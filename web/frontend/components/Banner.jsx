@@ -21,10 +21,13 @@
 
 import { Banner } from "@shopify/polaris";
 import {ButtonGroup, Button} from '@shopify/polaris';
+import "@shopify/polaris/build/esm/styles.css";
+
 
 
 export function BannerEx() {
   return (
+    
     <Banner
       title="Welcome to GST Pro"
       status="info"

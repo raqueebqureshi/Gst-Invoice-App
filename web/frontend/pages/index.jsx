@@ -2,10 +2,13 @@ import { Page, FooterHelp, Link, Layout, AlphaCard, VerticalStack } from '@shopi
 import { BannerEx } from "../components/Banner";
 import { IndexTableEx } from "../components/IndexTable.jsx";
 import "../css/index.css";
+import "@shopify/polaris/build/esm/styles.css";
+
+
 
 export default function HomePage() {
   return (
-    <Page fullWidth>
+    <Page fullWidth >
      <VerticalStack gap="4">
   <BannerEx />
 
@@ -19,9 +22,9 @@ export default function HomePage() {
   </Layout>
 </VerticalStack>
       <IndexTableEx value={1} fullWidth/>
-      <FooterHelp>
+      <FooterHelp >
       Need Help{' '}
-      <Link url="">
+      <Link url="" removeUnderline>
         please click here
       </Link>
     </FooterHelp>

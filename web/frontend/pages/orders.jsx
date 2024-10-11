@@ -1,14 +1,16 @@
-import { AlphaCard, Page, Layout, TextContainer, Text } from "@shopify/polaris";
+import { AlphaCard, Page, Layout, TextContainer, Text,FooterHelp, Link } from "@shopify/polaris";
 import { TitleBar } from "@shopify/app-bridge-react";
 import { useTranslation } from "react-i18next";
 import { BannerEx } from "../components/Banner";
 import { IndexTableEx } from "../components/IndexTable.jsx";
+import "@shopify/polaris/build/esm/styles.css";
+
 
 
 export default function Orders() {
   const { t } = useTranslation();
   return (
-    <Page>
+    <Page fullWidth>
       <TitleBar title={t("Orders.title")}>
         <button variant="primary" onClick={() => console.log("Primary action")}>
           {t("Orders.primaryAction")}
@@ -17,7 +19,6 @@ export default function Orders() {
 
       <BannerEx />
       <Layout >
-        
           <div style={{paddingTop: '20px', display: 'flex', gap: '10px', justifyContent: 'space-between', width : '100%'}}>
             <Layout.Section oneThird> 
           <AlphaCard >
@@ -58,6 +59,12 @@ export default function Orders() {
       </Layout>
       <IndexTableEx value={2} fullWidth/>
 
+      <FooterHelp >
+      Need Help{' '}
+      <Link url="" removeUnderline>
+        please click here
+      </Link>
+    </FooterHelp>
     </Page>
   );
 }

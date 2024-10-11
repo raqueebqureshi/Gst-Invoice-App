@@ -3,7 +3,7 @@
 client_id = "f91cb213006ab6fb5448b00b9a44c33c"
 name = "GST Invoice App"
 handle = "gst-invoice-app-2"
-application_url = "https://calculators-sir-settlement-updates.trycloudflare.com"
+application_url = "https://shoot-partners-trader-vary.trycloudflare.com"
 embedded = true
 
 [build]
@@ -16,9 +16,9 @@ scopes = ""
 
 [auth]
 redirect_urls = [
-  "https://calculators-sir-settlement-updates.trycloudflare.com/auth/callback",
-  "https://calculators-sir-settlement-updates.trycloudflare.com/auth/shopify/callback",
-  "https://calculators-sir-settlement-updates.trycloudflare.com/api/auth/callback"
+  "https://shoot-partners-trader-vary.trycloudflare.com/auth/callback",
+  "https://shoot-partners-trader-vary.trycloudflare.com/auth/shopify/callback",
+  "https://shoot-partners-trader-vary.trycloudflare.com/api/auth/callback"
 ]
 
 [webhooks]

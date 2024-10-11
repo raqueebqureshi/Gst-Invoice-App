@@ -12,7 +12,7 @@
     "products": "Products",
     "invoice_templates": "Invoice Templates",
     "settings": "Settings",
-    "contactus": "Contact Us",
+    "contactus": "ContactUs",
     "notfound": "Not Found"
   },
   "NotFound": {
@@ -29,8 +29,15 @@
   "InvoiceTemplates": {
     "body": "Body",
     "heading": "Heading",
-    "primaryAction": "InvoiceTemplates",
+    "primaryAction": "Invoice Templates",
     "secondaryAction": "Secondary action",
     "title": "Invoice Templates"
+  },
+  "Settings": {
+    "body": "Body",
+    "heading": "Heading",
+    "primaryAction": "Primary action",
+    "secondaryAction": "Secondary action",
+    "title": "Settings"
   }
 }

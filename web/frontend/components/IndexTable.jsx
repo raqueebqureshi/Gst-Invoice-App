@@ -10,11 +10,12 @@ import {
   ButtonGroup
 } from '@shopify/polaris';
 import '@shopify/polaris/build/esm/styles.css';
-import { ArrowDownMinor } from '@shopify/polaris-icons'; // Correct icon import
 import {PrintMinor} from '@shopify/polaris-icons';
 import {
   ImportMinor
 } from '@shopify/polaris-icons';
+import "@shopify/polaris/build/esm/styles.css";
+
 
 
 let orders =[];
@@ -96,8 +97,8 @@ export function IndexTableEx({value}) {
   ));
 
   return (
-    <AppProvider>
-      <Page  title="Orders">
+    
+      <Page  title="Orders" fullWidth>
         <AlphaCard>
           <IndexTable  fullWidth
             resourceName={resourceName}
@@ -119,6 +120,6 @@ export function IndexTableEx({value}) {
           </IndexTable>
         </AlphaCard>
       </Page>
-    </AppProvider>
+    
   );
 }
