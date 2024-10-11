@@ -4,6 +4,8 @@ import { useTranslation } from "react-i18next";
 import { MediaCardExample, MediaCardExample2 } from "../components/MediaCard";
 import { Divider } from "@shopify/polaris";
 import "@shopify/polaris/build/esm/styles.css";
+import '../styles.css';
+
 
 
 
@@ -46,7 +48,7 @@ export default function Orders() {
             competence and confidence, leaving a lasting impression." />
 </div>
     </Layout>
-    <FooterHelp>
+    <FooterHelp  >
     Didn't find anything you were looking for? We got you covered. Reach out to us at support{' '}
       <Link url="" removeUnderline>
        @delhidigital.co

@@ -1,8 +1,9 @@
 import { Page, FooterHelp, Link, Layout, AlphaCard, VerticalStack } from '@shopify/polaris';
 import { BannerEx } from "../components/Banner";
 import { IndexTableEx } from "../components/IndexTable.jsx";
-import "../css/index.css";
 import "@shopify/polaris/build/esm/styles.css";
+import '../styles.css';
+
 
 
 

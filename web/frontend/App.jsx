@@ -2,8 +2,9 @@ import { BrowserRouter } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { NavMenu } from "@shopify/app-bridge-react";
 import Routes from "./Routes";
-import "./css/index.css";
 import "@shopify/polaris/build/esm/styles.css";
+import './styles.css';
+
 
 
 import { QueryProvider, PolarisProvider } from "./components";

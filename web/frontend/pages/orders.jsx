@@ -4,6 +4,10 @@ import { useTranslation } from "react-i18next";
 import { BannerEx } from "../components/Banner";
 import { IndexTableEx } from "../components/IndexTable.jsx";
 import "@shopify/polaris/build/esm/styles.css";
+import '../styles.css';
+
+
+
 
 
 
