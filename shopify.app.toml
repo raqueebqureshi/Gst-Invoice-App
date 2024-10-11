@@ -1,0 +1,28 @@
+# Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
+
+client_id = "f91cb213006ab6fb5448b00b9a44c33c"
+name = "GST Invoice App"
+handle = "gst-invoice-app-2"
+application_url = "https://calculators-sir-settlement-updates.trycloudflare.com"
+embedded = true
+
+[build]
+automatically_update_urls_on_dev = true
+dev_store_url = "devstore134.myshopify.com"
+
+[access_scopes]
+# Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
+scopes = ""
+
+[auth]
+redirect_urls = [
+  "https://calculators-sir-settlement-updates.trycloudflare.com/auth/callback",
+  "https://calculators-sir-settlement-updates.trycloudflare.com/auth/shopify/callback",
+  "https://calculators-sir-settlement-updates.trycloudflare.com/api/auth/callback"
+]
+
+[webhooks]
+api_version = "2024-10"
+
+[pos]
+embedded = false
