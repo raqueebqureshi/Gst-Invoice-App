@@ -3,7 +3,7 @@ import { BannerEx } from "../components/Banner";
 import { IndexTableEx } from "../components/IndexTable.jsx";
 import "@shopify/polaris/build/esm/styles.css";
 import '../styles.css';
-import { useEffect, useTransition } from 'react';
+import { useEffect, useTransition , useState} from 'react';
 
 
 
@@ -17,22 +17,41 @@ export default function HomePage() {
       headers: {"Content-Type" : "application/json"}
     })
     .then(request => request.json())
-    .then(response => console.log(response))
+    .then(response => console.log("all products", response))
     .catch(error => console.log(error));
     
   });
 
 //fetch store details
-  // useEffect(()=>{
-  //   fetch ("/admin/Shop", {
-  //     method: "GET",
-  //     headers: {"Content-Type" : "application/json"}
-  //   })
-  //   .then(request => request.json())
-  //   .then(response => console.log(response.shop))
-  //   .catch(error => console.log(error));
+  useEffect(()=>{
+    fetch ("/api/orders/all", {
+      method: "GET",
+      headers: {"Content-Type" : "application/json"}
+    })
+    .then(request => request.json())
+    .then(response => console.log("orders details", response))
+    .catch(error => console.log(error));
     
-  // });
+  });
+
+  
+  const [storeName, setStoreName] = useState("GST app pro");
+
+  useEffect(() => {
+    fetch("/api/shop/all", {
+      method: "GET",
+      headers: { "Content-Type": "application/json" }
+    })
+    .then(request => request.json())
+    .then(response => {
+      // Access the first element of the array and set the store name
+      if (response.data.length > 0) {
+        setStoreName(response.data[0].name); // Set store name
+      }
+    })
+    .catch(error => console.log(error));
+  }, []);
+
 
   return (
     <Page fullWidth >
@@ -42,7 +61,7 @@ export default function HomePage() {
   <Layout>
     <Layout.Section>
       <AlphaCard><p style={{ textAlign: 'center', fontWeight: '600', fontSize: '20px' }}>
-        Style Aroma Dashboard
+       {storeName}
         </p></AlphaCard>
       
     </Layout.Section>

@@ -1,0 +1,223 @@
+<!-- Tab Section -->
+<div class="tab-wrapper">
+    <div class="tab-container">
+        <h2 class="section-title">OUR STORY</h2>
+        <div class="tabs">
+            <button class="tab-link" onclick="openTab(event, 'AboutUs')">About ERC</button>
+            <div class="tab-divider"></div>
+            <button class="tab-link" onclick="openTab(event, 'DesignedFun')">For Fun</button>
+            <div class="tab-divider"></div>
+            <button class="tab-link active" onclick="openTab(event, 'PicklePals')">For Picklepals</button>
+        </div>
+
+        <!-- Content for each tab -->
+        <div id="PicklePals" class="tab-content active">
+            <section>
+                <img id="picklePalsImage"
+                    src="https://cdn.shopify.com/s/files/1/0904/7464/3732/files/PICKLEPALS.png?v=1728648621"
+                    style="width:100%; max-width: 1100px; height: auto;">
+            </section>
+        </div>
+
+        <div id="AboutUs" class="tab-content">
+            <section>
+                <img id="aboutUsImage"
+                    src="https://cdn.shopify.com/s/files/1/0904/7464/3732/files/ABOUTUSFINAL.png?v=1728648890"
+                    style="width:100%; max-width: 1100px; height: auto;">
+            </section>
+        </div>
+
+        <div id="DesignedFun" class="tab-content">
+            <section>
+                <img id="designedFunImage"
+                    src="https://cdn.shopify.com/s/files/1/0904/7464/3732/files/ERCDESIGNED.png?v=1728648679"
+                    style="width:100%; max-width:1100px; height: auto;">
+            </section>
+        </div>
+    </div>
+</div>
+
+
+<style>
+    <!-- Inline CSS 
+    -->
+<style>
+    .tab-wrapper {
+        padding: 60px;
+        /* Increase padding for more spacing */
+        max-width: 1800px;
+        /* Significantly increase the max width for larger desktop screens */
+        margin: 0 auto;
+        /* Center the tab content on the page */
+    }
+
+    .tab-container {
+        text-align: center;
+        margin: 80px 0;
+        /* Increase margin for better spacing */
+    }
+
+    .section-title {
+        font-size: 40px;
+        /* Increase title size for desktop */
+        margin-top: 100px;
+        margin-bottom: 60px;
+        /* More space below the title */
+        font-weight: 400 !important;
+        color: #741100;
+    }
+
+    .tabs {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-bottom: 30px;
+        /* Increase margin between tabs and content */
+        flex-wrap: nowrap;
+        /* Prevent wrapping on small screens */
+    }
+
+    .tab-link {
+        background-color: #fff;
+        border: 1px solid #741100;
+        color: #741100;
+        padding: 20px 40px;
+        /* Increase padding for larger buttons */
+        cursor: pointer;
+        font-size: 20px;
+        /* Increase font size of tab links */
+        margin: 0 40px;
+        /* Increased margin for larger gaps between tabs */
+        transition: 0.3s;
+    }
+
+    .tab-link.active,
+    .tab-link:hover {
+        background-color: #741100;
+        color: #fff;
+    }
+
+    .tab-divider {
+        width: 70px;
+        /* Increase width for better spacing */
+        height: 4px;
+        /* Increase height for better visibility */
+        background-color: #741100;
+        /* Adjust the color of the line */
+        margin: 0 20px;
+        /* Increase space between the divider and tabs */
+    }
+
+    .tab-content {
+        display: none;
+        margin-top: 40px;
+        /* Increase margin for better spacing */
+        text-align: center;
+    }
+
+    .tab-content.active {
+        display: block;
+    }
+
+    .tab-content img {
+        width: 100%;
+        height: auto;
+        max-width: 1000px;
+        /* Further increase max width for larger images */
+    }
+
+    @media (max-width: 768px) {
+
+        /* Keep tabs inline on mobile */
+        .tabs {
+            flex-wrap: nowrap;
+            /* Ensure tabs stay inline */
+        }
+
+        .tab-link {
+            padding: 10px 12px;
+            font-size: 14px;
+            margin: 10px;
+        }
+
+        .tab-divider {
+            display: none;
+            /* Hide dividers for mobile */
+        }
+
+        .tab-content img {
+            max-width: 100%;
+            /* Make image full width for mobile */
+        }
+    }
+
+    @media (max-width: 768px) {
+        .section-title {
+            font-size: 24px;
+            margin-top: 60px;
+            margin-bottom: 30px;
+            font-weight: 600;
+        }
+    }
+
+    /* Hide on desktop and larger screens */
+    .section-title {
+        display: none;
+    }
+
+    /* Show on mobile screens only */
+    @media (max-width: 768px) {
+        .section-title {
+            display: block;
+        }
+    }
+</style>
+
+
+<!-- JavaScript for Tab Switching & Image Changing -->
+<script>
+    // Switch between tab content
+    function openTab(evt, tabName) {
+        var i, tabcontent, tablinks;
+
+        tabcontent = document.getElementsByClassName("tab-content");
+        for (i = 0; i < tabcontent.length; i++) {
+            tabcontent[i].style.display = "none";
+        }
+
+        tablinks = document.getElementsByClassName("tab-link");
+        for (i = 0; i < tablinks.length; i++) {
+            tablinks[i].className = tablinks[i].className.replace(" active", "");
+        }
+
+        document.getElementById(tabName).style.display = "block";
+        evt.currentTarget.className += " active";
+    }
+
+    // Function to change images based on screen size
+    function updateImages() {
+        const isMobile = window.innerWidth <= 768;
+
+        const picklePalsImage = document.getElementById("picklePalsImage");
+        const aboutUsImage = document.getElementById("aboutUsImage");
+        const designedFunImage = document.getElementById("designedFunImage");
+
+        if (isMobile) {
+            // Mobile image URLs
+            picklePalsImage.src = "https://cdn.shopify.com/s/files/1/0904/7464/3732/files/pal.png?v=1728993409";
+            aboutUsImage.src = "https://cdn.shopify.com/s/files/1/0904/7464/3732/files/about.png?v=1728993408";
+            designedFunImage.src = "https://cdn.shopify.com/s/files/1/0904/7464/3732/files/fun.png?v=1728993409";
+        } else {
+            // Desktop image URLs
+            picklePalsImage.src = "https://cdn.shopify.com/s/files/1/0904/7464/3732/files/PICKLEPALS.png?v=1728648621";
+            aboutUsImage.src = "https://cdn.shopify.com/s/files/1/0904/7464/3732/files/ABOUTUSFINAL.png?v=1728648890";
+            designedFunImage.src = "https://cdn.shopify.com/s/files/1/0904/7464/3732/files/ERCDESIGNED.png?v=1728648679";
+        }
+    }
+
+    // Add event listener for window resizing
+    window.addEventListener('resize', updateImages);
+
+    // Initial image load
+    updateImages();
+</script>
