@@ -7,6 +7,7 @@ import serveStatic from "serve-static";
 import shopify from "./shopify.js";
 import productCreator from "./product-creator.js";
 import PrivacyWebhookHandlers from "./privacy.js";
+import { log } from "console";
 
 const PORT = parseInt(
   process.env.BACKEND_PORT || process.env.PORT || "3000",
@@ -38,6 +39,26 @@ app.post(
 app.use("/api/*", shopify.validateAuthenticatedSession());
 
 app.use(express.json());
+//fetch all products
+app.get("/api/products/all", async (_req,res) =>{
+  const allProducts = await shopify.api.rest.Product.all({
+    session: res.locals.shopify.session,
+  });
+  // console.log(allProducts);
+  
+  res.status(200).send(allProducts);
+});
+//fetch sotre details
+// app.get("/admin/Shop", async (_req,res) =>{
+//   const StoreDetails = await shopify.api.rest.Shop.all({
+//     session: res.locals.shopify.session,
+//   });
+  
+//   console.log(StoreDetails);
+  
+//   res.status(200).send(StoreDetails);
+// });
+
 
 app.get("/api/products/count", async (_req, res) => {
   const client = new shopify.api.clients.Graphql({

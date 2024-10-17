@@ -3,11 +3,37 @@ import { BannerEx } from "../components/Banner";
 import { IndexTableEx } from "../components/IndexTable.jsx";
 import "@shopify/polaris/build/esm/styles.css";
 import '../styles.css';
+import { useEffect, useTransition } from 'react';
 
 
 
 
 export default function HomePage() {
+  // const {t} = useTransition();
+//fetch all products
+  useEffect(()=>{
+    fetch ("/api/products/all", {
+      method: "GET",
+      headers: {"Content-Type" : "application/json"}
+    })
+    .then(request => request.json())
+    .then(response => console.log(response))
+    .catch(error => console.log(error));
+    
+  });
+
+//fetch store details
+  // useEffect(()=>{
+  //   fetch ("/admin/Shop", {
+  //     method: "GET",
+  //     headers: {"Content-Type" : "application/json"}
+  //   })
+  //   .then(request => request.json())
+  //   .then(response => console.log(response.shop))
+  //   .catch(error => console.log(error));
+    
+  // });
+
   return (
     <Page fullWidth >
      <VerticalStack gap="4">

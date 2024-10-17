@@ -3,7 +3,7 @@
 client_id = "f91cb213006ab6fb5448b00b9a44c33c"
 name = "GST Invoice App"
 handle = "gst-invoice-app-2"
-application_url = "https://shoot-partners-trader-vary.trycloudflare.com"
+application_url = "https://qualify-opinions-wma-nights.trycloudflare.com"
 embedded = true
 
 [build]
@@ -12,13 +12,13 @@ dev_store_url = "devstore134.myshopify.com"
 
 [access_scopes]
 # Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
-scopes = ""
+scopes = "read_orders,read_products,write_products"
 
 [auth]
 redirect_urls = [
-  "https://shoot-partners-trader-vary.trycloudflare.com/auth/callback",
-  "https://shoot-partners-trader-vary.trycloudflare.com/auth/shopify/callback",
-  "https://shoot-partners-trader-vary.trycloudflare.com/api/auth/callback"
+  "https://qualify-opinions-wma-nights.trycloudflare.com/auth/callback",
+  "https://qualify-opinions-wma-nights.trycloudflare.com/auth/shopify/callback",
+  "https://qualify-opinions-wma-nights.trycloudflare.com/api/auth/callback"
 ]
 
 [webhooks]
