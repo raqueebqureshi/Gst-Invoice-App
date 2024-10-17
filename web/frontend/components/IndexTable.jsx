@@ -23,7 +23,11 @@ export function IndexTableEx({ value }) {
     })
       .then((request) => request.json())
       .then((response) => {
-        console.log('orders details', response);
+        console.log("Fetched orders:", response); // Check the structure here
+        if (response.data) {
+            setOrders(response.data);
+        }
+  
         // Assuming response.data is the array of orders
         if (response.data) {
           setOrders(response.data); // Set the orders from the response
@@ -45,21 +49,21 @@ export function IndexTableEx({ value }) {
     alert('Print functionality here!');
   }, []);
 
-  const rowMarkup = orders.map(({ id, date, customer, total, paymentStatus, fulfillmentStatus }) => (
-    <IndexTable.Row id={id} key={id} selected={selectedResources.includes(id)}>
+const rowMarkup = orders.map(({ order_number, created_at, customer, total_price, financial_status, fulfillment_status }) => (
+    <IndexTable.Row id={order_number} key={order_number} selected={selectedResources.includes(order_number)}>
       <IndexTable.Cell>
-        <TextStyle variation="strong">{id}</TextStyle>
+        <TextStyle variation="strong">{order_number}</TextStyle>
       </IndexTable.Cell>
-      <IndexTable.Cell>{date}</IndexTable.Cell>
-      <IndexTable.Cell>{customer}</IndexTable.Cell>
-      <IndexTable.Cell>{total}</IndexTable.Cell>
+      <IndexTable.Cell>{created_at}</IndexTable.Cell>
+      <IndexTable.Cell>{`${customer?.first_name|| 'Unknown'} ${customer?.last_name || ''}` }</IndexTable.Cell> {/* Accessing customer name */}
+      <IndexTable.Cell>{total_price}</IndexTable.Cell>
       <IndexTable.Cell>
-        <Badge status={paymentStatus === 'Pending' ? 'attention' : paymentStatus === 'Paid' ? 'success' : 'default'}>
-          {paymentStatus}
+        <Badge status={financial_status === 'Pending' ? 'attention' : financial_status === 'Paid' ? 'success' : 'default'}>
+          {financial_status}
         </Badge>
       </IndexTable.Cell>
       <IndexTable.Cell>
-        <Badge status="attention">{fulfillmentStatus}</Badge>
+        <Badge status="attention">{fulfillment_status}</Badge>
       </IndexTable.Cell>
       <IndexTable.Cell>
         <ButtonGroup>
@@ -68,7 +72,8 @@ export function IndexTableEx({ value }) {
         </ButtonGroup>
       </IndexTable.Cell>
     </IndexTable.Row>
-  ));
+));
+
 
   return (
     <Page title="Orders" fullWidth>

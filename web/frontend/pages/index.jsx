@@ -10,29 +10,30 @@ import { useEffect, useTransition , useState} from 'react';
 
 export default function HomePage() {
   // const {t} = useTransition();
-//fetch all products
-  useEffect(()=>{
-    fetch ("/api/products/all", {
-      method: "GET",
-      headers: {"Content-Type" : "application/json"}
-    })
-    .then(request => request.json())
-    .then(response => console.log("all products", response))
-    .catch(error => console.log(error));
-    
-  });
 
-//fetch store details
-  useEffect(()=>{
-    fetch ("/api/orders/all", {
-      method: "GET",
-      headers: {"Content-Type" : "application/json"}
-    })
-    .then(request => request.json())
-    .then(response => console.log("orders details", response))
-    .catch(error => console.log(error));
+//fetch all products
+  // useEffect(()=>{
+  //   fetch ("/api/products/all", {
+  //     method: "GET",
+  //     headers: {"Content-Type" : "application/json"}
+  //   })
+  //   .then(request => request.json())
+  //   .then(response => console.log("all products", response))
+  //   .catch(error => console.log(error));
     
-  });
+  // });
+
+//fetch order details
+  // useEffect(()=>{
+  //   fetch ("/api/orders/all", {
+  //     method: "GET",
+  //     headers: {"Content-Type" : "application/json"}
+  //   })
+  //   .then(request => request.json())
+  //   .then(response => console.log("orders details", response))
+  //   .catch(error => console.log(error));
+    
+  // });
 
   
   const [storeName, setStoreName] = useState("GST app pro");
