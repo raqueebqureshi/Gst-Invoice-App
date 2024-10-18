@@ -43,12 +43,12 @@ app.use(express.json());
 
 
 //fetch all products
-app.get("/api/products/all", async (_req,res) =>{
+app.get("/api/products/all", async (_req, res) => {
   const allProducts = await shopify.api.rest.Product.all({
     session: res.locals.shopify.session,
   });
-  console.log("peoducts " +  allProducts);
-  
+  console.log("peoducts " + allProducts);
+
   res.status(200).send(allProducts);
 });
 
@@ -64,9 +64,9 @@ app.get("/api/products/all", async (_req,res) =>{
 // });
 app.get("/api/2024-10/orders.json", async (req, res) => {
   let OrderAll = await shopify.api.rest.Order.all({
-      session: res.locals.shopify.session,
-      status: 'any',
-      fulfillment_status: null,
+    session: res.locals.shopify.session,
+    status: 'any',
+    fulfillment_status: null,
   });
   console.log(OrderAll); // Check the API response in the console
   res.status(200).send(OrderAll);
@@ -76,7 +76,7 @@ app.get("/api/2024-10/orders.json", async (req, res) => {
 // fetch shop details
 app.get("/api/shop/all", async (req, res) => {
   let shopInfo = await shopify.api.rest.Shop.all({
-      session: res.locals.shopify.session,
+    session: res.locals.shopify.session,
   });
   res.status(200).send(shopInfo);
 });

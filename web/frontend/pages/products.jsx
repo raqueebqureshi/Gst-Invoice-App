@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import {
   IndexTable,
   LegacyCard,
@@ -6,12 +6,27 @@ import {
   Text,
   Badge,
   Tabs,
+  TextField,
 } from '@shopify/polaris';
 
 export default function ProductIndexTable() {
+  const [HSN, setHSN] = useState('');
+  const [GST, setGST] = useState('18')
+
+  const handleHSNChange = useCallback(
+    (newHSN) => setHSN(newHSN),
+
+    [],
+  );
+
+  const handleGSTChange = useCallback(
+    (newGST) => setGST(newGST),
+  );
+
+
   const [products, setProducts] = useState([]);
   const [activeTab, setActiveTab] = useState(0);
-  
+
   // Example product status mapping (adjust based on your data)
   const productStatus = {
     active: 'Active',
@@ -62,7 +77,7 @@ export default function ProductIndexTable() {
         position={index}
       >
         <IndexTable.Cell>
-          <img src={images[0]?.src} alt={images[0]?.alt} style={{ width: '50px', height: '50px' }} />
+          <img src={images[0]?.src} alt={images[0]?.alt} style={{border:"0.2px solid black", borderRadius:"5", width: '50px', height: '50px' }} />
         </IndexTable.Cell>
         <IndexTable.Cell>
           <Text variant="bodyMd" fontWeight="bold" as="span">
@@ -71,7 +86,20 @@ export default function ProductIndexTable() {
         </IndexTable.Cell>
         <IndexTable.Cell>{productStatus[status]}</IndexTable.Cell>
         <IndexTable.Cell>
-          {/* Add any other relevant fields here */}
+          <TextField
+            placeholder='896574'
+            value={HSN}
+            onChange={handleHSNChange}
+            autoComplete="off"
+          />
+        </IndexTable.Cell>
+        <IndexTable.Cell>
+          <TextField
+            placeholder='18%'
+            value={GST}
+            onChange={handleGSTChange}
+            autoComplete="off"
+          />
         </IndexTable.Cell>
       </IndexTable.Row>
     ),
@@ -98,9 +126,11 @@ export default function ProductIndexTable() {
             }
             onSelectionChange={handleSelectionChange}
             headings={[
-              { title: 'Image' },
-              { title: 'Title' },
+              { title: 'Product Image' },
+              { title: 'Product Title' },
               { title: 'Status' },
+              { title: 'HSN' },
+              { title: 'TAX' }
               // Add more headings as needed
             ]}
           >

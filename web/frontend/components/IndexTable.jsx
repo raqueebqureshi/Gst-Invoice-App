@@ -1,13 +1,13 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import {
-  Page,  // <-- Add this import
-  AppProvider,
+  Page,
   AlphaCard,
   IndexTable,
   TextStyle,
   Badge,
   Button,
   ButtonGroup,
+  Spinner
 } from '@shopify/polaris';
 import '@shopify/polaris/build/esm/styles.css';
 import { PrintMinor, ImportMinor } from '@shopify/polaris-icons';
@@ -15,9 +15,11 @@ import jsPDF from "jspdf";
 import "jspdf-autotable";
 
 export function IndexTableEx({ value }) {
+  const [loading, setLoading] = useState(true);
   const [orders, setOrders] = useState([]);
   const [selectedResources, setSelectedResources] = useState([]);
 
+  // Fetch orders data
   useEffect(() => {
     fetch('/api/2024-10/orders.json', {
       method: 'GET',
@@ -27,11 +29,14 @@ export function IndexTableEx({ value }) {
       .then((response) => {
         if (response.data) {
           setOrders(response.data);
+          setLoading(false);  // Stop loading when data is fetched
           console.log(response.data);
-          
         }
       })
-      .catch((error) => console.log(error));
+      .catch((error) => {
+        console.log(error);
+        setLoading(false);  // Stop loading on error
+      });
   }, []);
 
   const handlePdfDownload = useCallback((order) => {
@@ -60,7 +65,11 @@ export function IndexTableEx({ value }) {
   }, []);
 
   const rowMarkup = orders.map((order) => (
-    <IndexTable.Row id={order.order_number} key={order.order_number} selected={selectedResources.includes(order.order_number)}>
+    <IndexTable.Row
+      id={order.order_number}
+      key={order.order_number}
+      selected={selectedResources.includes(order.order_number)}
+    >
       <IndexTable.Cell>
         <TextStyle variation="strong">{order.order_number}</TextStyle>
       </IndexTable.Cell>
@@ -68,7 +77,15 @@ export function IndexTableEx({ value }) {
       <IndexTable.Cell>{`${order.customer?.first_name || 'Unknown'} ${order.customer?.last_name || ''}`}</IndexTable.Cell>
       <IndexTable.Cell>{order.total_price}</IndexTable.Cell>
       <IndexTable.Cell>
-        <Badge status={order.financial_status === 'Pending' ? 'attention' : order.financial_status === 'Paid' ? 'success' : 'default'}>
+        <Badge
+          status={
+            order.financial_status === 'Pending'
+              ? 'attention'
+              : order.financial_status === 'Paid'
+              ? 'success'
+              : 'default'
+          }
+        >
           {order.financial_status}
         </Badge>
       </IndexTable.Cell>
@@ -82,27 +99,35 @@ export function IndexTableEx({ value }) {
   ));
 
   return (
-    <Page title="Orders" fullWidth>
-      <AlphaCard>
-        <IndexTable
-          fullWidth
-          resourceName={{ singular: 'order', plural: 'orders' }}
-          itemCount={orders.length}
-          selectedItemsCount={selectedResources.length}
-          onSelectionChange={setSelectedResources}
-          headings={[
-            { title: 'Order' },
-            { title: 'Date' },
-            { title: 'Customer' },
-            { title: 'Total' },
-            { title: 'Payment Status' },
-            { title: 'Actions' },
-          ]}
-          selectable={false}
-        >
-          {rowMarkup}
-        </IndexTable>
-      </AlphaCard>
-    </Page>
+    <>
+      {loading ? (
+        <div style={{ display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
+          <Spinner accessibilityLabel="Loading Spinner" size="large" />
+        </div>
+      ) : (
+        <Page title="Orders" fullWidth>
+          <AlphaCard>
+            <IndexTable
+              fullWidth
+              resourceName={{ singular: 'order', plural: 'orders' }}
+              itemCount={orders.length}
+              selectedItemsCount={selectedResources.length}
+              onSelectionChange={setSelectedResources}
+              headings={[
+                { title: 'Order' },
+                { title: 'Date' },
+                { title: 'Customer' },
+                { title: 'Total' },
+                { title: 'Payment Status' },
+                { title: 'Actions' },
+              ]}
+              selectable={false}
+            >
+              {rowMarkup}
+            </IndexTable>
+          </AlphaCard>
+        </Page>
+      )}
+    </>
   );
 }
