@@ -51,14 +51,28 @@ app.get("/api/products/all", async (_req,res) =>{
   
   res.status(200).send(allProducts);
 });
-//fetch sotre details
 
-app.get("/api/orders/all", async (req, res) => {
+
+
+//fetch orders
+
+// app.get("/api/2024-10/orders.json", async (req, res) => {
+//   let OrderAll = await shopify.api.rest.Order.all({
+//       session: res.locals.shopify.session,
+//   });
+//   res.status(200).send(OrderAll);
+// });
+app.get("/api/2024-10/orders.json", async (req, res) => {
   let OrderAll = await shopify.api.rest.Order.all({
       session: res.locals.shopify.session,
+      status: 'any',
+      fulfillment_status: null,
   });
+  console.log(OrderAll); // Check the API response in the console
   res.status(200).send(OrderAll);
 });
+
+
 // fetch shop details
 app.get("/api/shop/all", async (req, res) => {
   let shopInfo = await shopify.api.rest.Shop.all({
@@ -67,7 +81,7 @@ app.get("/api/shop/all", async (req, res) => {
   res.status(200).send(shopInfo);
 });
 
-
+//count of product
 app.get("/api/products/count", async (_req, res) => {
   const client = new shopify.api.clients.Graphql({
     session: res.locals.shopify.session,

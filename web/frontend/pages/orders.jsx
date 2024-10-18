@@ -7,10 +7,6 @@ import "@shopify/polaris/build/esm/styles.css";
 import '../styles.css';
 
 
-
-
-
-
 export default function Orders() {
   const { t } = useTranslation();
   return (

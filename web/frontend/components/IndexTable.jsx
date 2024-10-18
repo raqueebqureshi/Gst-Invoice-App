@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import {
+  Page,  // <-- Add this import
   AppProvider,
-  Page,
   AlphaCard,
   IndexTable,
   TextStyle,
@@ -11,76 +11,82 @@ import {
 } from '@shopify/polaris';
 import '@shopify/polaris/build/esm/styles.css';
 import { PrintMinor, ImportMinor } from '@shopify/polaris-icons';
+import jsPDF from "jspdf";
+import "jspdf-autotable";
 
 export function IndexTableEx({ value }) {
   const [orders, setOrders] = useState([]);
   const [selectedResources, setSelectedResources] = useState([]);
 
   useEffect(() => {
-    fetch('/api/orders/all', {
+    fetch('/api/2024-10/orders.json', {
       method: 'GET',
       headers: { 'Content-Type': 'application/json' },
     })
       .then((request) => request.json())
       .then((response) => {
-        console.log("Fetched orders:", response); // Check the structure here
         if (response.data) {
-            setOrders(response.data);
-        }
-  
-        // Assuming response.data is the array of orders
-        if (response.data) {
-          setOrders(response.data); // Set the orders from the response
+          setOrders(response.data);
+          console.log(response.data);
+          
         }
       })
       .catch((error) => console.log(error));
-  }, []); // Run only once on component mount
-
-  const resourceName = {
-    singular: 'order',
-    plural: 'orders',
-  };
-
-  const handlePdfDownload = useCallback(() => {
-    alert('Download PDF functionality here!');
   }, []);
 
-  const handlePrint = useCallback(() => {
-    alert('Print functionality here!');
+  const handlePdfDownload = useCallback((order) => {
+    const doc = new jsPDF();
+
+    doc.text(`Invoice for Order #${order.order_number}`, 10, 10);
+    doc.text(`Customer: ${order.customer.first_name} ${order.customer.last_name}`, 10, 20);
+    doc.text(`Total: ${order.total_price}`, 10, 30);
+    doc.text(`Payment Status: ${order.financial_status}`, 10, 40);
+
+    doc.save(`invoice_${order.order_number}.pdf`);
   }, []);
 
-const rowMarkup = orders.map(({ order_number, created_at, customer, total_price, financial_status, fulfillment_status }) => (
-    <IndexTable.Row id={order_number} key={order_number} selected={selectedResources.includes(order_number)}>
+  const handlePrint = useCallback((order) => {
+    const printContent = `
+      <div>
+        <h2>Invoice for Order #${order.order_number}</h2>
+        <p>Customer: ${order.customer.first_name} ${order.customer.last_name}</p>
+        <p>Total: ${order.total_price}</p>
+        <p>Payment Status: ${order.financial_status}</p>
+      </div>
+    `;
+    const newWindow = window.open();
+    newWindow.document.write(printContent);
+    newWindow.print();
+  }, []);
+
+  const rowMarkup = orders.map((order) => (
+    <IndexTable.Row id={order.order_number} key={order.order_number} selected={selectedResources.includes(order.order_number)}>
       <IndexTable.Cell>
-        <TextStyle variation="strong">{order_number}</TextStyle>
+        <TextStyle variation="strong">{order.order_number}</TextStyle>
       </IndexTable.Cell>
-      <IndexTable.Cell>{created_at}</IndexTable.Cell>
-      <IndexTable.Cell>{`${customer?.first_name|| 'Unknown'} ${customer?.last_name || ''}` }</IndexTable.Cell> {/* Accessing customer name */}
-      <IndexTable.Cell>{total_price}</IndexTable.Cell>
+      <IndexTable.Cell>{order.created_at}</IndexTable.Cell>
+      <IndexTable.Cell>{`${order.customer?.first_name || 'Unknown'} ${order.customer?.last_name || ''}`}</IndexTable.Cell>
+      <IndexTable.Cell>{order.total_price}</IndexTable.Cell>
       <IndexTable.Cell>
-        <Badge status={financial_status === 'Pending' ? 'attention' : financial_status === 'Paid' ? 'success' : 'default'}>
-          {financial_status}
+        <Badge status={order.financial_status === 'Pending' ? 'attention' : order.financial_status === 'Paid' ? 'success' : 'default'}>
+          {order.financial_status}
         </Badge>
       </IndexTable.Cell>
       <IndexTable.Cell>
-        <Badge status="attention">{fulfillment_status}</Badge>
-      </IndexTable.Cell>
-      <IndexTable.Cell>
         <ButtonGroup>
-          <Button primary icon={ImportMinor} onClick={handlePdfDownload}></Button>
-          <Button icon={PrintMinor} onClick={handlePrint}>Print</Button>
+          <Button primary onClick={() => handlePdfDownload(order)}>Download PDF</Button>
+          <Button onClick={() => handlePrint(order)}>Print</Button>
         </ButtonGroup>
       </IndexTable.Cell>
     </IndexTable.Row>
-));
-
+  ));
 
   return (
     <Page title="Orders" fullWidth>
       <AlphaCard>
         <IndexTable
           fullWidth
-          resourceName={resourceName}
+          resourceName={{ singular: 'order', plural: 'orders' }}
           itemCount={orders.length}
           selectedItemsCount={selectedResources.length}
           onSelectionChange={setSelectedResources}
@@ -90,7 +96,6 @@ const rowMarkup = orders.map(({ order_number, created_at, customer, total_price,
             { title: 'Customer' },
             { title: 'Total' },
             { title: 'Payment Status' },
-            { title: 'Fulfillment Status' },
             { title: 'Actions' },
           ]}
           selectable={false}

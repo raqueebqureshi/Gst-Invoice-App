@@ -12,16 +12,16 @@ export default function HomePage() {
   // const {t} = useTransition();
 
 //fetch all products
-  // useEffect(()=>{
-  //   fetch ("/api/products/all", {
-  //     method: "GET",
-  //     headers: {"Content-Type" : "application/json"}
-  //   })
-  //   .then(request => request.json())
-  //   .then(response => console.log("all products", response))
-  //   .catch(error => console.log(error));
+  useEffect(()=>{
+    fetch ("/api/products/all", {
+      method: "GET",
+      headers: {"Content-Type" : "application/json"}
+    })
+    .then(request => request.json())
+    .then(response => console.log("all products", response))
+    .catch(error => console.log(error));
     
-  // });
+  });
 
 //fetch order details
   // useEffect(()=>{
