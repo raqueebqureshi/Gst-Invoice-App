@@ -43,6 +43,7 @@ export default function HomePage() {
 
   return (
     <>
+    <div >
       {/* Show Spinner while loading */}
       {loading ? (
         <div style={{ display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
@@ -51,9 +52,7 @@ export default function HomePage() {
       ) : (
         <Page fullWidth>
           <VerticalStack gap="10">
-            <BannerEx />
-
-            <Layout>
+          <Layout>
               <Layout.Section>
                
                   <p style={{ display:"flex", gap:"20px", cursor: "pointer", float: 'right', textAlign: 'center', fontWeight: '600', fontSize: '20px' }}>
@@ -63,6 +62,10 @@ export default function HomePage() {
                 
               </Layout.Section>
             </Layout>
+            
+            <BannerEx />
+
+           
           </VerticalStack>
           
           <IndexTableEx value={1} fullWidth />
@@ -75,6 +78,7 @@ export default function HomePage() {
           </FooterHelp>
         </Page>
       )}
+      </div>
     </>
   );
 }

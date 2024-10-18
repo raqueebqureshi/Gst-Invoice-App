@@ -15,7 +15,7 @@ export function BannerEx() {
   };
 
   return (
-    <div style={{ display: isVisible ? "block" : "none" }}>
+    <div style={{ display: isVisible ? "block" : "none", width: '', justifyContent: 'center'}}>
       <Banner 
     title="Welcome to GST Pro"
     status="info"
