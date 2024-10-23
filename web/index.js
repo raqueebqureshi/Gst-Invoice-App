@@ -1,4 +1,3 @@
-// @ts-check
 import { join } from "path";
 import { readFileSync } from "fs";
 import express from "express";
@@ -9,18 +8,68 @@ import productCreator from "./product-creator.js";
 import PrivacyWebhookHandlers from "./privacy.js";
 import { log } from "console";
 import { useEffect } from "react";
+import nodemailer from "nodemailer";
+import bodyParser from "body-parser";
+import dotenv from 'dotenv';
 
 const PORT = parseInt(
   process.env.BACKEND_PORT || process.env.PORT || "3000",
   10
 );
 
+
+
+
+
+dotenv.config();
+
+const app = express();
+app.use(bodyParser.json());
+
+// Dummy database (optional, if you want to store messages)
+let messages = [];
+
+// Endpoint to handle form submission and send an email
+app.post('/api/contact_us', (req, res) => {
+  const { name, email, subject, message } = req.body;
+
+  // Save form data (optional)
+  messages.push({ name, email, subject, message });
+
+  // Create transporter with Gmail service (you can use other email services as well)
+  const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+      user: process.env.COMPANY_EMAIL, // Your email here
+      pass: process.env.COMPANY_APP_PASSWORD, // Your app-specific password here
+    },
+  });
+
+  // Email options
+  const mailOptions = {
+    from: email, // Sender's email (user's email)
+    to: 'delhiappco@gmail.com', // The recipient's email (your company's email)
+    subject: subject || 'New Contact Form Submission',
+    text: `You have received a new message from ${name} (${email}):\n\n${message}`,
+  };
+
+  // Send email
+  transporter.sendMail(mailOptions, (error, info) => {
+    if (error) {
+      console.error('Error sending email:', error);
+      return res.status(500).send({ error: 'Error sending email.' });
+    } else {
+      console.log('Email sent: ' + info.response);
+      res.status(200).send({ message: 'Form submitted and email sent successfully.' });
+    }
+  });
+});
+
 const STATIC_PATH =
   process.env.NODE_ENV === "production"
     ? `${process.cwd()}/frontend/dist`
     : `${process.cwd()}/frontend/`;
 
-const app = express();
 
 // Set up Shopify authentication and webhook handling
 app.get(shopify.config.auth.path, shopify.auth.begin());

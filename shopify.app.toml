@@ -3,7 +3,7 @@
 client_id = "f91cb213006ab6fb5448b00b9a44c33c"
 name = "GST Invoice App"
 handle = "gst-invoice-app-2"
-application_url = "https://meetings-definition-pets-eau.trycloudflare.com"
+application_url = "https://side-roommates-icq-congratulations.trycloudflare.com"
 embedded = true
 
 [build]
@@ -16,9 +16,27 @@ scopes = "read_orders,read_products,write_products"
 
 [auth]
 redirect_urls = [
-  "https://meetings-definition-pets-eau.trycloudflare.com/auth/callback",
-  "https://meetings-definition-pets-eau.trycloudflare.com/auth/shopify/callback",
-  "https://meetings-definition-pets-eau.trycloudflare.com/api/auth/callback"
+  "https://dropped-floppy-rage-behaviour.trycloudflare.com/auth/callback",
+  "https://dropped-floppy-rage-behaviour.trycloudflare.com/auth/shopify/callback",
+  "https://dropped-floppy-rage-behaviour.trycloudflare.com/api/auth/callback",
+  "https://grave-giving-appliances-chem.trycloudflare.com/auth/callback",
+  "https://grave-giving-appliances-chem.trycloudflare.com/auth/shopify/callback",
+  "https://grave-giving-appliances-chem.trycloudflare.com/api/auth/callback",
+  "https://wound-lg-integrated-opponents.trycloudflare.com/auth/callback",
+  "https://wound-lg-integrated-opponents.trycloudflare.com/auth/shopify/callback",
+  "https://wound-lg-integrated-opponents.trycloudflare.com/api/auth/callback",
+  "https://disabilities-todd-wr-commentary.trycloudflare.com/auth/callback",
+  "https://disabilities-todd-wr-commentary.trycloudflare.com/auth/shopify/callback",
+  "https://disabilities-todd-wr-commentary.trycloudflare.com/api/auth/callback",
+  "https://technology-uruguay-broadcasting-mystery.trycloudflare.com/auth/callback",
+  "https://technology-uruguay-broadcasting-mystery.trycloudflare.com/auth/shopify/callback",
+  "https://technology-uruguay-broadcasting-mystery.trycloudflare.com/api/auth/callback",
+  "https://divided-remembered-specifically-dump.trycloudflare.com/auth/callback",
+  "https://divided-remembered-specifically-dump.trycloudflare.com/auth/shopify/callback",
+  "https://divided-remembered-specifically-dump.trycloudflare.com/api/auth/callback",
+  "https://side-roommates-icq-congratulations.trycloudflare.com/auth/callback",
+  "https://side-roommates-icq-congratulations.trycloudflare.com/auth/shopify/callback",
+  "https://side-roommates-icq-congratulations.trycloudflare.com/api/auth/callback"
 ]
 
 [webhooks]
