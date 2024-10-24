@@ -17,7 +17,7 @@ export default function HomePage() {
     })
     .then(request => request.json())
     .then(response => {
-      console.log("all products", response);
+      // console.log("all products", response);
       setLoading(false);  // Stop loading when data is fetched
     })
     .catch(error => {
@@ -35,7 +35,8 @@ export default function HomePage() {
     .then(request => request.json())
     .then(response => {
       if (response.data.length > 0) {
-        setStoreName(response.data[0].name); // Set store name
+        console.log("Store Details ",response.data[0]);
+        setStoreName(response.data[0].name); 
       }
     })
     .catch(error => console.log(error));
@@ -44,7 +45,7 @@ export default function HomePage() {
   return (
     <>
     <div >
-      {/* Show Spinner while loading */}
+   
       {loading ? (
         <div style={{ display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
           <Spinner accessibilityLabel="Loading Spinner" size="large" />
