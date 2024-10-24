@@ -11,8 +11,8 @@ import dotenv from 'dotenv';
 dotenv.config();
 const app = express();
 
-// db connection
-const mongoUri = process.env.MONGO_URI;
+// db connectec
+const mongoUri = process.env.MONGODB_URI;
 
 if (!mongoUri) {
   console.error("Missing MONGODB_URI in environment variables.");

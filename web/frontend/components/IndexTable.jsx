@@ -13,11 +13,23 @@ import '@shopify/polaris/build/esm/styles.css';
 import { PrintMinor, ImportMinor } from '@shopify/polaris-icons';
 import jsPDF from "jspdf";
 import "jspdf-autotable";
+// import { DateTime } from 'luxon';
 
 export function IndexTableEx({ value }) {
   const [loading, setLoading] = useState(true);
   const [orders, setOrders] = useState([]);
   const [selectedResources, setSelectedResources] = useState([]);
+
+  const formatDateTime = (dateString) => {
+    const date = new Date(dateString);
+    return new Intl.DateTimeFormat('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+    }).format(date);
+  };
 
   // Fetch orders data
   useEffect(() => {
@@ -138,7 +150,7 @@ export function IndexTableEx({ value }) {
       <IndexTable.Cell>
         <TextStyle variation="strong">{order.order_number}</TextStyle>
       </IndexTable.Cell>
-      <IndexTable.Cell>{order.created_at}</IndexTable.Cell>
+      <IndexTable.Cell>{formatDateTime(order.created_at)}</IndexTable.Cell>
       <IndexTable.Cell>{`${order.customer?.first_name || 'Unknown'} ${order.customer?.last_name || ''}`}</IndexTable.Cell>
       <IndexTable.Cell>{order.total_price}</IndexTable.Cell>
       <IndexTable.Cell>

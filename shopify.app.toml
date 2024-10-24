@@ -3,7 +3,11 @@
 client_id = "f91cb213006ab6fb5448b00b9a44c33c"
 name = "GST Invoice App"
 handle = "gst-invoice-app-2"
+<<<<<<< HEAD
 application_url = "https://gi-graph-gba-relating.trycloudflare.com"
+=======
+application_url = "https://meetings-definition-pets-eau.trycloudflare.com"
+>>>>>>> 3794826207207e3c1af89a97d2bdff56ec50d7a4
 embedded = true
 
 [build]
@@ -16,9 +20,15 @@ scopes = "read_orders,read_products,write_products"
 
 [auth]
 redirect_urls = [
+<<<<<<< HEAD
   "https://gi-graph-gba-relating.trycloudflare.com/auth/callback",
   "https://gi-graph-gba-relating.trycloudflare.com/auth/shopify/callback",
   "https://gi-graph-gba-relating.trycloudflare.com/api/auth/callback"
+=======
+  "https://meetings-definition-pets-eau.trycloudflare.com/auth/callback",
+  "https://meetings-definition-pets-eau.trycloudflare.com/auth/shopify/callback",
+  "https://meetings-definition-pets-eau.trycloudflare.com/api/auth/callback"
+>>>>>>> 3794826207207e3c1af89a97d2bdff56ec50d7a4
 ]
 
 [webhooks]
