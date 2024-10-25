@@ -10,9 +10,9 @@ import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 dotenv.config();
 const app = express();
-
-// db connectec
-const mongoUri = process.env.MONGODB_URI;
+app.use(express.json());
+// db connection
+const mongoUri = process.env.MONGO_URI;
 
 if (!mongoUri) {
   console.error("Missing MONGODB_URI in environment variables.");
@@ -20,7 +20,7 @@ if (!mongoUri) {
 }
 
 // Connecting to the database using the URI from the environment variable
-mongoose.connect(mongoUri)
+mongoose.connect(mongoUri, { writeConcern: { w: "majority" } })
   .then((conn) => {
     console.log(`MongoDB Connected to: ${conn.connection.host}`);
   })
@@ -32,21 +32,16 @@ mongoose.connect(mongoUri)
 
 //store model
 let storeSchema = new mongoose.Schema({
-  storeName: String,
-  storeDomain: String,
-  storeEmail: String,
+  storeName: { type: String, required: true },
+  storeDomain: { type: String, required: true, unique: true },
+  storeEmail: { type: String, required: true },
   storeAddress1: String,
   storeCity: String,
   storeCountryName: String,
-  storeInvoiceTemplate: {
-    type: String,
-    default: 1
-  },
-  storeProductCount: {
-    type: String,
-    default: " "
-  }
+  storeInvoiceTemplate: { type: String, default: "1" },
+  storeProductCount: { type: String, default: "" }
 });
+
 
 let Store = mongoose.model("Stores", storeSchema);
 //api to send data to db
@@ -105,9 +100,15 @@ app.get(
 );
 
 //to update product count into db
-// API to update product count
 app.post('/api/update-product-count', async (req, res) => {
-  const { storeDomain, productCount } = req.body;
+  console.log("Received request body:", req.body);
+
+  const { storeDomain, productCount } = req.body || {};
+
+  if (!storeDomain || !productCount) {
+    res.status(400).json({ message: 'Missing storeDomain or productCount' }); 
+    return;
+  }
 
   try {
     // Retrieve session for the store
@@ -170,7 +171,7 @@ app.post(
 // Use the shop routes
 app.use("/api/*", shopify.validateAuthenticatedSession());
 
-app.use(express.json());
+
 
 
 //fetch all products
