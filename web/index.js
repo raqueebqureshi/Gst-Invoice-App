@@ -136,6 +136,88 @@ app.post('/api/update-product-count', async (req, res) => {
 });
 
 
+//api for update products id and HSN GST in db
+// Define the product schema
+const productSchema = new mongoose.Schema({
+  domain: { type: String, required: true },
+  products: [
+    {
+      name: { type: String, required: true },
+      productId: { type: String, required: true, unique: true },
+      HSN: { type: String, required: true },
+      GST: { type: String, required: true },
+    },
+  ],
+});
+
+// Create the Product model
+const Product = mongoose.model('Product', productSchema);
+
+// @ts-ignore
+app.post('/api/insertProduct-data', async (req, res) => {
+  const { storeDomain, products } = req.body; // Assuming you're sending products directly from the frontend
+
+  // console.log("Received request to /api/insertProduct-data:", req.body);
+  console.log(" Store domain:" + storeDomain , "Products:", products[0].productId);
+
+  try {
+    // Validate input
+    // if (!storeDomain || !Array.isArray(products)) {
+    //   return res.status(400).json({ message: 'Invalid input data' });
+    // }
+    
+    // Map over the products to extract relevant fields
+    // const productData = products.map(product => ({
+    //   domain: storeDomain,
+    //   productId: product.id,               // Use `id` from the Shopify response
+    //   productName: product.title,           // Use `title` from the Shopify response
+    //   HSN: '',                               // Default empty or fill if you have HSN logic
+    //   GST: '',                               // Default empty or fill if you have GST logic
+    // }));
+    console.log(" Product data:",   products.map( product => ({
+      productId: product.id,               // Use `id` from the Shopify response
+    })));
+
+    console.log("Product data:");
+    const productData = [];
+    for (let i = 0; i < products.length; i++) {
+      const product = products[i];
+       productData.push({
+        domain: storeDomain,
+          productId: product.productId,               // Use `id` from the Shopify response
+          productName: product.productName,           // Use `title` from the Shopify response
+          HSN: '',                               // Default empty or fill if you have HSN logic
+          GST: '', 
+      });
+           // Add GST if you want to log it
+ 
+}
+  console.log("Product data:", productData);        
+
+    // Filter out products with null or undefined `productId`
+    // const validProducts = productData.filter(product => product.productId != null);
+
+    // if (validProducts.length === 0) {
+    //   console.warn("No valid products with productId to insert.");
+    //   return res.status(400).json({ message: 'No valid products to save' });
+    // }
+
+    // Insert valid products into the database
+    const result = await Product.insertMany(productData);
+    
+    console.log("Insert operation result:", result);
+    res.status(201).json({ message: 'Products saved successfully', result });
+  } catch (error) {
+    console.error("Error saving products to DB:", error);
+    res.status(500).json({ message: 'Error saving products', error: error.message });
+  }
+});
+
+
+
+
+
+
 
 
 const PORT = parseInt(
@@ -247,6 +329,7 @@ app.post("/api/products", async (_req, res) => {
 app.use(shopify.cspHeaders());
 app.use(serveStatic(STATIC_PATH, { index: false }));
 
+// @ts-ignore
 app.use("/*", shopify.ensureInstalledOnShop(), async (_req, res, _next) => {
   return res
     .status(200)
