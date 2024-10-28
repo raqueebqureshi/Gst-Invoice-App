@@ -7,6 +7,8 @@ import shopify from "./shopify.js";
 import productCreator from "./product-creator.js";
 import PrivacyWebhookHandlers from "./privacy.js";
 import mongoose from 'mongoose';
+import nodemailer from 'nodemailer';
+import bodyPaser from 'body-parser';
 import dotenv from 'dotenv';
 dotenv.config();
 const app = express();
@@ -134,6 +136,82 @@ app.post('/api/update-product-count', async (req, res) => {
     res.status(500).json({ message: "Failed to update product count" });
   }
 });
+
+
+
+
+
+
+// Update invoice template API
+app.post('/api/update-invoice-template', async (req, res) => {
+  const { storeDomain, invoiceTemplate } = req.body;
+  console.log("Received request body:", req.body);
+
+  if (!storeDomain || !invoiceTemplate) {
+    res.status(400).json({ message: 'Missing storeDomain or invoiceTemplate' });
+    return;
+  }
+
+  try {
+    // Update the invoice template based on storeDomain
+    let updatedStore = await Store.findOneAndUpdate(
+      { storeDomain },
+      { storeInvoiceTemplate: invoiceTemplate },
+      { new: true } // Return the updated document
+    );
+
+    if (updatedStore) {
+      console.log("Invoice template updated successfully:", updatedStore.storeInvoiceTemplate);
+      res.status(200).json({
+        message: "Invoice template updated successfully",
+        storeInvoiceTemplate: updatedStore.storeInvoiceTemplate
+      });
+    } else {
+      res.status(404).json({ message: "Store not found" });
+    }
+  } catch (error) {
+    console.error("Error updating invoice template", error);
+    res.status(500).json({ message: "Failed to update invoice template" });
+  }
+});
+
+
+
+
+// api for send email to support
+
+const transporter = nodemailer.createTransport({
+  service: 'Gmail', // You can use other services like 'Yahoo', 'Outlook', etc.
+  auth: {
+
+    user: 'delhiappco@gmail.com', // Your email
+    pass: 'qlei dunz wqsb mzad', // Your email password or app password
+  },
+});
+
+
+
+app.post('/api/send-email', (req, res) => {
+  const { name, email, subject, message } = req.body;
+
+  const mailOptions = {
+    from: email, // sender address
+    to: 'delhiappco@gmail.com', // list of receivers (your app developer's email)
+    subject: `${subject} from ${name} / GST invoice APP`, // Subject line
+    text: message, // plain text body
+  };
+
+  transporter.sendMail(mailOptions, (error, info) => {
+    if (error) {
+      return res.status(500).json({ status: 'fail', error: error.message });
+    }
+    res.status(200).json({ status: 'success', message: 'Email sent successfully!' });
+  });
+});
+
+
+
+
 
 
 //api for update products id and HSN GST in db

@@ -3,7 +3,7 @@
 client_id = "f91cb213006ab6fb5448b00b9a44c33c"
 name = "GST Invoice App"
 handle = "gst-invoice-app-2"
-application_url = "https://idol-unto-battle-zoo.trycloudflare.com"
+application_url = "https://extreme-organizer-quick-croatia.trycloudflare.com"
 embedded = true
 
 [build]
@@ -16,9 +16,9 @@ scopes = "read_orders,read_products,write_products"
 
 [auth]
 redirect_urls = [
-  "https://idol-unto-battle-zoo.trycloudflare.com/auth/callback",
-  "https://idol-unto-battle-zoo.trycloudflare.com/auth/shopify/callback",
-  "https://idol-unto-battle-zoo.trycloudflare.com/api/auth/callback"
+  "https://extreme-organizer-quick-croatia.trycloudflare.com/auth/callback",
+  "https://extreme-organizer-quick-croatia.trycloudflare.com/auth/shopify/callback",
+  "https://extreme-organizer-quick-croatia.trycloudflare.com/api/auth/callback"
 ]
 
 [webhooks]
