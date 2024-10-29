@@ -192,13 +192,13 @@ const transporter = nodemailer.createTransport({
 
 
 app.post('/api/send-email', (req, res) => {
-  const { name, email, subject, message } = req.body;
+  const { name, email, subject, message, storeDetails } = req.body;
 
   const mailOptions = {
-    from: email, // sender address
-    to: 'delhiappco@gmail.com', // list of receivers (your app developer's email)
-    subject: `${subject} from ${name} / GST invoice APP`, // Subject line
-    text: message, // plain text body
+    from: email,
+    to: 'delhiappco@gmail.com',
+    subject: `${subject} from ${name} / GST Invoice App`,
+    text: `${message} \n\nStore Details:\n- Store Name: ${storeDetails.name}\n- Email: ${storeDetails.email}\n- Phone: ${storeDetails.phone}\n- Domain: ${storeDetails.domain}`,
   };
 
   transporter.sendMail(mailOptions, (error, info) => {
@@ -207,7 +207,7 @@ app.post('/api/send-email', (req, res) => {
     }
     res.status(200).json({ status: 'success', message: 'Email sent successfully!' });
   });
-});
+}); 
 
 
 

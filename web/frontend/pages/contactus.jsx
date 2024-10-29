@@ -9,6 +9,9 @@ export default function ContactUs() {
   const [submissionStatus, setSubmissionStatus] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false); // Track loading state
   const [storeName, setStoreName] = useState("");
+  const [storeDetails, setStoreDetails] = useState({});
+
+  
 
 
 //Fetch store details and send with email
@@ -21,7 +24,15 @@ export default function ContactUs() {
     .then(response => {
       if (response.data.length > 0) {
         console.log("Store Details ",response.data[0]);
-        setStoreName(response.data[0].name); 
+        setStoreName(response.data[0].name);
+        setStoreDetails({
+          Store_name: response.data[0].name,
+          email: response.data[0].email,
+          phone: response.data[0].phone,
+          domain: response.data[0].domain
+          
+        }); 
+        console.log("Send in email" , storeDetails)
       }
     })
     .catch(error => console.log(error));
@@ -38,7 +49,7 @@ export default function ContactUs() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ name, email, subject, message }),
+        body: JSON.stringify({ name, email, subject, message , storeDetails }),
       });
 
       const data = await response.json();
