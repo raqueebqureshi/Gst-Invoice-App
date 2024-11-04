@@ -177,6 +177,33 @@ app.post('/api/update-invoice-template', async (req, res) => {
 
 
 
+// Fetch invoice template ID based on storeDomain
+app.get('/api/get-invoice-template', async (req, res) => {
+  const { storeDomain } = req.query;
+  console.log("Fetching invoice template for storeDomain:", storeDomain);
+
+  if (!storeDomain) {
+    res.status(400).json({ message: 'Missing storeDomain' });
+    return;
+  }
+
+  try {
+    // Query the database to find the store by storeDomain and retrieve the template ID
+    const store = await Store.findOne({ storeDomain }, 'storeInvoiceTemplate');
+    if (store) {
+      console.log("Fetched invoice template:", store.storeInvoiceTemplate);
+      res.status(200).json({ storeInvoiceTemplate: store.storeInvoiceTemplate });
+    } else {
+      res.status(404).json({ message: "Store not found" });
+    }
+  } catch (error) {
+    console.error("Error fetching invoice template", error);
+    res.status(500).json({ message: "Failed to fetch invoice template" });
+  }
+});
+
+
+
 
 // api for send email to support
 

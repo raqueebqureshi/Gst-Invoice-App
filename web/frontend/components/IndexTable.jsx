@@ -19,7 +19,43 @@ export function IndexTableEx({ value }) {
   const [loading, setLoading] = useState(true);
   const [orders, setOrders] = useState([]);
   const [selectedResources, setSelectedResources] = useState([]);
+  const [currentTemplateId, setCurrentTemplateId] = useState(null);
+  const [storeDomain, setStoreDomain] = useState(null);
+   // Fetch the store domain
+   useEffect(() => {
+    console.log("Fetching store details...");
+    fetch("/api/shop/all", {
+      method: "GET",
+      headers: { "Content-Type": "application/json" }
+    })
+    .then(response => response.json())
+    .then(data => {
+      console.log("Store data fetched:", data);
+      if (data.data && data.data.length > 0) {
+        // Access the domain from the correct property
+        setStoreDomain(data.data[0].domain); 
+        console.log("Store domain set:", data.data[0].domain);
+      }
+    })
+    .catch(error => console.log("Error fetching store details:", error));
+  }, []);
 
+
+  //fetch seleceted invoice template from database
+  useEffect(() => {
+    if (storeDomain) {
+      fetch(`/api/get-invoice-template?storeDomain=${storeDomain}`)
+        .then(response => response.json())
+        .then(data => {
+          if (data.storeInvoiceTemplate) {
+            console.log("Fetched template ID from DB:", data.storeInvoiceTemplate);
+            setCurrentTemplateId(data.storeInvoiceTemplate); // Store template ID for comparison or other use
+          }
+        })
+        .catch(error => console.error("Error fetching template ID:", error));
+    }
+  }, [storeDomain]);
+  
   const formatDateTime = (dateString) => {
     const date = new Date(dateString);
     return new Intl.DateTimeFormat('en-US', {

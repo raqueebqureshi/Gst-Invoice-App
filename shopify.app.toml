@@ -3,7 +3,7 @@
 client_id = "f91cb213006ab6fb5448b00b9a44c33c"
 name = "GST Invoice App"
 handle = "gst-invoice-app-2"
-application_url = "https://nigeria-headset-pens-relax.trycloudflare.com"
+application_url = "https://contains-processing-science-encourage.trycloudflare.com"
 embedded = true
 
 [build]
@@ -16,9 +16,9 @@ scopes = "read_orders,read_products,write_products"
 
 [auth]
 redirect_urls = [
-  "https://nigeria-headset-pens-relax.trycloudflare.com/auth/callback",
-  "https://nigeria-headset-pens-relax.trycloudflare.com/auth/shopify/callback",
-  "https://nigeria-headset-pens-relax.trycloudflare.com/api/auth/callback"
+  "https://contains-processing-science-encourage.trycloudflare.com/auth/callback",
+  "https://contains-processing-science-encourage.trycloudflare.com/auth/shopify/callback",
+  "https://contains-processing-science-encourage.trycloudflare.com/api/auth/callback"
 ]
 
 [webhooks]
