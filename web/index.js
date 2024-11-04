@@ -7,6 +7,8 @@ import shopify from "./shopify.js";
 import productCreator from "./product-creator.js";
 import PrivacyWebhookHandlers from "./privacy.js";
 import mongoose from 'mongoose';
+import nodemailer from 'nodemailer';
+import bodyPaser from 'body-parser';
 import dotenv from 'dotenv';
 dotenv.config();
 const app = express();
@@ -138,6 +140,191 @@ app.post('/api/update-product-count', async (req, res) => {
 
 
 
+
+
+// Update invoice template API
+app.post('/api/update-invoice-template', async (req, res) => {
+  const { storeDomain, invoiceTemplate } = req.body;
+  console.log("Received request body:", req.body);
+
+  if (!storeDomain || !invoiceTemplate) {
+    res.status(400).json({ message: 'Missing storeDomain or invoiceTemplate' });
+    return;
+  }
+
+  try {
+    // Update the invoice template based on storeDomain
+    let updatedStore = await Store.findOneAndUpdate(
+      { storeDomain },
+      { storeInvoiceTemplate: invoiceTemplate },
+      { new: true } // Return the updated document
+    );
+
+    if (updatedStore) {
+      console.log("Invoice template updated successfully:", updatedStore.storeInvoiceTemplate);
+      res.status(200).json({
+        message: "Invoice template updated successfully",
+        storeInvoiceTemplate: updatedStore.storeInvoiceTemplate
+      });
+    } else {
+      res.status(404).json({ message: "Store not found" });
+    }
+  } catch (error) {
+    console.error("Error updating invoice template", error);
+    res.status(500).json({ message: "Failed to update invoice template" });
+  }
+});
+
+
+
+// Fetch invoice template ID based on storeDomain
+app.get('/api/get-invoice-template', async (req, res) => {
+  const { storeDomain } = req.query;
+  console.log("Fetching invoice template for storeDomain:", storeDomain);
+
+  if (!storeDomain) {
+    res.status(400).json({ message: 'Missing storeDomain' });
+    return;
+  }
+
+  try {
+    // Query the database to find the store by storeDomain and retrieve the template ID
+    const store = await Store.findOne({ storeDomain }, 'storeInvoiceTemplate');
+    if (store) {
+      console.log("Fetched invoice template:", store.storeInvoiceTemplate);
+      res.status(200).json({ storeInvoiceTemplate: store.storeInvoiceTemplate });
+    } else {
+      res.status(404).json({ message: "Store not found" });
+    }
+  } catch (error) {
+    console.error("Error fetching invoice template", error);
+    res.status(500).json({ message: "Failed to fetch invoice template" });
+  }
+});
+
+
+
+
+// api for send email to support
+
+const transporter = nodemailer.createTransport({
+  service: 'Gmail', // You can use other services like 'Yahoo', 'Outlook', etc.
+  auth: {
+
+    user: 'delhiappco@gmail.com', // Your email
+    pass: 'qlei dunz wqsb mzad', // Your email password or app password
+  },
+});
+
+
+
+app.post('/api/send-email', (req, res) => {
+  const { name, email, subject, message, storeDetails } = req.body;
+
+  const mailOptions = {
+    from: email,
+    to: 'delhiappco@gmail.com',
+    subject: `${subject} from ${name} / GST Invoice App`,
+    text: `${message} \n\nStore Details:\n- Store Name: ${storeDetails.name}\n- Email: ${storeDetails.email}\n- Phone: ${storeDetails.phone}\n- Domain: ${storeDetails.domain}`,
+  };
+
+  transporter.sendMail(mailOptions, (error, info) => {
+    if (error) {
+      return res.status(500).json({ status: 'fail', error: error.message });
+    }
+    res.status(200).json({ status: 'success', message: 'Email sent successfully!' });
+  });
+}); 
+
+
+
+
+
+
+//api for update products id and HSN GST in db
+// Define the product schema
+const productSchema = new mongoose.Schema({
+  domain: { type: String, required: true },
+  products: [
+    {
+      name: { type: String, required: true },
+      productId: { type: String, required: true, unique: true },
+      HSN: { type: String, required: true },
+      GST: { type: String, required: true },
+    },
+  ],
+});
+
+// Create the Product model
+const Product = mongoose.model('Product', productSchema);
+
+// @ts-ignore
+app.post('/api/insertProduct-data', async (req, res) => {
+  const { storeDomain, products } = req.body; // Assuming you're sending products directly from the frontend
+
+  // console.log("Received request to /api/insertProduct-data:", req.body);
+  console.log(" Store domain:" + storeDomain , "Products:", products[0].productId);
+
+  try {
+    // Validate input
+    // if (!storeDomain || !Array.isArray(products)) {
+    //   return res.status(400).json({ message: 'Invalid input data' });
+    // }
+    
+    // Map over the products to extract relevant fields
+    // const productData = products.map(product => ({
+    //   domain: storeDomain,
+    //   productId: product.id,               // Use `id` from the Shopify response
+    //   productName: product.title,           // Use `title` from the Shopify response
+    //   HSN: '',                               // Default empty or fill if you have HSN logic
+    //   GST: '',                               // Default empty or fill if you have GST logic
+    // }));
+    console.log(" Product data:",   products.map( product => ({
+      productId: product.id,               // Use `id` from the Shopify response
+    })));
+
+    console.log("Product data:");
+    const productData = [];
+    for (let i = 0; i < products.length; i++) {
+      const product = products[i];
+       productData.push({
+        domain: storeDomain,
+          productId: product.productId,               // Use `id` from the Shopify response
+          productName: product.productName,           // Use `title` from the Shopify response
+          HSN: '',                               // Default empty or fill if you have HSN logic
+          GST: '', 
+      });
+           // Add GST if you want to log it
+ 
+}
+  console.log("Product data:", productData);        
+
+    // Filter out products with null or undefined `productId`
+    // const validProducts = productData.filter(product => product.productId != null);
+
+    // if (validProducts.length === 0) {
+    //   console.warn("No valid products with productId to insert.");
+    //   return res.status(400).json({ message: 'No valid products to save' });
+    // }
+
+    // Insert valid products into the database
+    const result = await Product.insertMany(productData);
+    
+    console.log("Insert operation result:", result);
+    res.status(201).json({ message: 'Products saved successfully', result });
+  } catch (error) {
+    console.error("Error saving products to DB:", error);
+    res.status(500).json({ message: 'Error saving products', error: error.message });
+  }
+});
+
+
+
+
+
+
+
+
 const PORT = parseInt(
   process.env.BACKEND_PORT || process.env.PORT || "3000",
   10
@@ -247,6 +434,7 @@ app.post("/api/products", async (_req, res) => {
 app.use(shopify.cspHeaders());
 app.use(serveStatic(STATIC_PATH, { index: false }));
 
+// @ts-ignore
 app.use("/*", shopify.ensureInstalledOnShop(), async (_req, res, _next) => {
   return res
     .status(200)

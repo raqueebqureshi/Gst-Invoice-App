@@ -1,61 +1,88 @@
-import { Layout, Page,FooterHelp, Link} from "@shopify/polaris";
+import React, { useState, useEffect } from 'react';
+import { Page, Layout, FooterHelp, Link } from "@shopify/polaris";
 import { TitleBar } from "@shopify/app-bridge-react";
-import { useTranslation } from "react-i18next";
-import { MediaCardExample, MediaCardExample2 } from "../components/MediaCard";
-import { Divider } from "@shopify/polaris";
-import "@shopify/polaris/build/esm/styles.css";
-import '../styles.css';
-
-
-
+import { MediaCardExample2 } from "../components/MediaCard";
 
 export default function Orders() {
-  const { t } = useTranslation();
+  const [storeDomain, setStoreDomain] = useState(null);
+  const [selectedTemplate, setSelectedTemplate] = useState("1"); // Default to template 1
+
+  // Fetch the store domain
+  useEffect(() => {
+    console.log("Fetching store details...");
+    fetch("/api/shop/all", {
+      method: "GET",
+      headers: { "Content-Type": "application/json" }
+    })
+    .then(response => response.json())
+    .then(data => {
+      console.log("Store data fetched:", data);
+      if (data.data && data.data.length > 0) {
+        // Access the domain from the correct property
+        setStoreDomain(data.data[0].domain); 
+        console.log("Store domain set:", data.data[0].domain);
+      }
+    })
+    .catch(error => console.log("Error fetching store details:", error));
+  }, []);
+
+  // Function to handle invoice template selection
+  const handleSelectTemplate = (templateId) => {
+    console.log("Selected template:", templateId);
+    if (storeDomain) {
+      fetch("/api/update-invoice-template", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          storeDomain,
+          invoiceTemplate: templateId
+        })
+      })
+      .then(response => response.json())
+      .then(data => {
+        console.log("API response for updating template:", data);
+        setSelectedTemplate(templateId); // Update selected template state
+      })
+      .catch(error => console.error("Error updating template:", error));
+    } else {
+      console.log("Store domain not available; cannot update template");
+    }
+  };
+
   return (
     <Page fullWidth>
-      <TitleBar title={t("InvoiceTemplates.title")}>
-        {/* <button variant="primary" onClick={() => console.log("Primary action")}>
-          {t("InvoiceTemplates.primaryAction")}
-        </button> */}
-      </TitleBar>
-      <Layout >
-        <p style={{paddingTop: '20px', textAlign: 'start', width: '90%', fontWeight: '600'}}>Selected invoice template</p>
-        <div style={{paddingTop: '20px', display: 'flex', gap: '10px', justifyContent: 'space-between', width : '90%'}}>
-            <MediaCardExample />
-        
-</div>
-    </Layout>
-    <div style={{padding: '30px 30px 20px 10px',}}>
-    <Divider />
-</div>
-<Layout >
-        <p style={{paddingTop: '20px', textAlign: 'start', width: '90%', fontWeight: '600'}}>Available invoice template</p>
-        <div style={{paddingTop: '20px', width : '90%'}}>
-            <MediaCardExample2 imageSrc="assets/invoice2.png" 
-            title="Celestial" primaryAction="Preview and Customize" 
-            secondaryAction="Select" 
-            description="Our elegant invoice showcases a simple design, 
-            allowing the spotlight to shine on your business." />
-            <MediaCardExample2 imageSrc="assets/invoice3.png" 
-            title="Orbix" primaryAction="Preview and Customize" 
-            secondaryAction="Select" 
-            description="Make a statement without overwhelming your clients. 
-            Our elegant invoice features a simple design that put the focus on your business." />
-            <MediaCardExample2 imageSrc="assets/invoice4.png" 
-            title="Sharp" primaryAction="Preview and Customize" 
-            secondaryAction="Select" 
-            description="Designed for professionals, this sleek invoice exudes 
-            competence and confidence, leaving a lasting impression." />
-</div>
-    </Layout>
-    <FooterHelp  >
-    Didn't find anything you were looking for? We got you covered. Reach out to us at support{' '}
-      <Link url="" removeUnderline>
-       @delhidigital.co
-      </Link>
-    </FooterHelp>
-      
-
+      <TitleBar title="Invoice Templates" />
+      <Layout>
+        <p style={{ paddingTop: '20px', textAlign: 'start', width: '90%', fontWeight: '600' }}>Available Invoice Templates</p>
+        <div style={{ paddingTop: '20px', display: 'flex', flexDirection: 'column', gap: '10px', width: '90%' }}>
+          <MediaCardExample2
+            imageSrc="assets/invoice.png"
+            title="Pain"
+            primaryAction=" Customize available soon.."
+            isSelected={selectedTemplate === "1"} // Set isSelected based on selectedTemplate
+            onSelect={() => {
+              console.log("Bold template select button clicked");
+              if (selectedTemplate !== "1") handleSelectTemplate("1");
+            }}
+            description="Make a statement without overwhelming your clients. Elegant invoice design."
+          />
+          <MediaCardExample2
+            imageSrc="assets/invoice2.png"
+            title="Classic"
+            primaryAction=" Customize available soon.."
+            isSelected={selectedTemplate === "2"} // Set isSelected based on selectedTemplate
+            onSelect={() => {
+              console.log("Celestial template select button clicked");
+              if (selectedTemplate !== "2") handleSelectTemplate("2");
+            }}
+            description="Our elegant invoice showcases a simple design."
+          />
+        </div>
+      </Layout>
+      <FooterHelp style={{ marginTop: '40px' }}>
+        Didn't find what you were looking for? Reach out to support at{' '}
+        <Link url="mailto:support@delhidigital.co">support@delhidigital.co</Link>
+      </FooterHelp>
     </Page>
   );
 }

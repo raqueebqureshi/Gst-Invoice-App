@@ -1,57 +1,41 @@
-import {MediaCard} from '@shopify/polaris';
+import { MediaCard, Button } from '@shopify/polaris';
 import React from 'react';
 
-export function MediaCardExample() {
+export function MediaCardExample2({ imageSrc, title, primaryAction, description, isSelected, onSelect }) {
   return (
     <MediaCard
-      title="Bold"
+      title={
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', justifyContent: 'space-between' }}>
+          <span>{title}</span>
+        
+          <Button
+            variant="primary"
+            size="slim"
+            primary={!isSelected}
+            disabled={isSelected}
+            onClick={onSelect}
+          >
+            {isSelected ? 'Selected' : 'Select'}
+          </Button>
+        </div>
+      }
       primaryAction={{
-        content: 'Customize',
+        content: primaryAction,
         onAction: () => {},
       }}
-      description="Make a statement without overwhelming your clients. Our elegant invoice features a simple design that put the focus on your business."
-    //   popoverActions={[{content: 'Dismiss', onAction: () => {}}]}
+      description={description}
     >
       <img
         alt=""
-        width="100%"
-        height="100%"
         style={{
+          width: '100%',
+          height: '100%',
           objectFit: 'cover',
           objectPosition: 'center',
-          margin: '20px ',
-          borderRadius: '10px 10px 10px 10px',
+          borderRadius: '10px',
         }}
-        src="assets/invoice.png"
+        src={imageSrc}
       />
     </MediaCard>
   );
 }
-
-export function MediaCardExample2({imageSrc, title, primaryAction, description, secondaryAction}) {
-    return (
-      <MediaCard
-        title= {title}
-        primaryAction={{
-          content: primaryAction,
-          onAction: () => {},
-        }}
-    
-        description={description}
-        popoverActions={[{content: 'Select', onAction: () => {}}]}
-      >
-        <img
-          alt=""
-          width="100%"
-          height="100%"
-          style={{
-            objectFit: 'cover',
-            objectPosition: 'center',
-            margin: '20px ',
-            borderRadius: '10px 10px 10px 10px',
-          }}
-          src={imageSrc}
-        />
-      </MediaCard>
-    );
-  }
