@@ -11,13 +11,16 @@ import nodemailer from 'nodemailer';
 import bodyPaser from 'body-parser';
 import dotenv from 'dotenv';
 dotenv.config();
+
+
 const app = express();
 app.use(express.json());
+
 // db connection
 const mongoUri = process.env.MONGO_URI;
 
 if (!mongoUri) {
-  console.error("Missing MONGODB_URI in environment variables.");
+  console.error("Missing MONGO_URI in environment variables.");
   process.exit(1); // Exit the process if the environment variable is not set
 }
 
@@ -211,8 +214,8 @@ const transporter = nodemailer.createTransport({
   service: 'Gmail', // You can use other services like 'Yahoo', 'Outlook', etc.
   auth: {
 
-    user: 'delhiappco@gmail.com', // Your email
-    pass: 'qlei dunz wqsb mzad', // Your email password or app password
+    user: process.env.SUPPORT_EMAIL, // Your email
+    pass: process.env.SUPPORT_PASSWORD, // Your email password or app password
   },
 });
 
@@ -223,7 +226,7 @@ app.post('/api/send-email', (req, res) => {
 
   const mailOptions = {
     from: email,
-    to: 'delhiappco@gmail.com',
+    to: process.env.SUPPORT_EMAIL,
     subject: `${subject} from ${name} / GST Invoice App`,
     text: `${message} \n\nStore Details:\n- Store Name: ${storeDetails.name}\n- Email: ${storeDetails.email}\n- Phone: ${storeDetails.phone}\n- Domain: ${storeDetails.domain}`,
   };
@@ -237,35 +240,35 @@ app.post('/api/send-email', (req, res) => {
 }); 
 
 
-
-
+// --------------------------------------------------------------------------------------------------------------------------------------------------------------
+// Under development code base 
 
 
 //api for update products id and HSN GST in db
 // Define the product schema
-const productSchema = new mongoose.Schema({
-  domain: { type: String, required: true },
-  products: [
-    {
-      name: { type: String, required: true },
-      productId: { type: String, required: true, unique: true },
-      HSN: { type: String, required: true },
-      GST: { type: String, required: true },
-    },
-  ],
-});
+// const productSchema = new mongoose.Schema({
+//   domain: { type: String, required: true },
+//   products: [
+//     {
+//       name: { type: String, required: true },
+//       productId: { type: String, required: true, unique: true },
+//       HSN: { type: String, required: true },
+//       GST: { type: String, required: true },
+//     },
+//   ],
+// });
 
 // Create the Product model
-const Product = mongoose.model('Product', productSchema);
+// const Product = mongoose.model('Product', productSchema);
 
-// @ts-ignore
-app.post('/api/insertProduct-data', async (req, res) => {
-  const { storeDomain, products } = req.body; // Assuming you're sending products directly from the frontend
+// // @ts-ignore
+// app.post('/api/insertProduct-data', async (req, res) => {
+//   const { storeDomain, products } = req.body; // Assuming you're sending products directly from the frontend
 
-  // console.log("Received request to /api/insertProduct-data:", req.body);
-  console.log(" Store domain:" + storeDomain , "Products:", products[0].productId);
+//   // console.log("Received request to /api/insertProduct-data:", req.body);
+//   console.log(" Store domain:" + storeDomain , "Products:", products[0].productId);
 
-  try {
+//   try {
     // Validate input
     // if (!storeDomain || !Array.isArray(products)) {
     //   return res.status(400).json({ message: 'Invalid input data' });
@@ -278,26 +281,26 @@ app.post('/api/insertProduct-data', async (req, res) => {
     //   productName: product.title,           // Use `title` from the Shopify response
     //   HSN: '',                               // Default empty or fill if you have HSN logic
     //   GST: '',                               // Default empty or fill if you have GST logic
-    // }));
-    console.log(" Product data:",   products.map( product => ({
-      productId: product.id,               // Use `id` from the Shopify response
-    })));
+//     // }));
+//     console.log(" Product data:",   products.map( product => ({
+//       productId: product.id,               // Use `id` from the Shopify response
+//     })));
 
-    console.log("Product data:");
-    const productData = [];
-    for (let i = 0; i < products.length; i++) {
-      const product = products[i];
-       productData.push({
-        domain: storeDomain,
-          productId: product.productId,               // Use `id` from the Shopify response
-          productName: product.productName,           // Use `title` from the Shopify response
-          HSN: '',                               // Default empty or fill if you have HSN logic
-          GST: '', 
-      });
-           // Add GST if you want to log it
+//     console.log("Product data:");
+//     const productData = [];
+//     for (let i = 0; i < products.length; i++) {
+//       const product = products[i];
+//        productData.push({
+//         domain: storeDomain,
+//           productId: product.productId,               // Use `id` from the Shopify response
+//           productName: product.productName,           // Use `title` from the Shopify response
+//           HSN: '',                               // Default empty or fill if you have HSN logic
+//           GST: '', 
+//       });
+//            // Add GST if you want to log it
  
-}
-  console.log("Product data:", productData);        
+// }
+//   console.log("Product data:", productData);        
 
     // Filter out products with null or undefined `productId`
     // const validProducts = productData.filter(product => product.productId != null);
@@ -308,19 +311,18 @@ app.post('/api/insertProduct-data', async (req, res) => {
     // }
 
     // Insert valid products into the database
-    const result = await Product.insertMany(productData);
+//     const result = await Product.insertMany(productData);
     
-    console.log("Insert operation result:", result);
-    res.status(201).json({ message: 'Products saved successfully', result });
-  } catch (error) {
-    console.error("Error saving products to DB:", error);
-    res.status(500).json({ message: 'Error saving products', error: error.message });
-  }
-});
+//     console.log("Insert operation result:", result);
+//     res.status(201).json({ message: 'Products saved successfully', result });
+//   } catch (error) {
+//     console.error("Error saving products to DB:", error);
+//     res.status(500).json({ message: 'Error saving products', error: error.message });
+//   }
+// });
 
 
-
-
+// ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
 
