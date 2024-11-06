@@ -12,6 +12,6 @@ export default function convertAmountToWords(amount) {
   return result.charAt(0).toUpperCase() + result.slice(1) + " Only";
 }
 
-// Example usage
-const amount = 1129.50;
-console.log(convertAmountToWords(amount));  // Output: "One thousand one hundred twenty-nine rupees and fifty paise only"
+// // Example usage
+// const amount = 1129.50;
+// console.log(convertAmountToWords(amount));  // Output: "One thousand one hundred twenty-nine rupees and fifty paise only"

@@ -3,7 +3,11 @@
 client_id = "f91cb213006ab6fb5448b00b9a44c33c"
 name = "Indian GST Invoice"
 handle = "gst-invoice-app-2"
+<<<<<<< HEAD
 application_url = "https://dust-owen-streams-laughing.trycloudflare.com"
+=======
+application_url = "https://genetics-executed-julian-emission.trycloudflare.com"
+>>>>>>> b334ddccda2a8467924a590b7e31b9501ea8cf4a
 embedded = true
 
 [build]
@@ -16,9 +20,15 @@ scopes = "read_orders,read_products,write_products"
 
 [auth]
 redirect_urls = [
+<<<<<<< HEAD
   "https://dust-owen-streams-laughing.trycloudflare.com/auth/callback",
   "https://dust-owen-streams-laughing.trycloudflare.com/auth/shopify/callback",
   "https://dust-owen-streams-laughing.trycloudflare.com/api/auth/callback"
+=======
+  "https://genetics-executed-julian-emission.trycloudflare.com/auth/callback",
+  "https://genetics-executed-julian-emission.trycloudflare.com/auth/shopify/callback",
+  "https://genetics-executed-julian-emission.trycloudflare.com/api/auth/callback"
+>>>>>>> b334ddccda2a8467924a590b7e31b9501ea8cf4a
 ]
 
 [webhooks]
