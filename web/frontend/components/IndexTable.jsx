@@ -227,14 +227,14 @@ const handlePrint = useCallback(async (order, shopdetails, currentTemplate) => {
   printWindow.document.write(`
     <html>
       <head>
-        <title>Print Invoice</title>
+         <title></title>
         <style>
           body, html { margin: 0; padding: 0; }
-          img { width: 100%; height: auto; }
+          img { width: 99%; height: 100%;  }
         </style>
       </head>
       <body>
-        <img src="${imgData}" alt="Invoice" />
+        <img src="${imgData}" alt="Invoice" align="center" />
       </body>
     </html>
   `);

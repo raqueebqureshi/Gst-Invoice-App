@@ -3,7 +3,7 @@
 client_id = "f91cb213006ab6fb5448b00b9a44c33c"
 name = "GST Invoice App"
 handle = "gst-invoice-app-2"
-application_url = "https://pentium-sake-terms-boxing.trycloudflare.com"
+application_url = "https://genetics-executed-julian-emission.trycloudflare.com"
 embedded = true
 
 [build]
@@ -16,9 +16,9 @@ scopes = "read_orders,read_products,write_products"
 
 [auth]
 redirect_urls = [
-  "https://pentium-sake-terms-boxing.trycloudflare.com/auth/callback",
-  "https://pentium-sake-terms-boxing.trycloudflare.com/auth/shopify/callback",
-  "https://pentium-sake-terms-boxing.trycloudflare.com/api/auth/callback"
+  "https://genetics-executed-julian-emission.trycloudflare.com/auth/callback",
+  "https://genetics-executed-julian-emission.trycloudflare.com/auth/shopify/callback",
+  "https://genetics-executed-julian-emission.trycloudflare.com/api/auth/callback"
 ]
 
 [webhooks]
