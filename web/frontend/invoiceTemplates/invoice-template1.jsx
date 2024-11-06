@@ -133,6 +133,9 @@ export function InvoiceTemplate1({ shopdetails, orders }) {
                 width: "50%",
               }}
             >
+              {orders[0].billing_address.name !== null
+                ? orders[0].billing_address.name
+                : "N/A"},<br />
               {orders[0].billing_address.address1 !== null
                 ? orders[0].billing_address.address1
                 : "N/A"}
@@ -164,7 +167,9 @@ export function InvoiceTemplate1({ shopdetails, orders }) {
                 border: "1px solid #e2e8f0",
                 width: "50%",
               }}
-            >
+            >{orders[0].shipping_address.name !== null
+              ? orders[0].shipping_address.name
+              : "N/A"},<br />
               {orders[0].shipping_address.address1 !== null
                 ? orders[0].shipping_address.address1
                 : "N/A"}

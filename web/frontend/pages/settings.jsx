@@ -4,11 +4,39 @@ import { useTranslation } from "react-i18next";
 import { TextFieldExample } from "../components/TextField";
 import "@shopify/polaris/build/esm/styles.css";
 import { SelectPostal } from "../components/SelectPostal";
+import { useEffect, useState } from 'react';
+
 
 export default function Settings() {
+
+  const [shopDetails, setShopDetails] = useState([]);
+  const [storeName, setStoreName] = useState();
+
+
+
+
+   // Fetch store details
+   useEffect(() => {
+    fetch("/api/shop/all", {
+      method: "GET",
+      headers: { "Content-Type": "application/json" }
+    })
+    .then(request => request.json())
+    .then(response => {
+      if (response.data.length > 0) {
+        console.log("Store Details ",response.data[0]);
+        setShopDetails(response.data[0]);
+        setStoreName(response.data[0].name); 
+      }
+    })
+    .catch(error => console.log(error));
+  }, []);
+
+
+
   const { t } = useTranslation();
   return (
-    <Page fullWidthv>
+    <Page fullWidth>
       <TitleBar title={t("Settings.title")} style={{ fontweight: "bold" }}>
         {/* <button variant="primary" onClick={() => console.log("Primary action")}>
           {t("InvoiceTemplates.primaryAction")}
@@ -151,3 +179,6 @@ export default function Settings() {
     </Page>
   );
 }
+
+
+ 

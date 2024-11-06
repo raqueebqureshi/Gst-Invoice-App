@@ -17,7 +17,7 @@ export function BannerEx() {
   return (
     <div style={{ display: isVisible ? "block" : "none", width: '', justifyContent: 'center'}}>
       <Banner 
-    title="Welcome to GST Pro"
+    title="Welcome to GST Invoice App"
     status="info"
     onDismiss={handleDismiss}
     >

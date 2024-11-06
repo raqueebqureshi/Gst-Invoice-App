@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { Page, Layout, FooterHelp, Link } from "@shopify/polaris";
+import { Page, Layout, FooterHelp, Link ,Spinner} from "@shopify/polaris";
 import { TitleBar } from "@shopify/app-bridge-react";
 import { MediaCardExample2 } from "../components/MediaCard";
 
 export default function Orders() {
   const [storeDomain, setStoreDomain] = useState(null);
-  const [selectedTemplate, setSelectedTemplate] = useState("1"); // Default to template 1
+  const [loading, setLoading] = useState(true);
+
+  const [selectedTemplate, setSelectedTemplate] = useState(); // Default to template 1
 
   // Fetch the store domain
   useEffect(() => {
@@ -26,6 +28,22 @@ export default function Orders() {
     .catch(error => console.log("Error fetching store details:", error));
   }, []);
 
+  useEffect(() => {
+    if (storeDomain) {
+      fetch(`/api/get-invoice-template?storeDomain=${storeDomain}`)
+        .then(response => response.json())
+        .then(data => {
+          if (data.storeInvoiceTemplate) {
+            console.log("Fetched template ID from DB:", data.storeInvoiceTemplate);
+            setSelectedTemplate(data.storeInvoiceTemplate); // Store template ID for comparison or other use
+            setLoading(false);  
+          }
+        })
+        .catch(error => console.error("Error fetching template ID:", error));
+        
+    }
+  }, [storeDomain]);
+
   // Function to handle invoice template selection
   const handleSelectTemplate = (templateId) => {
     console.log("Selected template:", templateId);
@@ -41,7 +59,8 @@ export default function Orders() {
       .then(response => response.json())
       .then(data => {
         console.log("API response for updating template:", data);
-        setSelectedTemplate(templateId); // Update selected template state
+        setSelectedTemplate(data.storeInvoiceTemplate); // Update selected template state
+
       })
       .catch(error => console.error("Error updating template:", error));
     } else {
@@ -49,10 +68,18 @@ export default function Orders() {
     }
   };
 
+ 
   return (
+    <>
+    {loading ? (
+      <div style={{ display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
+        <Spinner accessibilityLabel="Loading Spinner" size="large" />
+      </div>
+    ) :
     <Page fullWidth>
       <TitleBar title="Invoice Templates" />
       <Layout>
+
         <p style={{ paddingTop: '20px', textAlign: 'start', width: '90%', fontWeight: '600' }}>Available Invoice Templates</p>
         <div style={{ paddingTop: '20px', display: 'flex', flexDirection: 'column', gap: '10px', width: '90%' }}>
           <MediaCardExample2
@@ -77,6 +104,17 @@ export default function Orders() {
             }}
             description="Our elegant invoice showcases a simple design."
           />
+          <MediaCardExample2
+            imageSrc="assets/invoice3.png"
+            title="Decent"
+            primaryAction=" Customize available soon.."
+            isSelected={selectedTemplate === "3"} // Set isSelected based on selectedTemplate
+            onSelect={() => {
+              console.log("Celestial template select button clicked");
+              if (selectedTemplate !== "3") handleSelectTemplate("3");
+            }}
+            description="Designed for professionals, this sleek invoice exudes competence and confidence, leaving a lasting impression."
+          />
         </div>
       </Layout>
       <FooterHelp style={{ marginTop: '40px' }}>
@@ -84,5 +122,7 @@ export default function Orders() {
         <Link url="mailto:support@delhidigital.co">support@delhidigital.co</Link>
       </FooterHelp>
     </Page>
+    }
+    </>
   );
 }

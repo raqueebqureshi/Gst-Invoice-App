@@ -32,7 +32,7 @@ export function MediaCardExample2({ imageSrc, title, primaryAction, description,
           height: '100%',
           objectFit: 'cover',
           objectPosition: 'center',
-          borderRadius: '10px',
+          borderRadius: '10px ',
         }}
         src={imageSrc}
       />
