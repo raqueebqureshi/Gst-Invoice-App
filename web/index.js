@@ -324,8 +324,104 @@ app.post('/api/send-email', (req, res) => {
 
 // ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
+// webhooks for Compliance webhooks shopify 
 
+// Customer Data Request Endpoint
+app.post('/webhooks/customers/data_request', async (req, res) => {
+  try {
+    const { shop_domain } = req.body;
+    console.log(`Customer data request received for shop: ${shop_domain}`);
 
+    // Fetch store data based on the storeDomain
+    const storeData = await Store.findOne({ storeDomain: shop_domain });
+
+    if (storeData) {
+      res.status(200).json({
+        message: 'Customer data request fulfilled',
+        data: {
+          storeName: storeData.storeName,
+          storeDomain: storeData.storeDomain,
+          storeEmail: storeData.storeEmail,
+          storeAddress1: storeData.storeAddress1,
+          storeCity: storeData.storeCity,
+          storeCountryName: storeData.storeCountryName,
+          storeInvoiceTemplate: storeData.storeInvoiceTemplate,
+          storeProductCount: storeData.storeProductCount,
+        },
+      });
+    } else {
+      res.status(404).json({ message: 'Store not found' });
+    }
+  } catch (error) {
+    console.error("Error handling customer data request webhook:", error);
+    res.status(500).json({ message: 'Failed to process customer data request' });
+  }
+});
+
+// Customer Data Erasure Endpoint
+app.post('/webhooks/customers/redact', async (req, res) => {
+  try {
+    const { shop_domain } = req.body;
+    console.log(`Customer data erasure request received for shop: ${shop_domain}`);
+
+    // Fetch store data to acknowledge what is being erased
+    const storeData = await Store.findOne({ storeDomain: shop_domain });
+
+    if (storeData) {
+      res.status(200).json({
+        message: 'Customer data erasure request acknowledged',
+        data: {
+          storeName: storeData.storeName,
+          storeDomain: storeData.storeDomain,
+          storeEmail: storeData.storeEmail,
+          storeAddress1: storeData.storeAddress1,
+          storeCity: storeData.storeCity,
+          storeCountryName: storeData.storeCountryName,
+          storeInvoiceTemplate: storeData.storeInvoiceTemplate,
+          storeProductCount: storeData.storeProductCount,
+        },
+      });
+    } else {
+      res.status(404).json({ message: 'Store not found' });
+    }
+  } catch (error) {
+    console.error("Error handling customer data erasure webhook:", error);
+    res.status(500).json({ message: 'Failed to process customer data erasure request' });
+  }
+});
+
+// Shop Data Erasure Endpoint
+app.post('/webhooks/shop/redact', async (req, res) => {
+  try {
+    const { shop_domain } = req.body;
+    console.log(`Shop data erasure request received for shop: ${shop_domain}`);
+
+    // Fetch and delete store data from MongoDB
+    const storeData = await Store.findOneAndDelete({ storeDomain: shop_domain });
+
+    if (storeData) {
+      res.status(200).json({
+        message: 'Shop data erased successfully',
+        data: {
+          storeName: storeData.storeName,
+          storeDomain: storeData.storeDomain,
+          storeEmail: storeData.storeEmail,
+          storeAddress1: storeData.storeAddress1,
+          storeCity: storeData.storeCity,
+          storeCountryName: storeData.storeCountryName,
+          storeInvoiceTemplate: storeData.storeInvoiceTemplate,
+          storeProductCount: storeData.storeProductCount,
+        },
+      });
+      console.log(`Store data erased for domain: ${shop_domain}`);
+    } else {
+      res.status(404).json({ message: 'Store not found' });
+    }
+  } catch (error) {
+    console.error("Error handling shop data erasure webhook:", error);
+    res.status(500).json({ message: 'Failed to process shop data erasure request' });
+  }
+});
 
 const PORT = parseInt(
   process.env.BACKEND_PORT || process.env.PORT || "3000",

@@ -1,9 +1,9 @@
 # Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
 
 client_id = "f91cb213006ab6fb5448b00b9a44c33c"
-name = "GST Invoice App"
+name = "Indian GST Invoice"
 handle = "gst-invoice-app-2"
-application_url = "https://pentium-sake-terms-boxing.trycloudflare.com"
+application_url = "https://dust-owen-streams-laughing.trycloudflare.com"
 embedded = true
 
 [build]
@@ -16,9 +16,9 @@ scopes = "read_orders,read_products,write_products"
 
 [auth]
 redirect_urls = [
-  "https://pentium-sake-terms-boxing.trycloudflare.com/auth/callback",
-  "https://pentium-sake-terms-boxing.trycloudflare.com/auth/shopify/callback",
-  "https://pentium-sake-terms-boxing.trycloudflare.com/api/auth/callback"
+  "https://dust-owen-streams-laughing.trycloudflare.com/auth/callback",
+  "https://dust-owen-streams-laughing.trycloudflare.com/auth/shopify/callback",
+  "https://dust-owen-streams-laughing.trycloudflare.com/api/auth/callback"
 ]
 
 [webhooks]
