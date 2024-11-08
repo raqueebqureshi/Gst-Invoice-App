@@ -10,11 +10,44 @@ import mongoose from 'mongoose';
 import nodemailer from 'nodemailer';
 import bodyPaser from 'body-parser';
 import dotenv from 'dotenv';
+import crypto from 'crypto';
+
 dotenv.config();
 
 
 const app = express();
 app.use(express.json());
+
+
+
+// Ensure that SHOPIFY_SECRET is defined
+const SHOPIFY_SECRET = process.env.SHOPIFY_SECRET;
+if (!SHOPIFY_SECRET) {
+  console.error("SHOPIFY_SECRET is not defined. Please set the SHOPIFY_SECRET environment variable.");
+  process.exit(1); // Stop execution if secret is not available
+}
+
+// Webhook HMAC Validation Middleware
+const hmacValidation = (req, res, next) => {
+  const hmac = req.headers['x-shopify-hmac-sha256'];
+  const body = JSON.stringify(req.body);
+
+  const hash = crypto
+    .createHmac('sha256', SHOPIFY_SECRET)
+    .update(body, 'utf8') // Only provide the data and the encoding
+    .digest('base64');  // Get the final hash in base64
+
+  if (hash === hmac) {
+    return next(); // HMAC is valid, continue processing the request
+  } else {
+    console.error("Invalid HMAC - Unauthorized request.");
+    return res.status(401).send('Unauthorized');
+  }
+};
+
+
+
+
 
 // db connection
 const mongoUri = process.env.MONGO_URI;
@@ -327,7 +360,7 @@ app.post('/api/send-email', (req, res) => {
 // webhooks for Compliance webhooks shopify 
 
 // Customer Data Request Endpoint
-app.post('/webhooks/customers/data_request', async (req, res) => {
+app.post('/api/webhooks/customers/data_request', hmacValidation, async (req, res) => {
   try {
     const { shop_domain } = req.body;
     console.log(`Customer data request received for shop: ${shop_domain}`);
@@ -359,7 +392,7 @@ app.post('/webhooks/customers/data_request', async (req, res) => {
 });
 
 // Customer Data Erasure Endpoint
-app.post('/webhooks/customers/redact', async (req, res) => {
+app.post('/api/webhooks/customers/redact',hmacValidation, async (req, res) => {
   try {
     const { shop_domain } = req.body;
     console.log(`Customer data erasure request received for shop: ${shop_domain}`);
@@ -391,7 +424,7 @@ app.post('/webhooks/customers/redact', async (req, res) => {
 });
 
 // Shop Data Erasure Endpoint
-app.post('/webhooks/shop/redact', async (req, res) => {
+app.post('/api/webhooks/shop/redact', hmacValidation,  async (req, res) => {
   try {
     const { shop_domain } = req.body;
     console.log(`Shop data erasure request received for shop: ${shop_domain}`);
@@ -424,7 +457,7 @@ app.post('/webhooks/shop/redact', async (req, res) => {
 });
 
 const PORT = parseInt(
-  process.env.BACKEND_PORT || process.env.PORT || "3000",
+  process.env.BACKEND_PORT || process.env.PORT || "8081", // Default to 8081 for fly.io
   10
 );
 

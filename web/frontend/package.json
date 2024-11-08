@@ -28,6 +28,7 @@
     "i18next-resources-to-backend": "^1.1.4",
     "jspdf": "^2.5.2",
     "jspdf-autotable": "^3.8.4",
+    "number-to-words": "^1.2.4",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-i18next": "^13.0.0",
