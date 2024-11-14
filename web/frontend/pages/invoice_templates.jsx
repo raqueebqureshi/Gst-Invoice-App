@@ -2,6 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { Page, Layout, FooterHelp, Link ,Spinner} from "@shopify/polaris";
 import { TitleBar } from "@shopify/app-bridge-react";
 import { MediaCardExample2 } from "../components/MediaCard";
+import invoice1 from '../assets/invoice.png'
+import invoice2 from '../assets/invoice2.png'
+import invoice3 from '../assets/invoice3.png'
+
+
+
 
 export default function Orders() {
   const [storeDomain, setStoreDomain] = useState(null);
@@ -83,7 +89,8 @@ export default function Orders() {
         <p style={{ paddingTop: '20px', textAlign: 'start', width: '90%', fontWeight: '600' }}>Available Invoice Templates</p>
         <div style={{ paddingTop: '20px', display: 'flex', flexDirection: 'column', gap: '10px', width: '90%' }}>
           <MediaCardExample2
-            imageSrc="assets/invoice.png"
+            // imageSrc="assets/invoice.png"
+            imageSrc={invoice1}
             title="Pain"
             primaryAction=" Customize available soon.."
             isSelected={selectedTemplate === "1"} // Set isSelected based on selectedTemplate
@@ -94,7 +101,8 @@ export default function Orders() {
             description="Make a statement without overwhelming your clients. Elegant invoice design."
           />
           <MediaCardExample2
-            imageSrc="assets/invoice2.png"
+           imageSrc={invoice2}
+            // imageSrc="assets/invoice2.png"
             title="Classic"
             primaryAction=" Customize available soon.."
             isSelected={selectedTemplate === "2"} // Set isSelected based on selectedTemplate
@@ -105,7 +113,8 @@ export default function Orders() {
             description="Our elegant invoice showcases a simple design."
           />
           <MediaCardExample2
-            imageSrc="assets/invoice3.png"
+           imageSrc={invoice3}
+            // imageSrc="assets/invoice3.png"
             title="Decent"
             primaryAction=" Customize available soon.."
             isSelected={selectedTemplate === "3"} // Set isSelected based on selectedTemplate
