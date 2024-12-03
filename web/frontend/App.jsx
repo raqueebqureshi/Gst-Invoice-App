@@ -24,7 +24,7 @@ export default function App() {
           <NavMenu>
             <a href="/" rel="home" />
             <a href="/orders">{t("NavigationMenu.orders")}</a>
-            {/* <a href="/products">{t("NavigationMenu.products")}</a> */}
+            <a href="/products">{t("NavigationMenu.products")}</a>
             <a href="/invoice_templates">{t("NavigationMenu.invoice_templates")}</a>
             {/* <a href="/settings">{t("NavigationMenu.settings")}</a> */}
             <a href="/contactus">{t("NavigationMenu.contactus")}</a>

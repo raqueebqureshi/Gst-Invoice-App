@@ -79,7 +79,7 @@ export function InvoiceTemplate1({ shopdetails, orders }) {
                 <td
                   style={{ padding: "5px 10px", border: "1px solid #e2e8f0" }}
                 >
-                  {formatDateTime(orders[0].processed_at)}
+                  {/* {formatDateTime(orders[0].processed_at)} */}{orders[0].processed_at}
                 </td>
               </tr>
               <tr>

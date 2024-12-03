@@ -17,7 +17,7 @@ export default function Settings() {
 
    // Fetch store details
    useEffect(() => {
-    fetch("/api/shop/all", {
+    fetch("/api/2024-10/shop.json", {
       method: "GET",
       headers: { "Content-Type": "application/json" }
     })

@@ -1,0 +1,29 @@
+# Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
+
+client_id = "78fbc68547f4cc8682944642dc9284c8"
+application_url = "https://disable-weird-treasures-excessive.trycloudflare.com"
+embedded = true
+name = "Indian GST App under dev"
+handle = "indian-gst-app-under-dev-1"
+
+[build]
+include_config_on_deploy = true
+dev_store_url = "devstore134.myshopify.com"
+automatically_update_urls_on_dev = true
+
+[webhooks]
+api_version = "2024-10"
+
+[access_scopes]
+# Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
+scopes = "read_orders,read_products,write_products,write_orders"
+
+[auth]
+redirect_urls = [
+  "https://disable-weird-treasures-excessive.trycloudflare.com/auth/callback",
+  "https://disable-weird-treasures-excessive.trycloudflare.com/auth/shopify/callback",
+  "https://disable-weird-treasures-excessive.trycloudflare.com/api/auth/callback"
+]
+
+[pos]
+embedded = false

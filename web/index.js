@@ -11,6 +11,9 @@ import nodemailer from 'nodemailer';
 import bodyPaser from 'body-parser';
 import dotenv from 'dotenv';
 import crypto from 'crypto';
+import Store from './Models/storeModel.js'
+import connectDB from './database/db.js';
+import Product from './Models/productHSN.js'
 
 dotenv.config();
 
@@ -18,6 +21,9 @@ dotenv.config();
 const app = express();
 app.use(express.json());
 
+
+//connect to db
+connectDB();
 
 
 // Ensure that SHOPIFY_SECRET is defined
@@ -49,41 +55,9 @@ const hmacValidation = (req, res, next) => {
 
 
 
-// db connection
-const mongoUri = process.env.MONGO_URI;
-
-if (!mongoUri) {
-  console.error("Missing MONGO_URI in environment variables.");
-  process.exit(1); // Exit the process if the environment variable is not set
-}
-
-// Connecting to the database using the URI from the environment variable
-mongoose.connect(mongoUri, { writeConcern: { w: "majority" } })
-  .then((conn) => {
-    console.log(`MongoDB Connected to: ${conn.connection.host}`);
-  })
-  .catch((error) => {
-    console.error("DB connection failed", error);
-  });
 
 
-
-//store model
-let storeSchema = new mongoose.Schema({
-  storeName: { type: String, required: true },
-  storeDomain: { type: String, required: true, unique: true },
-  storeEmail: { type: String, required: true },
-  storeAddress1: String,
-  storeCity: String,
-  storeCountryName: String,
-  storeInvoiceTemplate: { type: String, default: "1" },
-  storeProductCount: { type: String, default: "" }
-});
-
-
-let Store = mongoose.model("Stores", storeSchema);
-//api to send data to db
-
+//api to send shop data to db
 app.get(
   shopify.config.auth.callbackPath,
   shopify.auth.callback(),
@@ -136,6 +110,9 @@ app.get(
     }
   }
 );
+
+
+
 
 //to update product count into db
 app.post('/api/update-product-count', async (req, res) => {
@@ -242,7 +219,6 @@ app.get('/api/get-invoice-template', async (req, res) => {
 
 
 // api for send email to support
-
 const transporter = nodemailer.createTransport({
   service: 'Gmail', // You can use other services like 'Yahoo', 'Outlook', etc.
   auth: {
@@ -251,7 +227,6 @@ const transporter = nodemailer.createTransport({
     pass: process.env.SUPPORT_PASSWORD, // Your email password or app password
   },
 });
-
 
 
 app.post('/api/send-email', (req, res) => {
@@ -273,89 +248,7 @@ app.post('/api/send-email', (req, res) => {
 }); 
 
 
-// --------------------------------------------------------------------------------------------------------------------------------------------------------------
-// Under development code base 
 
-
-//api for update products id and HSN GST in db
-// Define the product schema
-// const productSchema = new mongoose.Schema({
-//   domain: { type: String, required: true },
-//   products: [
-//     {
-//       name: { type: String, required: true },
-//       productId: { type: String, required: true, unique: true },
-//       HSN: { type: String, required: true },
-//       GST: { type: String, required: true },
-//     },
-//   ],
-// });
-
-// Create the Product model
-// const Product = mongoose.model('Product', productSchema);
-
-// // @ts-ignore
-// app.post('/api/insertProduct-data', async (req, res) => {
-//   const { storeDomain, products } = req.body; // Assuming you're sending products directly from the frontend
-
-//   // console.log("Received request to /api/insertProduct-data:", req.body);
-//   console.log(" Store domain:" + storeDomain , "Products:", products[0].productId);
-
-//   try {
-    // Validate input
-    // if (!storeDomain || !Array.isArray(products)) {
-    //   return res.status(400).json({ message: 'Invalid input data' });
-    // }
-    
-    // Map over the products to extract relevant fields
-    // const productData = products.map(product => ({
-    //   domain: storeDomain,
-    //   productId: product.id,               // Use `id` from the Shopify response
-    //   productName: product.title,           // Use `title` from the Shopify response
-    //   HSN: '',                               // Default empty or fill if you have HSN logic
-    //   GST: '',                               // Default empty or fill if you have GST logic
-//     // }));
-//     console.log(" Product data:",   products.map( product => ({
-//       productId: product.id,               // Use `id` from the Shopify response
-//     })));
-
-//     console.log("Product data:");
-//     const productData = [];
-//     for (let i = 0; i < products.length; i++) {
-//       const product = products[i];
-//        productData.push({
-//         domain: storeDomain,
-//           productId: product.productId,               // Use `id` from the Shopify response
-//           productName: product.productName,           // Use `title` from the Shopify response
-//           HSN: '',                               // Default empty or fill if you have HSN logic
-//           GST: '', 
-//       });
-//            // Add GST if you want to log it
- 
-// }
-//   console.log("Product data:", productData);        
-
-    // Filter out products with null or undefined `productId`
-    // const validProducts = productData.filter(product => product.productId != null);
-
-    // if (validProducts.length === 0) {
-    //   console.warn("No valid products with productId to insert.");
-    //   return res.status(400).json({ message: 'No valid products to save' });
-    // }
-
-    // Insert valid products into the database
-//     const result = await Product.insertMany(productData);
-    
-//     console.log("Insert operation result:", result);
-//     res.status(201).json({ message: 'Products saved successfully', result });
-//   } catch (error) {
-//     console.error("Error saving products to DB:", error);
-//     res.status(500).json({ message: 'Error saving products', error: error.message });
-//   }
-// });
-
-
-// ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 // webhooks for Compliance webhooks shopify 
 
@@ -457,7 +350,7 @@ app.post('/api/webhooks/shop/redact', hmacValidation,  async (req, res) => {
 });
 
 const PORT = parseInt(
-  process.env.BACKEND_PORT || process.env.PORT || "8081", // Default to 8081 for fly.io
+  process.env.BACKEND_PORT || process.env.PORT || "8081", 
   10
 );
 
@@ -497,21 +390,12 @@ app.get("/api/products/all", async (_req, res) => {
   const allProducts = await shopify.api.rest.Product.all({
     session: res.locals.shopify.session,
   });
-  // console.log("peoducts " + allProducts);
 
   res.status(200).send(allProducts);
 });
 
 
 
-//fetch orders
-
-// app.get("/api/2024-10/orders.json", async (req, res) => {
-//   let OrderAll = await shopify.api.rest.Order.all({
-//       session: res.locals.shopify.session,
-//   });
-//   res.status(200).send(OrderAll);
-// });
 app.get("/api/2024-10/orders.json", async (req, res) => {
   let OrderAll = await shopify.api.rest.Order.all({
     session: res.locals.shopify.session,
@@ -523,16 +407,20 @@ app.get("/api/2024-10/orders.json", async (req, res) => {
 });
 
 
-// fetch shop details
-app.get("/api/shop/all", async (req, res) => {
-  let shopInfo = await shopify.api.rest.Shop.all({
-    session: res.locals.shopify.session,
-  });
-  res.status(200).send(shopInfo);
+app.get("/api/2024-10/shop.json", async (req, res) => {
+  try {
+    const shopDetails = await shopify.api.rest.Shop.all({
+      session: res.locals.shopify.session,
+    });
+    res.status(200).json({ data: shopDetails });
+  } catch (error) {
+    console.error("Error fetching shop details:", error); // Log the error
+    res.status(500).json({ error: "Failed to fetch shop details" });
+  }
 });
 
 //count of product
-app.get("/api/products/count", async (_req, res) => {
+app.get("/api/2024-10/products.json", async (_req, res) => {
   const client = new shopify.api.clients.Graphql({
     session: res.locals.shopify.session,
   });

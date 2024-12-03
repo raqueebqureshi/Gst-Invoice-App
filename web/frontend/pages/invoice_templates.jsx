@@ -18,7 +18,7 @@ export default function Orders() {
   // Fetch the store domain
   useEffect(() => {
     console.log("Fetching store details...");
-    fetch("/api/shop/all", {
+    fetch("/api/2024-10/shop.json", {
       method: "GET",
       headers: { "Content-Type": "application/json" }
     })
