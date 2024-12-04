@@ -13,8 +13,7 @@ import dotenv from 'dotenv';
 import crypto from 'crypto';
 import Store from './Models/storeModel.js'
 import connectDB from './database/db.js';
-import Product from './Models/productHSN.js'
-
+import productRoutes from './routes/routes.js'; // Import the product routes
 dotenv.config();
 
 
@@ -50,10 +49,6 @@ const hmacValidation = (req, res, next) => {
     return res.status(401).send('Unauthorized');
   }
 };
-
-
-
-
 
 
 
@@ -115,7 +110,7 @@ app.get(
 
 
 //to update product count into db
-app.post('/api/update-product-count', async (req, res) => {
+app.put('/api/update-product-count', async (req, res) => {
   console.log("Received request body:", req.body);
 
   const { storeDomain, productCount } = req.body || {};
@@ -394,7 +389,7 @@ app.get("/api/products/all", async (_req, res) => {
   res.status(200).send(allProducts);
 });
 
-
+app.use(productRoutes);
 
 app.get("/api/2024-10/orders.json", async (req, res) => {
   let OrderAll = await shopify.api.rest.Order.all({

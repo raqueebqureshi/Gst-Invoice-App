@@ -10,7 +10,7 @@ import invoice3 from '../assets/invoice3.png'
 
 
 export default function Orders() {
-  const [storeDomain, setStoreDomain] = useState(null);
+  const [storeDomain, setStoreDomain] = useState();
   const [loading, setLoading] = useState(true);
 
   const [selectedTemplate, setSelectedTemplate] = useState(); // Default to template 1
@@ -24,12 +24,13 @@ export default function Orders() {
     })
     .then(response => response.json())
     .then(data => {
-      console.log("Store data fetched:", data);
-      if (data.data && data.data.length > 0) {
+      // console.log("Store data fetched:", data.data.data[0].domain);
+      if (data.data.data && data.data.data.length > 0) {
         // Access the domain from the correct property
-        setStoreDomain(data.data[0].domain); 
-        console.log("Store domain set:", data.data[0].domain);
+        setStoreDomain(data.data.data[0].domain); 
+        // console.log("Store domain set:", data.data.data[0].domain);
       }
+      // console.log("store domain:", storeDomain)
     })
     .catch(error => console.log("Error fetching store details:", error));
   }, []);
@@ -78,7 +79,7 @@ export default function Orders() {
   return (
     <>
     {loading ? (
-      <div style={{ display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
+      <div style={{ display: 'flex', justifyContent: 'center', marginTop: '200px' }}>
         <Spinner accessibilityLabel="Loading Spinner" size="large" />
       </div>
     ) :
