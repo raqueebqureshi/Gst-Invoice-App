@@ -402,6 +402,8 @@
 //   );
 // }
 
+
+
 import React, { useEffect, useState } from "react";
 import {
   IndexTable,
@@ -410,108 +412,69 @@ import {
   Filters,
   Frame,
   Button,
-  Modal,
   Heading,
+  LegacyStack,
   Tag,
-  Stack,
   Select,
-  Text
 } from "@shopify/polaris";
 
 export default function ProductIndexTable() {
   const [products, setProducts] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
   const [selectedItems, setSelectedItems] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
-  const [tags, setTags] = useState([]); // For selected tags
-  const [tagInput, setTagInput] = useState(""); // Tag input value
-  const [selectedCollection, setSelectedCollection] = useState(""); // Collection filter
-  const [showEditModal, setShowEditModal] = useState(false);
+  const [tags, setTags] = useState([]);
+  const [tagInput, setTagInput] = useState("");
+  const [selectedCollection, setSelectedCollection] = useState("");
+  const [storeDomain, setStoreDomain] = useState(""); 
+  const [email, setEmail] = useState(""); 
+
+
+
+
 
   useEffect(() => {
+        const fetchShopInfo = async () => {
+          try {
+            const response = await fetch("/api/2024-10/shop.json", {
+              method: "GET",
+              headers: { "Content-Type": "application/json" },
+            });
+            const data = await response.json();
+            if (data?.data?.data?.length > 0) {
+              const shopInfo = data.data.data[0];
+              setStoreDomain(shopInfo.domain);
+              setEmail(shopInfo.email);
+            }
+          } catch (error) {
+            console.error("Error fetching shop info:", error);
+          }
+        };
+        fetchShopInfo();
+      }, []);
+
+
+  // Fetch products from the server on component mount
+  useEffect(() => {
     const fetchProducts = async () => {
-      setIsLoading(true);
       try {
         const response = await fetch("/api/products/all");
         const data = await response.json();
-        setProducts(data.data || []);
-        setFilteredProducts(data.data || []);
+        const productsWithEditableFields = data.data.map((product) => ({
+          ...product,
+          editableHSN: product.HSN || "",
+          editableGST: product.GST || "",
+        }));
+        setProducts(productsWithEditableFields);
+        setFilteredProducts(productsWithEditableFields);
       } catch (error) {
         console.error("Error fetching products:", error);
-      } finally {
-        setIsLoading(false);
       }
     };
     fetchProducts();
   }, []);
 
-  // Add tag and apply filters
-  const handleAddTag = () => {
-    if (tagInput && !tags.includes(tagInput)) {
-      const updatedTags = [...tags, tagInput];
-      setTags(updatedTags);
-      applyFilters(searchTerm, updatedTags, selectedCollection);
-      setTagInput("");
-    }
-  };
-
-  // Remove tag and apply filters
-  const handleRemoveTag = (tagToRemove) => {
-    const updatedTags = tags.filter((tag) => tag !== tagToRemove);
-    setTags(updatedTags);
-    applyFilters(searchTerm, updatedTags, selectedCollection);
-  };
-
-  const applyFilters = (search, selectedTags, collection) => {
-    console.log("Applying Filters:", { search, selectedTags, collection });
-    let filtered = [...products];
-  
-    if (search) {
-      filtered = filtered.filter((product) =>
-        product.title.toLowerCase().includes(search.toLowerCase())
-      );
-    }
-  
-    if (selectedTags.length > 0) {
-      filtered = filtered.filter((product) => {
-        // Safely extract product tags
-        const productTagsRaw = product.tags || [];
-        const productTags = Array.isArray(productTagsRaw)
-          ? productTagsRaw
-          : productTagsRaw.split(",").map((t) => t.trim());
-  
-        const productTagsLower = productTags.map((t) => t.toLowerCase());
-        const match = selectedTags.every((tag) =>
-          productTagsLower.includes(tag.toLowerCase())
-        );
-        console.log("Filtering by Tags:", { productTags, selectedTags, match });
-        return match;
-      });
-    }
-  
-    if (collection) {
-      filtered = filtered.filter(
-        (product) => product.collection === collection
-      );
-    }
-  
-    setFilteredProducts(filtered);
-  };
-  
-  
-
-  const handleSearchChange = (value) => {
-    setSearchTerm(value);
-    applyFilters(value, tags, selectedCollection);
-  };
-
-  const handleCollectionChange = (value) => {
-    setSelectedCollection(value);
-    applyFilters(searchTerm, tags, value);
-  };
-
-  // Single row selection
+  // Handle row selection
   const handleRowSelection = (id) => {
     setSelectedItems((prevSelectedItems) =>
       prevSelectedItems.includes(id)
@@ -520,7 +483,7 @@ export default function ProductIndexTable() {
     );
   };
 
-  // "Select All" logic
+  // Handle "Select All" functionality
   const handleSelectAll = () => {
     if (selectedItems.length === filteredProducts.length) {
       setSelectedItems([]);
@@ -529,115 +492,109 @@ export default function ProductIndexTable() {
     }
   };
 
-  // Show modal for bulk edit
-  useEffect(() => {
-    if (selectedItems.length > 1) {
-      setShowEditModal(true);
-    } else {
-      setShowEditModal(false);
+  // Handle changes in HSN and GST fields
+  const handleInputChange = (id, field, value) => {
+    setProducts((prevProducts) =>
+      prevProducts.map((product) =>
+        product.id === id ? { ...product, [field]: value } : product
+      )
+    );
+
+    setFilteredProducts((prevFilteredProducts) =>
+      prevFilteredProducts.map((product) =>
+        product.id === id ? { ...product, [field]: value } : product
+      )
+    );
+  };
+
+  // Add a new tag
+  const handleAddTag = () => {
+    if (tagInput && !tags.includes(tagInput)) {
+      setTags([...tags, tagInput]);
+      setTagInput("");
     }
-  }, [selectedItems]);
+  };
 
-  // Modal content
-  const modalContent = (
-    <div style={{padding:"20px"}}>
-    
+  // Remove a tag
+  const handleRemoveTag = (tagToRemove) => {
+    setTags(tags.filter((tag) => tag !== tagToRemove));
+  };
 
-      <Text >Editing {selectedItems.length} Products</Text>
-      <div style={{display:"flex", gap:"40px", marginTop:"5px"}}>
-      <TextField
-                placeholder="Enter HSN for selection"
-                />
-      <TextField
-                placeholder="Enter HSN for selection"
-                />
-                <Button varient="primary">Apply All</Button>
-    
-      </div>
 
-      <table style={{ width: "100%", marginTop: "20px", borderCollapse: "collapse" , padding:"20px"}}>
-        <thead>
-          <tr style={{ borderBottom: "1px solid #ccc" }}>
-            <th style={{ padding: "10px", textAlign: "left" }}>Image</th>
-            <th style={{ padding: "10px", textAlign: "left" }}>Title</th>
-            <th style={{ padding: "10px", textAlign: "left" }}>HSN</th>
-            <th style={{ padding: "10px", textAlign: "left" }}>GST</th>
-          </tr>
-        </thead>
-        <tbody>
-          {selectedItems.map((id) => {
-            const product = products.find((product) => product.id === id);
-            return (
-              <tr key={id} style={{ borderBottom: "1px solid #ccc" }}>  
-                <td style={{ padding: "10px" }}>  <img
-                  src={product.images[0]?.src || "Unknown Product"}
-                  alt={product.title}
-                  style={{
-                    border: "0.1px solid black",
-                    borderRadius: "5px",
-                    width: "50px",
-                    height: "50px",
-                  }}
-                /></td>
-                <td style={{ padding: "10px" }}>{product?.title || "Unknown Product"}</td>
-                <td style={{ padding: "10px" }}>
-                <TextField
-                placeholder="Enter HSN"
-                  value={product?.HSN || ""}
-                />
-                  </td>
-                <td style={{ padding: "10px" }}>
-                <TextField
-                placeholder="Enter GST"
-                  value={product?.HSN || ""}
-                />
-                  </td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
-    </div>
-  );
+  //update gst hsn
+  const saveChanges = async () => {
+    const updates = selectedItems.map((id) => {
+      const product = products.find((product) => product.id === id); // Ensure `id` matches `productId`
+      return {
+        id: product.id, // Match productId in the backend
+        HSN: product.editableHSN,
+        GST: product.editableGST,
+      };
+    });
+  
+    const payload = {
+      storeDomain,
+      email,
+      products: updates,
+    };
+  
+    console.log("Payload to API:", payload);
+  
+    try {
+      const response = await fetch("/api/products/update", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+  
+      if (!response.ok) {
+        const errorDetails = await response.json();
+        console.error("API Error:", errorDetails);
+        alert(`Failed to save changes: ${errorDetails.message}`);
+        return;
+      }
+  
+      const responseData = await response.json();
+      console.log("API Response:", responseData);
+      alert("Changes saved successfully!");
+  
+      // Update local state if needed
+    } catch (error) {
+      console.error("Error saving changes:", error);
+      alert("An error occurred while saving changes.");
+    }
+  };
+  
 
   return (
     <Frame>
       <div style={{ maxWidth: "80%", margin: "0 auto" }}>
-        {/* Heading */}
         <div style={{ padding: "16px" }}>
           <Heading>Products</Heading>
-          <p>Manage HSN & GST rates</p>
+          <p>Manage HSN and GST for your products.</p>
         </div>
 
         {/* Filters */}
         <LegacyCard>
           <Filters
             queryValue={searchTerm}
-            onQueryChange={handleSearchChange}
-            onQueryClear={() => handleSearchChange("")}
+            onQueryChange={(value) => setSearchTerm(value)}
+            onQueryClear={() => setSearchTerm("")}
             filters={[
               {
                 key: "taggedWith",
                 label: "Tagged with",
                 filter: (
-                  <div>
-                    <Stack spacing="tight">
-                      <TextField
-                        value={tagInput}
-                        onChange={(value) => setTagInput(value)}
-                        autoComplete="off"
-                        placeholder="Add a tag"
-                      />
-                      <Button onClick={handleAddTag}>Add</Button>
-                    </Stack>
-                    <Stack spacing="tight" wrap>
-                      {tags.map((tag) => (
-                        <Tag key={tag} onRemove={() => handleRemoveTag(tag)}>
-                          {tag}
-                        </Tag>
-                      ))}
-                    </Stack>
-                  </div>
+                  <LegacyStack spacing="tight">
+                    <TextField
+                      value={tagInput}
+                      onChange={(value) => setTagInput(value)}
+                      placeholder="Add a tag"
+                    />
+                    <Button onClick={handleAddTag}>Add</Button>
+                  </LegacyStack>
                 ),
               },
               {
@@ -650,13 +607,20 @@ export default function ProductIndexTable() {
                       { label: "Collection A", value: "collection_a" },
                       { label: "Collection B", value: "collection_b" },
                     ]}
-                    onChange={handleCollectionChange}
+                    onChange={setSelectedCollection}
                     value={selectedCollection}
                   />
                 ),
               },
             ]}
           />
+          <LegacyStack spacing="tight" wrap>
+            {tags.map((tag) => (
+              <Tag key={tag} onRemove={() => handleRemoveTag(tag)}>
+                {tag}
+              </Tag>
+            ))}
+          </LegacyStack>
         </LegacyCard>
 
         {/* Product Table */}
@@ -681,7 +645,7 @@ export default function ProductIndexTable() {
             },
           ]}
         >
-          {filteredProducts.map(({ id, title, images, HSN, GST }, index) => (
+          {filteredProducts.map(({ id, title, images, editableHSN, editableGST }, index) => (
             <IndexTable.Row
               id={id}
               key={id}
@@ -704,35 +668,27 @@ export default function ProductIndexTable() {
               <IndexTable.Cell>{title}</IndexTable.Cell>
               <IndexTable.Cell>
                 <TextField
-                  value={HSN || ""}
-                  onChange={(value) =>
-                    console.log(`HSN for ${id} changed to ${value}`)
-                  }
+                  value={editableHSN}
+                  onChange={(value) => handleInputChange(id, "editableHSN", value)}
                 />
               </IndexTable.Cell>
               <IndexTable.Cell>
                 <TextField
-                  value={GST || ""}
-                  onChange={(value) =>
-                    console.log(`GST for ${id} changed to ${value}`)
-                  }
+                  value={editableGST}
+                  onChange={(value) => handleInputChange(id, "editableGST", value)}
                 />
               </IndexTable.Cell>
             </IndexTable.Row>
           ))}
         </IndexTable>
-      </div>
 
-      {/* Modal for editing selected products */}
-      {showEditModal && (
-        <Modal
-          open={showEditModal}
-          onClose={() => setShowEditModal(false)}
-          title="Edit Selected Products"
-        >
-          {modalContent}
-        </Modal>
-      )}
+        {/* Save Changes Button */}
+        <div style={{ marginTop: "16px", textAlign: "right" }}>
+          <Button primary onClick={saveChanges}>
+            Save Changes
+          </Button>
+        </div>
+      </div>
     </Frame>
   );
 }

@@ -43,3 +43,66 @@ export const insertProductIntoDB = async (req, res) => {
     });
   }
 };
+
+
+
+/**
+ * Update HSN and GST for specific products in a store.
+ */
+export const updateProductsInDB = async (req, res) => {
+  const { storeDomain, email, products } = req.body;
+
+  console.log("Request Body:", req.body);
+
+  // Validate the input
+  if (!storeDomain || !email || !products || !Array.isArray(products)) {
+    return res.status(400).json({
+      message: 'Invalid request. Please provide storeDomain, email, and products.',
+    });
+  }
+
+  try {
+    // Find the store by storeDomain and email
+    const store = await Product.findOne({ storeDomain, email });
+
+    if (!store) {
+      return res.status(404).json({
+        message: 'Store not found or invalid email.',
+      });
+    }
+
+    // Iterate over the products to update HSN and GST
+    products.forEach((updateData) => {
+      const product = store.products.find(
+        (p) => p.productId === String(updateData.id) // Ensure type match by converting `id` to String
+      );
+
+      if (product) {
+        console.log("Matched Product:", product); // Debug log
+        // Update fields and mark as modified
+        product.set("hsn", updateData.HSN || product.hsn);
+        product.set("gst", updateData.GST || product.gst);
+      } else {
+        console.warn("No match found for productId:", updateData.id); // Debug log
+      }
+    });
+
+    // Save the updated store to the database
+    await store.save();
+
+    console.log("Updated Store:", store); // Debug log
+    return res.status(200).json({
+      message: 'Products updated successfully.',
+      store,
+    });
+  } catch (error) {
+    console.error('Error updating products:', error);
+    return res.status(500).json({
+      message: 'Internal server error.',
+      error: error.message,
+    });
+  }
+};
+
+
+
