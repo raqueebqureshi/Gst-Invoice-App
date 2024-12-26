@@ -106,3 +106,49 @@ export const updateProductsInDB = async (req, res) => {
 
 
 
+/**
+ * Fetch GST values for all products of a specific store.
+ */
+export const getAndHSNValuesFromDB = async (req, res) => {
+  const { storeDomain, email } = req.query;
+
+  console.log("Fetch GST Request Query:", req.query);
+
+  // Validate input
+  if (!storeDomain || !email) {
+    return res.status(400).json({
+      message: "Invalid request. Please provide storeDomain and email.",
+    });
+  }
+
+  try {
+    // Find the store by storeDomain and email
+    const store = await Product.findOne({ storeDomain, email });
+
+    if (!store) {
+      return res.status(404).json({
+        message: "Store not found or invalid email.",
+      });
+    }
+
+    // Extract productId, productName, and gst from each product
+    const gstValues = store.products.map((product) => ({
+      productId: product.productId,
+      productName: product.productName,
+      gst: product.gst,
+    }));
+
+    // Return the GST values
+    return res.status(200).json({
+      message: "GST values fetched successfully.",
+      gstValues,
+    });
+  } catch (error) {
+    console.error("Error fetching GST values:", error);
+    return res.status(500).json({
+      message: "Internal server error.",
+      error: error.message,
+    });
+  }
+};
+

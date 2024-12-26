@@ -428,7 +428,7 @@ export default function ProductIndexTable() {
   const [selectedCollection, setSelectedCollection] = useState("");
   const [storeDomain, setStoreDomain] = useState(""); 
   const [email, setEmail] = useState(""); 
-
+  const [isSaving, setIsSaving] = useState(false);
 
 
 
@@ -473,6 +473,36 @@ export default function ProductIndexTable() {
     };
     fetchProducts();
   }, []);
+
+  const fetchGSTHSNValues = async () => {
+    try {
+      if (!storeDomain || !email) {
+        console.error("Missing storeDomain or email:", { storeDomain, email });
+        throw new Error("Invalid storeDomain or email.");
+      }
+  
+      const url = `/api/products/gst?storeDomain=${encodeURIComponent(storeDomain)}&email=${encodeURIComponent(email)}`;
+      console.log("Fetching GST HSN Values with URL:", url);
+  
+      const response = await fetch(url);
+  
+      if (!response.ok) {
+        throw new Error(`Failed to fetch GST values. Status: ${response.status}`);
+      }
+  
+      const data = await response.json();
+      console.log("Fetched GST Values:", data.gstValues);
+  
+      // Process fetched values (if required)
+    } catch (error) {
+      console.error("Error fetching GST values:", error);
+    }
+  };
+  
+  
+  // Call the function
+  fetchGSTHSNValues();
+  
 
   // Handle row selection
   const handleRowSelection = (id) => {
@@ -523,10 +553,11 @@ export default function ProductIndexTable() {
 
   //update gst hsn
   const saveChanges = async () => {
+    setIsSaving(true);
     const updates = selectedItems.map((id) => {
-      const product = products.find((product) => product.id === id); // Ensure `id` matches `productId`
+      const product = products.find((product) => product.id === id);
       return {
-        id: product.id, // Match productId in the backend
+        id: product.id,
         HSN: product.editableHSN,
         GST: product.editableGST,
       };
@@ -559,13 +590,30 @@ export default function ProductIndexTable() {
       const responseData = await response.json();
       console.log("API Response:", responseData);
       alert("Changes saved successfully!");
+      setIsSaving(false);
+
+
+      // Fetch updated products
+      const updatedResponse = await fetch("/api/products/all");
+      const updatedData = await updatedResponse.json();
   
-      // Update local state if needed
+      const productsWithEditableFields = updatedData.data.map((product) => ({
+        ...product,
+        editableHSN: product.HSN || "",
+        editableGST: product.GST || "",
+      }));
+  
+      setProducts(productsWithEditableFields);
+      setFilteredProducts(productsWithEditableFields);
+  
+      // Clear selected items
+      setSelectedItems([]);
     } catch (error) {
       console.error("Error saving changes:", error);
       alert("An error occurred while saving changes.");
     }
   };
+  
   
 
   return (
@@ -684,8 +732,8 @@ export default function ProductIndexTable() {
 
         {/* Save Changes Button */}
         <div style={{ marginTop: "16px", textAlign: "right" }}>
-          <Button primary onClick={saveChanges}>
-            Save Changes
+        <Button primary onClick={saveChanges} disabled={isSaving}>
+          {isSaving ? "Saving..." : "Save Changes"}
           </Button>
         </div>
       </div>
