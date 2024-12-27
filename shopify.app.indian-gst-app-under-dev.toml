@@ -1,28 +1,28 @@
 # Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
 
 client_id = "78fbc68547f4cc8682944642dc9284c8"
-application_url = "https://carey-happened-nc-differ.trycloudflare.com"
+application_url = "https://tri-her-button-interstate.trycloudflare.com"
 embedded = true
 name = "Indian GST App under dev"
 handle = "indian-gst-app-under-dev-1"
 
 [build]
-include_config_on_deploy = true
-dev_store_url = "devstore134.myshopify.com"
 automatically_update_urls_on_dev = true
+dev_store_url = "devstore134.myshopify.com"
+include_config_on_deploy = true
 
 [webhooks]
 api_version = "2024-10"
 
 [access_scopes]
 # Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
-scopes = "read_orders,read_products,write_products,write_orders"
+scopes = "read_orders,read_products,write_orders,write_products"
 
 [auth]
 redirect_urls = [
-  "https://carey-happened-nc-differ.trycloudflare.com/auth/callback",
-  "https://carey-happened-nc-differ.trycloudflare.com/auth/shopify/callback",
-  "https://carey-happened-nc-differ.trycloudflare.com/api/auth/callback"
+  "https://tri-her-button-interstate.trycloudflare.com/auth/callback",
+  "https://tri-her-button-interstate.trycloudflare.com/auth/shopify/callback",
+  "https://tri-her-button-interstate.trycloudflare.com/api/auth/callback"
 ]
 
 [pos]

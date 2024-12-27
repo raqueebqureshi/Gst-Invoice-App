@@ -1,576 +1,615 @@
-// import React, { useEffect, useState, useCallback } from "react";
-// import {
-//   IndexTable,
-//   LegacyCard,
-//   Tabs,
-//   TextField,
-//   Toast,
-//   Frame,
-//   Button,
-//   SkeletonPage,
-//   SkeletonBodyText,
-//   Badge,
-//   Tag,
-//   Pagination,
-//   Heading,
-// } from "@shopify/polaris";
-
-// export default function ProductIndexTable() {
-//   const [products, setProducts] = useState([]);
-//   const [filteredProducts, setFilteredProducts] = useState([]);
-//   const [storeDomain, setStoreDomain] = useState("");
-//   const [storeEmail, setStoreEmail] = useState(""); // Store's email
-//   const [productCount, setProductCount] = useState(0);
-//   const [draftProductCount, setDraftProductCount] = useState(0); // Count for draft products
-//   const [activeProductCount, setActiveProductCount] = useState(0); // Count for active products
-//   const [activeTab, setActiveTab] = useState(0);
-//   const [showToast, setShowToast] = useState(false);
-//   const [searchTerm, setSearchTerm] = useState(""); // Search input state
-//   const [tagSearchTerm, setTagSearchTerm] = useState(""); // Tag search input state
-//   const [selectedTag, setSelectedTag] = useState(null); // Selected tag for filtering
-//   const [isLoading, setIsLoading] = useState(false); // Loading state
-//   const [selectedItems, setSelectedItems] = useState([]); // Manage checkbox selection
-//   const [currentPage, setCurrentPage] = useState(1); // Current page for pagination
-//   const itemsPerPage = 25;
-
-//   const fetchProducts = useCallback(async () => {
-//     setIsLoading(true);
-//     try {
-//       const response = await fetch("/api/products/all", {
-//         method: "GET",
-//         headers: { "Content-Type": "application/json" },
-//       });
-//       const data = await response.json();
-//       if (data.data.length > 0) {
-//         const fetchedProducts = data.data;
-//         setProducts(fetchedProducts);
-//         setFilteredProducts(fetchedProducts);
-//         setProductCount(fetchedProducts.length);
-
-//         const activeCount = fetchedProducts.filter(
-//           (product) => product.status.toLowerCase() === "active"
-//         ).length;
-//         const draftCount = fetchedProducts.filter(
-//           (product) => product.status.toLowerCase() === "draft"
-//         ).length;
-
-//         setActiveProductCount(activeCount);
-//         setDraftProductCount(draftCount);
-//         setShowToast(true);
-//       }
-//     } catch (error) {
-//       console.error("Error fetching products:", error);
-//     } finally {
-//       setIsLoading(false);
-//     }
-//   }, []);
-
-//   const syncProducts = async () => {
-//     setIsLoading(true);
-//     await fetchProducts();
-//     try {
-//       const response = await fetch("/api/add-store-products", {
-//         method: "POST",
-//         headers: { "Content-Type": "application/json" },
-//         body: JSON.stringify({
-//           storeDomain,
-//           email: storeEmail,
-//           products: products.map(({ id, title }) => ({
-//             productId: id,
-//             productName: title,
-//             hsn: "",
-//             gst: "",
-//           })),
-//         }),
-//       });
-//       if (response.ok) {
-//         console.log("Products saved successfully to the database.");
-//         setShowToast(true);
-//       } else {
-//         console.error("Failed to save products to the database.");
-//       }
-//     } catch (error) {
-//       console.error("Error syncing products:", error);
-//     } finally {
-//       setIsLoading(false);
-//     }
-//   };
-
-//   useEffect(() => {
-//     const fetchShopInfo = async () => {
-//       try {
-//         const response = await fetch("/api/2024-10/shop.json", {
-//           method: "GET",
-//           headers: { "Content-Type": "application/json" },
-//         });
-//         const data = await response.json();
-//         if (data?.data?.data?.length > 0) {
-//           const shopInfo = data.data.data[0];
-//           setStoreDomain(shopInfo.domain);
-//           setStoreEmail(shopInfo.email);
-//         }
-//       } catch (error) {
-//         console.error("Error fetching shop info:", error);
-//       }
-//     };
-//     fetchShopInfo();
-//     fetchProducts();
-//   }, [fetchProducts]);
-
-//   const handleSearch = () => {
-//     if (!searchTerm) {
-//       setFilteredProducts(products);
-//       return;
-//     }
-//     const searchedProducts = products.filter((product) =>
-//       product.title.toLowerCase().includes(searchTerm.toLowerCase())
-//     );
-//     setFilteredProducts(searchedProducts);
-//   };
-
-//   const handleTagSearch = () => {
-//     if (!tagSearchTerm) {
-//       setFilteredProducts(products);
-//       setSelectedTag(null);
-//       return;
-//     }
-//     const taggedProducts = products.filter(
-//       (product) =>
-//         product.tags && product.tags.includes(tagSearchTerm.toLowerCase())
-//     );
-//     setFilteredProducts(taggedProducts);
-//     setSelectedTag(tagSearchTerm);
-//   };
-
-//   const handleRemoveTag = () => {
-//     setSelectedTag(null);
-//     setTagSearchTerm("");
-//     setFilteredProducts(products);
-//   };
-
-//   const handleSelectAll = () => {
-//     const currentPageIds = paginatedProducts.map(({ id }) => id);
-//     if (isAllSelected) {
-//       console.log("Deselecting all items on the current page.");
-//       setSelectedItems((prevSelectedItems) => {
-//         const updatedSelection = prevSelectedItems.filter(
-//           (id) => !currentPageIds.includes(id)
-//         );
-//         console.log("Updated selectedItems after deselect all:", updatedSelection);
-//         return updatedSelection;
-//       });
-//     } else {
-//       console.log("Selecting all items on the current page.");
-//       setSelectedItems((prevSelectedItems) => {
-//         const updatedSelection = [
-//           ...prevSelectedItems,
-//           ...currentPageIds.filter((id) => !prevSelectedItems.includes(id)),
-//         ];
-//         console.log("Updated selectedItems after select all:", updatedSelection);
-//         return updatedSelection;
-//       });
-//     }
-//   };
-  
-//   const handleRowSelection = (id) => {
-//     console.log(`Row clicked with ID: ${id}`);
-//     setSelectedItems((prevSelectedItems) => {
-//       const updatedSelection = prevSelectedItems.includes(id)
-//         ? prevSelectedItems.filter((itemId) => itemId !== id) // Deselect
-//         : [...prevSelectedItems, id]; // Select
-//       console.log("Updated selectedItems:", updatedSelection);
-//       return updatedSelection;
-//     });
-//   };
-//   const filteredByTab = filteredProducts.filter((product) => {
-//     const status = product.status.toLowerCase();
-//     if (activeTab === 0) return true;
-//     if (activeTab === 1) return status === "active";
-//     if (activeTab === 2) return status === "draft";
-//     if (activeTab === 3) return status === "archived";
-//     return false;
-//   });
-
-//   const paginatedProducts = filteredByTab.slice(
-//     (currentPage - 1) * itemsPerPage,
-//     currentPage * itemsPerPage
-//   );
-
-// // Determine if "Select All" checkbox should be checked
-// const isAllSelected =
-//   paginatedProducts.length > 0 &&
-//   paginatedProducts.every(({ id }) => selectedItems.includes(id));
-
-//   const rowMarkup = paginatedProducts.map(
-//     ({ id, title, images, status, HSN = "", GST = "" }, index) => (
-//       <IndexTable.Row
-//         id={id}
-//         key={id}
-//         position={index}
-//         selected={selectedItems.includes(id)}
-//         onClick={() => {
-//           console.log(`Row ${id} clicked.`);
-//           handleRowSelection(id);
-//         }}
-//       >
-//         <IndexTable.Cell>
-//           <img
-//             src={images[0]?.src}
-//             alt={images[0]?.alt}
-//             style={{
-//               border: "0.1px solid black",
-//               borderRadius: "5px",
-//               width: "50px",
-//               height: "50px",
-//             }}
-//           />
-//         </IndexTable.Cell>
-//         <IndexTable.Cell>
-//           <span style={{ fontWeight: "bold" }}>{title}</span>
-//         </IndexTable.Cell>
-//         <IndexTable.Cell>{status}</IndexTable.Cell>
-//         <IndexTable.Cell>
-//           <TextField
-//             placeholder="Enter HSN"
-//             value={HSN}
-//             onChange={(value) =>
-//               console.log(`HSN for ${id} changed to ${value}`)
-//             }
-//             autoComplete="off"
-//           />
-//         </IndexTable.Cell>
-//         <IndexTable.Cell>
-//           <TextField
-//             placeholder="Enter Tax"
-//             value={GST}
-//             onChange={(value) =>
-//               console.log(`GST for ${id} changed to ${value}`)
-//             }
-//             autoComplete="off"
-//           />
-//         </IndexTable.Cell>
-//       </IndexTable.Row>
-//     )
-//   );
-
-//   return (
-//     <Frame>
-//       <div style={{ maxWidth: "80%", margin: "0 auto" }}>
-//         <div style={{ padding: "16px" }}>
-//           <Heading>Products</Heading>
-//           <div style={{ display: "flex", marginTop: "16px", gap: "20px" }}>
-//             <p>Manage HSN & GST rates</p>
-//             <div
-//               style={{
-//                 flex: 1,
-//                 display: "flex",
-//                 gap: "8px",
-//                 justifyContent: "end",
-//               }}
-//             >
-//               <Button>More actions</Button>
-//               <Button primary>Bulk edit as CSV</Button>
-//             </div>
-//           </div>
-//         </div>
-//         <LegacyCard sectioned style={{ margin: "16px", maxWidth: "1600px" }}>
-//           <div
-//             style={{
-//               display: "flex",
-//               alignItems: "center",
-//               padding: "16px",
-//               gap: "16px",
-//             }}
-//           >
-//             <div style={{ flex: 1, display: "flex", gap: "8px" }}>
-//               <TextField
-//                 placeholder="Search products"
-//                 value={searchTerm}
-//                 onChange={(value) => setSearchTerm(value)}
-//                 autoComplete="off"
-//               />
-//               <Button onClick={handleSearch}>Search</Button>
-//             </div>
-//             <div style={{ flex: 1, display: "flex", gap: "8px" }}>
-//               <TextField
-//                 placeholder="Search by tag"
-//                 value={tagSearchTerm}
-//                 onChange={(value) => setTagSearchTerm(value)}
-//                 autoComplete="off"
-//               />
-//               <Button onClick={handleTagSearch}>Find</Button>
-//             </div>
-//             {selectedTag && <Tag onRemove={handleRemoveTag}>{selectedTag}</Tag>}
-//             <div style={{ display: "flex", gap: "8px" }}>
-//               <Badge status="info">Total: {filteredByTab.length}</Badge>
-//               <Badge status="success">
-//                 Active:{" "}
-//                 {filteredByTab.filter(
-//                   (product) => product.status.toLowerCase() === "active"
-//                 ).length}
-//               </Badge>
-//               <Badge status="warning">
-//                 Draft:{" "}
-//                 {filteredByTab.filter(
-//                   (product) => product.status.toLowerCase() === "draft"
-//                 ).length}
-//               </Badge>
-//             </div>
-//             <Button primary onClick={syncProducts}>
-//               Sync Products
-//             </Button>
-//           </div>
-//           {isLoading ? (
-//             <SkeletonPage>
-//               <SkeletonBodyText lines={4} />
-//             </SkeletonPage>
-//           ) : (
-//             <Tabs
-//               tabs={[
-//                 { id: "all", content: "All", panelID: "all-products" },
-//                 { id: "active", content: "Active", panelID: "active-products" },
-//                 { id: "draft", content: "Draft", panelID: "draft-products" },
-//                 {
-//                   id: "archived",
-//                   content: "Archived",
-//                   panelID: "archived-products",
-//                 },
-//               ]}
-//               selected={activeTab}
-//               onSelect={(index) => {
-//                 setActiveTab(index);
-//                 setCurrentPage(1);
-//               }}
-//             >
-//  <IndexTable
-//     resourceName={{ singular: "product", plural: "products" }}
-//     itemCount={filteredByTab.length}
-//     headings={[
-//       { title: "Product Image" },
-//       { title: "Product Title" }, 
-//       { title: "Status" },
-//       { title: "HSN" },
-//       { title: "TAX" },
-//     ]}
-//     selectedItems={selectedItems}
-//     onSelectionChange={() => {
-//       console.log("Select All button clicked.");
-//       handleSelectAll();
-//     }}
-//     bulkActions={[
-//       {
-//         content: isAllSelected ? "Deselect All" : "Select All",
-//         onAction: () => {
-//           console.log("Bulk action triggered for Select All.");
-//           handleSelectAll();
-//         },
-//       },
-//     ]}
-//   >
-//     {rowMarkup}
-//   </IndexTable>
-
-//               <div
-//                 style={{
-//                   marginTop: "16px",
-//                   display: "flex",
-//                   justifyContent: "center",
-//                 }}
-//               >
-//                 <Pagination
-//                   hasPrevious={currentPage > 1}
-//                   onPrevious={() =>
-//                     setCurrentPage((prev) => Math.max(prev - 1, 1))
-//                   }
-//                   hasNext={
-//                     currentPage * itemsPerPage < filteredByTab.length
-//                   }
-//                   onNext={() => setCurrentPage((prev) => prev + 1)}
-//                 />
-//               </div>
-//             </Tabs>
-//           )}
-//         </LegacyCard>
-//       </div>
-//       {showToast && (
-//         <Toast
-//           content="Product Sync completed!"
-//           onDismiss={() => setShowToast(false)}
-//         />
-//       )}
-//     </Frame>
-//   );
-// }
-
-
-
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import {
   IndexTable,
   LegacyCard,
+  Tabs,
   TextField,
-  Filters,
+  Toast,
   Frame,
   Button,
-  Heading,
-  LegacyStack,
+  SkeletonPage,
+  SkeletonBodyText,
+  Badge,
   Tag,
-  Select,
+  Pagination,
+  Heading,
 } from "@shopify/polaris";
 
 export default function ProductIndexTable() {
   const [products, setProducts] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
-  const [selectedItems, setSelectedItems] = useState([]);
+  const [storeDomain, setStoreDomain] = useState("");
+  const [email, setEmail] = useState("");
+  const [productCount, setProductCount] = useState(0);
+  const [draftProductCount, setDraftProductCount] = useState(0);
+  const [activeProductCount, setActiveProductCount] = useState(0);
+  const [activeTab, setActiveTab] = useState(0);
+  const [showToast, setShowToast] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
-  const [tags, setTags] = useState([]);
-  const [tagInput, setTagInput] = useState("");
-  const [selectedCollection, setSelectedCollection] = useState("");
-  const [storeDomain, setStoreDomain] = useState(""); 
-  const [email, setEmail] = useState(""); 
+  const [tagSearchTerm, setTagSearchTerm] = useState("");
+  const [selectedTag, setSelectedTag] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [selectedItems, setSelectedItems] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 25;
+  const [GSTHSNCodes, setGSTHSNCodes] = useState([]);
   const [isSaving, setIsSaving] = useState(false);
 
+  const styles = {
+    container: {
+      maxWidth: "100%",
+      margin: "0 auto",
+      padding: "16px",
+    },
+    header: {
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+      textAlign: "center",
+      gap: "16px",
+    },
+    filters: {
+      display: "flex",
+      flexWrap: "wrap",
+      gap: "16px",
+      justifyContent: "space-between",
+      alignItems: "center",
+    },
+    searchField: {
+      flex: "1 1 300px",
+      minWidth: "300px",
+    },
+    buttons: {
+      display: "flex",
+      flexWrap: "wrap",
+      gap: "8px",
+      padding: "8px",
+    },
+    syncButtonContainer: {
+      display: "flex",
+      justifyContent: "flex-end",
+      marginTop: "16px",
+      gap: "16px",
+    },
+    tableContainer: {
+      overflowX: "auto",
+    },
+    pagination: {
+      marginTop: "16px",
+      display: "flex",
+      justifyContent: "center",
+    },
+    badgeContainer: {
+      display: "flex",
+      gap: "16px",
+      flexWrap: "wrap",
+      justifyContent: "space-evenly",
+      alignItems: "center",
+    },
+    badge: {
+      margin: "4px",
+    },
+    responsiveImage: {
+      border: "0.1px solid black",
+      borderRadius: "5px",
+      width: "100%",
+      maxWidth: "50px",
+      height: "50px",
+    },
+  };
 
-
-
-  useEffect(() => {
-        const fetchShopInfo = async () => {
-          try {
-            const response = await fetch("/api/2024-10/shop.json", {
-              method: "GET",
-              headers: { "Content-Type": "application/json" },
-            });
-            const data = await response.json();
-            if (data?.data?.data?.length > 0) {
-              const shopInfo = data.data.data[0];
-              setStoreDomain(shopInfo.domain);
-              setEmail(shopInfo.email);
-            }
-          } catch (error) {
-            console.error("Error fetching shop info:", error);
-          }
-        };
-        fetchShopInfo();
-      }, []);
-
-
-  // Fetch products from the server on component mount
-  useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        const response = await fetch("/api/products/all");
-        const data = await response.json();
-        const productsWithEditableFields = data.data.map((product) => ({
-          ...product,
-          editableHSN: product.HSN || "",
-          editableGST: product.GST || "",
-        }));
-        setProducts(productsWithEditableFields);
-        setFilteredProducts(productsWithEditableFields);
-      } catch (error) {
-        console.error("Error fetching products:", error);
+  const fetchShopInfo = async () => {
+    try {
+      const response = await fetch("/api/2024-10/shop.json", {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+      });
+      const data = await response.json();
+      console.log("API Response:", data.data.data[0]); // Check the response structure
+      if (data?.data?.data?.length > 0) {
+        const shopInfo = data.data.data[0];
+        setStoreDomain(shopInfo.domain);
+        setEmail(shopInfo.email);
       }
-    };
-    fetchProducts();
-  }, []);
+    } catch (error) {
+      console.error("Error fetching shop info:", error);
+    }
+  };
 
-  const fetchGSTHSNValues = async () => {
+  const fetchProducts = useCallback(async () => {
+    setIsLoading(true);
+    
+    try {
+      const response = await fetch("/api/products/all", {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+      });
+      const data = await response.json();
+      if (data.data.length > 0) {
+        const fetchedProducts = data.data;
+        console.log('fetchedProducts  :',fetchedProducts);
+      const productsWithEditableFields = data.data.map((product) => ({
+        ...product,
+        editableHSN: product.HSN || "",
+        editableGST: product.GST || "",
+      }));
+      console.log('productsWithEditableFields:',productsWithEditableFields);
+      setProducts(productsWithEditableFields);
+      setFilteredProducts(productsWithEditableFields);
+        // setProducts(fetchedProducts);
+        // setFilteredProducts(fetchedProducts);
+        // setProductCount(fetchedProducts.length);
+        setProductCount(productsWithEditableFields.length);
+
+        const activeCount = productsWithEditableFields.filter(
+          (product) => product.status.toLowerCase() === "active"
+        ).length;
+        const draftCount = productsWithEditableFields.filter(
+          (product) => product.status.toLowerCase() === "draft"
+        ).length;
+
+        setActiveProductCount(activeCount);
+        setDraftProductCount(draftCount);
+        setShowToast(true);
+        console.log('storeDomain && email:',storeDomain,email);
+        if (storeDomain && email) {
+          console.log('products--:',productsWithEditableFields);
+          fetchGSTHSNValues(productsWithEditableFields); // Fetch GST HSN values
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching products:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [storeDomain, email]);
+
+  const fetchGSTHSNValues = async (products) => {
     try {
       if (!storeDomain || !email) {
-        console.error("Missing storeDomain or email:", { storeDomain, email });
+        console.error("Missing storeDomain or email:", { storeDomain, email: email });
         throw new Error("Invalid storeDomain or email.");
       }
-  
-      const url = `/api/products/gst?storeDomain=${encodeURIComponent(storeDomain)}&email=${encodeURIComponent(email)}`;
+
+      const url = `/api/products/gsthsn?storeDomain=${encodeURIComponent(
+        storeDomain
+      )}&email=${encodeURIComponent(email)}`;
       console.log("Fetching GST HSN Values with URL:", url);
-  
+
       const response = await fetch(url);
-  
+
       if (!response.ok) {
-        throw new Error(`Failed to fetch GST values. Status: ${response.status}`);
+        throw new Error(
+          `Failed to fetch GST values. Status: ${response.status}`
+        );
       }
-  
+
       const data = await response.json();
       console.log("Fetched GST Values:", data.gstValues);
-  
-      // Process fetched values (if required)
+
+      setGSTHSNCodes(data.gstValues);
+
+      // Update products with fetched GST values
+      updateProductsWithGSTHSN(data.gstValues,products);
     } catch (error) {
       console.error("Error fetching GST values:", error);
     }
   };
-  
-  
-  // Call the function
-  fetchGSTHSNValues();
-  
 
-  // Handle row selection
-  const handleRowSelection = (id) => {
-    setSelectedItems((prevSelectedItems) =>
-      prevSelectedItems.includes(id)
-        ? prevSelectedItems.filter((itemId) => itemId !== id)
-        : [...prevSelectedItems, id]
-    );
+  const updateProductsWithGSTHSN = (gstValues,products) => {
+    console.log('gstValues:',gstValues);
+    console.log('products:',products);
+    if(products.length !== 0){
+    const updatedProducts = products.map((product) => {
+      const matchedGSTHSN = gstValues.find((items) => {
+        
+        return Number(items.productId) === product.id;
+      });
+
+      return {
+        ...product,
+        hsn: matchedGSTHSN ? matchedGSTHSN.hsn : "N/A",
+        gst: matchedGSTHSN ? matchedGSTHSN.gst : "N/A",
+      };
+    });
+    
+    setProducts(updatedProducts);
+    setFilteredProducts(updatedProducts);
+    setProductCount(updatedProducts.length);
+
+        const activeCount = updatedProducts.filter(
+          (product) => product.status.toLowerCase() === "active"
+        ).length;
+        const draftCount = updatedProducts.filter(
+          (product) => product.status.toLowerCase() === "draft"
+        ).length;
+
+        setActiveProductCount(activeCount);
+        setDraftProductCount(draftCount);
+        console.log("Updated Products with GST/HSN:", updatedProducts);
+      }else{
+        updateProductsWithGSTHSN(gstValues);
+      }
+    
   };
 
-  // Handle "Select All" functionality
+  useEffect(() => {
+    const fetchData = async () => {
+      await fetchShopInfo(); // Fetch shop info first
+    };
+
+    fetchData(); // Call the fetchData function
+  }, []); // Run only once on component mount
+
+  useEffect(() => {
+    const fetchData = async () => {
+      if (storeDomain && email) {
+        await fetchProducts(); // Fetch products after shop info is set
+        // await fetchGSTHSNValues(); // Then fetch GST HSN values
+      }
+    };
+
+    fetchData(); // Call the fetchData function
+  }, [storeDomain, email]); // Run when storeDomain or storeEmail changes
+
+
+
+  const syncProducts = async () => {
+    setIsLoading(true);
+    await fetchProducts();
+    try {
+      const response = await fetch("/api/add-store-products", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          storeDomain: storeDomain,
+          email: email,
+          products: products.map(({ id, title, editableHSN,editableGST}) => ({
+            productId: id,
+            productName: title,
+            hsn: editableHSN,
+            gst: editableGST,
+          })),
+        }),
+      });
+
+      console.log('response.body:',response.body);
+
+      if (response.ok) {
+        console.log("Products saved successfully to the database.");
+        setShowToast(true);
+      } else {
+        console.error("Failed to save products to the database.");
+      }
+    } catch (error) {
+      console.error("Error syncing products:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  
+
+    
+  
+  
+  
+
+  useEffect(() => {
+    const initializeData = async () => {
+      try {
+        await fetchShopInfo();
+        
+      } catch (error) {
+        console.error("Error during initialization:", error);
+      }
+    };
+  
+    initializeData();
+  }, []);
+  
+
+  const handleSearch = () => {
+    if (!searchTerm) {
+      setFilteredProducts(products);
+      return;
+    }
+    const searchedProducts = products.filter((product) =>
+      product.title.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+    setFilteredProducts(searchedProducts);
+  };
+
+  const handleTagSearch = () => {
+    if (!tagSearchTerm) {
+      setFilteredProducts(products);
+      setSelectedTag(null);
+      return;
+    }
+    const taggedProducts = products.filter(
+      (product) =>
+        product.tags && product.tags.includes(tagSearchTerm.toLowerCase())
+    );
+    setFilteredProducts(taggedProducts);
+    setSelectedTag(tagSearchTerm);
+  };
+
+  const handleRemoveTag = () => {
+    setSelectedTag(null);
+    setTagSearchTerm("");
+    setFilteredProducts(products);
+  };
+
   const handleSelectAll = () => {
-    if (selectedItems.length === filteredProducts.length) {
-      setSelectedItems([]);
+    const currentPageIds = paginatedProducts.map(({ id }) => id);
+    if (isAllSelected) {
+      setSelectedItems((prevSelectedItems) =>
+        prevSelectedItems.filter((id) => !currentPageIds.includes(id))
+      );
     } else {
-      setSelectedItems(filteredProducts.map(({ id }) => id));
+      setSelectedItems((prevSelectedItems) => [
+        ...prevSelectedItems,
+        ...currentPageIds.filter((id) => !prevSelectedItems.includes(id)),
+      ]);
     }
   };
 
-  // Handle changes in HSN and GST fields
-  const handleInputChange = (id, field, value) => {
-    setProducts((prevProducts) =>
-      prevProducts.map((product) =>
-        product.id === id ? { ...product, [field]: value } : product
-      )
+  const handleRowSelection = (id) => {
+    setSelectedItems((prevSelectedItems) => {
+      const updatedSelection = prevSelectedItems.includes(id)
+        ? prevSelectedItems.filter((itemId) => itemId !== id)
+        : [...prevSelectedItems, id];
+      return updatedSelection;
+    });
+  };
+
+  const filteredByTab = filteredProducts.filter((product) => {
+    const status = product.status.toLowerCase();
+    if (activeTab === 0) return true;
+    if (activeTab === 1) return status === "active";
+    if (activeTab === 2) return status === "draft";
+    if (activeTab === 3) return status === "archived";
+    return false;
+  });
+
+  const paginatedProducts = filteredByTab.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  const isAllSelected =
+    paginatedProducts.length > 0 &&
+    paginatedProducts.every(({ id }) => selectedItems.includes(id));
+
+    const [editableValues, setEditableValues] = useState(
+      paginatedProducts.reduce((acc, product) => {
+        acc[product.id] = {
+          HSN: product.editableHSN || '',
+          GST: product.editableGST || '',
+        };
+        return acc;
+      }, {})
     );
+  
+    const handleHSNChange = (id, value) => {
+      setEditableValues((prev) => {
+        const updatedValues = {
+          ...prev,
+          [id]: {
+            ...prev[id],
+            HSN: value,
+          },
+        };
+  
+        // Update products with the new HSN value
+        const updatedProducts = products.map((product) => {
+          if (product.id === id) {
+            return {
+              ...product,
+              editableHSN: value, // Update editableHSN
+            };
+          }
+          return product;
+        });
+  
+        setProducts(updatedProducts); // Update the products state
+        console.log(`HSN for ${id} changed to ${value}`);
+        console.log('editableValues:', updatedValues);
+        console.log('products:', updatedProducts);
+  
+        return updatedValues; // Return the updated editable values
+      });
+    };
+  
+  
+    const handleGSTChange = (id, value) => {
+    setEditableValues((prev) => {
+      const updatedValues = {
+        ...prev,
+        [id]: {
+          ...prev[id],
+          GST: value,
+        },
+      };
 
-    setFilteredProducts((prevFilteredProducts) =>
-      prevFilteredProducts.map((product) =>
-        product.id === id ? { ...product, [field]: value } : product
-      )
-    );
+      // Update products with the new GST value
+      const updatedProducts = products.map((product) => {
+        if (product.id === id) {
+          return {
+            ...product,
+            editableGST: value, // Update editableGST
+          };
+        }
+        return product;
+      });
+
+      setProducts(updatedProducts); // Update the products state
+      console.log(`GST for ${id} changed to ${value}`);
+      console.log('editableValues:', updatedValues);
+      console.log('products:', updatedProducts);
+
+      return updatedValues; // Return the updated editable values
+    });
   };
+    const rowMarkup = paginatedProducts.map(({ id, title, images, status, hsn,gst }, index) => {
+      const { HSN, GST } = editableValues[id] || { HSN: hsn||'', GST: gst||'' }; // Get current editable values
+  
+      return (
+        <IndexTable.Row
+          id={id}
+          key={id}
+          position={index}
+          selected={selectedItems.includes(id)}
+          onClick={() => handleRowSelection(id)}
+        >
+          <IndexTable.Cell>
+            <img
+              src={images[0]?.src}
+              alt={images[0]?.alt}
+              style={styles.responsiveImage}
+            />
+          </IndexTable.Cell>
+          <IndexTable.Cell>
+            <span style={{ fontWeight: 'bold' }}>{title}</span>
+          </IndexTable.Cell>
+          <IndexTable.Cell>{status}</IndexTable.Cell>
+          <IndexTable.Cell>
+            <TextField
+              placeholder="Enter HSN"
+              value={HSN}
+              onChange={(value) => handleHSNChange(id, value)}
+              autoComplete="off"
+            />
+          </IndexTable.Cell>
+          <IndexTable.Cell>
+            <TextField
+              placeholder="Enter GST"
+              value={GST}
+              onChange={(value) => handleGSTChange(id, value)}
+              autoComplete="off"
+            />
+          </IndexTable.Cell>
+        </IndexTable.Row>
+      );
+    });
+  // const rowMarkup = paginatedProducts.map(
+  //   ({ id, title, images, status, hsn, gst }, index) => (
+  //     <IndexTable.Row
+  //       id={id}
+  //       key={id}
+  //       position={index}
+  //       selected={selectedItems.includes(id)}
+  //       onClick={() => handleRowSelection(id)}
+  //     >
+  //       <IndexTable.Cell>
+  //         <img
+  //           src={images[0]?.src}
+  //           alt={images[0]?.alt}
+  //           style={styles.responsiveImage}
+  //         />
+  //       </IndexTable.Cell>
+  //       <IndexTable.Cell>
+  //         <span style={{ fontWeight: "bold" }}>{title}</span>
+  //       </IndexTable.Cell>
+  //       <IndexTable.Cell>{status}</IndexTable.Cell>
+  //       <IndexTable.Cell>
+  //         <TextField
+  //           placeholder="Enter HSN"
+  //           value={hsn}
+  //           onChange={(value) => console.log(`HSN for ${id} changed to ${value}`)}
+  //           autoComplete="off"
+  //         />
+  //       </IndexTable.Cell>
+  //       <IndexTable.Cell>
+  //         <TextField
+  //           placeholder="Enter GST"
+  //           value={gst}
+  //           onChange={(value) => console.log(`GST for ${id} changed to ${value}`)}
+  //           autoComplete="off"
+  //         />
+  //       </IndexTable.Cell>
+  //     </IndexTable.Row>
+  //   )
+  // );
 
-  // Add a new tag
-  const handleAddTag = () => {
-    if (tagInput && !tags.includes(tagInput)) {
-      setTags([...tags, tagInput]);
-      setTagInput("");
-    }
-  };
+  // const rowMarkup = paginatedProducts.map(({ id, title, images, status, editableHSN, editableGST}, index) => {
+  //   const [editHSN, setEditeHSN] = useState(editableHSN || ""); // Use current value or default to empty
+  //   const [editGST, setEditGST] = useState(editableGST || ""); // Use current value or default to empty
+  
+  //   const handleHSNChange = (value) => {
+  //     setEditeHSN(value);
+  //     console.log(`HSN for ${id} changed to ${value}`);
+  //   };
+  
+  //   const handleGSTChange = (value) => {
+  //     setEditGST(value);
+  //     console.log(`GST for ${id} changed to ${value}`);
+  //   };
+  
+  //   return (
+  //     <IndexTable.Row
+  //       id={id}
+  //       key={id}
+  //       position={index}
+  //       selected={selectedItems.includes(id)}
+  //       onClick={() => handleRowSelection(id)}
+  //     >
+  //       <IndexTable.Cell>
+  //         <img
+  //           src={images[0]?.src}
+  //           alt={images[0]?.alt}
+  //           style={styles.responsiveImage}
+  //         />
+  //       </IndexTable.Cell>
+  //       <IndexTable.Cell>
+  //         <span style={{ fontWeight: "bold" }}>{title}</span>
+  //       </IndexTable.Cell>
+  //       <IndexTable.Cell>{status}</IndexTable.Cell>
+  //       <IndexTable.Cell>
+  //         <TextField
+  //           placeholder="Enter HSN"
+  //           value={editHSN}
+  //           onChange={(value) => handleHSNChange(value)}
+  //           autoComplete="off"
+  //         />
+  //       </IndexTable.Cell>
+  //       <IndexTable.Cell>
+  //         <TextField
+  //           placeholder="Enter GST"
+  //           value={editGST}
+  //           onChange={(value) => handleGSTChange(value)}
+  //           autoComplete="off"
+  //         />
+  //       </IndexTable.Cell>
+  //     </IndexTable.Row>
+  //   );
+  // });
 
-  // Remove a tag
-  const handleRemoveTag = (tagToRemove) => {
-    setTags(tags.filter((tag) => tag !== tagToRemove));
-  };
-
-
-  //update gst hsn
   const saveChanges = async () => {
     setIsSaving(true);
     const updates = selectedItems.map((id) => {
       const product = products.find((product) => product.id === id);
+
+
+      console.log('id:', product.id,
+       ' HSN:', product.editableHSN,
+        'GST:', product.editableGST,'storeDomain:',storeDomain,'email:',email);
+
       return {
         id: product.id,
         HSN: product.editableHSN,
         GST: product.editableGST,
       };
     });
-  
+
     const payload = {
       storeDomain,
       email,
       products: updates,
     };
-  
+
     console.log("Payload to API:", payload);
-  
+
     try {
       const response = await fetch("/api/products/update", {
         method: "POST",
@@ -579,164 +618,174 @@ export default function ProductIndexTable() {
         },
         body: JSON.stringify(payload),
       });
-  
+
       if (!response.ok) {
         const errorDetails = await response.json();
         console.error("API Error:", errorDetails);
+        setIsSaving(false);
         alert(`Failed to save changes: ${errorDetails.message}`);
         return;
       }
-  
+
       const responseData = await response.json();
       console.log("API Response:", responseData);
       alert("Changes saved successfully!");
+      // Reset editable values to blank after successful save
+    
       setIsSaving(false);
-
 
       // Fetch updated products
       const updatedResponse = await fetch("/api/products/all");
       const updatedData = await updatedResponse.json();
-  
+
       const productsWithEditableFields = updatedData.data.map((product) => ({
         ...product,
         editableHSN: product.HSN || "",
         editableGST: product.GST || "",
       }));
-  
+
       setProducts(productsWithEditableFields);
       setFilteredProducts(productsWithEditableFields);
-  
+
       // Clear selected items
+      fetchProducts();
       setSelectedItems([]);
     } catch (error) {
       console.error("Error saving changes:", error);
+      setIsSaving(false);
       alert("An error occurred while saving changes.");
     }
   };
-  
-  
 
+
+  
   return (
     <Frame>
-      <div style={{ maxWidth: "80%", margin: "0 auto" }}>
-        <div style={{ padding: "16px" }}>
+      <div style={styles.container}>
+        <div style={styles.header}>
           <Heading>Products</Heading>
-          <p>Manage HSN and GST for your products.</p>
+          <p>Manage HSN & GST rates</p>
+          <div style={styles.buttons}>
+            <Button>More actions</Button>
+            <Button primary>Bulk edit as CSV</Button>
+          </div>
         </div>
-
-        {/* Filters */}
-        <LegacyCard>
-          <Filters
-            queryValue={searchTerm}
-            onQueryChange={(value) => setSearchTerm(value)}
-            onQueryClear={() => setSearchTerm("")}
-            filters={[
-              {
-                key: "taggedWith",
-                label: "Tagged with",
-                filter: (
-                  <LegacyStack spacing="tight">
-                    <TextField
-                      value={tagInput}
-                      onChange={(value) => setTagInput(value)}
-                      placeholder="Add a tag"
-                    />
-                    <Button onClick={handleAddTag}>Add</Button>
-                  </LegacyStack>
-                ),
-              },
-              {
-                key: "collection",
-                label: "Filter by Collection",
-                filter: (
-                  <Select
-                    options={[
-                      { label: "All Collections", value: "" },
-                      { label: "Collection A", value: "collection_a" },
-                      { label: "Collection B", value: "collection_b" },
-                    ]}
-                    onChange={setSelectedCollection}
-                    value={selectedCollection}
+        <LegacyCard sectioned style={{ margin: "16px", maxWidth: "1600px" }}>
+          <div style={styles.filters}>
+            <div style={styles.searchField}>
+              <TextField
+                placeholder="Search products"
+                value={searchTerm}
+                onChange={(value) => setSearchTerm(value)}
+                autoComplete="off"
+              />
+              <Button onClick={handleSearch}>Search</Button>
+            </div>
+            <div style={styles.searchField}>
+              <TextField
+                placeholder="Search by tag"
+                value={tagSearchTerm}
+                onChange={(value) => setTagSearchTerm(value)}
+                autoComplete="off"
+              />
+              <Button onClick={handleTagSearch}>Find</Button>
+            </div>
+            {selectedTag && <Tag onRemove={handleRemoveTag}>{selectedTag}</Tag>}
+            <div style={styles.badgeContainer}>
+              <Badge status="info" style={styles.badge}>Total: {filteredByTab.length}</Badge>
+              <Badge status="success" style={styles.badge}>
+                Active: {filteredByTab.filter((product) => product.status.toLowerCase() === "active").length}
+              </Badge>
+              <Badge status="warning" style={styles.badge}>
+                Draft: {filteredByTab.filter((product) => product.status.toLowerCase() === "draft").length}
+              </Badge>
+            </div>
+          </div>
+          <div style={styles.syncButtonContainer}>
+                 {/* Save Changes Button */}
+                 <Button primary onClick={ (()=>  {
+                  if(selectedItems.length === 0){
+                    alert('Please select a product to save changes');
+                    return;
+                  }else{
+                    saveChanges();
+                  }
+                 })
+                  
+                  
+                  
+                  } disabled={isSaving}>
+             {isSaving ? "Saving..." : "Save Changes"}
+           </Button>
+            <Button primary onClick={syncProducts}>Sync Products</Button>
+          </div>
+          {isLoading ? (
+            <SkeletonPage>
+              <SkeletonBodyText lines={4} />
+            </SkeletonPage>
+          ) : (
+            <div style={styles.tableContainer}>
+              <Tabs
+                tabs={[
+                  { id: "all", content: "All", panelID: "all-products" },
+                  { id: "active", content: "Active", panelID: "active-products" },
+                  { id: "draft", content: "Draft", panelID: "draft-products" },
+                  {
+                    id: "archived",
+                    content: "Archived",
+                    panelID: "archived-products",
+                  },
+                ]}
+                selected={activeTab}
+                onSelect={(index) => {
+                  setActiveTab(index);
+                  setCurrentPage(1);
+                }}
+              >
+                <IndexTable
+                  resourceName={{ singular: "product", plural: "products" }}
+                  itemCount={filteredByTab.length}
+                  headings={[
+                    { title: "Product Image" },
+                    { title: "Product Title" },
+                    { title: "Status" },
+                    { title: "HSN" },
+                    { title: "GST" },
+                  ]}
+                  selectedItems={selectedItems}
+                  onSelectionChange={handleSelectAll}
+                  bulkActions={[
+                    {
+                      content: isAllSelected ? "Deselect All" : "Select All",
+                      onAction: handleSelectAll,
+                    },
+                  ]}
+                >
+                  {rowMarkup}
+                </IndexTable>
+                <div style={styles.pagination}>
+                  <Pagination
+                    hasPrevious={currentPage > 1}
+                    onPrevious={() =>
+                      setCurrentPage((prev) => Math.max(prev - 1, 1))
+                    }
+                    hasNext={currentPage * itemsPerPage < filteredByTab.length}
+                    onNext={() => setCurrentPage((prev) => prev + 1)}
                   />
-                ),
-              },
-            ]}
-          />
-          <LegacyStack spacing="tight" wrap>
-            {tags.map((tag) => (
-              <Tag key={tag} onRemove={() => handleRemoveTag(tag)}>
-                {tag}
-              </Tag>
-            ))}
-          </LegacyStack>
+                </div>
+              </Tabs>
+            </div>
+          )}
         </LegacyCard>
-
-        {/* Product Table */}
-        <IndexTable
-          resourceName={{ singular: "product", plural: "products" }}
-          itemCount={filteredProducts.length}
-          headings={[
-            { title: "Product Image" },
-            { title: "Product Title" },
-            { title: "HSN" },
-            { title: "GST" },
-          ]}
-          selectedItems={selectedItems}
-          onSelectionChange={handleSelectAll}
-          bulkActions={[
-            {
-              content:
-                selectedItems.length === filteredProducts.length
-                  ? "Deselect All"
-                  : "Select All",
-              onAction: handleSelectAll,
-            },
-          ]}
-        >
-          {filteredProducts.map(({ id, title, images, editableHSN, editableGST }, index) => (
-            <IndexTable.Row
-              id={id}
-              key={id}
-              position={index}
-              selected={selectedItems.includes(id)}
-              onClick={() => handleRowSelection(id)}
-            >
-              <IndexTable.Cell>
-                <img
-                  src={images[0]?.src || ""}
-                  alt={title}
-                  style={{
-                    border: "0.1px solid black",
-                    borderRadius: "5px",
-                    width: "50px",
-                    height: "50px",
-                  }}
-                />
-              </IndexTable.Cell>
-              <IndexTable.Cell>{title}</IndexTable.Cell>
-              <IndexTable.Cell>
-                <TextField
-                  value={editableHSN}
-                  onChange={(value) => handleInputChange(id, "editableHSN", value)}
-                />
-              </IndexTable.Cell>
-              <IndexTable.Cell>
-                <TextField
-                  value={editableGST}
-                  onChange={(value) => handleInputChange(id, "editableGST", value)}
-                />
-              </IndexTable.Cell>
-            </IndexTable.Row>
-          ))}
-        </IndexTable>
-
-        {/* Save Changes Button */}
-        <div style={{ marginTop: "16px", textAlign: "right" }}>
-        <Button primary onClick={saveChanges} disabled={isSaving}>
-          {isSaving ? "Saving..." : "Save Changes"}
-          </Button>
-        </div>
       </div>
+      {showToast && (
+        <Toast
+          content="Product Sync completed!"
+          onDismiss={() => setShowToast(false)}
+        />
+      )}
     </Frame>
   );
 }
+
+
