@@ -14,6 +14,8 @@ import crypto from 'crypto';
 import Store from './Models/storeModel.js'
 import connectDB from './database/db.js';
 import productRoutes from './routes/routes.js'; // Import the product routes
+import InvoiceTemplate from './Models/InvoiceTemplateModel.js';
+
 dotenv.config();
 
 
@@ -53,6 +55,66 @@ const hmacValidation = (req, res, next) => {
 
 
 //api to send shop data to db
+// app.get(
+//   shopify.config.auth.callbackPath,
+//   shopify.auth.callback(),
+//   async (req, res, next) => {
+//     try {
+//       const session = res.locals.shopify.session;
+
+//       // Fetch shop information
+//       const shopInfo = await shopify.api.rest.Shop.all({
+//         session: session,
+//       });
+
+//       const shopDetails = shopInfo.data[0]; // Handle array or object
+
+//       const {
+//         name: storeName,
+//         domain: storeDomain,
+//         email: storeEmail,
+//         address1: storeAddress1,
+//         city: storeCity,
+//         country_name: storeCountryName,
+
+//       } = shopDetails;
+
+//       // Check if the store already exists in the DB
+//       let storeExists = await Store.findOne({ storeDomain });
+
+//       if (!storeExists) {
+//         // Create new store data
+//         const newStore = new Store({
+//           storeName,
+//           storeDomain,
+//           storeEmail,
+//           storeAddress1,
+//           storeCity,
+//           storeCountryName
+//         });
+
+//         await newStore.save();
+//         console.log("New store data saved to DB after app installation");
+//       } else {
+//         console.log("Store already exists in DB:", storeExists);
+//       }
+
+
+      
+
+//       // Redirect to Shopify or app root
+//       shopify.redirectToShopifyOrAppRoot()(req, res, next);
+//     } catch (error) {
+//       console.error("Error saving store data during app installation", error);
+//       res.status(500).send("Failed to save store data after installation");
+//     }
+//   }
+// );
+
+
+
+
+
 app.get(
   shopify.config.auth.callbackPath,
   shopify.auth.callback(),
@@ -74,7 +136,6 @@ app.get(
         address1: storeAddress1,
         city: storeCity,
         country_name: storeCountryName,
-
       } = shopDetails;
 
       // Check if the store already exists in the DB
@@ -88,11 +149,21 @@ app.get(
           storeEmail,
           storeAddress1,
           storeCity,
-          storeCountryName
+          storeCountryName,
         });
 
         await newStore.save();
         console.log("New store data saved to DB after app installation");
+
+        // Create a default invoice template for the new store
+        const newInvoiceTemplate = new InvoiceTemplate({
+          email: storeEmail,
+          storeDomain,
+          // Optionally set default values here if different from schema defaults
+        });
+
+        await newInvoiceTemplate.save();
+        console.log("Invoice template created for the new store");
       } else {
         console.log("Store already exists in DB:", storeExists);
       }
@@ -105,7 +176,6 @@ app.get(
     }
   }
 );
-
 
 
 

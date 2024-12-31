@@ -1,1 +1,0 @@
-const InvoiceTemplate = require('../Models/InvoiceTemplateModel');

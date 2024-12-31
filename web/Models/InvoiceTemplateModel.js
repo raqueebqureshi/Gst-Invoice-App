@@ -1,6 +1,8 @@
-const mongoose = require("mongoose");
+import mongoose from 'mongoose';
 
 const InvoiceTemplateSchema = new mongoose.Schema({
+  email: { type: String, required: true }, // Add email
+  storeDomain: { type: String, required: true }, // Add store domain
   branding: {
     showLogo: { type: Boolean, default: false },
     primaryColor: { type: String, default: "#000000" },
@@ -115,4 +117,4 @@ const InvoiceTemplate = mongoose.model(
   InvoiceTemplateSchema
 );
 
-module.exports = InvoiceTemplate;
+export default InvoiceTemplate;
