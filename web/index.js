@@ -128,6 +128,7 @@ app.get(
       });
 
       const shopDetails = shopInfo.data[0]; // Handle array or object
+        console.log(shopDetails)
 
       const {
         name: storeName,

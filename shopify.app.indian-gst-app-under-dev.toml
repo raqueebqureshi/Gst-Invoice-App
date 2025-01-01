@@ -1,7 +1,7 @@
 # Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
 
 client_id = "78fbc68547f4cc8682944642dc9284c8"
-application_url = "https://struck-vol-giving-months.trycloudflare.com"
+application_url = "https://living-moldova-buddy-sport.trycloudflare.com"
 embedded = true
 name = "Indian GST App under dev"
 handle = "indian-gst-app-under-dev-1"
@@ -20,9 +20,9 @@ scopes = "read_orders,read_products,write_products,write_orders"
 
 [auth]
 redirect_urls = [
-  "https://struck-vol-giving-months.trycloudflare.com/auth/callback",
-  "https://struck-vol-giving-months.trycloudflare.com/auth/shopify/callback",
-  "https://struck-vol-giving-months.trycloudflare.com/api/auth/callback"
+  "https://living-moldova-buddy-sport.trycloudflare.com/auth/callback",
+  "https://living-moldova-buddy-sport.trycloudflare.com/auth/shopify/callback",
+  "https://living-moldova-buddy-sport.trycloudflare.com/api/auth/callback"
 ]
 
 [pos]
