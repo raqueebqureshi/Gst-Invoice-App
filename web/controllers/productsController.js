@@ -136,6 +136,7 @@ export const getAndHSNValuesFromDB = async (req, res) => {
       productId: product.productId,
       productName: product.productName,
       gst: product.gst,
+      hsn: product.hsn,
     }));
 
     // Return the GST values

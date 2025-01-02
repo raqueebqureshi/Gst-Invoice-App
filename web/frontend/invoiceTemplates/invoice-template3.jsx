@@ -184,7 +184,9 @@ export function InvoiceTemplate3({ shopdetails, orders }) {
           <div className="invoice-section">
             <div className="invoice-content">
               <h3>BILLED TO</h3>
-              <p>{orders[0].billing_address.name !== null 
+              
+              {orders[0].billing_address !== null ?(<>
+                <p>{orders[0].billing_address.name !== null 
           ? orders[0].billing_address.name : "N/A"}</p>
               <p>{orders[0].billing_address.address1 !== null 
           ? orders[0].billing_address.address1 : "N/A"}</p>
@@ -197,11 +199,18 @@ export function InvoiceTemplate3({ shopdetails, orders }) {
                 ? orders[0].billing_address.country : "N/A"}</p>
               <p><strong>Tel:</strong> {orders[0].billing_address.phone !== null 
                 ? orders[0].billing_address.phone : "N/A"}</p>
-              {/* <p><strong>Email:</strong> dikshathakur721@gmail.com</p> */}
+                <p><strong>Email:</strong>{orders[0].email !== null 
+                ? orders[0].email : "N/A"}</p>
+              </>):(<>
+              Address not available
+              </>)}
+              
+              
             </div>
             <div className="invoice-content">
               <h3>SHIP TO</h3>
-              <p>{orders[0].shipping_address.name !== null 
+              {orders[0].billing_address !== null ?(<>
+                <p>{orders[0].shipping_address.name !== null 
           ? orders[0].shipping_address.name : "N/A"}</p>
               <p>{orders[0].shipping_address.address1 !== null 
           ? orders[0].shipping_address.address1 : "N/A"}</p>
@@ -214,7 +223,8 @@ export function InvoiceTemplate3({ shopdetails, orders }) {
               {orders[0].shipping_address.country !== null 
                 ? orders[0].shipping_address.country : "N/A"}</p>
               <p><strong>Tel:</strong> {orders[0].shipping_address.phone !== null 
-                ? orders[0].shipping_address.phone : "N/A"}</p>
+                ? orders[0].shipping_address.phone : "N/A"}</p></>):(<>Address not available</>)}
+             
               {/* <p><strong>Email:</strong> dikshathakur721@gmail.com</p> */}
             </div>
             <div className="invoice-content">
@@ -257,7 +267,7 @@ export function InvoiceTemplate3({ shopdetails, orders }) {
             {item.price || 0}
           </td>
           <td >
-            {item.tax_lines[0].price || "N/A"}
+            {item.tax_lines?.[0]?.price ? item.tax_lines[0].price : "0"}
           </td>
           <td
           >
