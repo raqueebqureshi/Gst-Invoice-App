@@ -5,6 +5,9 @@ import { MediaCardExample2 } from "../components/MediaCard";
 import invoice1 from '../assets/invoice.png'
 import invoice2 from '../assets/invoice2.png'
 import invoice3 from '../assets/invoice3.png'
+import { useNavigate } from 'react-router-dom';
+
+import CustomizeTemplatePage from './cutomizeTemplatePage';
 
 
 
@@ -12,6 +15,8 @@ import invoice3 from '../assets/invoice3.png'
 export default function Orders() {
   const [storeDomain, setStoreDomain] = useState();
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate(); // Initialize useNavigate
+
 
   const [selectedTemplate, setSelectedTemplate] = useState(); // Default to template 1
 
@@ -93,7 +98,14 @@ export default function Orders() {
             // imageSrc="assets/invoice.png"
             imageSrc={invoice1}
             title="Pain"
-            primaryAction=" Customize available soon.."
+            // primaryAction=" Customize available soon.."
+            secondaryAct={() => {
+              console.log("Navigating to Customize Template Page");
+              navigate('/customizeTemplatePage', {state:{
+                templateId: 1,
+                
+              }}); // Navigate to the CustomizeTemplatePage
+            }}
             isSelected={selectedTemplate === "1"} // Set isSelected based on selectedTemplate
             onSelect={() => {
               console.log("Bold template select button clicked");
@@ -105,7 +117,14 @@ export default function Orders() {
            imageSrc={invoice2}
             // imageSrc="assets/invoice2.png"
             title="Classic"
-            primaryAction=" Customize available soon.."
+            // primaryAction=" Customize available soon.."
+            secondaryAct={() => {
+              console.log("Navigating to Customize Template Page");
+              navigate('/customizeTemplatePage', {state:{
+                templateId: 2,
+                
+              }}); // Navigate to the CustomizeTemplatePage
+            }}
             isSelected={selectedTemplate === "2"} // Set isSelected based on selectedTemplate
             onSelect={() => {
               console.log("Celestial template select button clicked");
@@ -117,7 +136,14 @@ export default function Orders() {
            imageSrc={invoice3}
             // imageSrc="assets/invoice3.png"
             title="Decent"
-            primaryAction=" Customize available soon.."
+            // primaryAction=" Customize available soon.."
+            secondaryAct={() => {
+              console.log("Navigating to Customize Template Page");
+              navigate('/customizeTemplatePage', {state:{
+                templateId: 3,
+                
+              }}); // Navigate to the CustomizeTemplatePage
+            }}
             isSelected={selectedTemplate === "3"} // Set isSelected based on selectedTemplate
             onSelect={() => {
               console.log("Celestial template select button clicked");

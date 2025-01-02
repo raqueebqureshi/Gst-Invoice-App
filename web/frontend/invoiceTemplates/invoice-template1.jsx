@@ -6,7 +6,8 @@ export function InvoiceTemplate1({ shopdetails, orders }) {
   
   
   // console.log("billing_address - InvoiceTemplate1", orders[0].billing_address);
-  console.log("orders - InvoiceTemplate1", orders[0]);
+  console.log("orders - InvoiceTemplate1", orders);
+  console.log("orders - InvoiceTemplate1", JSON.stringify(orders));
   console.log("store - details I", shopdetails[0]);
   const formatDateTime = (dateString) => {
     const date = new Date(dateString);
@@ -33,6 +34,7 @@ export function InvoiceTemplate1({ shopdetails, orders }) {
           display: "flex",
           justifyContent: "space-between",
           marginBottom: "20px",
+          marginTop: "20px",
         }}
       >
         <div>
@@ -51,7 +53,7 @@ export function InvoiceTemplate1({ shopdetails, orders }) {
           </p>
           {/* <p style={{ margin: '0', color: '#718096' }}>Fax: [000-000-0000]</p> */}
           <p style={{ margin: "0", color: "#718096" }}>
-            Website: {shopdetails.domain !== null ? shopdetails.domain : "N/A"}
+          Email: {shopdetails[0].email !== null ? shopdetails[0].email : "N/A"}
           </p>
         </div>
         <div style={{ textAlign: "right" }}>
@@ -59,12 +61,12 @@ export function InvoiceTemplate1({ shopdetails, orders }) {
             style={{
               color: "#4299e1",
               fontSize: "2.5em",
-              marginBottom: "10px",
+              marginBottom: "20px",
             }}
           >
             INVOICE
           </h2>
-          <table style={{ borderCollapse: "collapse" }}>
+          <table style={{ borderCollapse: "collapse",  }}>
             <tbody>
               <tr>
                 <td
@@ -112,6 +114,7 @@ export function InvoiceTemplate1({ shopdetails, orders }) {
           width: "100%",
           borderCollapse: "collapse",
           marginBottom: "20px",
+          marginTop: "20px",
         }}
       >
         <thead>
@@ -133,9 +136,9 @@ export function InvoiceTemplate1({ shopdetails, orders }) {
                 width: "50%",
               }}
             >
-              {orders[0].billing_address.name !== null
+              {orders[0].billing_address !== null ?(<>{orders[0].billing_address.name !== null
                 ? orders[0].billing_address.name
-                : "N/A"},<br />
+                : "N/A"}<br />
               {orders[0].billing_address.address1 !== null
                 ? orders[0].billing_address.address1
                 : "N/A"}
@@ -158,7 +161,8 @@ export function InvoiceTemplate1({ shopdetails, orders }) {
               ,{" "}
               {orders[0].billing_address.zip !== null
                 ? orders[0].billing_address.zip
-                : ""}
+                : ""}</>):(<>Address not available</>)}
+              
               
             </td>
             <td
@@ -167,9 +171,11 @@ export function InvoiceTemplate1({ shopdetails, orders }) {
                 border: "1px solid #e2e8f0",
                 width: "50%",
               }}
-            >{orders[0].shipping_address.name !== null
+            >
+              {orders[0].shipping_address !== null ?(<>
+                {orders[0].shipping_address.name !== null
               ? orders[0].shipping_address.name
-              : "N/A"},<br />
+              : "N/A"}<br />
               {orders[0].shipping_address.address1 !== null
                 ? orders[0].shipping_address.address1
                 : "N/A"}
@@ -193,6 +199,8 @@ export function InvoiceTemplate1({ shopdetails, orders }) {
               {orders[0].shipping_address.zip !== null
                 ? orders[0].shipping_address.zip
                 : ""}
+              </>):(<>Address not availble</>)}
+             
               
             </td>
           </tr>

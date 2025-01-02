@@ -28,6 +28,7 @@ export default function App() {
             <a href="/invoice_templates">{t("NavigationMenu.invoice_templates")}</a>
             <a href="/settings">{t("NavigationMenu.settings")}</a>
             <a href="/contactus">{t("NavigationMenu.contactus")}</a>
+            
           </NavMenu>
         
           <Routes pages={pages} />

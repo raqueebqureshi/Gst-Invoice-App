@@ -118,7 +118,7 @@ export default function ProductIndexTable() {
 
   const fetchProducts = useCallback(async () => {
     setIsLoading(true);
-    
+
     try {
       const response = await fetch("/api/products/all", {
         method: "GET",
@@ -127,15 +127,15 @@ export default function ProductIndexTable() {
       const data = await response.json();
       if (data.data.length > 0) {
         const fetchedProducts = data.data;
-        console.log('fetchedProducts  :',fetchedProducts);
-      const productsWithEditableFields = data.data.map((product) => ({
-        ...product,
-        editableHSN: product.HSN || "",
-        editableGST: product.GST || "",
-      }));
-      console.log('productsWithEditableFields:',productsWithEditableFields);
-      setProducts(productsWithEditableFields);
-      setFilteredProducts(productsWithEditableFields);
+        console.log("fetchedProducts  :", fetchedProducts);
+        const productsWithEditableFields = data.data.map((product) => ({
+          ...product,
+          editableHSN: product.HSN || "",
+          editableGST: product.GST || "",
+        }));
+        console.log("productsWithEditableFields:", productsWithEditableFields);
+        setProducts(productsWithEditableFields);
+        setFilteredProducts(productsWithEditableFields);
         // setProducts(fetchedProducts);
         // setFilteredProducts(fetchedProducts);
         // setProductCount(fetchedProducts.length);
@@ -151,9 +151,9 @@ export default function ProductIndexTable() {
         setActiveProductCount(activeCount);
         setDraftProductCount(draftCount);
         setShowToast(true);
-        console.log('storeDomain && email:',storeDomain,email);
+        console.log("storeDomain && email:", storeDomain, email);
         if (storeDomain && email) {
-          console.log('products--:',productsWithEditableFields);
+          console.log("products--:", productsWithEditableFields);
           fetchGSTHSNValues(productsWithEditableFields); // Fetch GST HSN values
         }
       }
@@ -167,7 +167,10 @@ export default function ProductIndexTable() {
   const fetchGSTHSNValues = async (products) => {
     try {
       if (!storeDomain || !email) {
-        console.error("Missing storeDomain or email:", { storeDomain, email: email });
+        console.error("Missing storeDomain or email:", {
+          storeDomain,
+          email: email,
+        });
         throw new Error("Invalid storeDomain or email.");
       }
 
@@ -190,47 +193,45 @@ export default function ProductIndexTable() {
       setGSTHSNCodes(data.gstValues);
 
       // Update products with fetched GST values
-      updateProductsWithGSTHSN(data.gstValues,products);
+      updateProductsWithGSTHSN(data.gstValues, products);
     } catch (error) {
       console.error("Error fetching GST values:", error);
     }
   };
 
-  const updateProductsWithGSTHSN = (gstValues,products) => {
-    console.log('gstValues:',gstValues);
-    console.log('products:',products);
-    if(products.length !== 0){
-    const updatedProducts = products.map((product) => {
-      const matchedGSTHSN = gstValues.find((items) => {
-        
-        return Number(items.productId) === product.id;
+  const updateProductsWithGSTHSN = (gstValues, products) => {
+    console.log("gstValues:", gstValues);
+    console.log("products:", products);
+    if (products.length !== 0) {
+      const updatedProducts = products.map((product) => {
+        const matchedGSTHSN = gstValues.find((items) => {
+          return Number(items.productId) === product.id;
+        });
+
+        return {
+          ...product,
+          hsn: matchedGSTHSN ? matchedGSTHSN.hsn : "N/A",
+          gst: matchedGSTHSN ? matchedGSTHSN.gst : "N/A",
+        };
       });
 
-      return {
-        ...product,
-        hsn: matchedGSTHSN ? matchedGSTHSN.hsn : "N/A",
-        gst: matchedGSTHSN ? matchedGSTHSN.gst : "N/A",
-      };
-    });
-    
-    setProducts(updatedProducts);
-    setFilteredProducts(updatedProducts);
-    setProductCount(updatedProducts.length);
+      setProducts(updatedProducts);
+      setFilteredProducts(updatedProducts);
+      setProductCount(updatedProducts.length);
 
-        const activeCount = updatedProducts.filter(
-          (product) => product.status.toLowerCase() === "active"
-        ).length;
-        const draftCount = updatedProducts.filter(
-          (product) => product.status.toLowerCase() === "draft"
-        ).length;
+      const activeCount = updatedProducts.filter(
+        (product) => product.status.toLowerCase() === "active"
+      ).length;
+      const draftCount = updatedProducts.filter(
+        (product) => product.status.toLowerCase() === "draft"
+      ).length;
 
-        setActiveProductCount(activeCount);
-        setDraftProductCount(draftCount);
-        console.log("Updated Products with GST/HSN:", updatedProducts);
-      }else{
-        updateProductsWithGSTHSN(gstValues);
-      }
-    
+      setActiveProductCount(activeCount);
+      setDraftProductCount(draftCount);
+      console.log("Updated Products with GST/HSN:", updatedProducts);
+    } else {
+      updateProductsWithGSTHSN(gstValues);
+    }
   };
 
   useEffect(() => {
@@ -252,8 +253,6 @@ export default function ProductIndexTable() {
     fetchData(); // Call the fetchData function
   }, [storeDomain, email]); // Run when storeDomain or storeEmail changes
 
-
-
   const syncProducts = async () => {
     setIsLoading(true);
     await fetchProducts();
@@ -264,7 +263,7 @@ export default function ProductIndexTable() {
         body: JSON.stringify({
           storeDomain: storeDomain,
           email: email,
-          products: products.map(({ id, title, editableHSN,editableGST}) => ({
+          products: products.map(({ id, title, editableHSN, editableGST }) => ({
             productId: id,
             productName: title,
             hsn: editableHSN,
@@ -273,7 +272,7 @@ export default function ProductIndexTable() {
         }),
       });
 
-      console.log('response.body:',response.body);
+      console.log("response.body:", response.body);
 
       if (response.ok) {
         console.log("Products saved successfully to the database.");
@@ -288,26 +287,17 @@ export default function ProductIndexTable() {
     }
   };
 
-  
-
-    
-  
-  
-  
-
   useEffect(() => {
     const initializeData = async () => {
       try {
         await fetchShopInfo();
-        
       } catch (error) {
         console.error("Error during initialization:", error);
       }
     };
-  
+
     initializeData();
   }, []);
-  
 
   const handleSearch = () => {
     if (!searchTerm) {
@@ -356,10 +346,13 @@ export default function ProductIndexTable() {
 
   const handleRowSelection = (id) => {
     setSelectedItems((prevSelectedItems) => {
-      const updatedSelection = prevSelectedItems.includes(id)
-        ? prevSelectedItems.filter((itemId) => itemId !== id)
-        : [...prevSelectedItems, id];
-      return updatedSelection;
+      if (prevSelectedItems.includes(id)) {
+        // If the row is already selected, remove it from the selection
+        return prevSelectedItems.filter((itemId) => itemId !== id);
+      } else {
+        // Otherwise, add it to the selection
+        return [...prevSelectedItems, id];
+      }
     });
   };
 
@@ -381,48 +374,47 @@ export default function ProductIndexTable() {
     paginatedProducts.length > 0 &&
     paginatedProducts.every(({ id }) => selectedItems.includes(id));
 
-    const [editableValues, setEditableValues] = useState(
-      paginatedProducts.reduce((acc, product) => {
-        acc[product.id] = {
-          HSN: product.editableHSN || '',
-          GST: product.editableGST || '',
-        };
-        return acc;
-      }, {})
-    );
-  
-    const handleHSNChange = (id, value) => {
-      setEditableValues((prev) => {
-        const updatedValues = {
-          ...prev,
-          [id]: {
-            ...prev[id],
-            HSN: value,
-          },
-        };
-  
-        // Update products with the new HSN value
-        const updatedProducts = products.map((product) => {
-          if (product.id === id) {
-            return {
-              ...product,
-              editableHSN: value, // Update editableHSN
-            };
-          }
-          return product;
-        });
-  
-        setProducts(updatedProducts); // Update the products state
-        console.log(`HSN for ${id} changed to ${value}`);
-        console.log('editableValues:', updatedValues);
-        console.log('products:', updatedProducts);
-  
-        return updatedValues; // Return the updated editable values
+  const [editableValues, setEditableValues] = useState(
+    paginatedProducts.reduce((acc, product) => {
+      acc[product.id] = {
+        HSN: product.editableHSN || "",
+        GST: product.editableGST || "",
+      };
+      return acc;
+    }, {})
+  );
+
+  const handleHSNChange = (id, value) => {
+    setEditableValues((prev) => {
+      const updatedValues = {
+        ...prev,
+        [id]: {
+          ...prev[id],
+          HSN: value,
+        },
+      };
+
+      // Update products with the new HSN value
+      const updatedProducts = products.map((product) => {
+        if (product.id === id) {
+          return {
+            ...product,
+            editableHSN: value, // Update editableHSN
+          };
+        }
+        return product;
       });
-    };
-  
-  
-    const handleGSTChange = (id, value) => {
+
+      setProducts(updatedProducts); // Update the products state
+      console.log(`HSN for ${id} changed to ${value}`);
+      console.log("editableValues:", updatedValues);
+      console.log("products:", updatedProducts);
+
+      return updatedValues; // Return the updated editable values
+    });
+  };
+
+  const handleGSTChange = (id, value) => {
     setEditableValues((prev) => {
       const updatedValues = {
         ...prev,
@@ -445,32 +437,37 @@ export default function ProductIndexTable() {
 
       setProducts(updatedProducts); // Update the products state
       console.log(`GST for ${id} changed to ${value}`);
-      console.log('editableValues:', updatedValues);
-      console.log('products:', updatedProducts);
+      console.log("editableValues:", updatedValues);
+      console.log("products:", updatedProducts);
 
       return updatedValues; // Return the updated editable values
     });
   };
-    const rowMarkup = paginatedProducts.map(({ id, title, images, status, hsn,gst }, index) => {
-      const { HSN, GST } = editableValues[id] || { HSN: hsn||'', GST: gst||'' }; // Get current editable values
-  
+  const rowMarkup = paginatedProducts.map(
+    ({ id, title, images, status, hsn, gst }, index) => {
+      const { HSN, GST } = editableValues[id] || {
+        HSN: hsn || "",
+        GST: gst || "",
+      }; // Get current editable values
+
       return (
         <IndexTable.Row
-          id={id}
-          key={id}
-          position={index}
-          selected={selectedItems.includes(id)}
-          onClick={() => handleRowSelection(id)}
-        >
+        id={id}
+        key={id}
+        selected={selectedItems.includes(id)}
+        position={index}
+        onClick={() => handleRowSelection(id)}
+      >
           <IndexTable.Cell>
             <img
               src={images[0]?.src}
               alt={images[0]?.alt}
               style={styles.responsiveImage}
+              onClick={(e) => e.stopPropagation()} // Prevent event propagation
             />
           </IndexTable.Cell>
           <IndexTable.Cell>
-            <span style={{ fontWeight: 'bold' }}>{title}</span>
+            <span style={{ fontWeight: "bold" }}>{title}</span>
           </IndexTable.Cell>
           <IndexTable.Cell>{status}</IndexTable.Cell>
           <IndexTable.Cell>
@@ -479,6 +476,7 @@ export default function ProductIndexTable() {
               value={HSN}
               onChange={(value) => handleHSNChange(id, value)}
               autoComplete="off"
+              onClick={(e) => e.stopPropagation()} // Prevent event propagation
             />
           </IndexTable.Cell>
           <IndexTable.Cell>
@@ -487,11 +485,13 @@ export default function ProductIndexTable() {
               value={GST}
               onChange={(value) => handleGSTChange(id, value)}
               autoComplete="off"
+              onClick={(e) => e.stopPropagation()} // Prevent event propagation
             />
           </IndexTable.Cell>
         </IndexTable.Row>
       );
-    });
+    }
+  );
   // const rowMarkup = paginatedProducts.map(
   //   ({ id, title, images, status, hsn, gst }, index) => (
   //     <IndexTable.Row
@@ -535,17 +535,17 @@ export default function ProductIndexTable() {
   // const rowMarkup = paginatedProducts.map(({ id, title, images, status, editableHSN, editableGST}, index) => {
   //   const [editHSN, setEditeHSN] = useState(editableHSN || ""); // Use current value or default to empty
   //   const [editGST, setEditGST] = useState(editableGST || ""); // Use current value or default to empty
-  
+
   //   const handleHSNChange = (value) => {
   //     setEditeHSN(value);
   //     console.log(`HSN for ${id} changed to ${value}`);
   //   };
-  
+
   //   const handleGSTChange = (value) => {
   //     setEditGST(value);
   //     console.log(`GST for ${id} changed to ${value}`);
   //   };
-  
+
   //   return (
   //     <IndexTable.Row
   //       id={id}
@@ -590,10 +590,18 @@ export default function ProductIndexTable() {
     const updates = selectedItems.map((id) => {
       const product = products.find((product) => product.id === id);
 
-
-      console.log('id:', product.id,
-       ' HSN:', product.editableHSN,
-        'GST:', product.editableGST,'storeDomain:',storeDomain,'email:',email);
+      console.log(
+        "id:",
+        product.id,
+        " HSN:",
+        product.editableHSN,
+        "GST:",
+        product.editableGST,
+        "storeDomain:",
+        storeDomain,
+        "email:",
+        email
+      );
 
       return {
         id: product.id,
@@ -631,7 +639,7 @@ export default function ProductIndexTable() {
       console.log("API Response:", responseData);
       alert("Changes saved successfully!");
       // Reset editable values to blank after successful save
-    
+
       setIsSaving(false);
 
       // Fetch updated products
@@ -657,8 +665,6 @@ export default function ProductIndexTable() {
     }
   };
 
-
-  
   return (
     <Frame>
       <div style={styles.container}>
@@ -692,32 +698,46 @@ export default function ProductIndexTable() {
             </div>
             {selectedTag && <Tag onRemove={handleRemoveTag}>{selectedTag}</Tag>}
             <div style={styles.badgeContainer}>
-              <Badge status="info" style={styles.badge}>Total: {filteredByTab.length}</Badge>
+              <Badge status="info" style={styles.badge}>
+                Total: {filteredByTab.length}
+              </Badge>
               <Badge status="success" style={styles.badge}>
-                Active: {filteredByTab.filter((product) => product.status.toLowerCase() === "active").length}
+                Active:{" "}
+                {
+                  filteredByTab.filter(
+                    (product) => product.status.toLowerCase() === "active"
+                  ).length
+                }
               </Badge>
               <Badge status="warning" style={styles.badge}>
-                Draft: {filteredByTab.filter((product) => product.status.toLowerCase() === "draft").length}
+                Draft:{" "}
+                {
+                  filteredByTab.filter(
+                    (product) => product.status.toLowerCase() === "draft"
+                  ).length
+                }
               </Badge>
             </div>
           </div>
           <div style={styles.syncButtonContainer}>
-                 {/* Save Changes Button */}
-                 <Button primary onClick={ (()=>  {
-                  if(selectedItems.length === 0){
-                    alert('Please select a product to save changes');
-                    return;
-                  }else{
-                    saveChanges();
-                  }
-                 })
-                  
-                  
-                  
-                  } disabled={isSaving}>
-             {isSaving ? "Saving..." : "Save Changes"}
-           </Button>
-            <Button primary onClick={syncProducts}>Sync Products</Button>
+            {/* Save Changes Button */}
+            <Button
+              primary
+              onClick={() => {
+                if (selectedItems.length === 0) {
+                  alert("Please select a product to save changes");
+                  return;
+                } else {
+                  saveChanges();
+                }
+              }}
+              disabled={isSaving}
+            >
+              {isSaving ? "Saving..." : "Save Changes"}
+            </Button>
+            <Button primary onClick={syncProducts}>
+              Sync Products
+            </Button>
           </div>
           {isLoading ? (
             <SkeletonPage>
@@ -728,7 +748,11 @@ export default function ProductIndexTable() {
               <Tabs
                 tabs={[
                   { id: "all", content: "All", panelID: "all-products" },
-                  { id: "active", content: "Active", panelID: "active-products" },
+                  {
+                    id: "active",
+                    content: "Active",
+                    panelID: "active-products",
+                  },
                   { id: "draft", content: "Draft", panelID: "draft-products" },
                   {
                     id: "archived",
@@ -753,6 +777,9 @@ export default function ProductIndexTable() {
                     { title: "GST" },
                   ]}
                   selectedItems={selectedItems}
+                  selectedItemsCount={
+                     selectedItems.length
+                  }
                   onSelectionChange={handleSelectAll}
                   bulkActions={[
                     {
@@ -787,5 +814,3 @@ export default function ProductIndexTable() {
     </Frame>
   );
 }
-
-
