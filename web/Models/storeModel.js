@@ -13,7 +13,7 @@ const storeSchema = new mongoose.Schema({
 });
 
 // Create the Store model
-const Store = mongoose.model("Stores", storeSchema);
+const Stores = mongoose.models.Stores || mongoose.model("Stores", storeSchema);
 
 // Export default
-export default Store;
+export default Stores;

@@ -40,6 +40,6 @@ const StoreProfileSchema = new mongoose.Schema({
 });
 
 // Create the model
-const StoreProfile = mongoose.model("StoreProfile", StoreProfileSchema);
+const StoreProfile = mongoose.models.StoreProfile || mongoose.model("StoreProfile", StoreProfileSchema);
 
 export default StoreProfile;
