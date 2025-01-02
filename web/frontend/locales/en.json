@@ -13,6 +13,7 @@
     "invoice_templates": "Invoice Templates",
     "settings": "Settings",
     "contactus": "ContactUs",
+    "email-settings" : "Email Settings",
     "notfound": "Not Found"
   },
   "NotFound": {
@@ -39,5 +40,13 @@
     "primaryAction": "Primary action",
     "secondaryAction": "Secondary action",
     "title": "Settings"
+  },
+
+  "EmailSettings": {
+    "body": "Body",
+    "heading": "Heading",
+    "primaryAction": "Primary action",
+    "secondaryAction": "Secondary action",
+    "title": "Email Settings"
   }
 }

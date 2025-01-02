@@ -1,4 +1,4 @@
-import StoreProfile from "../Models/StoreModel.js";
+import StoreProfile from "../Model/storeProfileModel.js";
 
 export const createStoreProfile = async (req, res) => {
   try {

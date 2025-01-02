@@ -49,11 +49,11 @@ export default function CustomizeTemplate() {
                 "price_set": {
                   "shop_money": {
                     "amount": "500.00",
-                    "currency_code": "USD"
+                    "currency_code": "INR"
                   },
                   "presentment_money": {
                     "amount": "500.00",
-                    "currency_code": "USD"
+                    "currency_code": "INR"
                   }
                 },
                 "product_exists": true,
@@ -515,6 +515,7 @@ export default function CustomizeTemplate() {
   const [showDropdown, setShowDropdown] = useState(false);
   const [showLogo, setShowLogo] = useState(false);
   const [storeDomain, setStoreDomain] = useState(null);
+  const [email, setEmail] = useState(null);
   const [currentTemplateId, setCurrentTemplateId] = useState(null);
   const togglePopoverActive = useCallback(
     () => setPopoverActive((popoverActive) => !popoverActive),
@@ -545,34 +546,72 @@ export default function CustomizeTemplate() {
       .then((response) => {
         console.log("Store Details---!", response.data);
         if (response.data.data.length > 0) {
-          console.log("Store Details---", response.data.data[0]);
+          // console.log("Store Details---", response.data.data[0]);
           setShopDetails(response.data.data[0]);
           if(shopDetails.length > 0){
             console.log('shopDetails',shopDetails);}
+            setStoreDomain(shopDetails.domain);
+            // console.log(shopDetails.email);
+            setEmail(shopDetails.email);
+            console.log('storeDomain',storeDomain , 'email',email);
         }
       })
       .catch((error) => console.log(error));
-  }, []);
+  }, [email, storeDomain]);
+
+  // useEffect(() => {
+  //   fetch("/api/2024-10/orders.json", {
+  //     method: "GET",
+  //     headers: { "Content-Type": "application/json" },
+  //   })
+  //     .then((request) => request.json())
+  //     .then((response) => {
+  //       if (response.data) {
+  //         setOrders(response.data);
+  //         if(orders.length > 0){
+  //         console.log('orders',orders);}
+  //       }
+  //     })
+  //     .catch((error) => {
+  //       console.error(error);
+        
+  //       handleShowToast("Internal Server Error 500", true);
+  //     });
+  // }, []);
+
+
 
   useEffect(() => {
-    fetch("/api/2024-10/orders.json", {
-      method: "GET",
-      headers: { "Content-Type": "application/json" },
-    })
-      .then((request) => request.json())
-      .then((response) => {
-        if (response.data) {
-          setOrders(response.data);
-          if(orders.length > 0){
-          console.log('orders',orders);}
+    const fetchInvoiceSettings = async () => {
+      const requestBody = {
+        email: email , // Replace with actual email
+        storeDomain: storeDomain, // Replace with actual storeDomain
+      };
+  
+      try {
+        const response = await fetch("/fetch-invoice-settings", {
+          method: "POST", // Change to POST
+          headers: { "Content-Type": "application/json" },
+          body: requestBody , // Send email and storeDomain in body
+        });
+  
+      
+  
+        const responseData = await response.json();
+        console.log("API Response:", responseData);
+  
+        // Optional: Handle the data as needed
+        if (responseData.data) {
+          console.log("Fetched Data:", responseData.data);
         }
-      })
-      .catch((error) => {
-        console.error(error);
-        
-        handleShowToast("Internal Server Error 500", true);
-      });
+      } catch (error) {
+        console.error("Error fetching invoice settings:", error);
+      }
+    };
+  
+    fetchInvoiceSettings();
   }, []);
+  
 
   
   

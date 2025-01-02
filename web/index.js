@@ -10,9 +10,9 @@ import nodemailer from 'nodemailer';
 import bodyPaser from 'body-parser';
 import dotenv from 'dotenv';
 import crypto from 'crypto';
-import Store from './Models/storeModel.js'
+import Store from './Models/storeModel.js';
 import connectDB from './database/db.js';
-import productRoutes from './routes/routes.js'; // Import the product routes
+import routes from './routes/routes.js'; // Import the product routes
 import InvoiceTemplate from './Models/InvoiceTemplateModel.js';
 
 dotenv.config();
@@ -109,6 +109,7 @@ const hmacValidation = (req, res, next) => {
 //     }
 //   }
 // );
+
 
 
 
@@ -447,7 +448,7 @@ app.post(
 // Use the shop routes
 app.use("/api/*", shopify.validateAuthenticatedSession());
 
-
+app.use(routes);
 
 
 //fetch all products
@@ -459,7 +460,10 @@ app.get("/api/products/all", async (_req, res) => {
   res.status(200).send(allProducts);
 });
 
-app.use(productRoutes);
+//all custom routes
+app.use(routes);
+
+
 
 app.get("/api/2024-10/orders.json", async (req, res) => {
   let OrderAll = await shopify.api.rest.Order.all({
