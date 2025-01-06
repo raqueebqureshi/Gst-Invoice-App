@@ -1,11 +1,7 @@
 # Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
 
 client_id = "78fbc68547f4cc8682944642dc9284c8"
-<<<<<<< HEAD
-application_url = "https://roots-recording-celebrities-base.trycloudflare.com"
-=======
-application_url = "https://wireless-richards-too-dominican.trycloudflare.com"
->>>>>>> 590f8d8813a3f9d0fb428ec9bcf221d1a8a8a991
+application_url = "https://perfect-sublime-org-mr.trycloudflare.com"
 embedded = true
 name = "Indian GST App under dev"
 handle = "indian-gst-app-under-dev-1"
@@ -24,15 +20,9 @@ scopes = "read_orders,read_products,write_orders,write_products"
 
 [auth]
 redirect_urls = [
-<<<<<<< HEAD
-  "https://roots-recording-celebrities-base.trycloudflare.com/auth/callback",
-  "https://roots-recording-celebrities-base.trycloudflare.com/auth/shopify/callback",
-  "https://roots-recording-celebrities-base.trycloudflare.com/api/auth/callback"
-=======
-  "https://wireless-richards-too-dominican.trycloudflare.com/auth/callback",
-  "https://wireless-richards-too-dominican.trycloudflare.com/auth/shopify/callback",
-  "https://wireless-richards-too-dominican.trycloudflare.com/api/auth/callback"
->>>>>>> 590f8d8813a3f9d0fb428ec9bcf221d1a8a8a991
+  "https://perfect-sublime-org-mr.trycloudflare.com/auth/callback",
+  "https://perfect-sublime-org-mr.trycloudflare.com/auth/shopify/callback",
+  "https://perfect-sublime-org-mr.trycloudflare.com/api/auth/callback"
 ]
 
 [pos]

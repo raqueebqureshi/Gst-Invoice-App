@@ -114,7 +114,7 @@ const hmacValidation = (req, res, next) => {
 
 
 
-
+//after app installation
 app.get(
   shopify.config.auth.callbackPath,
   shopify.auth.callback(),
