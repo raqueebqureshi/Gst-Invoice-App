@@ -1,7 +1,7 @@
 # Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
 
 client_id = "78fbc68547f4cc8682944642dc9284c8"
-application_url = "https://appreciated-sometimes-constantly-fails.trycloudflare.com"
+application_url = "https://periods-surprised-defend-identifies.trycloudflare.com"
 embedded = true
 name = "Indian GST App under dev"
 handle = "indian-gst-app-under-dev-1"
@@ -20,9 +20,9 @@ scopes = "read_orders,read_products,write_orders,write_products"
 
 [auth]
 redirect_urls = [
-  "https://appreciated-sometimes-constantly-fails.trycloudflare.com/auth/callback",
-  "https://appreciated-sometimes-constantly-fails.trycloudflare.com/auth/shopify/callback",
-  "https://appreciated-sometimes-constantly-fails.trycloudflare.com/api/auth/callback"
+  "https://glad-scanning-salmon-harvest.trycloudflare.com/auth/callback",
+  "https://glad-scanning-salmon-harvest.trycloudflare.com/auth/shopify/callback",
+  "https://glad-scanning-salmon-harvest.trycloudflare.com/api/auth/callback"
 ]
 
 [pos]

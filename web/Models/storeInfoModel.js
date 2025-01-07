@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 const StoreProfileSchema = new mongoose.Schema({
   storeDomain: { type: String, required: true, unique: true }, // Unique store domain
   email: { type: String, required: true }, // Store email
-
+  shopId : { type: String, required: true }, // Store ID
   storeProfile: {
     firstName: { type: String, default: "" },
     lastName: { type: String, default: "" },

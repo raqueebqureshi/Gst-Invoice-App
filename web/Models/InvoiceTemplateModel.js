@@ -3,6 +3,7 @@ import mongoose from 'mongoose';
 const InvoiceTemplateSchema = new mongoose.Schema({
   email: { type: String, required: true }, // Add email
   storeDomain: { type: String, required: true }, // Add store domain
+  shopId: { type: String, required: true }, // Add shop ID
   branding: {
     showLogo: { type: Boolean, default: false },
     primaryColor: { type: String, default: "#000000" },
