@@ -6,7 +6,7 @@ const InvoiceTemplateSchema = new mongoose.Schema({
   branding: {
     showLogo: { type: Boolean, default: false },
     primaryColor: { type: String, default: "#000000" },
-    fontFamily: { type: String, default: "Arial" },
+    fontFamily: { type: String, default: "Roboto" },
   },
   overview: {
     documentTitle: { type: String, default: "Tax Invoice" },
@@ -14,7 +14,7 @@ const InvoiceTemplateSchema = new mongoose.Schema({
     showInvoiceNumber: { type: Boolean, default: true },
     showOrderIdBarcode: { type: Boolean, default: false },
     customizeInvoiceNumber: { type: Boolean, default: false },
-    issueDate: { type: String, default: "" },
+    issueDate: { type: Boolean, default: true },
     showTaxReverseText: { type: Boolean, default: false },
     showTrackingCompany: { type: Boolean, default: false },
     showTrackingNo: { type: Boolean, default: false },

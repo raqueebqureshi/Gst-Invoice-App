@@ -1,7 +1,11 @@
 # Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
 
 client_id = "78fbc68547f4cc8682944642dc9284c8"
+<<<<<<< HEAD
 application_url = "https://madness-radios-push-exams.trycloudflare.com"
+=======
+application_url = "https://cart-angels-ie-quantity.trycloudflare.com"
+>>>>>>> 3bd84f859d4578b2bfe4c7d24c00557ff69dddc0
 embedded = true
 name = "Indian GST App under dev"
 handle = "indian-gst-app-under-dev-1"
@@ -20,9 +24,15 @@ scopes = "read_orders,read_products,write_orders,write_products"
 
 [auth]
 redirect_urls = [
+<<<<<<< HEAD
   "https://madness-radios-push-exams.trycloudflare.com/auth/callback",
   "https://madness-radios-push-exams.trycloudflare.com/auth/shopify/callback",
   "https://madness-radios-push-exams.trycloudflare.com/api/auth/callback"
+=======
+  "https://cart-angels-ie-quantity.trycloudflare.com/auth/callback",
+  "https://cart-angels-ie-quantity.trycloudflare.com/auth/shopify/callback",
+  "https://cart-angels-ie-quantity.trycloudflare.com/api/auth/callback"
+>>>>>>> 3bd84f859d4578b2bfe4c7d24c00557ff69dddc0
 ]
 
 [pos]

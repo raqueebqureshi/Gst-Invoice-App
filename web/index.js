@@ -457,10 +457,7 @@ app.get("/api/products/all", async (_req, res) => {
   res.status(200).send(allProducts);
 });
 
-//all custom routes
 app.use(routes);
-
-
 
 app.get("/api/2024-10/orders.json", async (req, res) => {
   let OrderAll = await shopify.api.rest.Order.all({
