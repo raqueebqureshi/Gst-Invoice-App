@@ -252,6 +252,7 @@ export default function Settings() {
   const [selected, setSelected] = useState(0);
   const [storeDomain, setStoreDomain] = useState("");
   const [email, setEmail] = useState("");
+  const [shopId, setshopId] = useState("")
   const [showToast, setShowToast] = useState({
       active: false,
       message: "",
@@ -315,6 +316,7 @@ export default function Settings() {
         console.log("Shop info:", shopInfo);
         setStoreDomain(shopInfo.domain || "");
         setEmail(shopInfo.email || "");
+        setshopId(shopInfo.id || "")
         console.log("Store domain:", storeDomain);
         console.log("Email:", email);
       })
@@ -324,16 +326,15 @@ export default function Settings() {
   const handleSave = async () => {
     try {
       const requestData = {
-        storeDomain,
-        email,
+        shopId,
         storeProfile,
         images,
         addresses,
         socialLinks,
       };
   
-      const response = await fetch("/api/add-store-data", {
-        method: "POST",
+      const response = await fetch("/api/update-store-data", {
+        method: "PUT",
         headers: {
           "Content-Type": "application/json",
         },
