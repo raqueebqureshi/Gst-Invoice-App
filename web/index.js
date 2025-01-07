@@ -10,7 +10,7 @@ import nodemailer from 'nodemailer';
 import bodyPaser from 'body-parser';
 import dotenv from 'dotenv';
 import crypto from 'crypto';
-import Store from './Models/storeModel.js'
+import Store from './Models/storeModel.js';
 import connectDB from './database/db.js';
 import routes from './routes/routes.js'; // Import the product routes
 import InvoiceTemplate from './Models/InvoiceTemplateModel.js';
@@ -114,6 +114,7 @@ const hmacValidation = (req, res, next) => {
 
 
 
+//after app installation
 app.get(
   shopify.config.auth.callbackPath,
   shopify.auth.callback(),
@@ -447,7 +448,7 @@ app.post(
 // Use the shop routes
 app.use("/api/*", shopify.validateAuthenticatedSession());
 
-
+app.use(routes);
 
 
 //fetch all products

@@ -5,7 +5,7 @@ const connectDB = async () => {
   // const mongoUri = process.env.MONGO_URI;
   const mongoUri = process.env.MONGO_URI;
 
-  console.log("mongoUri", mongoUri);
+  // console.log("mongoUri", mongoUri);
 
   if (!mongoUri) {
     console.error("Missing MONGO_URI in environment variables.");
