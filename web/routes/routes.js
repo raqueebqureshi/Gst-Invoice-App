@@ -13,12 +13,12 @@ router.post('/api/products/update', updateProductsInDB);
 router.get("/api/products/gsthsn", getAndHSNValuesFromDB);
 
 // Route to fetch template settings
-router.post("/fetch-invoice-settings", getTemplateSettings);
+router.post("/api/fetch-invoice-settings", getTemplateSettings);
 
 // Route udpate invoice settings in db
-router.put("/update-invoice-settings", updateTemplateSettings);
+router.put("/api/update-invoice-settings", updateTemplateSettings);
 
 // Define the POST route to create a store profile with the required fields
-router.put("/add-store-data", createStoreProfile);
+router.put("/api/add-store-data", createStoreProfile);
 
 export default router;
