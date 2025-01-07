@@ -31,7 +31,7 @@ router.post("/api/fetch-invoice-settings", getTemplateSettings);
 router.put("/api/update-invoice-settings", updateTemplateSettings);
 
 // Define the POST route to create a store profile with the required fields
-router.put("/api/add-store-data", createStoreProfile);
+router.post("/api/add-store-data", createStoreProfile);
 
 // Define the POST route to save SMTP configuration
 router.post("/api/smtp/save", saveSMTPConfig);

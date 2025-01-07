@@ -252,6 +252,11 @@ export default function Settings() {
   const [selected, setSelected] = useState(0);
   const [storeDomain, setStoreDomain] = useState("");
   const [email, setEmail] = useState("");
+  const [showToast, setShowToast] = useState({
+      active: false,
+      message: "",
+      error: false,
+    });
   const [storeProfile, setStoreProfile] = useState({
     firstName: "",
     lastName: "",
@@ -295,51 +300,58 @@ export default function Settings() {
     []
   );
 
+  const handleShowToast = (message, error = false) => {
+    setShowToast({ active: true, message, error });
+  };
   // Fetch initial data for store domain and email
   useEffect(() => {
-    fetch("/api/shop-info", {
+    fetch("/api/2024-10/shop.json", {
       method: "GET",
       headers: { "Content-Type": "application/json" },
     })
       .then((response) => response.json())
       .then((data) => {
-        setStoreDomain(data.storeDomain || "");
-        setEmail(data.email || "");
+        const shopInfo = data?.data?.data?.[0];
+        console.log("Shop info:", shopInfo);
+        setStoreDomain(shopInfo.domain || "");
+        setEmail(shopInfo.email || "");
+        console.log("Store domain:", storeDomain);
+        console.log("Email:", email);
       })
       .catch((error) => console.log("Error fetching shop info:", error));
   }, []);
 
   const handleSave = async () => {
-    const requestBody = {
-      storeDomain,
-      email,
-      storeProfile,
-      images,
-      addresses,
-      socialLinks,
-    };
-
     try {
-      const response = await fetch("/add-store-data", {
+      const requestData = {
+        storeDomain,
+        email,
+        storeProfile,
+        images,
+        addresses,
+        socialLinks,
+      };
+  
+      const response = await fetch("/api/add-store-data", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(requestBody),
+        body: JSON.stringify(requestData), // Properly serialize the body
       });
-
+  
       if (response.ok) {
-        alert("Settings saved successfully!");
+        const responseData = await response.json();
+        console.log("Settings saved successfully:", responseData);
       } else {
         const errorData = await response.json();
-        console.error("Error saving settings:", errorData);
-        alert("Failed to save settings!");
+        console.error("Failed to save settings:", errorData);
       }
     } catch (error) {
-      console.error("Error:", error);
-      alert("An error occurred while saving settings.");
+      console.error("Error while saving settings:", error);
     }
   };
+  
 
   return (
     <Page>
