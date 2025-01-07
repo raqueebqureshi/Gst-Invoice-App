@@ -426,9 +426,6 @@ const STATIC_PATH =
     : `${process.cwd()}/frontend/`;
 
 
-
-
-
 // Set up Shopify authentication and webhook handling
 app.get(shopify.config.auth.path, shopify.auth.begin());
 app.get(

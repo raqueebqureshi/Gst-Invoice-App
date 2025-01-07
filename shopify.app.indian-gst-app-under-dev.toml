@@ -1,7 +1,7 @@
 # Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
 
 client_id = "78fbc68547f4cc8682944642dc9284c8"
-application_url = "https://perfect-sublime-org-mr.trycloudflare.com"
+application_url = "https://madness-radios-push-exams.trycloudflare.com"
 embedded = true
 name = "Indian GST App under dev"
 handle = "indian-gst-app-under-dev-1"
@@ -20,9 +20,9 @@ scopes = "read_orders,read_products,write_orders,write_products"
 
 [auth]
 redirect_urls = [
-  "https://perfect-sublime-org-mr.trycloudflare.com/auth/callback",
-  "https://perfect-sublime-org-mr.trycloudflare.com/auth/shopify/callback",
-  "https://perfect-sublime-org-mr.trycloudflare.com/api/auth/callback"
+  "https://madness-radios-push-exams.trycloudflare.com/auth/callback",
+  "https://madness-radios-push-exams.trycloudflare.com/auth/shopify/callback",
+  "https://madness-radios-push-exams.trycloudflare.com/api/auth/callback"
 ]
 
 [pos]
