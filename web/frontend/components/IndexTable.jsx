@@ -29,7 +29,7 @@ import { InvoiceTemplate1 } from "../invoiceTemplates/invoice-template1";
 import { InvoiceTemplate2 } from "../invoiceTemplates/invoice-template2";
 import { InvoiceTemplate3 } from "../invoiceTemplates/invoice-template3";
 import { useIndexResourceState } from "@shopify/polaris";
-import { HorizontalDotsMinor } from "@shopify/polaris-icons";
+import { MenuHorizontalIcon } from "@shopify/polaris-icons";
 
 const filterOrders = (orders, query) => {
   return orders.filter((order) => {
@@ -397,7 +397,7 @@ export function IndexTableEx({ value, shopdetails }) {
                 activator={
                   <Button
                     plain
-                    icon={HorizontalDotsMinor}
+                    icon={MenuHorizontalIcon}
                     onClick={(e) => {
                       e.stopPropagation();
                       togglePopoverActive(id);

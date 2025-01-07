@@ -12,15 +12,14 @@ import {
   Spinner,
 } from "@shopify/polaris";
 import {
-  ImageMajor,
-  HomeMajor,
-  StoreMajor,
-  OrdersMajor,
-  ChecklistMajor,
-  TextMajor,
-  TaxMajor,
-  FooterMajor,
-  ArrowLeftMinor,
+  ImageIcon,
+  HomeIcon,
+  StoreIcon,
+  OrderIcon,
+  ClipboardChecklistIcon,
+  TaxIcon,
+  LayoutFooterIcon,
+  ArrowLeftIcon,
 } from "@shopify/polaris-icons";
 import { useLocation } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
@@ -938,33 +937,33 @@ export default function CustomizeTemplate() {
 
   const menuItems = [
     {
-      icon: ImageMajor,
+      icon: ImageIcon,
       label: "Branding and Style",
       onClick: () => setShowBrandingAndStyle(true),
     },
     {
-      icon: HomeMajor,
+      icon: HomeIcon,
       label: "Overview",
       onClick: () => setShowOverview(true),
     },
 
     {
-      icon: StoreMajor,
+      icon: StoreIcon,
       label: "Supplier",
       onClick: () => setShowSupplier(true),
     },
     {
-      icon: OrdersMajor,
+      icon: OrderIcon,
       label: "Shipping",
       onClick: () => setShowShipping(true),
     },
     {
-      icon: OrdersMajor,
+      icon: OrderIcon,
       label: "Billing",
       onClick: () => setShowBilling(true),
     },
     {
-      icon: ChecklistMajor,
+      icon: ClipboardChecklistIcon,
       label: "Line items",
       onClick: () => setShowLineItems(true),
     },
@@ -973,8 +972,8 @@ export default function CustomizeTemplate() {
     //   label: "Additional text",
     //   onClick: () => setShowAdditionalText(true),
     // },
-    { icon: TaxMajor, label: "Total", onClick: () => setShowTotal(true) },
-    { icon: FooterMajor, label: "Other", onClick: () => setShowFooter(true) },
+    { icon: TaxIcon, label: "Total", onClick: () => setShowTotal(true) },
+    { icon: LayoutFooterIcon, label: "Other", onClick: () => setShowFooter(true) },
   ];
 
   const handleColorSelect = (value) => {
@@ -1033,7 +1032,7 @@ export default function CustomizeTemplate() {
             }}
           >
             <Icon
-              source={ArrowLeftMinor}
+              source={ArrowLeftIcon}
               color="base" // Optional: Adjust the color for better visibility
               style={{ width: "16px", height: "16px" }}
             />
@@ -1082,7 +1081,7 @@ export default function CustomizeTemplate() {
                     }}
                   >
                     <Icon
-                      source={ArrowLeftMinor}
+                      source={ArrowLeftIcon}
                       color="base" // Optional: Adjust the color for better visibility
                       style={{ width: "16px", height: "16px" }}
                     />
@@ -1219,7 +1218,7 @@ export default function CustomizeTemplate() {
                     }}
                   >
                     <Icon
-                      source={ArrowLeftMinor}
+                      source={ArrowLeftIcon}
                       color="base" // Optional: Adjust the color for better visibility
                       style={{ width: "16px", height: "16px" }}
                     />
@@ -1300,7 +1299,7 @@ export default function CustomizeTemplate() {
                     }}
                   >
                     <Icon
-                      source={ArrowLeftMinor}
+                      source={ArrowLeftIcon}
                       color="base" // Adjust visibility
                       style={{ width: "16px", height: "16px" }}
                     />
@@ -1372,7 +1371,7 @@ export default function CustomizeTemplate() {
                     }}
                   >
                     <Icon
-                      source={ArrowLeftMinor}
+                      source={ArrowLeftIcon}
                       color="base" // Adjust visibility
                       style={{ width: "16px", height: "16px" }}
                     />
@@ -1447,7 +1446,7 @@ export default function CustomizeTemplate() {
                     }}
                   >
                     <Icon
-                      source={ArrowLeftMinor}
+                      source={ArrowLeftIcon}
                       color="base" // Adjust visibility
                       style={{ width: "16px", height: "16px" }}
                     />
@@ -1524,7 +1523,7 @@ export default function CustomizeTemplate() {
                     }}
                   >
                     <Icon
-                      source={ArrowLeftMinor}
+                      source={ArrowLeftIcon}
                       color="base"
                       style={{ width: "16px", height: "16px" }}
                     />
@@ -1608,7 +1607,7 @@ export default function CustomizeTemplate() {
                     }}
                   >
                     <Icon
-                      source={ArrowLeftMinor}
+                      source={ArrowLeftIcon}
                       color="base"
                       style={{ width: "16px", height: "16px" }}
                     />
@@ -1692,7 +1691,7 @@ export default function CustomizeTemplate() {
                     onClick={() => setShowFooter(false)}
                   >
                     <Icon
-                      source={ArrowLeftMinor}
+                      source={ArrowLeftIcon}
                       color="base"
                       style={{ width: "16px", height: "16px" }}
                     />
