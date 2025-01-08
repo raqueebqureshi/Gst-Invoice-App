@@ -14,6 +14,11 @@ import {
   getSMTPConfig,
   updateSMTPConfig,
 } from "../controllers/smtpController.js"; // Import the controller
+
+import { 
+  uploadLogo,
+  removeLogo
+} from "../controllers/UploadBrandLogoController.js";
 const router = express.Router();
 
 // Define the POST route to add or update products
@@ -42,5 +47,10 @@ router.post("/api/smtp/save", saveSMTPConfig);
 router.get("/api/smtp/get", getSMTPConfig);
 // Define the PUT route to update SMTP configuration
 router.put("/api/smtp/update", updateSMTPConfig);
+
+//upload logo for store
+router.post("/api/upload-logo", upload.single("logo"), uploadLogo);
+// removing the logo
+router.post("/api/remove-logo", removeLogo);
 
 export default router;
