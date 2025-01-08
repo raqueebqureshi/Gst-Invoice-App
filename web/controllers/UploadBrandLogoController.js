@@ -4,7 +4,7 @@ const express = require("express");
 const multer = require("multer");
 const AWS = require("aws-sdk");
 const uuid = require("uuid").v4;
-
+import StoreProfile from "../models/StoreProfile.js";
 // Configure AWS S3
 const s3 = new AWS.S3({
   accessKeyId: process.env.AWS_ACCESS_KEY_ID,
@@ -50,5 +50,42 @@ const uploadLogo = async (req, res) => {
   }
 };
 
+// Remove Logo API
+async function removeLogo(req, res) {
+    try {
+      const { shopId } = req.body; // Ensure shopId is sent in the request body
+  
+      // Validate required fields
+      if (!shopId) {
+        return res.status(400).json({ success: false, message: "Shop ID is required." });
+      }
+  
+      // Fetch the store profile by shopId
+      const storeProfile = await StoreProfile.findOne({ shopId });
+      if (!storeProfile || !storeProfile.images?.logoURL) {
+        return res
+          .status(404)
+          .json({ success: false, message: "Store profile or logo not found." });
+      }
+  
+      // Extract the old logo key
+      const logoKey = storeProfile.images.logoURL.split('/').slice(-2).join('/');
+      console.log(`Deleting logo: ${logoKey}`);
+  
+      // Delete the logo from S3
+      await s3.deleteObject({ Bucket: process.env.AWS_BUCKET_NAME, Key: logoKey }).promise();
+  
+      // Remove the logo URL from the database
+      storeProfile.images.logoURL = null; // Or set it to an empty string
+      await storeProfile.save();
+  
+      // Respond with success message
+      res.status(200).json({ success: true, message: "Logo removed successfully." });
+    } catch (err) {
+      console.error("Error during logo deletion process:", err);
+      res.status(500).json({ success: false, message: "Error removing logo." });
+    }
+  }
 
-module.exports = { uploadLogo };
+
+module.exports = { uploadLogo , removeLogo};

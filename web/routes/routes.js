@@ -16,8 +16,8 @@ import {
 } from "../controllers/smtpController.js"; // Import the controller
 
 import { 
-  uploadLogo 
-
+  uploadLogo,
+  removeLogo
 } from "../controllers/UploadBrandLogoController.js";
 const router = express.Router();
 
@@ -50,5 +50,7 @@ router.put("/api/smtp/update", updateSMTPConfig);
 
 //upload logo for store
 router.post("/api/upload-logo", upload.single("logo"), uploadLogo);
+// removing the logo
+router.post("/api/remove-logo", removeLogo);
 
 export default router;
