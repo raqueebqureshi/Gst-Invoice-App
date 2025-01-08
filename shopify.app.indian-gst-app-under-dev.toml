@@ -20,9 +20,9 @@ scopes = "read_orders,read_products,write_orders,write_products"
 
 [auth]
 redirect_urls = [
-  "https://periods-surprised-defend-identifies.trycloudflare.com/auth/callback",
-  "https://periods-surprised-defend-identifies.trycloudflare.com/auth/shopify/callback",
-  "https://periods-surprised-defend-identifies.trycloudflare.com/api/auth/callback"
+  "https://glad-scanning-salmon-harvest.trycloudflare.com/auth/callback",
+  "https://glad-scanning-salmon-harvest.trycloudflare.com/auth/shopify/callback",
+  "https://glad-scanning-salmon-harvest.trycloudflare.com/api/auth/callback"
 ]
 
 [pos]
