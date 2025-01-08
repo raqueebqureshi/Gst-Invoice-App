@@ -17,7 +17,9 @@ import {
 
 import { 
   uploadLogo,
-  removeLogo
+  removeLogo,
+  uploadSignature, 
+  removeSignature 
 } from "../controllers/UploadBrandLogoController.js";
 import multer from "multer";
 
@@ -57,5 +59,11 @@ router.put("/api/smtp/update", updateSMTPConfig);
 router.post("/api/upload-logo", upload.single("logo"), uploadLogo);
 // removing the logo
 router.put("/api/remove-logo", removeLogo);
+
+// Upload Signature Route
+router.post("/upload-signature", upload.single("signature"), uploadSignature);
+
+// Remove Signature Route
+router.post("/remove-signature", removeSignature);
 
 export default router;
