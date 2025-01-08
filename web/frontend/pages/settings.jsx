@@ -1,5 +1,3 @@
-
-
 import {
   Layout,
   Page,
@@ -9,26 +7,29 @@ import {
   FormLayout,
   LegacyStack,
   TextField,
-  DropZone, Thumbnail
+  DropZone,
+  Thumbnail,
 } from "@shopify/polaris";
 import { RiDeleteBinLine } from "react-icons/ri"; // FontAwesome
-import {   Collapsible, HorizontalStack, VerticalStack, Icon } from "@shopify/polaris";
-import { ChevronDownIcon, ChevronUpIcon, DeleteIcon } from '@shopify/polaris-icons';
+import { Collapsible, HorizontalStack, VerticalStack, Icon } from "@shopify/polaris";
+import { ChevronDownIcon, ChevronUpIcon, DeleteIcon } from "@shopify/polaris-icons";
 import { TitleBar } from "@shopify/app-bridge-react";
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, use } from "react";
 
 export default function Settings() {
   const [selected, setSelected] = useState(0);
   const [storeDomain, setStoreDomain] = useState("");
   const [email, setEmail] = useState("");
-  const [shopId, setshopId] = useState("")
+  const [shopId, setshopId] = useState("");
   const [logoFile, setLogoFile] = useState(null);
-const [signatureFile, setSignatureFile] = useState(null);
+  const [signatureFile, setSignatureFile] = useState(null);
+  const [uploadStatus, setUploadStatus] = useState("");
+  const [imageUrl, setImageUrl] = useState("");
   const [showToast, setShowToast] = useState({
-      active: false,
-      message: "",
-      error: false,
-    });
+    active: false,
+    message: "",
+    error: false,
+  });
   const [storeProfile, setStoreProfile] = useState({
     firstName: "",
     lastName: "",
@@ -74,16 +75,16 @@ const [signatureFile, setSignatureFile] = useState(null);
     setFile(acceptedFiles[0]); // Only take the first accepted file
   }, []);
 
-
-  const handleTabChange = useCallback(
-    (selectedTabIndex) => setSelected(selectedTabIndex),
-    []
-  );
+  const handleTabChange = useCallback((selectedTabIndex) => setSelected(selectedTabIndex), []);
 
   const handleLogoDrop = useCallback((_dropFiles, acceptedFiles) => {
-    setLogoFile(acceptedFiles[0]);
+    setLogoFile(URL.createObjectURL(acceptedFiles[0]));
+    if (acceptedFiles[0]) {
+      handleUpload(acceptedFiles[0]);
+      console.log("acceptedFiles[0]", acceptedFiles[0]);
+    }
   }, []);
-  
+
   const handleSignatureDrop = useCallback((_dropFiles, acceptedFiles) => {
     setSignatureFile(acceptedFiles[0]);
   }, []);
@@ -100,13 +101,13 @@ const [signatureFile, setSignatureFile] = useState(null);
       .then((response) => response.json())
       .then((data) => {
         const shopInfo = data?.data?.data?.[0];
-        console.log("Shop info:", shopInfo);
+        // console.log("Shop info:", shopInfo);
         setStoreDomain(shopInfo.domain || "");
         setEmail(shopInfo.email || "");
-        setshopId(shopInfo.id || "")
-        console.log("Store domain:", storeDomain);
-        console.log("Email:", email);
-        console.log("ShopID:", shopId);
+        setshopId(shopInfo.id || "");
+        // console.log("Store domain:", storeDomain);
+        // console.log("Email:", email);
+        // console.log("ShopID:", shopId);
       })
       .catch((error) => console.log("Error fetching shop info:", error));
   }, []);
@@ -120,21 +121,25 @@ const [signatureFile, setSignatureFile] = useState(null);
       .then((data) => {
         if (data && data.profile) {
           const profileData = data.profile;
-  
+
           // Set the individual states
           setStoreProfile(profileData.storeProfile || {});
           setImages(profileData.images || {});
           setAddresses(profileData.addresses || {});
           setSocialLinks(profileData.socialLinks || {});
-  
+          if (profileData.images.logoURL !== "" && profileData.images.logoURL !== null) {
+            setImageUrl(profileData.images.logoURL);
+          }
           console.log("Shop Profile Data", profileData);
+          console.log("Logo URL:", logoFile);
         }
       })
       .catch((error) => {
         console.error("Error fetching store profile:", error);
       });
   }, [shopId]);
-    const handleSave = async () => {
+
+  const handleSave = async () => {
     try {
       const requestData = {
         shopId,
@@ -143,7 +148,7 @@ const [signatureFile, setSignatureFile] = useState(null);
         addresses,
         socialLinks,
       };
-  
+
       const response = await fetch("/api/update-store-data", {
         method: "PUT",
         headers: {
@@ -151,7 +156,7 @@ const [signatureFile, setSignatureFile] = useState(null);
         },
         body: JSON.stringify(requestData), // Properly serialize the body
       });
-  
+
       if (response.ok) {
         const responseData = await response.json();
         console.log("Settings saved successfully:", responseData);
@@ -163,12 +168,82 @@ const [signatureFile, setSignatureFile] = useState(null);
       console.error("Error while saving settings:", error);
     }
   };
-  
 
-  const [isSectionOpen, setIsSectionOpen] = useState({ general: true, branding: true, address: true, social: true });
+  // Handle upload button click
+  const handleUpload = async (file) => {
+    if (!file) {
+      setUploadStatus("Please select a file before uploading.");
+      return;
+    }
 
-  const toggleSection = (section) =>
-    setIsSectionOpen((prev) => ({ ...prev, [section]: !prev[section] }));
+    const formData = new FormData();
+    formData.append("logo", file); // This matches the multer key
+
+    try {
+      setUploadStatus("Uploading...");
+      const response = await fetch("/api/upload-logo", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error("Upload failed");
+      }
+
+      const data = await response.json();
+      console.log("data", data);
+      setUploadStatus("Uploaded successful!");
+      setImages({
+        ...images,
+        logoURL: data.logoURL,
+      });
+      // setImageUrl(data.imageUrl);
+    } catch (error) {
+      setUploadStatus(`Upload failed: ${error.message}`);
+    }
+  };
+
+  const handleDelete = async (shopId) => {
+    console.log("Deleting logo with URL:", shopId);
+    if (!imageUrl) {
+      setUploadStatus("No logo to delete.");
+      return;
+    }
+
+    try {
+      setUploadStatus("Deleting...");
+      const response = await fetch("/api/remove-logo", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ shopId }), // Sending the image URL to delete
+      });
+
+      if (!response.ok) {
+        throw new Error("Deletion failed");
+      }
+
+      const data = await response.json();
+      console.log(data);
+      setUploadStatus("Logo deleted successfully!");
+      // setImageUrl(""); // Clear the image URL after deletion
+      setImages({
+        ...images,
+        logoURL: "",
+      });
+      setLogoFile(null); // Clear selected file if needed
+    } catch (error) {
+      setUploadStatus(`Deletion failed: ${error.message}`);
+    }
+  };
+
+  const [isSectionOpen, setIsSectionOpen] = useState({
+    general: true,
+    branding: true,
+    address: true,
+    social: true,
+  });
+
+  const toggleSection = (section) => setIsSectionOpen((prev) => ({ ...prev, [section]: !prev[section] }));
 
   return (
     <Page>
@@ -356,8 +431,7 @@ const [signatureFile, setSignatureFile] = useState(null);
           </Button>
         </div>
       </AlphaCard> */}
-     
-    
+
       <Tabs tabs={tabs} selected={selected} onSelect={handleTabChange} />
       <div style={{ marginTop: "24px" }}>
         {selected === 0 && (
@@ -365,26 +439,24 @@ const [signatureFile, setSignatureFile] = useState(null);
             <h2 style={sectionTitleStyle}>General Information</h2>
             <FormLayout>
               <FormLayout.Group>
-                <TextField label="First Name" placeholder="Enter first name"
-                value={storeProfile.firstName}
-                onChange={(value) =>
-                  setStoreProfile({ ...storeProfile, firstName: value })
-                }
+                <TextField
+                  label="First Name"
+                  placeholder="Enter first name"
+                  value={storeProfile.firstName}
+                  onChange={(value) => setStoreProfile({ ...storeProfile, firstName: value })}
                 />
-                <TextField label="Last Name" placeholder="Enter last name" 
-                value={storeProfile.lastName}
-                onChange={(value) =>
-                  setStoreProfile({ ...storeProfile, lastName: value })
-                }
+                <TextField
+                  label="Last Name"
+                  placeholder="Enter last name"
+                  value={storeProfile.lastName}
+                  onChange={(value) => setStoreProfile({ ...storeProfile, lastName: value })}
                 />
               </FormLayout.Group>
               <TextField
                 label="Brand Name"
                 placeholder="Enter your brand name"
                 value={storeProfile.brandName}
-                onChange={(value) =>
-                  setStoreProfile({ ...storeProfile, brandName: value })
-                }
+                onChange={(value) => setStoreProfile({ ...storeProfile, brandName: value })}
               />
               <FormLayout.Group>
                 <TextField
@@ -392,231 +464,254 @@ const [signatureFile, setSignatureFile] = useState(null);
                   type="email"
                   placeholder="example@domain.com"
                   value={storeProfile.storeEmail}
-                onChange={(value) =>
-                  setStoreProfile({ ...storeProfile, storeEmail: value })
-                }
+                  onChange={(value) => setStoreProfile({ ...storeProfile, storeEmail: value })}
                 />
-                <TextField label="Phone Number" placeholder="Enter phone number" 
-                value={storeProfile.phone}
-                onChange={(value) =>
-                  setStoreProfile({ ...storeProfile, phone: value })
-                }
+                <TextField
+                  label="Phone Number"
+                  placeholder="Enter phone number"
+                  value={storeProfile.phone}
+                  onChange={(value) => setStoreProfile({ ...storeProfile, phone: value })}
                 />
               </FormLayout.Group>
               <TextField
                 label="Website URL"
                 placeholder="https://yourstore.com"
                 value={storeProfile.websiteURL}
-                onChange={(value) =>
-                  setStoreProfile({ ...storeProfile, websiteURL: value })
-                }
+                onChange={(value) => setStoreProfile({ ...storeProfile, websiteURL: value })}
               />
               <TextField
                 label="GST Number"
                 placeholder="Enter GST number"
                 value={storeProfile.gstNumber}
-                onChange={(value) =>
-                  setStoreProfile({ ...storeProfile, gstNumber: value })
-                }
+                onChange={(value) => setStoreProfile({ ...storeProfile, gstNumber: value })}
               />
             </FormLayout>
           </AlphaCard>
         )}
 
-{selected === 1 && (
-  <AlphaCard padding="5">
-    <h2 style={sectionTitleStyle}>Branding Information</h2>
-    <FormLayout>
-      <TextField
-        label="Brand Color (Hex)"
-        placeholder="#000000"
-        type="text"
-        value={storeProfile.brandColor}
-        onChange={(value) =>
-          setStoreProfile({ ...storeProfile, brandColor: value })
-        }
-      />
-     <FormLayout.Group style={{ justifyContent: "center", display: "flex", gap: "32px" }}>
-  {/* Logo Image Upload */}
-  <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "8px" }}>
-    <label style={{ fontWeight: "bold" }}>Logo Image</label>
-    <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
-      <div
-        style={{
-          // width: 114,
-          // height: 114,
-          borderRadius: "8px",
-          overflow: "hidden",
-          display: "flex",
-          
-          justifyContent: "center",
-          alignItems: "center",
-          backgroundColor: "#f4f6f8",
-        }}
-      >
-        <DropZone accept="image/*" onDrop={handleLogoDrop} allowMultiple={false} >
-        <div style={{ 
-  display: "inline-flex", 
-  justifyContent: "center", 
-  alignItems: "center", 
-  padding: "8px", // Optional for spacing
-  borderRadius: "8px", 
-  backgroundColor: "#f4f6f8", 
-}}>
-            {logoFile ? (
-              <LegacyStack vertical spacing="tight" align="center">
-                <Thumbnail size="large" alt="Logo Image" source={URL.createObjectURL(logoFile)} />
-              </LegacyStack>
-            ) : (
-              <DropZone.FileUpload />
-            )}
-          </div>
-        </DropZone>
-      </div>
-      
-    </div>
-    {logoFile && (
-        <button
-          onClick={() => setLogoFile(null)}
-          style={{
-            backgroundColor: "#bf0711", // Optional: background for contrast
-            border: "none",
-            borderRadius: "4px",
-            padding: "5px",
-            cursor: "pointer",
-            display: "flex",
-            alignItems: "center",
-            gap: "6px",
-          }}
-        >
-           <RiDeleteBinLine size={17} color="white" />
-          <span style={{ color: "white", fontWeight: "bold" }}>Remove</span>
-        </button>
-      )}
-  </div>
-  
+        {selected === 1 && (
+          <AlphaCard padding="5">
+            <h2 style={sectionTitleStyle}>Branding Information</h2>
+            <FormLayout>
+              <TextField
+                label="Brand Color (Hex)"
+                placeholder="#000000"
+                type="text"
+                value={storeProfile.brandColor}
+                onChange={(value) => setStoreProfile({ ...storeProfile, brandColor: value })}
+              />
+              <FormLayout.Group
+                style={{
+                  justifyContent: "center",
+                  display: "flex",
+                  gap: "32px",
+                }}
+              >
+                {/* Logo Image Upload */}
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    gap: "8px",
+                  }}
+                >
+                  <label style={{ fontWeight: "bold" }}>Logo Image</label>
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "16px",
+                    }}
+                  >
+                    <div
+                      style={{
+                        // width: 114,
+                        // height: 114,
+                        borderRadius: "8px",
+                        overflow: "hidden",
+                        display: "flex",
 
-  {/* Signature Image Upload */}
-  <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "8px" }}>
-    <label style={{ fontWeight: "bold" }}>Signature Image</label>
-    <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
-      <div
-        style={{
-          // width: 114,
-          // height: 114,
-          borderRadius: "8px",
-          overflow: "hidden",
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          backgroundColor: "#f4f6f8",
-        }}
-      >
-        <DropZone accept="image/*" onDrop={handleSignatureDrop} allowMultiple={false}  >
-        <div style={{ 
-  display: "inline-flex", 
-  justifyContent: "center", 
-  alignItems: "center", 
-  padding: "8px", // Optional for spacing
-  borderRadius: "8px", 
-  backgroundColor: "#f4f6f8", 
-}}>
-  {signatureFile ? (
-    <LegacyStack vertical spacing="tight" align="center">
-      <Thumbnail size="large" alt="Signature Image" source={URL.createObjectURL(signatureFile)} />
-    </LegacyStack>
-  ) : (
-    <DropZone.FileUpload />
-  )}
-</div>
+                        justifyContent: "center",
+                        alignItems: "center",
+                        backgroundColor: "#f4f6f8",
+                      }}
+                    >
+                      <DropZone accept="image/*" onDrop={handleLogoDrop} allowMultiple={false}>
+                        <div
+                          style={{
+                            display: "inline-flex",
+                            justifyContent: "center",
+                            alignItems: "center",
+                            padding: "8px", // Optional for spacing
+                            borderRadius: "8px",
+                            backgroundColor: "#f4f6f8",
+                          }}
+                        >
+                          {logoFile ? (
+                            <LegacyStack vertical spacing="tight" align="center">
+                              <Thumbnail size="large" alt="Logo Image" source={logoFile} />
+                            </LegacyStack>
+                          ) : (
+                            <DropZone.FileUpload />
+                          )}
+                        </div>
+                      </DropZone>
+                    </div>
+                  </div>
+                  {<p>{uploadStatus}</p>}
+                  {logoFile && (
+                    <button
+                      onClick={() => {
+                        handleDelete(shopId);
+                      }}
+                      style={{
+                        backgroundColor: "#bf0711", // Optional: background for contrast
+                        border: "none",
+                        borderRadius: "4px",
+                        padding: "5px",
+                        cursor: "pointer",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "6px",
+                      }}
+                    >
+                      <RiDeleteBinLine size={17} color="white" />
+                      <span style={{ color: "white", fontWeight: "bold" }}>Remove</span>
+                    </button>
+                  )}
+                </div>
 
-        </DropZone>
-      </div>
-      
-    </div>
-    {signatureFile && (
-        <button
-        onClick={() => setSignatureFile(null)}
-        style={{
-          backgroundColor: "#bf0711", // Optional: background for contrast
-          border: "none",
-          borderRadius: "4px",
-          padding: "5px",
-          cursor: "pointer",
-          display: "flex",
-          alignItems: "center",
-          gap: "6px",
-        }}
-      >
-         <RiDeleteBinLine size={17} color="white" />
-        <span style={{ color: "white", fontWeight: "bold" }}>Remove</span>
-      </button>
-      )}
-  </div>
-</FormLayout.Group>
+                {/* Signature Image Upload */}
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    gap: "8px",
+                  }}
+                >
+                  <label style={{ fontWeight: "bold" }}>Signature Image</label>
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "16px",
+                    }}
+                  >
+                    <div
+                      style={{
+                        // width: 114,
+                        // height: 114,
+                        borderRadius: "8px",
+                        overflow: "hidden",
+                        display: "flex",
+                        justifyContent: "center",
+                        alignItems: "center",
+                        backgroundColor: "#f4f6f8",
+                      }}
+                    >
+                      <DropZone accept="image/*" onDrop={handleSignatureDrop} allowMultiple={false}>
+                        <div
+                          style={{
+                            display: "inline-flex",
+                            justifyContent: "center",
+                            alignItems: "center",
+                            padding: "8px", // Optional for spacing
+                            borderRadius: "8px",
+                            backgroundColor: "#f4f6f8",
+                          }}
+                        >
+                          {signatureFile ? (
+                            <LegacyStack vertical spacing="tight" align="center">
+                              <Thumbnail size="large" alt="Signature Image" source={URL(signatureFile)} />
+                            </LegacyStack>
+                          ) : (
+                            <DropZone.FileUpload />
+                          )}
+                        </div>
+                      </DropZone>
+                    </div>
+                  </div>
+                  {signatureFile && (
+                    <button
+                      onClick={() => setSignatureFile(null)}
+                      style={{
+                        backgroundColor: "#bf0711", // Optional: background for contrast
+                        border: "none",
+                        borderRadius: "4px",
+                        padding: "5px",
+                        cursor: "pointer",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "6px",
+                      }}
+                    >
+                      <RiDeleteBinLine size={17} color="white" />
+                      <span style={{ color: "white", fontWeight: "bold" }}>Remove</span>
+                    </button>
+                  )}
+                </div>
+              </FormLayout.Group>
 
-
-      <TextField
-        label="Invoice Prefix"
-        placeholder="e.g., INV-"
-        value={storeProfile.invoicePrefix}
-        onChange={(value) =>
-          setStoreProfile({ ...storeProfile, invoicePrefix: value })
-        }
-      />
-      <TextField
-        label="Invoice Number"
-        value={storeProfile.invoiceNumber}
-        type="number"
-        onChange={(value) =>
-          setStoreProfile({
-            ...storeProfile,
-            invoiceNumber: Number(value),
-          })
-        }
-        placeholder="Enter initial invoice number"
-      />
-    </FormLayout>
-  </AlphaCard>
-)}
-
+              <TextField
+                label="Invoice Prefix"
+                placeholder="e.g., INV-"
+                value={storeProfile.invoicePrefix}
+                onChange={(value) => setStoreProfile({ ...storeProfile, invoicePrefix: value })}
+              />
+              <TextField
+                label="Invoice Number"
+                value={storeProfile.invoiceNumber}
+                type="number"
+                onChange={(value) =>
+                  setStoreProfile({
+                    ...storeProfile,
+                    invoiceNumber: Number(value),
+                  })
+                }
+                placeholder="Enter initial invoice number"
+              />
+            </FormLayout>
+          </AlphaCard>
+        )}
 
         {selected === 2 && (
           <AlphaCard padding="5">
             <h2 style={sectionTitleStyle}>Address Information</h2>
             <FormLayout>
-              <TextField label="Street Address" placeholder="Enter street address" 
-              value={addresses.address}
-              onChange={(value) =>
-                setAddresses({ ...addresses, address: value })
-              }
+              <TextField
+                label="Street Address"
+                placeholder="Enter street address"
+                value={addresses.address}
+                onChange={(value) => setAddresses({ ...addresses, address: value })}
               />
               <FormLayout.Group>
-                <TextField label="Apartment/Suite" placeholder="e.g., Apt 101" 
-                value={addresses.apartment}
-                onChange={(value) =>
-                  setAddresses({ ...addresses, apartment: value })
-                }
+                <TextField
+                  label="Apartment/Suite"
+                  placeholder="e.g., Apt 101"
+                  value={addresses.apartment}
+                  onChange={(value) => setAddresses({ ...addresses, apartment: value })}
                 />
-                <TextField label="City" placeholder="Enter city" 
-                value={addresses.city}
-                onChange={(value) =>
-                  setAddresses({ ...addresses, city: value })
-                }
+                <TextField
+                  label="City"
+                  placeholder="Enter city"
+                  value={addresses.city}
+                  onChange={(value) => setAddresses({ ...addresses, city: value })}
                 />
               </FormLayout.Group>
               <FormLayout.Group>
-                <TextField label="Postal Code" placeholder="Enter postal code" 
-                value={addresses.postalCode}
-                onChange={(value) =>
-                  setAddresses({ ...addresses, postalCode: value })
-                }
+                <TextField
+                  label="Postal Code"
+                  placeholder="Enter postal code"
+                  value={addresses.postalCode}
+                  onChange={(value) => setAddresses({ ...addresses, postalCode: value })}
                 />
-                <TextField label="Country" placeholder="Enter country" 
-                value={addresses.country}
-                onChange={(value) =>
-                  setAddresses({ ...addresses, country: value })
-                }
+                <TextField
+                  label="Country"
+                  placeholder="Enter country"
+                  value={addresses.country}
+                  onChange={(value) => setAddresses({ ...addresses, country: value })}
                 />
               </FormLayout.Group>
             </FormLayout>
@@ -631,41 +726,31 @@ const [signatureFile, setSignatureFile] = useState(null);
                 label="Facebook URL"
                 placeholder="Enter Facebook URL"
                 value={socialLinks.facebookURL}
-                onChange={(value) =>
-                  setSocialLinks({ ...socialLinks, facebookURL: value })
-                }
+                onChange={(value) => setSocialLinks({ ...socialLinks, facebookURL: value })}
               />
               <TextField
                 label="Twitter/X URL"
                 placeholder="Enter Twitter/X URL"
                 value={socialLinks.xURL}
-                onChange={(value) =>
-                  setSocialLinks({ ...socialLinks, xURL: value })
-                }
+                onChange={(value) => setSocialLinks({ ...socialLinks, xURL: value })}
               />
               <TextField
                 label="Instagram URL"
                 placeholder="Enter Instagram URL"
                 value={socialLinks.instagramURL}
-                onChange={(value) =>
-                  setSocialLinks({ ...socialLinks, instagramURL: value })
-                }
+                onChange={(value) => setSocialLinks({ ...socialLinks, instagramURL: value })}
               />
               <TextField
                 label="Pinterest URL"
                 placeholder="Enter Pinterest URL"
                 value={socialLinks.pinterestURL}
-                onChange={(value) =>
-                  setSocialLinks({ ...socialLinks, pinterestURL: value })
-                }
+                onChange={(value) => setSocialLinks({ ...socialLinks, pinterestURL: value })}
               />
               <TextField
                 label="YouTube URL"
                 placeholder="Enter YouTube URL"
                 value={socialLinks.youtubeURL}
-                onChange={(value) =>
-                  setSocialLinks({ ...socialLinks, youtubeURL: value })
-                }
+                onChange={(value) => setSocialLinks({ ...socialLinks, youtubeURL: value })}
               />
             </FormLayout>
           </AlphaCard>
@@ -673,7 +758,6 @@ const [signatureFile, setSignatureFile] = useState(null);
 
         <div style={footerButtonStyle}>
           <LegacyStack distribution="trailing">
-            
             <Button primary onClick={() => handleSave()}>
               Save Changes
             </Button>
@@ -681,7 +765,6 @@ const [signatureFile, setSignatureFile] = useState(null);
         </div>
       </div>
     </Page>
-    
   );
 }
 
@@ -696,20 +779,17 @@ const footerButtonStyle = {
   textAlign: "right",
 };
 
-
-
-
-// import { 
-//   Layout, 
-//   Page, 
-//   AlphaCard, 
-//   Divider, 
-//   FooterHelp, 
-//   Link, 
-//   LegacyCard, 
-//   Tabs, 
-//   Button, 
-//   TextField 
+// import {
+//   Layout,
+//   Page,
+//   AlphaCard,
+//   Divider,
+//   FooterHelp,
+//   Link,
+//   LegacyCard,
+//   Tabs,
+//   Button,
+//   TextField
 // } from "@shopify/polaris";
 // import { TitleBar } from "@shopify/app-bridge-react";
 // import { useEffect, useState, useCallback } from "react";
@@ -741,7 +821,7 @@ const footerButtonStyle = {
 //     fetch("/api/2024-10/shop.json", {
 //       method: "GET",
 //       headers: { "Content-Type": "application/json" },
-//     })  
+//     })
 //       .then((response) => response.json())
 //       .then((data) => {
 //         if (data?.data?.data?.length > 0) {
@@ -773,45 +853,45 @@ const footerButtonStyle = {
 //             <LegacyCard.Section>
 //               {selected === 0 && (
 //                 <AlphaCard>
-//                   <TextField 
-//                     label="Legal name of business" 
-//                     value={shopDetails.name || ""} 
+//                   <TextField
+//                     label="Legal name of business"
+//                     value={shopDetails.name || ""}
 //                     onChange={() => {}}
 //                   />
-//                   <TextField 
-//                     label="Phone" 
-//                     value={shopDetails.phone || ""} 
+//                   <TextField
+//                     label="Phone"
+//                     value={shopDetails.phone || ""}
 //                     onChange={() => {}}
 //                   />
 //                   <Layout>
 //                     <Layout.Section oneHalf>
-//                       <TextField 
-//                         label="Sale email" 
-//                         value={shopDetails.email || ""} 
+//                       <TextField
+//                         label="Sale email"
+//                         value={shopDetails.email || ""}
 //                         onChange={() => {}}
 //                       />
 //                     </Layout.Section>
 //                     <Layout.Section oneHalf>
-//                       <TextField 
-//                         label="Contact email" 
-//                         value={shopDetails.customer_email || ""} 
+//                       <TextField
+//                         label="Contact email"
+//                         value={shopDetails.customer_email || ""}
 //                         onChange={() => {}}
 //                       />
 //                     </Layout.Section>
 //                   </Layout>
-//                   <TextField 
-//                     label="Website" 
-//                     value={shopDetails.domain || ""} 
+//                   <TextField
+//                     label="Website"
+//                     value={shopDetails.domain || ""}
 //                     onChange={() => {}}
 //                   />
-//                   <TextField 
-//                     label="VAT number" 
-//                     value={shopDetails.vat_number || ""} 
+//                   <TextField
+//                     label="VAT number"
+//                     value={shopDetails.vat_number || ""}
 //                     onChange={() => {}}
 //                   />
-//                   <TextField 
-//                     label="Registered number" 
-//                     value={shopDetails.registered_number || ""} 
+//                   <TextField
+//                     label="Registered number"
+//                     value={shopDetails.registered_number || ""}
 //                     onChange={() => {}}
 //                   />
 //                 </AlphaCard>
@@ -847,35 +927,35 @@ const footerButtonStyle = {
 
 //               {selected === 2 && (
 //                 <AlphaCard>
-//                   <TextField 
-//                     label="Address" 
-//                     value={shopDetails.address1 || ""} 
+//                   <TextField
+//                     label="Address"
+//                     value={shopDetails.address1 || ""}
 //                     onChange={() => {}}
 //                   />
-//                   <TextField 
-//                     label="Apartment" 
-//                     value={shopDetails.address2 || ""} 
+//                   <TextField
+//                     label="Apartment"
+//                     value={shopDetails.address2 || ""}
 //                     onChange={() => {}}
 //                   />
 //                   <Layout>
 //                     <Layout.Section oneHalf>
-//                       <TextField 
-//                         label="City" 
-//                         value={shopDetails.city || ""} 
+//                       <TextField
+//                         label="City"
+//                         value={shopDetails.city || ""}
 //                         onChange={() => {}}
 //                       />
 //                     </Layout.Section>
 //                     <Layout.Section oneHalf>
-//                       <TextField 
-//                         label="Postal/ZIP code" 
-//                         value={shopDetails.zip || ""} 
+//                       <TextField
+//                         label="Postal/ZIP code"
+//                         value={shopDetails.zip || ""}
 //                         onChange={() => {}}
 //                       />
 //                     </Layout.Section>
 //                   </Layout>
-//                   <TextField 
-//                     label="Country" 
-//                     value={shopDetails.country_name || ""} 
+//                   <TextField
+//                     label="Country"
+//                     value={shopDetails.country_name || ""}
 //                     onChange={() => {}}
 //                   />
 //                 </AlphaCard>
@@ -883,29 +963,29 @@ const footerButtonStyle = {
 
 //               {selected === 3 && (
 //                 <AlphaCard>
-//                   <TextField 
-//                     label="Facebook" 
-//                     value={shopDetails.facebook || ""} 
+//                   <TextField
+//                     label="Facebook"
+//                     value={shopDetails.facebook || ""}
 //                     onChange={() => {}}
 //                   />
-//                   <TextField 
-//                     label="Twitter" 
-//                     value={shopDetails.twitter || ""} 
+//                   <TextField
+//                     label="Twitter"
+//                     value={shopDetails.twitter || ""}
 //                     onChange={() => {}}
 //                   />
-//                   <TextField 
-//                     label="Instagram" 
-//                     value={shopDetails.instagram || ""} 
+//                   <TextField
+//                     label="Instagram"
+//                     value={shopDetails.instagram || ""}
 //                     onChange={() => {}}
 //                   />
-//                   <TextField 
-//                     label="Pinterest" 
-//                     value={shopDetails.pinterest || ""} 
+//                   <TextField
+//                     label="Pinterest"
+//                     value={shopDetails.pinterest || ""}
 //                     onChange={() => {}}
 //                   />
-//                   <TextField 
-//                     label="YouTube" 
-//                     value={shopDetails.youtube || ""} 
+//                   <TextField
+//                     label="YouTube"
+//                     value={shopDetails.youtube || ""}
 //                     onChange={() => {}}
 //                   />
 //                 </AlphaCard>
@@ -922,21 +1002,6 @@ const footerButtonStyle = {
 //     </>
 //   );
 // }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 // import {
 //   // Layout,
@@ -1033,7 +1098,7 @@ const footerButtonStyle = {
 //         addresses,
 //         socialLinks,
 //       };
-  
+
 //       const response = await fetch("/api/update-store-data", {
 //         method: "PUT",
 //         headers: {
@@ -1041,7 +1106,7 @@ const footerButtonStyle = {
 //         },
 //         body: JSON.stringify(requestData), // Properly serialize the body
 //       });
-  
+
 //       if (response.ok) {
 //         const responseData = await response.json();
 //         console.log("Settings saved successfully:", responseData);
@@ -1053,7 +1118,6 @@ const footerButtonStyle = {
 //       console.error("Error while saving settings:", error);
 //     }
 //   };
-  
 
 //   return (
 //     <Page>

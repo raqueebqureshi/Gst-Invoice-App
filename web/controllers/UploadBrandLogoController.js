@@ -1,11 +1,17 @@
 // Import required modules
-require("dotenv").config();
-const express = require("express");
-const multer = require("multer");
-const AWS = require("aws-sdk");
-const uuid = require("uuid").v4;
-import StoreProfile from "../models/StoreProfile.js";
+import dotenv from "dotenv";
+import multer from "multer";
+import AWS from "aws-sdk";
+import { v4 as uuid } from "uuid";
+
+
+import StoreProfile from "../models/storeInfoModel.js";
 // Configure AWS S3
+// Load environment variables
+dotenv.config();
+
+// Use uuidv4 for generating unique IDs
+
 const s3 = new AWS.S3({
   accessKeyId: process.env.AWS_ACCESS_KEY_ID,
   secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
@@ -15,9 +21,10 @@ const s3 = new AWS.S3({
 // Multer configuration
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
+// const uuid = require("uuid").v4;
 
 // Upload Logo API
-const uploadLogo = async (req, res) => {
+export const uploadLogo = async (req, res) => {
   try {
     const file = req.file;
 
@@ -51,7 +58,7 @@ const uploadLogo = async (req, res) => {
 };
 
 // Remove Logo API
-async function removeLogo(req, res) {
+export async function removeLogo(req, res) {
     try {
       const { shopId } = req.body; // Ensure shopId is sent in the request body
   
@@ -76,7 +83,7 @@ async function removeLogo(req, res) {
       await s3.deleteObject({ Bucket: process.env.AWS_BUCKET_NAME, Key: logoKey }).promise();
   
       // Remove the logo URL from the database
-      storeProfile.images.logoURL = null; // Or set it to an empty string
+      storeProfile.images.logoURL = ""; // Or set it to an empty string
       await storeProfile.save();
   
       // Respond with success message
@@ -88,4 +95,3 @@ async function removeLogo(req, res) {
   }
 
 
-module.exports = { uploadLogo , removeLogo};
