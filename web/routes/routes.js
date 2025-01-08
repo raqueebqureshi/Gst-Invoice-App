@@ -8,7 +8,7 @@ import {
   getTemplateSettings,
   updateTemplateSettings,
 } from "../controllers/InvoiceTemplateController.js";
-import { updateStoreProfile } from "../controllers/storeProfileController.js";
+import { updateStoreProfile , fetchShopProfile } from "../controllers/storeProfileController.js";
 import {
   saveSMTPConfig,
   getSMTPConfig,
@@ -32,6 +32,9 @@ router.put("/api/update-invoice-settings", updateTemplateSettings);
 
 // Define the POST route to create a store profile with the required fields
 router.put("/api/update-store-data", updateStoreProfile);
+
+//for the fetchstoreprofile
+router.get("/api/fetch-store-profile", fetchShopProfile);
 
 // Define the POST route to save SMTP configuration
 router.post("/api/smtp/save", saveSMTPConfig);

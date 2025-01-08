@@ -9,9 +9,11 @@ import {
   FormLayout,
   LegacyStack,
   TextField,
+  DropZone, Thumbnail
 } from "@shopify/polaris";
+import { RiDeleteBinLine } from "react-icons/ri"; // FontAwesome
 import {   Collapsible, HorizontalStack, VerticalStack, Icon } from "@shopify/polaris";
-import { ChevronDownIcon, ChevronUpIcon } from '@shopify/polaris-icons';
+import { ChevronDownIcon, ChevronUpIcon, DeleteIcon } from '@shopify/polaris-icons';
 import { TitleBar } from "@shopify/app-bridge-react";
 import React, { useEffect, useState, useCallback } from "react";
 
@@ -19,6 +21,9 @@ export default function Settings() {
   const [selected, setSelected] = useState(0);
   const [storeDomain, setStoreDomain] = useState("");
   const [email, setEmail] = useState("");
+  const [shopId, setshopId] = useState("")
+  const [logoFile, setLogoFile] = useState(null);
+const [signatureFile, setSignatureFile] = useState(null);
   const [showToast, setShowToast] = useState({
       active: false,
       message: "",
@@ -62,15 +67,31 @@ export default function Settings() {
     { id: "Social-1", content: "Social Links" },
   ];
 
+  const [file, setFile] = useState(null); // Store the selected image file
+
+  // Handle file drop
+  const handleDrop = useCallback((_dropFiles, acceptedFiles, _rejectedFiles) => {
+    setFile(acceptedFiles[0]); // Only take the first accepted file
+  }, []);
+
+
   const handleTabChange = useCallback(
     (selectedTabIndex) => setSelected(selectedTabIndex),
     []
   );
 
+  const handleLogoDrop = useCallback((_dropFiles, acceptedFiles) => {
+    setLogoFile(acceptedFiles[0]);
+  }, []);
+  
+  const handleSignatureDrop = useCallback((_dropFiles, acceptedFiles) => {
+    setSignatureFile(acceptedFiles[0]);
+  }, []);
+
   const handleShowToast = (message, error = false) => {
     setShowToast({ active: true, message, error });
   };
-  // Fetch initial data for store domain and email
+  //   // Fetch initial data for store domain and email
   useEffect(() => {
     fetch("/api/2024-10/shop.json", {
       method: "GET",
@@ -80,28 +101,51 @@ export default function Settings() {
       .then((data) => {
         const shopInfo = data?.data?.data?.[0];
         console.log("Shop info:", shopInfo);
-        console.log("Shop info:", JSON.stringify(shopInfo));
         setStoreDomain(shopInfo.domain || "");
         setEmail(shopInfo.email || "");
+        setshopId(shopInfo.id || "")
         console.log("Store domain:", storeDomain);
         console.log("Email:", email);
+        console.log("ShopID:", shopId);
       })
       .catch((error) => console.log("Error fetching shop info:", error));
   }, []);
 
-  const handleSave = async () => {
+  useEffect(() => {
+    fetch(`/api/fetch-store-profile?shopId=${shopId}`, {
+      method: "GET",
+      headers: { "Content-Type": "application/json" },
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        if (data && data.profile) {
+          const profileData = data.profile;
+  
+          // Set the individual states
+          setStoreProfile(profileData.storeProfile || {});
+          setImages(profileData.images || {});
+          setAddresses(profileData.addresses || {});
+          setSocialLinks(profileData.socialLinks || {});
+  
+          console.log("Shop Profile Data", profileData);
+        }
+      })
+      .catch((error) => {
+        console.error("Error fetching store profile:", error);
+      });
+  }, [shopId]);
+    const handleSave = async () => {
     try {
       const requestData = {
-        storeDomain,
-        email,
+        shopId,
         storeProfile,
         images,
         addresses,
         socialLinks,
       };
   
-      const response = await fetch("/api/add-store-data", {
-        method: "POST",
+      const response = await fetch("/api/update-store-data", {
+        method: "PUT",
         headers: {
           "Content-Type": "application/json",
         },
@@ -337,70 +381,243 @@ export default function Settings() {
               <TextField
                 label="Brand Name"
                 placeholder="Enter your brand name"
+                value={storeProfile.brandName}
+                onChange={(value) =>
+                  setStoreProfile({ ...storeProfile, brandName: value })
+                }
               />
               <FormLayout.Group>
                 <TextField
                   label="Store Email"
                   type="email"
                   placeholder="example@domain.com"
+                  value={storeProfile.storeEmail}
+                onChange={(value) =>
+                  setStoreProfile({ ...storeProfile, storeEmail: value })
+                }
                 />
-                <TextField label="Phone Number" placeholder="Enter phone number" />
+                <TextField label="Phone Number" placeholder="Enter phone number" 
+                value={storeProfile.phone}
+                onChange={(value) =>
+                  setStoreProfile({ ...storeProfile, phone: value })
+                }
+                />
               </FormLayout.Group>
               <TextField
                 label="Website URL"
                 placeholder="https://yourstore.com"
+                value={storeProfile.websiteURL}
+                onChange={(value) =>
+                  setStoreProfile({ ...storeProfile, websiteURL: value })
+                }
               />
               <TextField
                 label="GST Number"
                 placeholder="Enter GST number"
+                value={storeProfile.gstNumber}
+                onChange={(value) =>
+                  setStoreProfile({ ...storeProfile, gstNumber: value })
+                }
               />
             </FormLayout>
           </AlphaCard>
         )}
 
-        {selected === 1 && (
-          <AlphaCard padding="5">
-            <h2 style={sectionTitleStyle}>Branding Information</h2>
-            <FormLayout>
-              <TextField label="Brand Color (Hex)" placeholder="#000000" type="text" 
-              value={storeProfile.brandColor}
-              onChange={(value) =>
-                setStoreProfile({ ...storeProfile, brandColor: value })
-              }
-              />
-              <FormLayout.Group>
-                <TextField label="Logo URL" placeholder="Enter logo image URL" />
-                <TextField label="Signature URL" placeholder="Enter signature URL" />
-              </FormLayout.Group>
-              <TextField label="Invoice Prefix" placeholder="e.g., INV-" />
-              <TextField
-                label="Invoice Number"
-                value={storeProfile.invoiceNumber}
-                type="number"
-                onChange={(value) =>
-                  setStoreProfile({
-                    ...storeProfile,
-                    invoiceNumber: Number(value),
-                  })
-                }
-                placeholder="Enter initial invoice number"
-              />
-            </FormLayout>
-          </AlphaCard>
-        )}
+{selected === 1 && (
+  <AlphaCard padding="5">
+    <h2 style={sectionTitleStyle}>Branding Information</h2>
+    <FormLayout>
+      <TextField
+        label="Brand Color (Hex)"
+        placeholder="#000000"
+        type="text"
+        value={storeProfile.brandColor}
+        onChange={(value) =>
+          setStoreProfile({ ...storeProfile, brandColor: value })
+        }
+      />
+     <FormLayout.Group style={{ justifyContent: "center", display: "flex", gap: "32px" }}>
+  {/* Logo Image Upload */}
+  <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "8px" }}>
+    <label style={{ fontWeight: "bold" }}>Logo Image</label>
+    <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+      <div
+        style={{
+          // width: 114,
+          // height: 114,
+          borderRadius: "8px",
+          overflow: "hidden",
+          display: "flex",
+          
+          justifyContent: "center",
+          alignItems: "center",
+          backgroundColor: "#f4f6f8",
+        }}
+      >
+        <DropZone accept="image/*" onDrop={handleLogoDrop} allowMultiple={false} >
+        <div style={{ 
+  display: "inline-flex", 
+  justifyContent: "center", 
+  alignItems: "center", 
+  padding: "8px", // Optional for spacing
+  borderRadius: "8px", 
+  backgroundColor: "#f4f6f8", 
+}}>
+            {logoFile ? (
+              <LegacyStack vertical spacing="tight" align="center">
+                <Thumbnail size="large" alt="Logo Image" source={URL.createObjectURL(logoFile)} />
+              </LegacyStack>
+            ) : (
+              <DropZone.FileUpload />
+            )}
+          </div>
+        </DropZone>
+      </div>
+      
+    </div>
+    {logoFile && (
+        <button
+          onClick={() => setLogoFile(null)}
+          style={{
+            backgroundColor: "#bf0711", // Optional: background for contrast
+            border: "none",
+            borderRadius: "4px",
+            padding: "5px",
+            cursor: "pointer",
+            display: "flex",
+            alignItems: "center",
+            gap: "6px",
+          }}
+        >
+           <RiDeleteBinLine size={17} color="white" />
+          <span style={{ color: "white", fontWeight: "bold" }}>Remove</span>
+        </button>
+      )}
+  </div>
+  
+
+  {/* Signature Image Upload */}
+  <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "8px" }}>
+    <label style={{ fontWeight: "bold" }}>Signature Image</label>
+    <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+      <div
+        style={{
+          // width: 114,
+          // height: 114,
+          borderRadius: "8px",
+          overflow: "hidden",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          backgroundColor: "#f4f6f8",
+        }}
+      >
+        <DropZone accept="image/*" onDrop={handleSignatureDrop} allowMultiple={false}  >
+        <div style={{ 
+  display: "inline-flex", 
+  justifyContent: "center", 
+  alignItems: "center", 
+  padding: "8px", // Optional for spacing
+  borderRadius: "8px", 
+  backgroundColor: "#f4f6f8", 
+}}>
+  {signatureFile ? (
+    <LegacyStack vertical spacing="tight" align="center">
+      <Thumbnail size="large" alt="Signature Image" source={URL.createObjectURL(signatureFile)} />
+    </LegacyStack>
+  ) : (
+    <DropZone.FileUpload />
+  )}
+</div>
+
+        </DropZone>
+      </div>
+      
+    </div>
+    {signatureFile && (
+        <button
+        onClick={() => setSignatureFile(null)}
+        style={{
+          backgroundColor: "#bf0711", // Optional: background for contrast
+          border: "none",
+          borderRadius: "4px",
+          padding: "5px",
+          cursor: "pointer",
+          display: "flex",
+          alignItems: "center",
+          gap: "6px",
+        }}
+      >
+         <RiDeleteBinLine size={17} color="white" />
+        <span style={{ color: "white", fontWeight: "bold" }}>Remove</span>
+      </button>
+      )}
+  </div>
+</FormLayout.Group>
+
+
+      <TextField
+        label="Invoice Prefix"
+        placeholder="e.g., INV-"
+        value={storeProfile.invoicePrefix}
+        onChange={(value) =>
+          setStoreProfile({ ...storeProfile, invoicePrefix: value })
+        }
+      />
+      <TextField
+        label="Invoice Number"
+        value={storeProfile.invoiceNumber}
+        type="number"
+        onChange={(value) =>
+          setStoreProfile({
+            ...storeProfile,
+            invoiceNumber: Number(value),
+          })
+        }
+        placeholder="Enter initial invoice number"
+      />
+    </FormLayout>
+  </AlphaCard>
+)}
+
 
         {selected === 2 && (
           <AlphaCard padding="5">
             <h2 style={sectionTitleStyle}>Address Information</h2>
             <FormLayout>
-              <TextField label="Street Address" placeholder="Enter street address" />
+              <TextField label="Street Address" placeholder="Enter street address" 
+              value={addresses.address}
+              onChange={(value) =>
+                setAddresses({ ...addresses, address: value })
+              }
+              />
               <FormLayout.Group>
-                <TextField label="Apartment/Suite" placeholder="e.g., Apt 101" />
-                <TextField label="City" placeholder="Enter city" />
+                <TextField label="Apartment/Suite" placeholder="e.g., Apt 101" 
+                value={addresses.apartment}
+                onChange={(value) =>
+                  setAddresses({ ...addresses, apartment: value })
+                }
+                />
+                <TextField label="City" placeholder="Enter city" 
+                value={addresses.city}
+                onChange={(value) =>
+                  setAddresses({ ...addresses, city: value })
+                }
+                />
               </FormLayout.Group>
               <FormLayout.Group>
-                <TextField label="Postal Code" placeholder="Enter postal code" />
-                <TextField label="Country" placeholder="Enter country" />
+                <TextField label="Postal Code" placeholder="Enter postal code" 
+                value={addresses.postalCode}
+                onChange={(value) =>
+                  setAddresses({ ...addresses, postalCode: value })
+                }
+                />
+                <TextField label="Country" placeholder="Enter country" 
+                value={addresses.country}
+                onChange={(value) =>
+                  setAddresses({ ...addresses, country: value })
+                }
+                />
               </FormLayout.Group>
             </FormLayout>
           </AlphaCard>
@@ -413,22 +630,42 @@ export default function Settings() {
               <TextField
                 label="Facebook URL"
                 placeholder="Enter Facebook URL"
+                value={socialLinks.facebookURL}
+                onChange={(value) =>
+                  setSocialLinks({ ...socialLinks, facebookURL: value })
+                }
               />
               <TextField
                 label="Twitter/X URL"
                 placeholder="Enter Twitter/X URL"
+                value={socialLinks.xURL}
+                onChange={(value) =>
+                  setSocialLinks({ ...socialLinks, xURL: value })
+                }
               />
               <TextField
                 label="Instagram URL"
                 placeholder="Enter Instagram URL"
+                value={socialLinks.instagramURL}
+                onChange={(value) =>
+                  setSocialLinks({ ...socialLinks, instagramURL: value })
+                }
               />
               <TextField
                 label="Pinterest URL"
                 placeholder="Enter Pinterest URL"
+                value={socialLinks.pinterestURL}
+                onChange={(value) =>
+                  setSocialLinks({ ...socialLinks, pinterestURL: value })
+                }
               />
               <TextField
                 label="YouTube URL"
                 placeholder="Enter YouTube URL"
+                value={socialLinks.youtubeURL}
+                onChange={(value) =>
+                  setSocialLinks({ ...socialLinks, youtubeURL: value })
+                }
               />
             </FormLayout>
           </AlphaCard>
@@ -437,7 +674,7 @@ export default function Settings() {
         <div style={footerButtonStyle}>
           <LegacyStack distribution="trailing">
             
-            <Button primary onClick={() => alert("Changes saved!")}>
+            <Button primary onClick={() => handleSave()}>
               Save Changes
             </Button>
           </LegacyStack>
@@ -701,309 +938,309 @@ const footerButtonStyle = {
 
 
 
-import {
-  Layout,
-  Page,
-  AlphaCard,
-  Tabs,
-  Button,
-  TextField,
-} from "@shopify/polaris";
-import { TitleBar } from "@shopify/app-bridge-react";
-import { useEffect, useState, useCallback } from "react";
+// import {
+//   // Layout,
+//   // Page,
+//   AlphaCard,
+//   Tabs,
+//   Button,
+//   TextField,
+// } from "@shopify/polaris";
+// import { TitleBar } from "@shopify/app-bridge-react";
+// import { useEffect, useState, useCallback } from "react";
 
-export default function Settings() {
-  const [selected, setSelected] = useState(0);
-  const [storeDomain, setStoreDomain] = useState("");
-  const [email, setEmail] = useState("");
-  const [shopId, setshopId] = useState("")
-  const [showToast, setShowToast] = useState({
-      active: false,
-      message: "",
-      error: false,
-    });
-  const [storeProfile, setStoreProfile] = useState({
-    firstName: "",
-    lastName: "",
-    brandColor: "#000000",
-    invoiceNumber: 1001,
-    invoicePrefix: "INV-25-26",
-    brandName: "",
-    phone: "",
-    storeEmail: "",
-    websiteURL: "",
-    gstNumber: "",
-  });
-  const [images, setImages] = useState({
-    logoURL: "",
-    signatureURL: "",
-  });
-  const [addresses, setAddresses] = useState({
-    address: "",
-    apartment: "",
-    city: "",
-    postalCode: "",
-    country: "",
-  });
-  const [socialLinks, setSocialLinks] = useState({
-    facebookURL: "",
-    xURL: "",
-    instagramURL: "",
-    pinterestURL: "",
-    youtubeURL: "",
-  });
+// export default function Settings() {
+//   const [selected, setSelected] = useState(0);
+//   const [storeDomain, setStoreDomain] = useState("");
+//   const [email, setEmail] = useState("");
+//   const [shopId, setshopId] = useState("")
+//   const [showToast, setShowToast] = useState({
+//       active: false,
+//       message: "",
+//       error: false,
+//     });
+//   const [storeProfile, setStoreProfile] = useState({
+//     firstName: "",
+//     lastName: "",
+//     brandColor: "#000000",
+//     invoiceNumber: 1001,
+//     invoicePrefix: "INV-25-26",
+//     brandName: "",
+//     phone: "",
+//     storeEmail: "",
+//     websiteURL: "",
+//     gstNumber: "",
+//   });
+//   const [images, setImages] = useState({
+//     logoURL: "",
+//     signatureURL: "",
+//   });
+//   const [addresses, setAddresses] = useState({
+//     address: "",
+//     apartment: "",
+//     city: "",
+//     postalCode: "",
+//     country: "",
+//   });
+//   const [socialLinks, setSocialLinks] = useState({
+//     facebookURL: "",
+//     xURL: "",
+//     instagramURL: "",
+//     pinterestURL: "",
+//     youtubeURL: "",
+//   });
 
-  const tabs = [
-    { id: "Company-details-1", content: "Company Details" },
-    { id: "Logo-And-Signature-1", content: "Logo And Signature" },
-    { id: "Addresses-1", content: "Address" },
-    { id: "Social-1", content: "Social Links" },
-  ];
+//   const tabs = [
+//     { id: "Company-details-1", content: "Company Details" },
+//     { id: "Logo-And-Signature-1", content: "Logo And Signature" },
+//     { id: "Addresses-1", content: "Address" },
+//     { id: "Social-1", content: "Social Links" },
+//   ];
 
-  const handleTabChange = useCallback(
-    (selectedTabIndex) => setSelected(selectedTabIndex),
-    []
-  );
+//   const handleTabChange = useCallback(
+//     (selectedTabIndex) => setSelected(selectedTabIndex),
+//     []
+//   );
 
-  const handleShowToast = (message, error = false) => {
-    setShowToast({ active: true, message, error });
-  };
-  // Fetch initial data for store domain and email
-  useEffect(() => {
-    fetch("/api/2024-10/shop.json", {
-      method: "GET",
-      headers: { "Content-Type": "application/json" },
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        const shopInfo = data?.data?.data?.[0];
-        console.log("Shop info:", shopInfo);
-        setStoreDomain(shopInfo.domain || "");
-        setEmail(shopInfo.email || "");
-        setshopId(shopInfo.id || "")
-        console.log("Store domain:", storeDomain);
-        console.log("Email:", email);
-      })
-      .catch((error) => console.log("Error fetching shop info:", error));
-  }, []);
+//   const handleShowToast = (message, error = false) => {
+//     setShowToast({ active: true, message, error });
+//   };
+//   // Fetch initial data for store domain and email
+//   useEffect(() => {
+//     fetch("/api/2024-10/shop.json", {
+//       method: "GET",
+//       headers: { "Content-Type": "application/json" },
+//     })
+//       .then((response) => response.json())
+//       .then((data) => {
+//         const shopInfo = data?.data?.data?.[0];
+//         console.log("Shop info:", shopInfo);
+//         setStoreDomain(shopInfo.domain || "");
+//         setEmail(shopInfo.email || "");
+//         setshopId(shopInfo.id || "")
+//         console.log("Store domain:", storeDomain);
+//         console.log("Email:", email);
+//       })
+//       .catch((error) => console.log("Error fetching shop info:", error));
+//   }, []);
 
-  const handleSave = async () => {
-    try {
-      const requestData = {
-        shopId,
-        storeProfile,
-        images,
-        addresses,
-        socialLinks,
-      };
+//   const handleSave = async () => {
+//     try {
+//       const requestData = {
+//         shopId,
+//         storeProfile,
+//         images,
+//         addresses,
+//         socialLinks,
+//       };
   
-      const response = await fetch("/api/update-store-data", {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(requestData), // Properly serialize the body
-      });
+//       const response = await fetch("/api/update-store-data", {
+//         method: "PUT",
+//         headers: {
+//           "Content-Type": "application/json",
+//         },
+//         body: JSON.stringify(requestData), // Properly serialize the body
+//       });
   
-      if (response.ok) {
-        const responseData = await response.json();
-        console.log("Settings saved successfully:", responseData);
-      } else {
-        const errorData = await response.json();
-        console.error("Failed to save settings:", errorData);
-      }
-    } catch (error) {
-      console.error("Error while saving settings:", error);
-    }
-  };
+//       if (response.ok) {
+//         const responseData = await response.json();
+//         console.log("Settings saved successfully:", responseData);
+//       } else {
+//         const errorData = await response.json();
+//         console.error("Failed to save settings:", errorData);
+//       }
+//     } catch (error) {
+//       console.error("Error while saving settings:", error);
+//     }
+//   };
   
 
-  return (
-    <Page>
-      <TitleBar title="Settings" />
-      <AlphaCard>
-        <Tabs tabs={tabs} selected={selected} onSelect={handleTabChange}>
-          {selected === 0 && (
-            <div>
-              <TextField
-                label="First Name"
-                value={storeProfile.firstName}
-                onChange={(value) =>
-                  setStoreProfile({ ...storeProfile, firstName: value })
-                }
-              />
-              <TextField
-                label="Last Name"
-                value={storeProfile.lastName}
-                onChange={(value) =>
-                  setStoreProfile({ ...storeProfile, lastName: value })
-                }
-              />
-              <TextField
-                label="Brand Color"
-                value={storeProfile.brandColor}
-                onChange={(value) =>
-                  setStoreProfile({ ...storeProfile, brandColor: value })
-                }
-              />
-              <TextField
-                label="Invoice Number"
-                value={storeProfile.invoiceNumber}
-                type="number"
-                onChange={(value) =>
-                  setStoreProfile({
-                    ...storeProfile,
-                    invoiceNumber: Number(value),
-                  })
-                }
-              />
-              <TextField
-                label="Invoice Prefix"
-                value={storeProfile.invoicePrefix}
-                onChange={(value) =>
-                  setStoreProfile({ ...storeProfile, invoicePrefix: value })
-                }
-              />
-              <TextField
-                label="Brand Name"
-                value={storeProfile.brandName}
-                onChange={(value) =>
-                  setStoreProfile({ ...storeProfile, brandName: value })
-                }
-              />
-              <TextField
-                label="Phone"
-                value={storeProfile.phone}
-                onChange={(value) =>
-                  setStoreProfile({ ...storeProfile, phone: value })
-                }
-              />
-              <TextField
-                label="Store Email"
-                value={storeProfile.storeEmail}
-                onChange={(value) =>
-                  setStoreProfile({ ...storeProfile, storeEmail: value })
-                }
-              />
-              <TextField
-                label="Website URL"
-                value={storeProfile.websiteURL}
-                onChange={(value) =>
-                  setStoreProfile({ ...storeProfile, websiteURL: value })
-                }
-              />
-              <TextField
-                label="GST Number"
-                value={storeProfile.gstNumber}
-                onChange={(value) =>
-                  setStoreProfile({ ...storeProfile, gstNumber: value })
-                }
-              />
-            </div>
-          )}
-          {selected === 1 && (
-            <div>
-              <TextField
-                label="Logo URL"
-                value={images.logoURL}
-                onChange={(value) =>
-                  setImages({ ...images, logoURL: value })
-                }
-              />
-              <TextField
-                label="Signature URL"
-                value={images.signatureURL}
-                onChange={(value) =>
-                  setImages({ ...images, signatureURL: value })
-                }
-              />
-            </div>
-          )}
-          {selected === 2 && (
-            <div>
-              <TextField
-                label="Address"
-                value={addresses.address}
-                onChange={(value) =>
-                  setAddresses({ ...addresses, address: value })
-                }
-              />
-              <TextField
-                label="Apartment"
-                value={addresses.apartment}
-                onChange={(value) =>
-                  setAddresses({ ...addresses, apartment: value })
-                }
-              />
-              <TextField
-                label="City"
-                value={addresses.city}
-                onChange={(value) =>
-                  setAddresses({ ...addresses, city: value })
-                }
-              />
-              <TextField
-                label="Postal Code"
-                value={addresses.postalCode}
-                onChange={(value) =>
-                  setAddresses({ ...addresses, postalCode: value })
-                }
-              />
-              <TextField
-                label="Country"
-                value={addresses.country}
-                onChange={(value) =>
-                  setAddresses({ ...addresses, country: value })
-                }
-              />
-            </div>
-          )}
-          {selected === 3 && (
-            <div>
-              <TextField
-                label="Facebook URL"
-                value={socialLinks.facebookURL}
-                onChange={(value) =>
-                  setSocialLinks({ ...socialLinks, facebookURL: value })
-                }
-              />
-              <TextField
-                label="Twitter URL"
-                value={socialLinks.xURL}
-                onChange={(value) =>
-                  setSocialLinks({ ...socialLinks, xURL: value })
-                }
-              />
-              <TextField
-                label="Instagram URL"
-                value={socialLinks.instagramURL}
-                onChange={(value) =>
-                  setSocialLinks({ ...socialLinks, instagramURL: value })
-                }
-              />
-              <TextField
-                label="Pinterest URL"
-                value={socialLinks.pinterestURL}
-                onChange={(value) =>
-                  setSocialLinks({ ...socialLinks, pinterestURL: value })
-                }
-              />
-              <TextField
-                label="YouTube URL"
-                value={socialLinks.youtubeURL}
-                onChange={(value) =>
-                  setSocialLinks({ ...socialLinks, youtubeURL: value })
-                }
-              />
-            </div>
-          )}
-        </Tabs>
-        <div style={{ marginTop: "20px", textAlign: "right" }}>
-          <Button primary onClick={handleSave}>
-            Save
-          </Button>
-        </div>
-      </AlphaCard>
-    </Page>
-  );
-}
+//   return (
+//     <Page>
+//       <TitleBar title="Settings" />
+//       <AlphaCard>
+//         <Tabs tabs={tabs} selected={selected} onSelect={handleTabChange}>
+//           {selected === 0 && (
+//             <div>
+//               <TextField
+//                 label="First Name"
+//                 value={storeProfile.firstName}
+//                 onChange={(value) =>
+//                   setStoreProfile({ ...storeProfile, firstName: value })
+//                 }
+//               />
+//               <TextField
+//                 label="Last Name"
+//                 value={storeProfile.lastName}
+//                 onChange={(value) =>
+//                   setStoreProfile({ ...storeProfile, lastName: value })
+//                 }
+//               />
+//               <TextField
+//                 label="Brand Color"
+//                 value={storeProfile.brandColor}
+//                 onChange={(value) =>
+//                   setStoreProfile({ ...storeProfile, brandColor: value })
+//                 }
+//               />
+//               <TextField
+//                 label="Invoice Number"
+//                 value={storeProfile.invoiceNumber}
+//                 type="number"
+//                 onChange={(value) =>
+//                   setStoreProfile({
+//                     ...storeProfile,
+//                     invoiceNumber: Number(value),
+//                   })
+//                 }
+//               />
+//               <TextField
+//                 label="Invoice Prefix"
+//                 value={storeProfile.invoicePrefix}
+//                 onChange={(value) =>
+//                   setStoreProfile({ ...storeProfile, invoicePrefix: value })
+//                 }
+//               />
+//               <TextField
+//                 label="Brand Name"
+//                 value={storeProfile.brandName}
+//                 onChange={(value) =>
+//                   setStoreProfile({ ...storeProfile, brandName: value })
+//                 }
+//               />
+//               <TextField
+//                 label="Phone"
+//                 value={storeProfile.phone}
+//                 onChange={(value) =>
+//                   setStoreProfile({ ...storeProfile, phone: value })
+//                 }
+//               />
+//               <TextField
+//                 label="Store Email"
+//                 value={storeProfile.storeEmail}
+//                 onChange={(value) =>
+//                   setStoreProfile({ ...storeProfile, storeEmail: value })
+//                 }
+//               />
+//               <TextField
+//                 label="Website URL"
+//                 value={storeProfile.websiteURL}
+//                 onChange={(value) =>
+//                   setStoreProfile({ ...storeProfile, websiteURL: value })
+//                 }
+//               />
+//               <TextField
+//                 label="GST Number"
+//                 value={storeProfile.gstNumber}
+//                 onChange={(value) =>
+//                   setStoreProfile({ ...storeProfile, gstNumber: value })
+//                 }
+//               />
+//             </div>
+//           )}
+//           {selected === 1 && (
+//             <div>
+//               <TextField
+//                 label="Logo URL"
+//                 value={images.logoURL}
+//                 onChange={(value) =>
+//                   setImages({ ...images, logoURL: value })
+//                 }
+//               />
+//               <TextField
+//                 label="Signature URL"
+//                 value={images.signatureURL}
+//                 onChange={(value) =>
+//                   setImages({ ...images, signatureURL: value })
+//                 }
+//               />
+//             </div>
+//           )}
+//           {selected === 2 && (
+//             <div>
+//               <TextField
+//                 label="Address"
+//                 value={addresses.address}
+//                 onChange={(value) =>
+//                   setAddresses({ ...addresses, address: value })
+//                 }
+//               />
+//               <TextField
+//                 label="Apartment"
+//                 value={addresses.apartment}
+//                 onChange={(value) =>
+//                   setAddresses({ ...addresses, apartment: value })
+//                 }
+//               />
+//               <TextField
+//                 label="City"
+//                 value={addresses.city}
+//                 onChange={(value) =>
+//                   setAddresses({ ...addresses, city: value })
+//                 }
+//               />
+//               <TextField
+//                 label="Postal Code"
+//                 value={addresses.postalCode}
+//                 onChange={(value) =>
+//                   setAddresses({ ...addresses, postalCode: value })
+//                 }
+//               />
+//               <TextField
+//                 label="Country"
+//                 value={addresses.country}
+//                 onChange={(value) =>
+//                   setAddresses({ ...addresses, country: value })
+//                 }
+//               />
+//             </div>
+//           )}
+//           {selected === 3 && (
+//             <div>
+//               <TextField
+//                 label="Facebook URL"
+//                 value={socialLinks.facebookURL}
+//                 onChange={(value) =>
+//                   setSocialLinks({ ...socialLinks, facebookURL: value })
+//                 }
+//               />
+//               <TextField
+//                 label="Twitter URL"
+//                 value={socialLinks.xURL}
+//                 onChange={(value) =>
+//                   setSocialLinks({ ...socialLinks, xURL: value })
+//                 }
+//               />
+//               <TextField
+//                 label="Instagram URL"
+//                 value={socialLinks.instagramURL}
+//                 onChange={(value) =>
+//                   setSocialLinks({ ...socialLinks, instagramURL: value })
+//                 }
+//               />
+//               <TextField
+//                 label="Pinterest URL"
+//                 value={socialLinks.pinterestURL}
+//                 onChange={(value) =>
+//                   setSocialLinks({ ...socialLinks, pinterestURL: value })
+//                 }
+//               />
+//               <TextField
+//                 label="YouTube URL"
+//                 value={socialLinks.youtubeURL}
+//                 onChange={(value) =>
+//                   setSocialLinks({ ...socialLinks, youtubeURL: value })
+//                 }
+//               />
+//             </div>
+//           )}
+//         </Tabs>
+//         <div style={{ marginTop: "20px", textAlign: "right" }}>
+//           <Button primary onClick={handleSave}>
+//             Save
+//           </Button>
+//         </div>
+//       </AlphaCard>
+//     </Page>
+//   );
+// }
