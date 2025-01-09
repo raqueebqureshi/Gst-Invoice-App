@@ -43,6 +43,7 @@ const EmailSetting = () => {
   const [active, setActive] = useState(false);
   const [isEnabled, setIsEnabled] = useState(false);
   const [isEnabledByApp, setIsEnabledByApp] = useState(false);
+  const [sendEmailOnOrderPlaced, setsendEmailOnOrderPlaced] = useState();
 
   const handleButtonToggle = () => {
     setIsEnabled((prev) => !prev);
@@ -55,6 +56,10 @@ const EmailSetting = () => {
 
   const handleButtonByAppToggle = () => {
     setIsEnabledByApp((prev) => !prev);
+  };
+
+  const handleButtonSendAuto = () => {
+    setsendEmailOnOrderPlaced((prev) => !prev);
   };
 
   const handleToggle = useCallback(() => setOpen((open) => !open), []);
@@ -371,6 +376,42 @@ const EmailSetting = () => {
           
         </VerticalStack>
       </AlphaCard>
+      
+      </div>
+
+      <div style={{marginTop: "20px"}}>
+      <AlphaCard >
+        <VerticalStack gap="5">
+          <div style={styles.headerContainer}>
+            <div style={styles.titleSection}>
+              <Icon source={EmailFollowUpIcon} color="highlight" />
+              <p>Automatically send invoice to customer on order placed!</p>
+              
+            </div>
+            <LegacyStack alignment="center" spacing="tight">
+              <Badge status={sendEmailOnOrderPlaced ? "success" : "attention"}>
+                {sendEmailOnOrderPlaced ? "Enabled" : "Disabled"}
+              </Badge>
+              <div onClick={handleButtonSendAuto} style={styles.toggleWrapper}>
+                <div
+                  style={{
+                    ...styles.toggleCircle,
+                    ...(sendEmailOnOrderPlaced ? styles.on : styles.off),
+                  }}
+                ></div>
+              </div>
+            </LegacyStack>
+          </div>
+
+          
+
+          
+          <div style={{display: "flex", justifyContent: "space-between", alignItems: "center"}}>
+          </div>
+          
+        </VerticalStack>
+      </AlphaCard>
+      
       </div>
       
     </Page>

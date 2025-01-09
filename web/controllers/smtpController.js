@@ -28,6 +28,115 @@ export const saveSMTPConfig = async (req, res) => {
   }
 };
 
+//update only boolean for sendByOwnEmail
+export const changeSendByOwnEmail = async (req, res) => {
+  try {
+    const { shopId, sendByOwnEmail } = req.body;
+
+    // Ensure shopId and sendByOwnEmail are provided
+    if (!shopId || sendByOwnEmail === undefined) {
+      return res.status(400).json({ error: "Shop ID and sendByOwnEmail are required." });
+    }
+
+    // Update only the sendByOwnEmail field in the database
+    const updatedConfig = await SMTPConfig.findOneAndUpdate(
+      { shopId }, // Find by shopId
+      { sendByOwnEmail }, // Update only the sendByOwnEmail field
+      { new: true } // Return the updated document
+    );
+
+    // If no configuration is found
+    if (!updatedConfig) {
+      return res.status(404).json({ error: "SMTP configuration not found for this shop." });
+    }
+
+    // Respond with the updated configuration
+    res.status(200).json({
+      message: "SMTP configuration updated successfully.",
+      updatedConfig: {
+        shopId: updatedConfig.shopId,
+        sendByOwnEmail: updatedConfig.sendByOwnEmail,
+      },
+    });
+  } catch (error) {
+    console.error("Error updating sendByOwnEmail:", error);
+    res.status(500).json({ error: "An error occurred while updating the SMTP configuration." });
+  }
+};
+
+// update only boolean for sendByAppEmail 
+export const changeSendByAppEmail = async (req, res) => {
+  try {
+    const { shopId, sendByAppEmail } = req.body;
+
+    // Ensure shopId and sendByAppEmail are provided
+    if (!shopId || sendByAppEmail === undefined) {
+      return res.status(400).json({ error: "Shop ID and sendByAppEmail are required." });
+    }
+
+    // Update only the sendByAppEmail field in the database
+    const updatedConfig = await SMTPConfig.findOneAndUpdate(
+      { shopId }, // Find by shopId
+      { sendByAppEmail }, // Update only the sendByAppEmail field
+      { new: true } // Return the updated document
+    );
+
+    // If no configuration is found
+    if (!updatedConfig) {
+      return res.status(404).json({ error: "SMTP configuration not found for this shop." });
+    }
+
+    // Respond with the updated configuration
+    res.status(200).json({
+      message: "SMTP configuration updated successfully.",
+      updatedConfig: {
+        shopId: updatedConfig.shopId,
+        sendByAppEmail: updatedConfig.sendByAppEmail,
+      },
+    });
+  } catch (error) {
+    console.error("Error updating sendByAppEmail:", error);
+    res.status(500).json({ error: "An error occurred while updating the SMTP configuration." });
+  }
+};
+
+// update only boolean for sendOnOrderPlaced
+export const changeSendOnOrderPlaced = async (req, res) => {
+  try {
+    const { shopId, sendOnOrderPlaced } = req.body;
+
+    // Ensure shopId and sendOnOrderPlaced are provided
+    if (!shopId || sendOnOrderPlaced === undefined) {
+      return res.status(400).json({ error: "Shop ID and sendOnOrderPlaced are required." });
+    }
+
+    // Update only the sendOnOrderPlaced field in the database
+    const updatedConfig = await SMTPConfig.findOneAndUpdate(
+      { shopId }, // Find by shopId
+      { sendOnOrderPlaced }, // Update only the sendOnOrderPlaced field
+      { new: true } // Return the updated document
+    );
+
+    // If no configuration is found
+    if (!updatedConfig) {
+      return res.status(404).json({ error: "SMTP configuration not found for this shop." });
+    }
+
+    // Respond with the updated configuration
+    res.status(200).json({
+      message: "SMTP configuration updated successfully.",
+      updatedConfig: {
+        shopId: updatedConfig.shopId,
+        sendOnOrderPlaced: updatedConfig.sendOnOrderPlaced,
+      },
+    });
+  } catch (error) {
+    console.error("Error updating sendOnOrderPlaced:", error);
+    res.status(500).json({ error: "An error occurred while updating the SMTP configuration." });
+  }
+};
+
+
 // Get SMTP configuration
 export const getSMTPConfig = async (req, res) => {
   try {
@@ -52,6 +161,7 @@ export const getSMTPConfig = async (req, res) => {
       fromName: smtpConfig.fromName,
       sendByOwnEmail: smtpConfig.sendByOwnEmail,
       sendByAppEmail: smtpConfig.sendByAppEmail,
+      sendOnOrderPlaced: smtpConfig.sendOnOrderPlaced,
       emailFormat: smtpConfig.emailFormat,
       password: "********", // Mask the password for security
     });
@@ -60,6 +170,35 @@ export const getSMTPConfig = async (req, res) => {
     res.status(500).json({ error: "An error occurred while fetching the SMTP configuration." });
   }
 };
+
+
+// Get SMTP configuration
+export const checkForStatus = async (req, res) => {
+  try {
+    const { shopId } = req.query;
+
+    // Ensure shopId is provided
+    if (!shopId) {
+      return res.status(400).json({ error: "Shop ID is required." });
+    }
+
+    // Fetch configuration for the shop
+    const checkTureFalse = await SMTPConfig.findOne({ shopId });
+    if (!checkTureFalse) {
+      return res.status(404).json({ error: "SMTP configuration not found for the given shop ID." });
+    }
+
+    res.status(200).json({
+      sendByOwnEmail: checkTureFalse.sendByOwnEmail,
+      sendByAppEmail: checkTureFalse.sendByAppEmail,
+      sendOnOrderPlaced: checkTureFalse.sendOnOrderPlaced,
+    });
+  } catch (error) {
+    console.error("Error fetching SMTP configuration:", error);
+    res.status(500).json({ error: "An error occurred while fetching the SMTP configuration." });
+  }
+};
+
 
 // Update SMTP configuration
 export const updateSMTPConfig = async (req, res) => {
