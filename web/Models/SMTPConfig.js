@@ -36,11 +36,12 @@ Best regards,
 
 // Encrypt password before saving
 smtpSchema.pre("save", async function (next) {
-  if (this.isModified("password")) {
-    this.password = await bcrypt.hash(this.password, 10);
+  if (this.isModified("smtpData.password")) {
+    this.smtpData.password = await bcrypt.hash(this.smtpData.password, 10);
   }
   next();
 });
+
 
 // Instance method to match password
 smtpSchema.methods.matchPassword = async function (enteredPassword) {
