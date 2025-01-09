@@ -1,5 +1,10 @@
 import SMTPConfig from "../Models/SMTPConfig.js";
 import bcrypt from "bcrypt";
+import crypto from "crypto";
+
+import dotenv from 'dotenv';
+dotenv.config();
+
 
 // Save SMTP configuration
 export const saveSMTPConfig = async (req, res) => {
@@ -144,19 +149,34 @@ export const getSMTPConfig = async (req, res) => {
   try {
     const { shopId } = req.query;
 
-    // Ensure shopId is provided
     if (!shopId) {
       return res.status(400).json({ error: "Shop ID is required." });
     }
 
-    // Fetch configuration for the shop
     const smtpConfig = await SMTPConfig.findOne({ shopId });
     if (!smtpConfig) {
-      return res.status(404).json({ error: "SMTP configuration not found for the given shop ID." });
+      return res.status(404).json({ error: "SMTP configuration not found." });
     }
 
+    // Decrypt the password
+    const [iv, encryptedPassword] = smtpConfig.smtpData.password.split(":");
+    const algorithm = "aes-256-cbc";
+    const secretKey = process.env.ENCRYPTION_SECRET_KEY;
+    const decipher = crypto.createDecipheriv(
+      algorithm,
+      Buffer.from(secretKey),
+      Buffer.from(iv, "hex")
+    );
+
+    let decryptedPassword = decipher.update(encryptedPassword, "hex", "utf8");
+    decryptedPassword += decipher.final("utf8");
+
+    // Include decrypted password in response
     res.status(200).json({
-      smtpData: smtpConfig.smtpData,
+      smtpData: {
+        ...smtpConfig.smtpData.toObject(),
+        password: decryptedPassword,
+      },
     });
   } catch (error) {
     console.error("Error fetching SMTP configuration:", error);
