@@ -15,6 +15,7 @@ import { Collapsible, HorizontalStack, VerticalStack, Icon } from "@shopify/pola
 import { ChevronDownIcon, ChevronUpIcon, DeleteIcon } from "@shopify/polaris-icons";
 import { TitleBar } from "@shopify/app-bridge-react";
 import React, { useEffect, useState, useCallback, use } from "react";
+import { set } from "mongoose";
 
 export default function Settings() {
   const [selected, setSelected] = useState(0);
@@ -24,7 +25,8 @@ export default function Settings() {
   const [logoFile, setLogoFile] = useState(null);
   const [signatureFile, setSignatureFile] = useState(null);
   const [uploadStatus, setUploadStatus] = useState("");
-  const [imageUrl, setImageUrl] = useState("");
+  const [logoUrl, setLogoUrl] = useState("");
+  const [signatureUrl, setSignatureUrl] = useState("");
   const [showToast, setShowToast] = useState({
     active: false,
     message: "",
@@ -128,7 +130,7 @@ export default function Settings() {
           setAddresses(profileData.addresses || {});
           setSocialLinks(profileData.socialLinks || {});
           if (profileData.images.logoURL !== "" && profileData.images.logoURL !== null) {
-            setImageUrl(profileData.images.logoURL);
+            setLogoUrl(profileData.images.logoURL);
           }
           console.log("Shop Profile Data", profileData);
           console.log("Logo URL:", logoFile);
@@ -138,6 +140,17 @@ export default function Settings() {
         console.error("Error fetching store profile:", error);
       });
   }, [shopId]);
+
+  useEffect(() => {
+    console.log('imageUrl', logoUrl);
+  }, [logoUrl]);
+
+  useEffect(() => {
+    setTimeout(() => {
+      setUploadStatus("");
+    }, 5000);
+    
+  }, [uploadStatus]);
 
   const handleSave = async () => {
     try {
@@ -197,7 +210,7 @@ export default function Settings() {
         ...images,
         logoURL: data.logoURL,
       });
-      // setImageUrl(data.imageUrl);
+      setLogoUrl(data.logoURL);
     } catch (error) {
       setUploadStatus(`Upload failed: ${error.message}`);
     }
@@ -205,7 +218,7 @@ export default function Settings() {
 
   const handleDelete = async (shopId) => {
     console.log("Deleting logo with URL:", shopId);
-    if (!imageUrl) {
+    if (!logoUrl) {
       setUploadStatus("No logo to delete.");
       return;
     }
@@ -225,7 +238,7 @@ export default function Settings() {
       const data = await response.json();
       console.log(data);
       setUploadStatus("Logo deleted successfully!");
-      // setImageUrl(""); // Clear the image URL after deletion
+      setLogoUrl(""); // Clear the image URL after deletion
       setImages({
         ...images,
         logoURL: "",
@@ -548,9 +561,9 @@ export default function Settings() {
                             backgroundColor: "#f4f6f8",
                           }}
                         >
-                          {logoFile ? (
+                          {logoUrl ? (
                             <LegacyStack vertical spacing="tight" align="center">
-                              <Thumbnail size="large" alt="Logo Image" source={logoFile} />
+                              <Thumbnail size="large" alt="Logo Image" source={logoUrl} />
                             </LegacyStack>
                           ) : (
                             <DropZone.FileUpload />
@@ -560,7 +573,7 @@ export default function Settings() {
                     </div>
                   </div>
                   {<p>{uploadStatus}</p>}
-                  {logoFile && (
+                  {logoUrl && (
                     <button
                       onClick={() => {
                         handleDelete(shopId);

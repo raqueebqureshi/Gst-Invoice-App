@@ -3,6 +3,7 @@ import bcrypt from "bcrypt";
 
 // Save SMTP configuration
 export const saveSMTPConfig = async (req, res) => {
+  
   try {
     const { shopId, ...smtpData } = req.body;
 

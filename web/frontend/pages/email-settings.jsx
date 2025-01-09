@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import {
   AlphaCard,
   Page,
@@ -35,7 +35,6 @@ const EmailSetting = () => {
     port: "",
     username: "",
     password: "",
-    storeName: "",
     fromEmail: "",
     fromName: "",
   });
@@ -72,6 +71,7 @@ const EmailSetting = () => {
 
   const handleSave = () => {
     console.log("Saving Email Settings...", emailSettings);
+    saveSMTPConfiguration(shopId, emailSettings);
   };
 
   const handleTabChange = useCallback((selectedIndex) => {
@@ -178,6 +178,55 @@ const EmailSetting = () => {
       ),
     },
   ];
+
+  // Fetch store details
+  useEffect(() => {
+    fetch("/api/2024-10/shop.json", {
+      method: "GET",
+      headers: { "Content-Type": "application/json" },
+    })
+      .then((request) => request.json())
+      .then((response) => {
+        // console.log("Store Details---!", response.data);
+        if (response.data.data.length > 0) {
+          // console.log("Store Details---", response.data.data[0]);
+          
+        }
+      })
+      .catch((error) =>  console.log(error));
+  }, []);
+
+  const saveSMTPConfiguration = async (shopId , smtpData) => {
+    try {
+      if (!shopId) {
+        console.error("Missing shopId:", 
+          shopId
+        );
+        throw new Error("Invalid shopId.");
+      }
+
+      const response = await fetch("/api/smtp/save", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          shopId,
+          smtpData
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(
+          `Failed to save settings. Status: ${response.status}`
+        );
+      }
+
+      const data = await response.json();
+      console.log("Saved settings:", data);
+
+    } catch (error) {
+      console.error("Error while save settings:", error);
+    }
+  };
 
   return (
     <Page title="Email Configuration" fullWidth>
@@ -290,13 +339,13 @@ const EmailSetting = () => {
                   />
                 </FormLayout.Group>
 
-                <TextField
+                {/* <TextField
                   label="Store Name"
                   value={emailSettings.storeName}
                   onChange={handleChange("storeName")}
                   autoComplete="off"
                   placeholder="Your Store Name"
-                />
+                /> */}
                 <TextField
                   label="From Email"
                   type="email"
