@@ -38,7 +38,7 @@ export const saveSMTPConfig = async (req, res) => {
 export const changeSendByOwnEmail = async (req, res) => {
   try {
     const { shopId, sendByOwnEmail } = req.body;
-
+    console.log('req.body', req.body);
     // Ensure shopId and sendByOwnEmail are provided
     if (!shopId || sendByOwnEmail === undefined) {
       return res.status(400).json({ error: "Shop ID and sendByOwnEmail are required." });
@@ -47,7 +47,7 @@ export const changeSendByOwnEmail = async (req, res) => {
     // Update only the sendByOwnEmail field in the database
     const updatedConfig = await SMTPConfig.findOneAndUpdate(
       { shopId }, // Find by shopId
-      { sendByOwnEmail }, // Update only the sendByOwnEmail field
+      { "smtpData.sendByOwnEmail": sendByOwnEmail }, // Update only the sendByOwnEmail field
       { new: true } // Return the updated document
     );
 
@@ -61,7 +61,7 @@ export const changeSendByOwnEmail = async (req, res) => {
       message: "SMTP configuration updated successfully.",
       updatedConfig: {
         shopId: updatedConfig.shopId,
-        sendByOwnEmail: updatedConfig.sendByOwnEmail,
+        sendByOwnEmail: updatedConfig.smtpData.sendByOwnEmail,
       },
     });
   } catch (error) {
@@ -83,7 +83,7 @@ export const changeSendByAppEmail = async (req, res) => {
     // Update only the sendByAppEmail field in the database
     const updatedConfig = await SMTPConfig.findOneAndUpdate(
       { shopId }, // Find by shopId
-      { sendByAppEmail }, // Update only the sendByAppEmail field
+      { "smtpData.sendByAppEmail": sendByAppEmail }, // Update only the sendByAppEmail field
       { new: true } // Return the updated document
     );
 
@@ -97,7 +97,7 @@ export const changeSendByAppEmail = async (req, res) => {
       message: "SMTP configuration updated successfully.",
       updatedConfig: {
         shopId: updatedConfig.shopId,
-        sendByAppEmail: updatedConfig.sendByAppEmail,
+        sendByAppEmail: updatedConfig.smtpData.sendByAppEmail,
       },
     });
   } catch (error) {
@@ -119,7 +119,7 @@ export const changeSendOnOrderPlaced = async (req, res) => {
     // Update only the sendOnOrderPlaced field in the database
     const updatedConfig = await SMTPConfig.findOneAndUpdate(
       { shopId }, // Find by shopId
-      { sendOnOrderPlaced }, // Update only the sendOnOrderPlaced field
+      { "smtpData.sendOnOrderPlaced": sendOnOrderPlaced }, // Update only the sendOnOrderPlaced field
       { new: true } // Return the updated document
     );
 
@@ -133,7 +133,7 @@ export const changeSendOnOrderPlaced = async (req, res) => {
       message: "SMTP configuration updated successfully.",
       updatedConfig: {
         shopId: updatedConfig.shopId,
-        sendOnOrderPlaced: updatedConfig.sendOnOrderPlaced,
+        sendOnOrderPlaced: updatedConfig.smtpData.sendOnOrderPlaced,
       },
     });
   } catch (error) {
@@ -201,9 +201,9 @@ export const checkForStatus = async (req, res) => {
     }
 
     res.status(200).json({
-      sendByOwnEmail: checkTureFalse.sendByOwnEmail,
-      sendByAppEmail: checkTureFalse.sendByAppEmail,
-      sendOnOrderPlaced: checkTureFalse.sendOnOrderPlaced,
+      sendByOwnEmail: checkTureFalse.smtpData.sendByOwnEmail,
+      sendByAppEmail: checkTureFalse.smtpData.sendByAppEmail,
+      sendOnOrderPlaced: checkTureFalse.smtpData.sendOnOrderPlaced,
     });
   } catch (error) {
     console.error("Error fetching SMTP configuration:", error);
