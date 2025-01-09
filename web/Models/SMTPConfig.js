@@ -6,12 +6,12 @@ dotenv.config();
 const smtpSchema = new mongoose.Schema({
   shopId: { type: String, required: true, unique: true },
   smtpData: {
-    host: { type: String, required: true },
-    port: { type: Number, required: true },
-    username: { type: String, required: true },
-    password: { type: String, required: true }, // Encrypted password
-    fromEmail: { type: String, required: true },
-    fromName: { type: String, required: true },
+    host: { type: String, default: "" },
+    port: { type: Number, default: "" },
+    username: { type: String, default: "" },
+    password: { type: String, default: "" }, // Encrypted password
+    fromEmail: { type: String, default: ""},
+    fromName: { type: String, default: "" },
     sendByOwnEmail: { type: Boolean, default: false },
     sendByAppEmail: { type: Boolean, default: true },
     sendOnOrderPlaced: { type: Boolean, default: false },

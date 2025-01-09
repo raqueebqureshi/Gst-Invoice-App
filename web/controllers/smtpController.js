@@ -2,8 +2,7 @@ import SMTPConfig from "../Models/SMTPConfig.js";
 import bcrypt from "bcrypt";
 import crypto from "crypto";
 
-import dotenv from 'dotenv';
-dotenv.config();
+
 
 
 // Save SMTP configuration

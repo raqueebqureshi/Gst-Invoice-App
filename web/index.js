@@ -15,6 +15,7 @@ import connectDB from './database/db.js';
 import routes from './routes/routes.js'; // Import the product routes
 import InvoiceTemplate from './Models/InvoiceTemplateModel.js';
 import StoreProfile from './Models/storeInfoModel.js';
+import SMTPConfig from "./Models/SMTPConfig.js";
 dotenv.config();
 
 
@@ -285,6 +286,26 @@ app.get(
       } else {
         console.log("Invoice template already exists:", invoiceTemplate);
       }
+
+
+      
+      let SMtPSettings = await SMTPConfig.findOne({ shopId });
+
+      if (!SMtPSettings) {
+        // Create a new store profile
+        SMtPSettings = new SMTPConfig({
+          shopId,
+          smtpData: SMtPSettings.smtpData,
+          // Default values for the profile will come from the schema
+        });
+
+        await SMtPSettings.save();
+        console.log("Store profile created for the store:", SMtPSettings);
+      } else {
+        console.log("Store profile already exists:", SMtPSettings);
+      }
+
+
 
       // Redirect to Shopify or app root
       shopify.redirectToShopifyOrAppRoot()(req, res, next);
