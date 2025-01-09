@@ -96,6 +96,6 @@ router.put("/api/remove-logo", removeLogo);
 router.post("/api/upload-signature", upload.single("signature"), uploadSignature);
 
 // Remove Signature Route
-router.post("/api/remove-signature", removeSignature);
+router.put("/api/remove-signature", removeSignature);
 
 export default router;

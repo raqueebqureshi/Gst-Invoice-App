@@ -24,7 +24,8 @@ export default function Settings() {
   const [shopId, setshopId] = useState("");
   const [logoFile, setLogoFile] = useState(null);
   const [signatureFile, setSignatureFile] = useState(null);
-  const [uploadStatus, setUploadStatus] = useState("");
+  const [uploadLogoStatus, setUploadLogoStatus] = useState("");
+  const [uploadSignatureStatus, setUploadSignatureStatus] = useState("");
   const [logoUrl, setLogoUrl] = useState("");
   const [signatureUrl, setSignatureUrl] = useState("");
   const [showToast, setShowToast] = useState({
@@ -48,6 +49,7 @@ export default function Settings() {
     logoURL: "",
     signatureURL: "",
   });
+  const [isSaving, setIsSaving] = useState(false);
   const [addresses, setAddresses] = useState({
     address: "",
     apartment: "",
@@ -82,13 +84,17 @@ export default function Settings() {
   const handleLogoDrop = useCallback((_dropFiles, acceptedFiles) => {
     setLogoFile(URL.createObjectURL(acceptedFiles[0]));
     if (acceptedFiles[0]) {
-      handleUpload(acceptedFiles[0]);
+      handleLogoUpload(acceptedFiles[0]);
       console.log("acceptedFiles[0]", acceptedFiles[0]);
     }
   }, []);
 
   const handleSignatureDrop = useCallback((_dropFiles, acceptedFiles) => {
-    setSignatureFile(acceptedFiles[0]);
+    setSignatureFile(URL.createObjectURL(acceptedFiles[0]));
+    if (acceptedFiles[0]) {
+      handleSignatureUpload(acceptedFiles[0]);
+      console.log("acceptedFiles[0]", acceptedFiles[0]);
+    }
   }, []);
 
   const handleShowToast = (message, error = false) => {
@@ -132,8 +138,11 @@ export default function Settings() {
           if (profileData.images.logoURL !== "" && profileData.images.logoURL !== null) {
             setLogoUrl(profileData.images.logoURL);
           }
+          if (profileData.images.signatureURL !== "" && profileData.images.signatureURL !== null) {
+            setSignatureUrl(profileData.images.signatureURL);
+          }
           console.log("Shop Profile Data", profileData);
-          console.log("Logo URL:", logoFile);
+          // console.log("Logo URL:", logoFile);
         }
       })
       .catch((error) => {
@@ -142,17 +151,20 @@ export default function Settings() {
   }, [shopId]);
 
   useEffect(() => {
-    console.log('imageUrl', logoUrl);
-  }, [logoUrl]);
+    console.log("logoUrl:", logoUrl);
+    console.log("signatureUrl:", signatureUrl);
+    console.log("images", images);
+  }, [logoUrl, signatureUrl]);
 
   useEffect(() => {
     setTimeout(() => {
-      setUploadStatus("");
+      setUploadLogoStatus("");
+      setUploadSignatureStatus("");
     }, 5000);
-    
-  }, [uploadStatus]);
+  }, [uploadLogoStatus, uploadSignatureStatus]);
 
   const handleSave = async () => {
+    setIsSaving(true);
     try {
       const requestData = {
         shopId,
@@ -173,19 +185,22 @@ export default function Settings() {
       if (response.ok) {
         const responseData = await response.json();
         console.log("Settings saved successfully:", responseData);
+        setIsSaving(false);
       } else {
         const errorData = await response.json();
         console.error("Failed to save settings:", errorData);
+        setIsSaving(false);
       }
     } catch (error) {
       console.error("Error while saving settings:", error);
+      setIsSaving(false);
     }
   };
 
   // Handle upload button click
-  const handleUpload = async (file) => {
+  const handleLogoUpload = async (file) => {
     if (!file) {
-      setUploadStatus("Please select a file before uploading.");
+      setUploadLogoStatus("Please select a file before uploading.");
       return;
     }
 
@@ -193,7 +208,7 @@ export default function Settings() {
     formData.append("logo", file); // This matches the multer key
 
     try {
-      setUploadStatus("Uploading...");
+      setUploadLogoStatus("Uploading...");
       const response = await fetch("/api/upload-logo", {
         method: "POST",
         body: formData,
@@ -205,26 +220,26 @@ export default function Settings() {
 
       const data = await response.json();
       console.log("data", data);
-      setUploadStatus("Uploaded successful!");
-      setImages({
-        ...images,
+      setUploadLogoStatus("Uploaded successful!");
+      setImages((prevImages) => ({
+        ...prevImages,
         logoURL: data.logoURL,
-      });
+      }));
       setLogoUrl(data.logoURL);
     } catch (error) {
-      setUploadStatus(`Upload failed: ${error.message}`);
+      setUploadLogoStatus(`Upload failed: ${error.message}`);
     }
   };
 
-  const handleDelete = async (shopId) => {
+  const handleLogoDelete = async (shopId) => {
     console.log("Deleting logo with URL:", shopId);
     if (!logoUrl) {
-      setUploadStatus("No logo to delete.");
+      setUploadLogoStatus("No logo to delete.");
       return;
     }
 
     try {
-      setUploadStatus("Deleting...");
+      setUploadLogoStatus("Deleting...");
       const response = await fetch("/api/remove-logo", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
@@ -237,7 +252,7 @@ export default function Settings() {
 
       const data = await response.json();
       console.log(data);
-      setUploadStatus("Logo deleted successfully!");
+      setUploadLogoStatus("Logo deleted successfully!");
       setLogoUrl(""); // Clear the image URL after deletion
       setImages({
         ...images,
@@ -245,7 +260,73 @@ export default function Settings() {
       });
       setLogoFile(null); // Clear selected file if needed
     } catch (error) {
-      setUploadStatus(`Deletion failed: ${error.message}`);
+      setUploadLogoStatus(`Deletion failed: ${error.message}`);
+    }
+  };
+
+  const handleSignatureUpload = async (file) => {
+    if (!file) {
+      setUploadSignatureStatus("Please select a file before uploading.");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("signature", file); // This matches the multer key
+
+    try {
+      setUploadSignatureStatus("Uploading...");
+      const response = await fetch("/api/upload-signature", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error("Upload failed");
+      }
+
+      const data = await response.json();
+      console.log("data", data);
+      setUploadSignatureStatus("Uploaded successful!");
+      setImages((prevImages) => ({
+        ...prevImages,
+        signatureURL: data.signatureURL,
+      }));
+      setSignatureUrl(data.signatureURL);
+    } catch (error) {
+      setUploadSignatureStatus(`Upload failed: ${error.message}`);
+    }
+  };
+
+  const handleSignatureDelete = async (shopId) => {
+    console.log("Signature with URL:", shopId);
+    if (!signatureUrl) {
+      setUploadSignatureStatus("No Signature to delete.");
+      return;
+    }
+
+    try {
+      setUploadSignatureStatus("Deleting...");
+      const response = await fetch("/api/remove-signature", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ shopId }), // Sending the image URL to delete
+      });
+
+      if (!response.ok) {
+        throw new Error("Deletion failed");
+      }
+
+      const data = await response.json();
+      console.log(data);
+      setUploadSignatureStatus("Signature deleted successfully!");
+      setSignatureUrl(""); // Clear the image URL after deletion
+      setImages({
+        ...images,
+        signatureURL: "",
+      });
+      setSignatureFile(null); // Clear selected file if needed
+    } catch (error) {
+      setUploadSignatureStatus(`Deletion failed: ${error.message}`);
     }
   };
 
@@ -513,13 +594,7 @@ export default function Settings() {
                 value={storeProfile.brandColor}
                 onChange={(value) => setStoreProfile({ ...storeProfile, brandColor: value })}
               />
-              <FormLayout.Group
-                style={{
-                  justifyContent: "center",
-                  display: "flex",
-                  gap: "32px",
-                }}
-              >
+              <FormLayout.Group>
                 {/* Logo Image Upload */}
                 <div
                   style={{
@@ -529,7 +604,7 @@ export default function Settings() {
                     gap: "8px",
                   }}
                 >
-                  <label style={{ fontWeight: "bold" }}>Logo Image</label>
+                  <label style={{ fontWeight: "bold" }}>Logo</label>
                   <div
                     style={{
                       display: "flex",
@@ -572,11 +647,11 @@ export default function Settings() {
                       </DropZone>
                     </div>
                   </div>
-                  {<p>{uploadStatus}</p>}
+                  {<p>{uploadLogoStatus}</p>}
                   {logoUrl && (
                     <button
                       onClick={() => {
-                        handleDelete(shopId);
+                        handleLogoDelete(shopId);
                       }}
                       style={{
                         backgroundColor: "#bf0711", // Optional: background for contrast
@@ -604,7 +679,7 @@ export default function Settings() {
                     gap: "8px",
                   }}
                 >
-                  <label style={{ fontWeight: "bold" }}>Signature Image</label>
+                  <label style={{ fontWeight: "bold" }}>Signature</label>
                   <div
                     style={{
                       display: "flex",
@@ -635,9 +710,9 @@ export default function Settings() {
                             backgroundColor: "#f4f6f8",
                           }}
                         >
-                          {signatureFile ? (
+                          {signatureUrl ? (
                             <LegacyStack vertical spacing="tight" align="center">
-                              <Thumbnail size="large" alt="Signature Image" source={URL(signatureFile)} />
+                              <Thumbnail size="large" alt="Signature Image" source={signatureUrl} />
                             </LegacyStack>
                           ) : (
                             <DropZone.FileUpload />
@@ -646,9 +721,12 @@ export default function Settings() {
                       </DropZone>
                     </div>
                   </div>
-                  {signatureFile && (
+                  {<p>{uploadSignatureStatus}</p>}
+                  {signatureUrl && (
                     <button
-                      onClick={() => setSignatureFile(null)}
+                      onClick={() => {
+                        handleSignatureDelete(shopId);
+                      }}
                       style={{
                         backgroundColor: "#bf0711", // Optional: background for contrast
                         border: "none",
@@ -771,8 +849,8 @@ export default function Settings() {
 
         <div style={footerButtonStyle}>
           <LegacyStack distribution="trailing">
-            <Button primary onClick={() => handleSave()}>
-              Save Changes
+            <Button primary onClick={handleSave} loading={isSaving}>
+              {isSaving ? "Saving..." : "Save Changes"} {/* Optional: changing text */}
             </Button>
           </LegacyStack>
         </div>

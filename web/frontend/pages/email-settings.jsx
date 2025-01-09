@@ -39,11 +39,14 @@ const EmailSetting = () => {
     fromEmail: "",
     fromName: "",
   });
+  
+
   const [selectedTab, setSelectedTab] = useState(0);
   const [active, setActive] = useState(false);
   const [isEnabled, setIsEnabled] = useState(false);
   const [isEnabledByApp, setIsEnabledByApp] = useState(false);
   const [sendEmailOnOrderPlaced, setsendEmailOnOrderPlaced] = useState();
+
   const [shopId, setShopId] = useState("");
 
   const handleButtonToggle = () => {
@@ -53,14 +56,29 @@ const EmailSetting = () => {
     } else {
       setOpen(true);
     }
+    if(isEnabled){
+      updateToggleSetting(shopId, !isEnabled);
+    }else{
+      updateToggleSetting(shopId, !isEnabled);
+    }
   };
 
   const handleButtonByAppToggle = () => {
     setIsEnabledByApp((prev) => !prev);
+    if(isEnabledByApp){
+      updateToggleSettingbyApp(shopId, !isEnabledByApp);
+    }else{
+      updateToggleSettingbyApp(shopId, !isEnabledByApp);
+    }
   };
 
   const handleButtonSendAuto = () => {
     setsendEmailOnOrderPlaced((prev) => !prev);
+    if(sendEmailOnOrderPlaced){
+      updateToggleSettingonOrderPlaced(shopId, !sendEmailOnOrderPlaced);
+    }else{
+      updateToggleSettingonOrderPlaced(shopId, !sendEmailOnOrderPlaced);
+    }
   };
 
   const handleToggle = useCallback(() => setOpen((open) => !open), []);
@@ -211,6 +229,7 @@ const EmailSetting = () => {
 
   useEffect(() => {
     console.log("emailSettings", emailSettings);
+    
   }, [emailSettings]);
 
   const fetchSMTPConfiguration = async (shopId) => {
@@ -273,14 +292,100 @@ const EmailSetting = () => {
 
       const data = await response.json();
       console.log("fetchToggleSetting:", data);
-      
+     setIsEnabled(data.sendByOwnEmail);
+     setIsEnabledByApp(data.sendByAppEmail);
+     setsendEmailOnOrderPlaced(data.sendOnOrderPlaced);
+    } catch (error) {
+      console.error("Error while fetching settings:", error);
+    }
+  };
 
-      if (data) {
-        console.log("fetchToggleSetting:", data);
-        
-      } else {
-        console.error("No data received from API.");
+  const updateToggleSetting = async (shopId, sendByOwnEmail) => {
+    try {
+      console.log("shopId:", shopId);
+      console.log("sendByOwnEmail:", sendByOwnEmail);
+      if (!shopId) {
+        console.error("Missing shopId.");
+        throw new Error("Invalid shopId.");
       }
+
+      const response = await fetch(`/api/change-send-by-own-email`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          shopId,
+          sendByOwnEmail
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch settings. Status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log("fetchToggleSetting:", data);
+     setIsEnabled(data.updatedConfig.sendByOwnEmail);
+     
+    } catch (error) {
+      console.error("Error while fetching settings:", error);
+    }
+  };
+
+  const updateToggleSettingbyApp = async (shopId, sendByAppEmail) => {
+    try {
+      console.log("shopId:", shopId);
+      console.log("sendByAppEmail:", sendByAppEmail);
+      if (!shopId) {
+        console.error("Missing shopId.");
+        throw new Error("Invalid shopId.");
+      }
+
+      const response = await fetch(`/api/change-send-by-app-email`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          shopId,
+          sendByAppEmail
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch settings. Status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log("fetchToggleSetting:", data);
+     setIsEnabledByApp(data.updatedConfig.sendByAppEmail);
+    } catch (error) {
+      console.error("Error while fetching settings:", error);
+    }
+  };
+
+  const updateToggleSettingonOrderPlaced = async (shopId, sendOnOrderPlaced) => {
+    try {
+      console.log("shopId:", shopId);
+      console.log("sendOnOrderPlaced:", sendOnOrderPlaced);
+      if (!shopId) {
+        console.error("Missing shopId.");
+        throw new Error("Invalid shopId.");
+      }
+
+      const response = await fetch(`/api/change-send-on-order-placed`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          shopId,
+          sendOnOrderPlaced
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch settings. Status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log("fetchToggleSetting:", data);
+     setsendEmailOnOrderPlaced(data.updatedConfig.sendOnOrderPlaced);
     } catch (error) {
       console.error("Error while fetching settings:", error);
     }
@@ -355,7 +460,7 @@ const EmailSetting = () => {
                 )}
               </div>
               <LegacyStack alignment="center" spacing="tight">
-                <Badge status={isEnabled ? "success" : "attention"}>{isEnabled ? "Enabled" : "Disabled"}</Badge>
+                <Badge status={isEnabled ? "success" : "critical"}>{isEnabled ? "Enabled" : "Disabled"}</Badge>
                 <div onClick={handleButtonToggle} style={styles.toggleWrapper}>
                   <div
                     style={{
@@ -371,7 +476,7 @@ const EmailSetting = () => {
               <div style={styles.collapsibleHeader}>
                 <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
                   <h3 style={{ margin: 0 }}>{open ? "Hide SMTP Configuration" : "Show SMTP Configuration"}</h3>
-                  <Badge status={isEnabled ? "success" : "attention"}>{isEnabled ? "Connected" : "Disconnected"}</Badge>
+                  <Badge status={isEnabled ? "success" : "danger"}>{isEnabled ? "Connected" : "Not connected"}</Badge>
                 </div>
                 <div style={{ marginLeft: "auto" }}>
                   <Icon source={open ? ChevronUpIcon : ChevronDownIcon} />
@@ -480,7 +585,7 @@ const EmailSetting = () => {
                 <h2 style={styles.titleText}>Send from Indian GST Invoice App</h2>
               </div>
               <LegacyStack alignment="center" spacing="tight">
-                <Badge status={isEnabledByApp ? "success" : "attention"}>
+                <Badge status={isEnabledByApp ? "success" : "critical"}>
                   {isEnabledByApp ? "Enabled" : "Disabled"}
                 </Badge>
                 <div onClick={handleButtonByAppToggle} style={styles.toggleWrapper}>
@@ -515,7 +620,7 @@ const EmailSetting = () => {
                 <p>Automatically send invoice to customer on order placed!</p>
               </div>
               <LegacyStack alignment="center" spacing="tight">
-                <Badge status={sendEmailOnOrderPlaced ? "success" : "attention"}>
+                <Badge status={sendEmailOnOrderPlaced ? "success" : "critical"}>
                   {sendEmailOnOrderPlaced ? "Enabled" : "Disabled"}
                 </Badge>
                 <div onClick={handleButtonSendAuto} style={styles.toggleWrapper}>
