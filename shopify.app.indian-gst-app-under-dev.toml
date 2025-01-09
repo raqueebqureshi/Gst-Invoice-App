@@ -1,7 +1,11 @@
 # Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
 
 client_id = "78fbc68547f4cc8682944642dc9284c8"
+<<<<<<< HEAD
 application_url = "https://campbell-je-crops-ra.trycloudflare.com"
+=======
+application_url = "https://trim-venues-helen-leone.trycloudflare.com"
+>>>>>>> 534c110a5355075b07c77b3734b12a837d979822
 embedded = true
 name = "Indian GST App under dev"
 handle = "indian-gst-app-under-dev-1"
@@ -20,9 +24,15 @@ scopes = "read_orders,read_products,write_orders,write_products"
 
 [auth]
 redirect_urls = [
+<<<<<<< HEAD
   "https://campbell-je-crops-ra.trycloudflare.com/auth/callback",
   "https://campbell-je-crops-ra.trycloudflare.com/auth/shopify/callback",
   "https://campbell-je-crops-ra.trycloudflare.com/api/auth/callback"
+=======
+  "https://trim-venues-helen-leone.trycloudflare.com/auth/callback",
+  "https://trim-venues-helen-leone.trycloudflare.com/auth/shopify/callback",
+  "https://trim-venues-helen-leone.trycloudflare.com/api/auth/callback"
+>>>>>>> 534c110a5355075b07c77b3734b12a837d979822
 ]
 
 [pos]

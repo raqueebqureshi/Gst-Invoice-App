@@ -95,3 +95,77 @@ export async function removeLogo(req, res) {
   }
 
 
+
+// Upload Signature API
+export const uploadSignature = async (req, res) => {
+  try {
+    const file = req.file;
+
+    if (!file) {
+      return res.status(400).json({ success: false, message: "File is required." });
+    }
+
+    // Generate unique file path for the signature
+    const fileName = `Shopify_Invoice_App_Signatures/${uuid()}-${file.originalname}`;
+    const params = {
+      Bucket: process.env.AWS_BUCKET_NAME,
+      Key: fileName,
+      Body: file.buffer,
+      ContentType: file.mimetype,
+    };
+
+    // Upload the signature to S3
+    console.log(`Uploading signature to S3: ${fileName}`);
+    const data = await s3.upload(params).promise();
+
+    // Respond with the uploaded signature URL
+    res.status(200).json({
+      success: true,
+      message: "Signature uploaded successfully.",
+      signatureURL: data.Location,
+    });
+  } catch (err) {
+    console.error("Error during signature upload process:", err);
+    res.status(500).json({ success: false, message: "Error uploading signature." });
+  }
+};
+
+
+
+
+// Remove Signature API
+export const removeSignature = async (req, res) => {
+  try {
+    const { shopId } = req.body; // Ensure shopId is sent in the request body
+
+    // Validate required fields
+    if (!shopId) {
+      return res.status(400).json({ success: false, message: "Shop ID is required." });
+    }
+
+    // Fetch the store profile by shopId
+    const storeProfile = await StoreProfile.findOne({ shopId });
+    if (!storeProfile || !storeProfile.images?.signatureURL) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Store profile or signature not found." });
+    }
+
+    // Extract the old signature key
+    const signatureKey = storeProfile.images.signatureURL.split('/').slice(-2).join('/');
+    console.log(`Deleting signature: ${signatureKey}`);
+
+    // Delete the signature from S3
+    await s3.deleteObject({ Bucket: process.env.AWS_BUCKET_NAME, Key: signatureKey }).promise();
+
+    // Remove the signature URL from the database
+    storeProfile.images.signatureURL = ""; // Or set it to an empty string
+    await storeProfile.save();
+
+    // Respond with success message
+    res.status(200).json({ success: true, message: "Signature removed successfully." });
+  } catch (err) {
+    console.error("Error during signature deletion process:", err);
+    res.status(500).json({ success: false, message: "Error removing signature." });
+  }
+};

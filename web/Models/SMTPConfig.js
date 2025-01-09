@@ -11,6 +11,7 @@ const smtpSchema = new mongoose.Schema({
   fromName: { type: String, required: true },
   sendByOwnEmail: { type: Boolean, default: false },
   sendByAppEmail: { type: Boolean, default: true },
+  sendOnOrderPlaced: { type: Boolean, default: false },
   emailFormat: {
     subject: { type: String, default: "Download Invoice" },
     cc: { type: [String], default: [] }, // Array of email addresses for CC
