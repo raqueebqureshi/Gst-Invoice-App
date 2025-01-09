@@ -33,6 +33,10 @@ smtpSchema.pre("save", function (next) {
   const secretKey = process.env.ENCRYPTION_SECRET_KEY;
   const iv = crypto.randomBytes(16);
 
+  if (!secretKey || secretKey.length !== 32) {
+    return next(new Error("Invalid ENCRYPTION_SECRET_KEY length. Must be 32 characters. ", secretKey.length));
+  }
+
   if (this.isModified("smtpData.password")) {
     const cipher = crypto.createCipheriv(algorithm, Buffer.from(secretKey), iv);
     let encrypted = cipher.update(this.smtpData.password, "utf8", "hex");
@@ -41,6 +45,7 @@ smtpSchema.pre("save", function (next) {
   }
   next();
 });
+
 
 const SMTPConfig = mongoose.model("SMTPConfig", smtpSchema);
 

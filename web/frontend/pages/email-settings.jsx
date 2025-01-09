@@ -23,8 +23,9 @@ import {
   InfoIcon,
   ChevronUpIcon,
   ChevronDownIcon,
-  EmailFollowUpIcon
+  EmailFollowUpIcon,
 } from "@shopify/polaris-icons";
+import { CustomPasswordInput } from "../components/CustomPasswordInput";
 
 const EmailSetting = () => {
   const [isConnected, setIsConnected] = useState(true); // Mock connection status
@@ -43,13 +44,13 @@ const EmailSetting = () => {
   const [isEnabled, setIsEnabled] = useState(false);
   const [isEnabledByApp, setIsEnabledByApp] = useState(false);
   const [sendEmailOnOrderPlaced, setsendEmailOnOrderPlaced] = useState();
-  const [shopId, setShopId] = useState('');
+  const [shopId, setShopId] = useState("");
 
   const handleButtonToggle = () => {
     setIsEnabled((prev) => !prev);
-    if(isEnabled){
+    if (isEnabled) {
       setOpen(false);
-    }else{
+    } else {
       setOpen(true);
     }
   };
@@ -77,14 +78,19 @@ const EmailSetting = () => {
 
   const handleSave = () => {
     console.log("Saving Email Settings...", emailSettings);
-    if(!shopId){
-      console.error("Missing shopId:", 
-        shopId
-      );
+    if (!shopId) {
+      console.error("Missing shopId:", shopId);
       throw new Error("Invalid shopId.");
     }
-    if(!emailSettings.host || !emailSettings.port || !emailSettings.username || !emailSettings.password || !emailSettings.fromEmail || !emailSettings.fromName){
-      console.error("Missing email settings:", emailSettings);      
+    if (
+      !emailSettings.host ||
+      !emailSettings.port ||
+      !emailSettings.username ||
+      !emailSettings.password ||
+      !emailSettings.fromEmail ||
+      !emailSettings.fromName
+    ) {
+      console.error("Missing email settings:", emailSettings);
       throw new Error("Invalid email settings.");
     }
     saveSMTPConfiguration(shopId, emailSettings);
@@ -114,22 +120,15 @@ const EmailSetting = () => {
             </li>
             <li>Enable "2-Step Verification" if not already enabled.</li>
             <li>Under "2-Step Verification", click on "App passwords".</li>
-            <li>
-              Create a new app-specific password. Enter a name for the app
-              (e.g., "Indian GST Invoice").
-            </li>
+            <li>Create a new app-specific password. Enter a name for the app (e.g., "Indian GST Invoice").</li>
             <li>Click "Generate" to get your 16-character app password.</li>
             <li>Use this password in the SMTP configuration.</li>
             <li>SMTP Server: "smtp.gmail.com".</li>
             <li>Port: "465".</li>
             <li>Your Username is your full Gmail address.</li>
+            <li>The "From Email" can be the same as your username or another email you've set up.</li>
             <li>
-              The "From Email" can be the same as your username or another email
-              you've set up.
-            </li>
-            <li>
-              Still not connecting?{" "}
-              <Link url="mailto:support@example.com">Contact us</Link>.
+              Still not connecting? <Link url="mailto:support@example.com">Contact us</Link>.
             </li>
           </ol>
         </VerticalStack>
@@ -155,13 +154,9 @@ const EmailSetting = () => {
             <li>SMTP Server: "smtp.mail.yahoo.com".</li>
             <li>Port: "465".</li>
             <li>Your Username is your full Yahoo email address.</li>
+            <li>The "From Email" can be the same as your username or another email.</li>
             <li>
-              The "From Email" can be the same as your username or another
-              email.
-            </li>
-            <li>
-              Still having issues?{" "}
-              <Link url="mailto:support@example.com">Contact us</Link>.
+              Still having issues? <Link url="mailto:support@example.com">Contact us</Link>.
             </li>
           </ol>
         </VerticalStack>
@@ -174,20 +169,15 @@ const EmailSetting = () => {
       contentDetails: (
         <VerticalStack>
           {/* <h3>Other Email Providers</h3> */}
-          <p style={{ marginTop: "15px" }}>
-            Please contact your email provider for the following details:
-          </p>
+          <p style={{ marginTop: "15px" }}>Please contact your email provider for the following details:</p>
           <ol>
             <li>SMTP Server address (e.g., smtp.yourmail.com).</li>
             <li>Port (common: "465" or "587").</li>
             <li>Your email address (used as the username).</li>
             <li>Your email account password or an app-specific password.</li>
+            <li>If using SSL/TLS encryption, ensure your email client supports it.</li>
             <li>
-              If using SSL/TLS encryption, ensure your email client supports it.
-            </li>
-            <li>
-              Still facing trouble?{" "}
-              <Link url="mailto:support@example.com">Contact us</Link>.
+              Still facing trouble? <Link url="mailto:support@example.com">Contact us</Link>.
             </li>
           </ol>
         </VerticalStack>
@@ -209,60 +199,99 @@ const EmailSetting = () => {
           setShopId(response.data.data[0].id);
         }
       })
-      .catch((error) =>  console.log(error));
-
-
-
-
+      .catch((error) => console.log(error));
   }, []);
 
-  
-  useEffect(() => { 
+  useEffect(() => {
     if (shopId) {
       fetchSMTPConfiguration(shopId);
-    }   
+      fetchToggleSetting(shopId);
+    }
   }, [shopId]);
 
+  useEffect(() => {
+    console.log("emailSettings", emailSettings);
+  }, [emailSettings]);
 
   const fetchSMTPConfiguration = async (shopId) => {
-    console.log('shopId ',shopId );
-    
     try {
+      // console.log("shopId:", shopId);
+
       if (!shopId) {
-        console.error("Missing shopId:", 
-          shopId
-        );
+        console.error("Missing shopId.");
         throw new Error("Invalid shopId.");
       }
 
       const response = await fetch(`/api/smtp/get?shopId=${shopId}`, {
         method: "GET",
         headers: { "Content-Type": "application/json" },
-        
       });
 
       if (!response.ok) {
-        throw new Error(
-          `Failed to fetch settings. Status: ${response.status}`
-        );
+        throw new Error(`Failed to fetch settings. Status: ${response.status}`);
       }
 
       const data = await response.json();
-      console.log("fetch settings:", data);
+      // console.log("Fetched settings:", data.smtpData);
+      const smtpdata = data.smtpData;
 
+      if (data) {
+        // console.log("Fetched settings:", smtpdata);
+        setEmailSettings({
+          host: smtpdata.host || "",
+          port: smtpdata.port || "",
+          username: smtpdata.username || "",
+          password: smtpdata.password || "",
+          fromEmail: smtpdata.fromEmail || "",
+          fromName: smtpdata.fromName || "",
+        });
+      } else {
+        console.error("No data received from API.");
+      }
     } catch (error) {
       console.error("Error while fetching settings:", error);
     }
   };
 
-  const saveSMTPConfiguration = async (shopId , smtpData) => {
-    console.log('shopId ',shopId );
-    console.log('smtpData ',smtpData );
+  const fetchToggleSetting = async (shopId) => {
+    try {
+      console.log("shopId:", shopId);
+
+      if (!shopId) {
+        console.error("Missing shopId.");
+        throw new Error("Invalid shopId.");
+      }
+
+      const response = await fetch(`/api/check-status?shopId=${shopId}`, {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch settings. Status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log("fetchToggleSetting:", data);
+      
+
+      if (data) {
+        console.log("fetchToggleSetting:", data);
+        
+      } else {
+        console.error("No data received from API.");
+      }
+    } catch (error) {
+      console.error("Error while fetching settings:", error);
+    }
+  };
+
+  const saveSMTPConfiguration = async (shopId, smtpData) => {
+    console.log("shopId ", shopId);
+    console.log("smtpData ", smtpData);
     try {
       if (!shopId) {
-        console.error("Missing shopId:", 
-          shopId
-        );
+        console.error("Missing shopId:", shopId);
         throw new Error("Invalid shopId.");
       }
 
@@ -271,256 +300,239 @@ const EmailSetting = () => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           shopId,
-          smtpData
+          smtpData,
         }),
       });
 
       if (!response.ok) {
-        throw new Error(
-          `Failed to save settings. Status: ${response.status}`
-        );
+        throw new Error(`Failed to save settings. Status: ${response.status}`);
       }
 
       const data = await response.json();
       console.log("Saved settings:", data);
-
     } catch (error) {
       console.error("Error while save settings:", error);
     }
   };
 
-
-
   return (
     <Page title="Email Configuration" fullWidth>
       <div>
-      <AlphaCard>
-        <VerticalStack gap="5">
-          <div style={styles.headerContainer}>
-            <div style={styles.titleSection}>
-              <Icon source={SettingsIcon} color="highlight" />
-              <h2 style={styles.titleText}>Send from my own Email</h2>
-              <Button plain icon={InfoIcon} onClick={toggleModal}>
-                How to configure SMTP?
-              </Button>
-              {active && (
-                <Modal
-                  open={active}
-                  onClose={toggleModal}
-                  title="How to set up SMTP"
-                  primaryAction={{
-                    content: "Got it!",
-                    onAction: toggleModal,
-                  }}
-                  large
-                >
-                  <Modal.Section>
-                    <Tabs
-                      tabs={tabs.map((tab, index) => ({
-                        id: tab.id,
-                        content: tab.content,
-                        panelID: tab.panelID,
-                      }))}
-                      selected={selectedTab}
-                      onSelect={handleTabChange}
-                    >
-                      <div>{tabs[selectedTab].contentDetails}</div>
-                    </Tabs>
-                  </Modal.Section>
-                </Modal>
-              )}
+        <AlphaCard>
+          <VerticalStack gap="5">
+            <div style={styles.headerContainer}>
+              <div style={styles.titleSection}>
+                <Icon source={SettingsIcon} color="highlight" />
+                <h2 style={styles.titleText}>Send from my own Email</h2>
+                <Button plain icon={InfoIcon} onClick={toggleModal}>
+                  How to configure SMTP?
+                </Button>
+                {active && (
+                  <Modal
+                    open={active}
+                    onClose={toggleModal}
+                    title="How to set up SMTP"
+                    primaryAction={{
+                      content: "Got it!",
+                      onAction: toggleModal,
+                    }}
+                    large
+                  >
+                    <Modal.Section>
+                      <Tabs
+                        tabs={tabs.map((tab, index) => ({
+                          id: tab.id,
+                          content: tab.content,
+                          panelID: tab.panelID,
+                        }))}
+                        selected={selectedTab}
+                        onSelect={handleTabChange}
+                      >
+                        <div>{tabs[selectedTab].contentDetails}</div>
+                      </Tabs>
+                    </Modal.Section>
+                  </Modal>
+                )}
+              </div>
+              <LegacyStack alignment="center" spacing="tight">
+                <Badge status={isEnabled ? "success" : "attention"}>{isEnabled ? "Enabled" : "Disabled"}</Badge>
+                <div onClick={handleButtonToggle} style={styles.toggleWrapper}>
+                  <div
+                    style={{
+                      ...styles.toggleCircle,
+                      ...(isEnabled ? styles.on : styles.off),
+                    }}
+                  ></div>
+                </div>
+              </LegacyStack>
             </div>
-            <LegacyStack alignment="center" spacing="tight">
-              <Badge status={isEnabled ? "success" : "attention"}>
-                {isEnabled ? "Enabled" : "Disabled"}
-              </Badge>
-              <div onClick={handleButtonToggle} style={styles.toggleWrapper}>
-                <div
-                  style={{
-                    ...styles.toggleCircle,
-                    ...(isEnabled ? styles.on : styles.off),
-                  }}
-                ></div>
-              </div>
-            </LegacyStack>
-          </div>
 
-          <div style={styles.collapsibleContainer} onClick={isEnabled ?   handleToggle: null}>
-            <div style={styles.collapsibleHeader}>
-              <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-              <h3 style={{ margin: 0 }}>
-                {open ? "Hide SMTP Configuration" : "Show SMTP Configuration"}
-              </h3>
-              <Badge status={isEnabled ? "success" : "attention"}>
-                {isEnabled ? "Connected" : "Disconnected"}
-              </Badge>
-              </div>
-              <div style={{ marginLeft: "auto" }}>
-                <Icon source={open ? ChevronUpIcon : ChevronDownIcon} />
+            <div style={styles.collapsibleContainer} onClick={isEnabled ? handleToggle : null}>
+              <div style={styles.collapsibleHeader}>
+                <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                  <h3 style={{ margin: 0 }}>{open ? "Hide SMTP Configuration" : "Show SMTP Configuration"}</h3>
+                  <Badge status={isEnabled ? "success" : "attention"}>{isEnabled ? "Connected" : "Disconnected"}</Badge>
+                </div>
+                <div style={{ marginLeft: "auto" }}>
+                  <Icon source={open ? ChevronUpIcon : ChevronDownIcon} />
+                </div>
               </div>
             </div>
-          </div>
 
-          <Collapsible
-            open={open}
-            id="smtp-collapsible"
-            transition={{ duration: "500ms", timingFunction: "ease-in-out" }}
-          >
-            <Box paddingBlockStart="4">
-              <FormLayout>
-                <FormLayout.Group>
-                  <TextField
-                    label="Host"
-                    value={emailSettings.host}
-                    onChange={handleChange("host")}
-                    autoComplete="off"
-                    placeholder="e.g., smtp.mailtrap.io"
-                  />
-                  <TextField
-                    label="Port"
-                    type="number"
-                    value={emailSettings.port}
-                    onChange={handleChange("port")}
-                    autoComplete="off"
-                    placeholder="e.g., 587"
-                  />
-                </FormLayout.Group>
+            <Collapsible
+              open={open}
+              id="smtp-collapsible"
+              transition={{ duration: "500ms", timingFunction: "ease-in-out" }}
+            >
+              <Box paddingBlockStart="4">
+                <FormLayout>
+                  <FormLayout.Group>
+                    <TextField
+                      label="Host"
+                      value={emailSettings.host}
+                      onChange={handleChange("host")}
+                      autoComplete="off"
+                      placeholder="e.g., smtp.mailtrap.io"
+                    />
+                    <TextField
+                      label="Port"
+                      type="number"
+                      value={emailSettings.port}
+                      onChange={handleChange("port")}
+                      autoComplete="off"
+                      placeholder="e.g., 587"
+                    />
+                  </FormLayout.Group>
 
-                <FormLayout.Group>
-                  <TextField
-                    label="Username"
-                    value={emailSettings.username}
-                    onChange={handleChange("username")}
-                    autoComplete="off"
-                  />
-                  <TextField
+                  <FormLayout.Group>
+                    <TextField
+                      label="Username"
+                      value={emailSettings.username}
+                      placeholder="Enter your username"
+                      onChange={handleChange("username")}
+                      autoComplete="off"
+                    />
+                    {/* <TextField
                     label="Password"
                     type="password"
                     value={emailSettings.password}
                     onChange={handleChange("password")}
                     autoComplete="off"
-                  />
-                </FormLayout.Group>
+                  /> */}
 
-                {/* <TextField
+                    <CustomPasswordInput
+                      label="Password"
+                      value={emailSettings.password}
+                      onChange={handleChange("password")}
+                      placeholder="Enter your password"
+                    />
+                  </FormLayout.Group>
+
+                  {/* <TextField
                   label="Store Name"
                   value={emailSettings.storeName}
                   onChange={handleChange("storeName")}
                   autoComplete="off"
                   placeholder="Your Store Name"
                 /> */}
-                <TextField
-                  label="From Email"
-                  type="email"
-                  value={emailSettings.fromEmail}
-                  onChange={handleChange("fromEmail")}
-                  autoComplete="email"
-                  placeholder="example@domain.com"
-                />
-                <TextField
-                  label="From Name"
-                  value={emailSettings.fromName}
-                  onChange={handleChange("fromName")}
-                  autoComplete="off"
-                  placeholder="e.g., Support Team"
-                />
-              </FormLayout>
-            </Box>
-          </Collapsible>
+                  <TextField
+                    label="From Email"
+                    type="email"
+                    value={emailSettings.fromEmail}
+                    onChange={handleChange("fromEmail")}
+                    autoComplete="email"
+                    placeholder="example@domain.com"
+                  />
+                  <TextField
+                    label="From Name"
+                    value={emailSettings.fromName}
+                    onChange={handleChange("fromName")}
+                    autoComplete="off"
+                    placeholder="e.g., Support Team"
+                  />
+                </FormLayout>
+              </Box>
+            </Collapsible>
 
-          <div style={styles.buttonWrapper}>
-          <div style={{display: "flex", gap: "12px", alignItems: "center"}}>
-            <Button onClick={handleTestConfiguration} disabled={isEnabled ? false : true} outline
-            
-            >
-              Send Test Email
-            </Button>
-            <p style={{color  : isEnabled ? "black" : "gray"}}>Test email will be sent from <strong> entered@domain.com</strong> to <strong> store@email.com</strong></p>
-            </div>
-
-            <Button primary onClick={handleSave} disabled={isEnabled ? false : true}>
-              Save Settings
-            </Button>
-          </div>
-        </VerticalStack>
-      </AlphaCard>
-      </div>
-      <div style={{marginTop: "20px"}}>
-      <AlphaCard >
-        <VerticalStack gap="5">
-          <div style={styles.headerContainer}>
-            <div style={styles.titleSection}>
-              <Icon source={EmailFollowUpIcon} color="highlight" />
-              <h2 style={styles.titleText}>Send from Indian GST Invoice App</h2>
-              
-            </div>
-            <LegacyStack alignment="center" spacing="tight">
-              <Badge status={isEnabledByApp ? "success" : "attention"}>
-                {isEnabledByApp ? "Enabled" : "Disabled"}
-              </Badge>
-              <div onClick={handleButtonByAppToggle} style={styles.toggleWrapper}>
-                <div
-                  style={{
-                    ...styles.toggleCircle,
-                    ...(isEnabledByApp ? styles.on : styles.off),
-                  }}
-                ></div>
+            <div style={styles.buttonWrapper}>
+              <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
+                <Button onClick={handleTestConfiguration} disabled={isEnabled ? false : true} outline>
+                  Send Test Email
+                </Button>
+                <p style={{ color: isEnabled ? "black" : "gray" }}>
+                  Test email will be sent from <strong> entered@domain.com</strong> to <strong> store@email.com</strong>
+                </p>
               </div>
-            </LegacyStack>
-          </div>
 
-          
-
-          
-          <div style={{display: "flex", justifyContent: "space-between", alignItems: "center"}}>
-            <Button onClick={handleTestConfiguration} outline disabled={isEnabledByApp ? false : true}
-            
-            >
-              Send Test Email
-            </Button>
-            <p style={{color  : isEnabledByApp ? "black" : "gray"}}>Test email will be sent from <strong> app@domain.com</strong> to <strong> store@email.com</strong></p>
-          </div>
-          
-        </VerticalStack>
-      </AlphaCard>
-      
-      </div>
-
-      <div style={{marginTop: "20px"}}>
-      <AlphaCard >
-        <VerticalStack gap="5">
-          <div style={styles.headerContainer}>
-            <div style={styles.titleSection}>
-              <Icon source={EmailFollowUpIcon} color="highlight" />
-              <p>Automatically send invoice to customer on order placed!</p>
-              
+              <Button primary onClick={handleSave} disabled={isEnabled ? false : true}>
+                Save Settings
+              </Button>
             </div>
-            <LegacyStack alignment="center" spacing="tight">
-              <Badge status={sendEmailOnOrderPlaced ? "success" : "attention"}>
-                {sendEmailOnOrderPlaced ? "Enabled" : "Disabled"}
-              </Badge>
-              <div onClick={handleButtonSendAuto} style={styles.toggleWrapper}>
-                <div
-                  style={{
-                    ...styles.toggleCircle,
-                    ...(sendEmailOnOrderPlaced ? styles.on : styles.off),
-                  }}
-                ></div>
-              </div>
-            </LegacyStack>
-          </div>
-
-          
-
-          
-          <div style={{display: "flex", justifyContent: "space-between", alignItems: "center"}}>
-          </div>
-          
-        </VerticalStack>
-      </AlphaCard>
-      
+          </VerticalStack>
+        </AlphaCard>
       </div>
-      
+      <div style={{ marginTop: "20px" }}>
+        <AlphaCard>
+          <VerticalStack gap="5">
+            <div style={styles.headerContainer}>
+              <div style={styles.titleSection}>
+                <Icon source={EmailFollowUpIcon} color="highlight" />
+                <h2 style={styles.titleText}>Send from Indian GST Invoice App</h2>
+              </div>
+              <LegacyStack alignment="center" spacing="tight">
+                <Badge status={isEnabledByApp ? "success" : "attention"}>
+                  {isEnabledByApp ? "Enabled" : "Disabled"}
+                </Badge>
+                <div onClick={handleButtonByAppToggle} style={styles.toggleWrapper}>
+                  <div
+                    style={{
+                      ...styles.toggleCircle,
+                      ...(isEnabledByApp ? styles.on : styles.off),
+                    }}
+                  ></div>
+                </div>
+              </LegacyStack>
+            </div>
+
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <Button onClick={handleTestConfiguration} outline disabled={isEnabledByApp ? false : true}>
+                Send Test Email
+              </Button>
+              <p style={{ color: isEnabledByApp ? "black" : "gray" }}>
+                Test email will be sent from <strong> app@domain.com</strong> to <strong> store@email.com</strong>
+              </p>
+            </div>
+          </VerticalStack>
+        </AlphaCard>
+      </div>
+
+      <div style={{ marginTop: "20px" }}>
+        <AlphaCard>
+          <VerticalStack gap="5">
+            <div style={styles.headerContainer}>
+              <div style={styles.titleSection}>
+                <Icon source={EmailFollowUpIcon} color="highlight" />
+                <p>Automatically send invoice to customer on order placed!</p>
+              </div>
+              <LegacyStack alignment="center" spacing="tight">
+                <Badge status={sendEmailOnOrderPlaced ? "success" : "attention"}>
+                  {sendEmailOnOrderPlaced ? "Enabled" : "Disabled"}
+                </Badge>
+                <div onClick={handleButtonSendAuto} style={styles.toggleWrapper}>
+                  <div
+                    style={{
+                      ...styles.toggleCircle,
+                      ...(sendEmailOnOrderPlaced ? styles.on : styles.off),
+                    }}
+                  ></div>
+                </div>
+              </LegacyStack>
+            </div>
+
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}></div>
+          </VerticalStack>
+        </AlphaCard>
+      </div>
     </Page>
   );
 };
@@ -544,7 +556,7 @@ const styles = {
   },
   collapsibleContainer: {
     padding: "12px",
-    backgroundColor:  "#f4f6f8",
+    backgroundColor: "#f4f6f8",
     borderRadius: "8px",
     cursor: "pointer",
   },
