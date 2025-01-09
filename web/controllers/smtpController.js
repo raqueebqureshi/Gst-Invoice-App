@@ -3,9 +3,10 @@ import bcrypt from "bcrypt";
 
 // Save SMTP configuration
 export const saveSMTPConfig = async (req, res) => {
-  
+
   try {
     const { shopId, ...smtpData } = req.body;
+    console.log("req.body", req.body);
 
     // Ensure shopId is provided
     if (!shopId) {
@@ -155,16 +156,7 @@ export const getSMTPConfig = async (req, res) => {
     }
 
     res.status(200).json({
-      host: smtpConfig.host,
-      port: smtpConfig.port,
-      username: smtpConfig.username,
-      fromEmail: smtpConfig.fromEmail,
-      fromName: smtpConfig.fromName,
-      sendByOwnEmail: smtpConfig.sendByOwnEmail,
-      sendByAppEmail: smtpConfig.sendByAppEmail,
-      sendOnOrderPlaced: smtpConfig.sendOnOrderPlaced,
-      emailFormat: smtpConfig.emailFormat,
-      password: "********", // Mask the password for security
+      smtpData: smtpConfig.smtpData,
     });
   } catch (error) {
     console.error("Error fetching SMTP configuration:", error);

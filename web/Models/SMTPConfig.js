@@ -3,6 +3,7 @@ import bcrypt from "bcrypt";
 
 const smtpSchema = new mongoose.Schema({
   shopId: { type: String, required: true, unique: true }, // Unique identifier for the store
+  smtpData:{
   host: { type: String, required: true },
   port: { type: Number, required: true },
   username: { type: String, required: true },
@@ -30,6 +31,7 @@ Best regards,
 {{shop_name}}`,
     },
   },
+  } 
 });
 
 // Encrypt password before saving

@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from "react";
+import React, { useState, useCallback, useEffect, use } from "react";
 import {
   AlphaCard,
   Page,
@@ -43,6 +43,7 @@ const EmailSetting = () => {
   const [isEnabled, setIsEnabled] = useState(false);
   const [isEnabledByApp, setIsEnabledByApp] = useState(false);
   const [sendEmailOnOrderPlaced, setsendEmailOnOrderPlaced] = useState();
+  const [shopId, setShopId] = useState('');
 
   const handleButtonToggle = () => {
     setIsEnabled((prev) => !prev);
@@ -76,6 +77,16 @@ const EmailSetting = () => {
 
   const handleSave = () => {
     console.log("Saving Email Settings...", emailSettings);
+    if(!shopId){
+      console.error("Missing shopId:", 
+        shopId
+      );
+      throw new Error("Invalid shopId.");
+    }
+    if(!emailSettings.host || !emailSettings.port || !emailSettings.username || !emailSettings.password || !emailSettings.fromEmail || !emailSettings.fromName){
+      console.error("Missing email settings:", emailSettings);      
+      throw new Error("Invalid email settings.");
+    }
     saveSMTPConfiguration(shopId, emailSettings);
   };
 
@@ -194,14 +205,59 @@ const EmailSetting = () => {
       .then((response) => {
         // console.log("Store Details---!", response.data);
         if (response.data.data.length > 0) {
-          // console.log("Store Details---", response.data.data[0]);
-          
+          console.log("Store Details---", response.data.data[0]);
+          setShopId(response.data.data[0].id);
         }
       })
       .catch((error) =>  console.log(error));
+
+
+
+
   }, []);
 
+  
+  useEffect(() => { 
+    if (shopId) {
+      fetchSMTPConfiguration(shopId);
+    }   
+  }, [shopId]);
+
+
+  const fetchSMTPConfiguration = async (shopId) => {
+    console.log('shopId ',shopId );
+    
+    try {
+      if (!shopId) {
+        console.error("Missing shopId:", 
+          shopId
+        );
+        throw new Error("Invalid shopId.");
+      }
+
+      const response = await fetch(`/api/smtp/get?shopId=${shopId}`, {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+        
+      });
+
+      if (!response.ok) {
+        throw new Error(
+          `Failed to fetch settings. Status: ${response.status}`
+        );
+      }
+
+      const data = await response.json();
+      console.log("fetch settings:", data);
+
+    } catch (error) {
+      console.error("Error while fetching settings:", error);
+    }
+  };
+
   const saveSMTPConfiguration = async (shopId , smtpData) => {
+    console.log('shopId ',shopId );
+    console.log('smtpData ',smtpData );
     try {
       if (!shopId) {
         console.error("Missing shopId:", 
@@ -232,6 +288,8 @@ const EmailSetting = () => {
       console.error("Error while save settings:", error);
     }
   };
+
+
 
   return (
     <Page title="Email Configuration" fullWidth>
