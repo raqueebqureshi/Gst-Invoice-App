@@ -1630,7 +1630,8 @@ export default function CustomizeTemplate() {
                             "showShippingGSTSplit",
                             "showShipping",
                             "showRefunded",
-                            "showOutstanding"
+                            "showOutstanding",
+                            "showDiscount",
                             
                           ].includes(key)
                       ) // Filter out unwanted fields

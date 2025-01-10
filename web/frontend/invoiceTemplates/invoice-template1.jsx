@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 
 export function InvoiceTemplate1({ shopdetails, orders, invoiceSettings }) {
   console.log("orders - InvoiceTemplate1", orders);
+  console.log("invoiceSettings - InvoiceTemplate1", invoiceSettings);
 
   const [storeDomain, setStoreDomain] = useState(null);
   const [email, setEmail] = useState(null);
@@ -156,7 +157,7 @@ export function InvoiceTemplate1({ shopdetails, orders, invoiceSettings }) {
               shopdetails[0].name !== null ? (
                 shopdetails[0].name
               ) : (
-                "N/A"
+                "Shop Name"
               )
             ) : (
               <td></td>
@@ -183,7 +184,7 @@ export function InvoiceTemplate1({ shopdetails, orders, invoiceSettings }) {
             ) : (
               <td></td>
             )}
-            {invoiceSettings.supplier.showCity ? (
+            {invoiceSettings.supplier.showZipPinCode ? (
               shopdetails[0].zip !== null ? (
                 shopdetails[0].zip + ", "
               ) : (
@@ -513,22 +514,27 @@ export function InvoiceTemplate1({ shopdetails, orders, invoiceSettings }) {
         <div style={{ width: "30%" }}>
           <table style={{ width: "100%", borderCollapse: "collapse" }}>
             <tbody>
+            {invoiceSettings.total.showSubtotal ? (
               <tr>
                 <td style={{ padding: "5px" }}>Subtotal</td>
                 <td style={{ padding: "5px", textAlign: "right" }}>
                   ₹{" "}
                   {orders[0].subtotal_price !== null
-                    ? orders[0].subtotal_price
-                    : "0.00"}
+                    ? Number(orders[0].subtotal_price)
+                    : "0"}
                 </td>
               </tr>
+              ):(<></>)}
+              {invoiceSettings.total.showTax ? (
               <tr>
-                <td style={{ padding: "5px" }}>Taxable</td>
-                <td style={{ padding: "5px", textAlign: "right" }}>
-                  ₹{" "}
-                  {orders[0].total_tax !== null ? orders[0].total_tax : "0.00"}
-                </td>
-              </tr>
+              <td style={{ padding: "5px" }}>Taxable</td>
+              <td style={{ padding: "5px", textAlign: "right" }}>
+                ₹{" "}
+                {orders[0].total_tax !== null ? Number(orders[0].total_tax) : "0"}
+              </td>
+            </tr>
+            ):(<></>)}
+              
               {/* <tr>
                 <td style={{ padding: "5px" }}>Tax rate</td>
                 <td style={{ padding: "5px", textAlign: "right" }}>6.250%</td>
@@ -541,15 +547,18 @@ export function InvoiceTemplate1({ shopdetails, orders, invoiceSettings }) {
                 <td style={{ padding: "5px" }}>Other</td>
                 <td style={{ padding: "5px", textAlign: "right" }}></td>
               </tr> */}
+              {invoiceSettings.total.showTotal ? (
               <tr style={{ fontWeight: "bold" }}>
                 <td style={{ padding: "5px" }}>TOTAL</td>
                 <td style={{ padding: "5px", textAlign: "right" }}>
                   ₹{" "}
                   {orders[0].total_price !== null
-                    ? orders[0].total_price
-                    : "0.00"}
+                    ? Number(orders[0].total_price)
+                    : "0"}
                 </td>
               </tr>
+            ):(<></>)}
+              
             </tbody>
           </table>
           <p style={{ marginTop: "10px", fontSize: "0.9em" }}>
@@ -563,13 +572,23 @@ export function InvoiceTemplate1({ shopdetails, orders, invoiceSettings }) {
       <p style={{ textAlign: "center", marginTop: "20px", fontSize: "0.9em" }}>
         If you have any questions about this invoice, please contact
         <br />
-        Name: {shopdetails[0].name !== null ? shopdetails[0].name : "N/A"}{" "}
+        {invoiceSettings.supplier.showHeading ? (
+          <>
+              Name: {shopdetails[0].name !== null ? shopdetails[0].name : "N/A"}{" "}
+            </>):(<></>)}
+        
         <br />
-        Phone: {shopdetails[0].phone !== null
+        {invoiceSettings.supplier.showPhone ? (
+              <>Phone: {shopdetails[0].phone !== null
           ? shopdetails[0].phone
-          : "N/A"}{" "}
+          : "N/A"}{" "}</>
+            ):(<></>)}
+        
         <br />
-        E-mail: {shopdetails[0].email !== null ? shopdetails[0].email : "N/A"}
+        {invoiceSettings.supplier.showEmail ? (
+              <>E-mail: {shopdetails[0].email !== null ? shopdetails[0].email : "N/A"}</>
+            ):(<></>)}
+        
       </p>
       <p style={{ textAlign: "center", fontWeight: "bold" }}>
         Thank You For Choosing Us!

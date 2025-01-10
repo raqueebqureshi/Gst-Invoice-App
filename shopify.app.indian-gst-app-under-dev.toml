@@ -1,7 +1,7 @@
 # Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
 
 client_id = "78fbc68547f4cc8682944642dc9284c8"
-application_url = "https://schema-cio-contractor-replacement.trycloudflare.com"
+application_url = "https://juan-spyware-hats-tree.trycloudflare.com"
 embedded = true
 name = "Indian GST App under dev"
 handle = "indian-gst-app-under-dev-1"
@@ -20,9 +20,9 @@ scopes = "read_orders,read_products,write_orders,write_products"
 
 [auth]
 redirect_urls = [
-  "https://schema-cio-contractor-replacement.trycloudflare.com/auth/callback",
-  "https://schema-cio-contractor-replacement.trycloudflare.com/auth/shopify/callback",
-  "https://schema-cio-contractor-replacement.trycloudflare.com/api/auth/callback"
+  "https://juan-spyware-hats-tree.trycloudflare.com/auth/callback",
+  "https://juan-spyware-hats-tree.trycloudflare.com/auth/shopify/callback",
+  "https://juan-spyware-hats-tree.trycloudflare.com/api/auth/callback"
 ]
 
 [pos]

@@ -1,9 +1,126 @@
 import convertAmountToWords from "../components/ConvertAmount";
 import React from "react";
+import { useState, useEffect } from "react";
 
-export function InvoiceTemplate2({ shopdetails, orders }) {
+
+export function InvoiceTemplate2({ shopdetails, orders, invoiceSettings }) {
   console.log("orders - InvoiceTemplate2", orders[0]);
   console.log("store - details I2", shopdetails[0]);
+  console.log("invoiceSettings - InvoiceTemplate2", invoiceSettings);
+
+  const [storeDomain, setStoreDomain] = useState(null);
+  const [email, setEmail] = useState(null);
+  const [GSTHSNCodes, setGSTHSNCodes] = useState([]);
+  const [InvoiceHeading, setInvoiceHeading] = useState("");
+  const [BillHeading, setBillHeading] = useState("");
+  const [ShipHeading, setShipHeading] = useState("");
+  const formatDateTime = (dateString) => {
+    const date = new Date(dateString);
+    return new Intl.DateTimeFormat("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "2-digit",
+    }).format(date);
+  };
+
+  useEffect(() => {
+    fetch("/api/2024-10/shop.json", {
+      method: "GET",
+      headers: { "Content-Type": "application/json" },
+    })
+      .then((request) => request.json())
+      .then((response) => {
+        console.log("Store Details---!", response.data);
+        if (response.data.data.length > 0) {
+          console.log("Store Details---", response.data.data[0]);
+
+          setStoreDomain(response.data.data[0].domain);
+          setEmail(response.data.data[0].email);
+        }
+      })
+      .catch((error) => console.log(error));
+  }, []);
+
+  const fetchInvoiceSettings = async () => {
+    console.log("Sending request to fetch invoice settings");
+
+    return fetch("/api/fetch-invoice-settings", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: email, storeDomain: storeDomain }), // Replace with actual data
+    })
+      .then(async (response) => {
+        if (!response.ok) {
+          return response.text().then((errorText) => {
+            throw new Error(
+              errorText || `HTTP error! Status: ${response.status}`
+            );
+          });
+        }
+        return response.json();
+      })
+      .then((data) => {
+        // setInvoiceSettings(data);
+        const settings = data;
+        console.log("Received response:", settings);
+        
+        // console.log("Received response:", JSON.stringify(settings));
+      })
+      .catch((error) => {
+        console.error("Error fetching invoice settings:", error.message);
+      });
+  };
+
+  const fetchGSTHSNValues = async (products) => {
+    try {
+      if (!storeDomain || !email) {
+        console.error("Missing storeDomain or email:", {
+          storeDomain,
+          email: email,
+        });
+        throw new Error("Invalid storeDomain or email.");
+      }
+
+      const url = `/api/products/gsthsn?storeDomain=${encodeURIComponent(
+        storeDomain
+      )}&email=${encodeURIComponent(email)}`;
+      console.log("Fetching GST HSN Values with URL:", url);
+
+      const response = await fetch(url);
+
+      if (!response.ok) {
+        throw new Error(
+          `Failed to fetch GST values. Status: ${response.status}`
+        );
+      }
+
+      const data = await response.json();
+      console.log("Fetched GST Values:", data.gstValues);
+
+      setGSTHSNCodes(data.gstValues);
+    } catch (error) {
+      console.error("Error fetching GST values:", error);
+    }
+  };
+
+  useEffect(() => {
+    if (storeDomain && email) {
+      fetchInvoiceSettings();
+      fetchGSTHSNValues();
+    }
+  }, [storeDomain, email]);
+
+  // console.log("billing_address - InvoiceTemplate2", orders[0].billing_address);
+  // console.log("orders - InvoiceTemplate2", orders);
+  // // console.log("orders - InvoiceTemplate2", JSON.stringify(orders));
+  // console.log("store - details I", shopdetails[0]);
+  useEffect(() => {
+    setInvoiceHeading(invoiceSettings.overview.documentTitle || "invoice");
+        setBillHeading(invoiceSettings.billing.heading|| "Bill To");
+        setShipHeading(invoiceSettings.shipping.heading|| "Ship To");
+  }, [orders, shopdetails, invoiceSettings]);
+
+  
 
   return (
     <div
@@ -32,15 +149,50 @@ export function InvoiceTemplate2({ shopdetails, orders }) {
         </div>
       </div>
 
-      <div style={{ marginTop: "20px" }}>
+      <div style={{ marginTop: "20px",  visibility: invoiceSettings.supplier.showSupplier
+              ? "visible"
+              : "hidden"}}>
         <h2 style={{ margin: 0, fontSize: "20px" }}>
-          {shopdetails[0].name !== null ? shopdetails.name : "Shop Name"}
+        {invoiceSettings.supplier.showHeading ? (
+              shopdetails[0].name !== null ? (
+                shopdetails[0].name
+              ) : (
+                "N/A"
+              )
+            ) : (
+              <td></td>
+            )}
         </h2>
         <p style={{ margin: "5px 0" }}>
-          {shopdetails[0].address1 !== null ? shopdetails[0].address1 : "N/A"},
-          {shopdetails[0].city !== null ? shopdetails[0].city : "N/A"},
-          {shopdetails[0].state !== null ? shopdetails[0].state : "N/A"},
-          {shopdetails[0].zip !== null ? shopdetails[0].zip : "N/A"}
+        {invoiceSettings.supplier.showAddress ? (
+              shopdetails[0].address1 !== null ? (
+                shopdetails[0].address1
+              ) : (
+                "N/A"
+              )
+            ) : (
+              <td></td>
+            )}
+          {invoiceSettings.supplier.showCity ? (
+              shopdetails[0].city !== null ? (
+                shopdetails[0].city + ", "
+              ) : (
+                "N/A"
+              )
+            ) : (
+              <td></td>
+            )}
+            
+          {/* {shopdetails[0].state !== null ? shopdetails[0].state : "N/A"} */}
+          {invoiceSettings.supplier.showZipPinCode ? (
+              shopdetails[0].zip !== null ? (
+                shopdetails[0].zip + ", "
+              ) : (
+                "N/A"
+              )
+            ) : (
+              <td></td>
+            )}
         </p>
         {/* <p style={{ margin: '5px 0' }}>GSTIN: AAA21345</p> */}
         <p style={{ margin: "5px 0" }}>
