@@ -21,6 +21,9 @@ import {
   SkeletonDisplayText,
   SkeletonPage,
 } from "@shopify/polaris";
+import {
+  SendIcon
+} from '@shopify/polaris-icons';
 import ReactDOM from "react-dom";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
@@ -30,6 +33,7 @@ import { InvoiceTemplate2 } from "../invoiceTemplates/invoice-template2";
 import { InvoiceTemplate3 } from "../invoiceTemplates/invoice-template3";
 import { useIndexResourceState } from "@shopify/polaris";
 import { MenuHorizontalIcon } from "@shopify/polaris-icons";
+import { set } from "mongoose";
 
 const filterOrders = (orders, query) => {
   return orders.filter((order) => {
@@ -49,6 +53,8 @@ export function IndexTableEx({ value, shopdetails }) {
   const [currentTemplateId, setCurrentTemplateId] = useState(null);
   const [storeDomain, setStoreDomain] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
+
+  const [shopId, setShopId] = useState(null);
   const itemsPerPage = 20;
   const [showToast, setShowToast] = useState({
     active: false,
@@ -68,6 +74,8 @@ export function IndexTableEx({ value, shopdetails }) {
     })
       .then((response) => response.json())
       .then((data) => {
+        // console.log("Store Details---!", data.data);
+        setShopId(data.data.data[0].id);
         if (data.data.data && data.data.data.length > 0) {
           setStoreDomain(data.data.data[0].domain);
         }
@@ -82,6 +90,7 @@ export function IndexTableEx({ value, shopdetails }) {
         .then((data) => {
           if (data.storeInvoiceTemplate) {
             setCurrentTemplateId(data.storeInvoiceTemplate);
+            console.log("Current Template ID:", currentTemplateId);
           }
         })
         .catch((error) => console.error("Error fetching template ID:", error));
@@ -108,6 +117,107 @@ export function IndexTableEx({ value, shopdetails }) {
         handleShowToast("Internal Server Error 500", true);
       });
   }, []);
+
+
+  const sendInvoiceToCustomer = async (orderDetails, shopDetails, invoiceSettings, customerEmail) => {
+    try {
+      // Fetch the generated PDF file as Blob
+      const pdfBlob = await generatePDFBlob(orderDetails, shopDetails, invoiceSettings);
+      
+      // Create a FormData object to include the Blob and additional data
+      const formData = new FormData();
+      formData.append("file", pdfBlob, `Invoice-${orderDetails.order_number}.pdf`);
+      formData.append("customerEmail", customerEmail);
+      formData.append("orderId", orderDetails.order_number);
+      formData.append("storeDetails", shopDetails.name);
+      
+      // Send request to the backend API
+      const response = await fetch("/api/send-invoice", {
+        method: "POST",
+        body: formData,
+      });
+      
+      if (response.ok) {
+        handleShowToast("Invoice sent successfully.");
+      } else {
+        const errorData = await response.json();
+        console.error("Error sending invoice:", errorData);
+        handleShowToast("Failed to send invoice.", true);
+      }
+    } catch (error) {
+      console.error("Error in sending invoice:", error);
+      handleShowToast("An error occurred while sending the invoice.", true);
+    }
+  };
+  
+  // Helper function to generate PDF as Blob
+  const generatePDFBlob = async (orderDetails, shopDetails, invoiceSettings) => {
+    const pdf = new jsPDF("p", "pt", "a4");
+  
+    // Create an invoice container dynamically
+    const invoiceContainer = document.createElement("div");
+    invoiceContainer.style.width = "794px";
+    invoiceContainer.style.height = "1123px";
+    invoiceContainer.style.position = "absolute";
+    invoiceContainer.style.top = "-9999px";
+    document.body.appendChild(invoiceContainer);
+  
+    console.log(currentTemplateId, "currentTemplateId");
+    // Render the appropriate template into the container
+    switch (currentTemplateId) {
+      case "1":
+        ReactDOM.render(
+          <InvoiceTemplate1 shopdetails={[shopDetails]} orders={[orderDetails]} />,
+          invoiceContainer
+        );
+        break;
+      case "2":
+        ReactDOM.render(
+          <InvoiceTemplate2 shopdetails={[shopDetails]} orders={[orderDetails]} />,
+          invoiceContainer
+        );
+        break;
+      case "3":
+        ReactDOM.render(
+          <InvoiceTemplate3 shopdetails={[shopDetails]} orders={[orderDetails]} />,
+          invoiceContainer
+        );
+        break;
+      default:
+        console.error("Invalid template ID:", currentTemplateId);
+        throw new Error("Invalid template ID.");
+    }
+  
+    // Convert the rendered HTML to a canvas and generate a PDF Blob
+    const canvas = await html2canvas(invoiceContainer, {
+      scale: 2,
+      useCORS: true,
+    });
+    const imgData = canvas.toDataURL("image/png");
+  
+    const pdfWidth = pdf.internal.pageSize.getWidth();
+    const imgWidth = pdfWidth - 20;
+    const imgHeight = (canvas.height * imgWidth) / canvas.width;
+  
+    pdf.addImage(imgData, "PNG", 10, 10, imgWidth, imgHeight);
+    document.body.removeChild(invoiceContainer);
+  
+    // Return PDF as Blob
+    return pdf.output("blob");
+  };
+  
+  const quickSendInvoice = async (orderDetails, shopDetails, invoiceSettings, customerEmail) => {
+    try {
+      await sendInvoiceToCustomer(orderDetails, shopDetails, invoiceSettings, customerEmail);
+    } catch (error) {
+      console.error("Error in Quick Send:", error);
+      handleShowToast("An error occurred while sending the invoice.", true);
+    }
+  };
+  
+  
+  
+  
 
   const togglePopoverActive = (orderId) => {
     setPopoverActive((prevState) => ({
@@ -263,12 +373,12 @@ export function IndexTableEx({ value, shopdetails }) {
         key={id}
         selected={selectedResources.includes(id)}
         position={index}
-        onClick={(event) => {
-          const clickedElement = event.target.closest(".btn-actions, .btn-popover");
-          if (clickedElement) {
-            event.stopPropagation();
-          }
-        }}
+        // onClick={(event) => {
+        //   const clickedElement = event.target.closest(".btn-actions, .btn-popover");
+        //   if (clickedElement) {
+        //     event.stopPropagation();
+        //   }
+        // }}
       >
         <IndexTable.Cell>
           {loading ? <SkeletonBodyText lines={1} /> : <Text variation="strong">{order_number}</Text>}
@@ -407,10 +517,24 @@ export function IndexTableEx({ value, shopdetails }) {
                 }
                 onClose={() => togglePopoverActive(id)}
               >
-                <ActionList
-                  items={[{ content: "Quick Send" }, { content: "View Invoice" }]}
-                />
-              </Popover>
+              <ActionList
+                    items={[
+                      {
+                        content: "Quick Send",
+                        onAction: () => {
+                          quickSendInvoice(
+                            paginatedOrders[index],
+                            shopdetails,
+                            currentTemplateId,
+                            shopdetails.smtpConfig,
+                            paginatedOrders[index].customer?.email || paginatedOrders[index].customer?.contact_email
+                          );
+                        },
+                      },
+                      { content: "View Invoice" },
+                    ]}
+                  />
+                            </Popover>
             </div>
           </ButtonGroup>
         </IndexTable.Cell>
@@ -532,7 +656,7 @@ export function IndexTableEx({ value, shopdetails }) {
             </AlphaCard>
             <FooterHelp>
               Need Help{" "}
-              <Link url="" removeUnderline>
+              <Link to="/contact-us" removeUnderline>
                 please click here
               </Link>
             </FooterHelp>

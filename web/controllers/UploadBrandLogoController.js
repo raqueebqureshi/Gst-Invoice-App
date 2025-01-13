@@ -5,7 +5,7 @@ import AWS from "aws-sdk";
 import { v4 as uuid } from "uuid";
 
 
-import StoreProfile from "../models/storeInfoModel.js";
+import StoreProfile from "../Models/storeInfoModel.js";
 // Configure AWS S3
 // Load environment variables
 dotenv.config();
