@@ -1,10 +1,23 @@
 import React from 'react';
 import convertAmountToWords from '../components/ConvertAmount';
+import { useState, useEffect } from "react";
 
-export function InvoiceTemplate3({ shopdetails, orders }) {
+
+export function InvoiceTemplate3({ shopdetails, orders, invoiceSettings, GSTHSNCodes  }) {
 
   console.log("orders - InvoiceTemplate3", orders[0]);
   console.log("store - details 3", shopdetails[0]);
+  console.log("invoiceSettings - InvoiceTemplate3", invoiceSettings);
+  console.log("GSTHSNCodes - InvoiceTemplate3", GSTHSNCodes);
+
+
+  const [storeDomain, setStoreDomain] = useState(null);
+  const [email, setEmail] = useState(null);
+  // const [GSTHSNCodes, setGSTHSNCodes] = useState([]);
+  const [InvoiceHeading, setInvoiceHeading] = useState("");
+  const [BillHeading, setBillHeading] = useState("");
+  const [ShipHeading, setShipHeading] = useState("");
+
   const formatDateTime = (dateString) => {
     const date = new Date(dateString);
     return new Intl.DateTimeFormat("en-US", {
@@ -13,6 +26,100 @@ export function InvoiceTemplate3({ shopdetails, orders }) {
       day: "2-digit",
     }).format(date);
   };
+
+  useEffect(() => {
+    fetch("/api/2024-10/shop.json", {
+      method: "GET",
+      headers: { "Content-Type": "application/json" },
+    })
+      .then((request) => request.json())
+      .then((response) => {
+        console.log("Store Details---!", response.data);
+        if (response.data.data.length > 0) {
+          console.log("Store Details---", response.data.data[0]);
+
+          setStoreDomain(response.data.data[0].domain);
+          setEmail(response.data.data[0].email);
+        }
+      })
+      .catch((error) => console.log(error));
+  }, []);
+
+  const fetchInvoiceSettings = async () => {
+    console.log("Sending request to fetch invoice settings");
+
+    return fetch("/api/fetch-invoice-settings", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: email, storeDomain: storeDomain }), // Replace with actual data
+    })
+      .then(async (response) => {
+        if (!response.ok) {
+          return response.text().then((errorText) => {
+            throw new Error(errorText || `HTTP error! Status: ${response.status}`);
+          });
+        }
+        return response.json();
+      })
+      .then((data) => {
+        // setInvoiceSettings(data);
+        const settings = data;
+        console.log("Received response:", settings);
+
+        // console.log("Received response:", JSON.stringify(settings));
+      })
+      .catch((error) => {
+        console.error("Error fetching invoice settings:", error.message);
+      });
+  };
+
+  // const fetchGSTHSNValues = async (products) => {
+  //   try {
+  //     if (!storeDomain || !email) {
+  //       console.error("Missing storeDomain or email:", {
+  //         storeDomain,
+  //         email: email,
+  //       });
+  //       throw new Error("Invalid storeDomain or email.");
+  //     }
+
+  //     const url = `/api/products/gsthsn?storeDomain=${encodeURIComponent(storeDomain)}&email=${encodeURIComponent(
+  //       email
+  //     )}`;
+  //     console.log("Fetching GST HSN Values with URL:", url);
+
+  //     const response = await fetch(url);
+
+  //     if (!response.ok) {
+  //       throw new Error(`Failed to fetch GST values. Status: ${response.status}`);
+  //     }
+
+  //     const data = await response.json();
+  //     console.log("Fetched GST Values:", data.gstValues);
+
+  //     setGSTHSNCodes(data.gstValues);
+  //   } catch (error) {
+  //     console.error("Error fetching GST values:", error);
+  //   }
+  // };
+
+  useEffect(() => {
+    if (storeDomain && email) {
+      fetchInvoiceSettings();
+      // fetchGSTHSNValues();
+    }
+  }, [storeDomain, email]);
+
+  // console.log("billing_address - InvoiceTemplate2", orders[0].billing_address);
+  // console.log("orders - InvoiceTemplate2", orders);
+  // // console.log("orders - InvoiceTemplate2", JSON.stringify(orders));
+  // console.log("store - details I", shopdetails[0]);
+  useEffect(() => {
+    setInvoiceHeading(invoiceSettings.overview.documentTitle || "invoice");
+    setBillHeading(invoiceSettings.billing.heading || "Bill To");
+    setShipHeading(invoiceSettings.shipping.heading || "Ship To");
+  }, [orders, shopdetails, invoiceSettings]);
+
 
   return (
     <>
@@ -150,15 +257,18 @@ export function InvoiceTemplate3({ shopdetails, orders }) {
               {/* <p>GSTIN: 07AACCM0437C1Z1</p> */}
             </div>
             <div className="invoice-center">
-              <h1>Tax Invoice</h1>
+              <h1>{InvoiceHeading}</h1>
             </div>
             <div className="invoice-right">
               <p>Original</p>
             </div>
           </div>
-
+          {invoiceSettings.supplier.showSupplier ? (<>
           <div className="invoice-center">
-            <h2>{shopdetails[0].name !== null ? shopdetails[0].name: "Store Invoice"}</h2>
+          {invoiceSettings.supplier.showHeading ? ( 
+            <h2>{shopdetails[0].name !== null ? shopdetails[0].name: "Store Invoice"}</h2>) : (
+            <></>
+          )}
             <p>Email: {shopdetails[0].email !== null ? shopdetails[0].email: "N/A"}</p>
             <p>Website: {shopdetails[0].domain !== null ? shopdetails[0].domain: "N/A"}</p>
             <p>PH: {shopdetails[0].phone !== null ? shopdetails[0].phone: "N/A"}</p>
@@ -166,10 +276,14 @@ export function InvoiceTemplate3({ shopdetails, orders }) {
 
           <div className="invoice-section">
             <div className="invoice-content">
-              <p><strong>Invoice No:</strong> {orders[0].order_number !== null 
-              ? orders[0].order_number: "N/A"}</p>
+            {invoiceSettings.overview.showInvoiceNumber ? ( <p><strong>Invoice No:</strong> {orders[0].order_number !== null 
+              ? orders[0].order_number: "N/A"}</p>) : (
+                <></>
+              )}
               {/* <p><strong>Order Id:</strong> 1020</p> */}
-              <p><strong>Invoice Date:</strong> {formatDateTime(orders[0].processed_at)}</p>
+              {invoiceSettings.overview.issueDate ? ( <p><strong>Invoice Date:</strong> {formatDateTime(orders[0].processed_at)}</p>) : (
+            <></>
+          )}
               {/* <p><strong>Payment:</strong> UPI</p> */}
             </div>
             <div className="invoice-content-right">
@@ -179,8 +293,10 @@ export function InvoiceTemplate3({ shopdetails, orders }) {
               <p><strong>State Code: </strong> {shopdetails[0].province_code !== null 
               ? shopdetails[0].province_code: "N/A"}</p>
             </div>
-          </div>
-
+          </div></>
+) : (
+  <></>
+)}
           <div className="invoice-section">
             <div className="invoice-content">
               <h3>BILLED TO</h3>

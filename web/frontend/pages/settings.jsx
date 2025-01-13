@@ -14,7 +14,7 @@ import { RiDeleteBinLine } from "react-icons/ri"; // FontAwesome
 import { Collapsible, HorizontalStack, VerticalStack, Icon } from "@shopify/polaris";
 import { ChevronDownIcon, ChevronUpIcon, DeleteIcon } from "@shopify/polaris-icons";
 import { TitleBar } from "@shopify/app-bridge-react";
-import React, { useEffect, useState, useCallback, use } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { set } from "mongoose";
 
 export default function Settings() {

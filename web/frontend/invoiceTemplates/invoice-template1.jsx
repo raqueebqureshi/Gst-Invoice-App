@@ -1,13 +1,16 @@
 import React from "react";
 import { useState, useEffect } from "react";
+import SocialMediaIcons from "../components/GlobalSocialIcons";
 
-export function InvoiceTemplate1({ shopdetails, orders, invoiceSettings }) {
+export function InvoiceTemplate1({ shopdetails, orders, invoiceSettings, GSTHSNCodes }) {
   console.log("orders - InvoiceTemplate1", orders);
   console.log("invoiceSettings - InvoiceTemplate1", invoiceSettings);
+  console.log("GSTHSNCodes - InvoiceTemplate1", GSTHSNCodes.gstcodes);
 
   const [storeDomain, setStoreDomain] = useState(null);
   const [email, setEmail] = useState(null);
-  const [GSTHSNCodes, setGSTHSNCodes] = useState([]);
+  const [shopId, setshopId] = useState("");
+  // const [GSTHSNCodes, setGSTHSNCodes] = useState([]);
   const [InvoiceHeading, setInvoiceHeading] = useState("");
   const [BillHeading, setBillHeading] = useState("");
   const [ShipHeading, setShipHeading] = useState("");
@@ -30,7 +33,7 @@ export function InvoiceTemplate1({ shopdetails, orders, invoiceSettings }) {
         console.log("Store Details---!", response.data);
         if (response.data.data.length > 0) {
           console.log("Store Details---", response.data.data[0]);
-
+          setshopId(response.data.data[0].id || "");
           setStoreDomain(response.data.data[0].domain);
           setEmail(response.data.data[0].email);
         }
@@ -68,44 +71,48 @@ export function InvoiceTemplate1({ shopdetails, orders, invoiceSettings }) {
       });
   };
 
-  const fetchGSTHSNValues = async (products) => {
-    try {
-      if (!storeDomain || !email) {
-        console.error("Missing storeDomain or email:", {
-          storeDomain,
-          email: email,
-        });
-        throw new Error("Invalid storeDomain or email.");
-      }
+  // const fetchGSTHSNValues = async () => {
+  //   try {
+  //     if (!storeDomain || !email) {
+  //       console.error("Missing storeDomain or email:", {
+  //         storeDomain,
+  //         email: email,
+  //       });
+  //       throw new Error("Invalid storeDomain or email.");
+  //     }
 
-      const url = `/api/products/gsthsn?storeDomain=${encodeURIComponent(
-        storeDomain
-      )}&email=${encodeURIComponent(email)}`;
-      console.log("Fetching GST HSN Values with URL:", url);
+  //     const url = `/api/products/gsthsn?storeDomain=${encodeURIComponent(
+  //       storeDomain
+  //     )}&email=${encodeURIComponent(email)}`;
+  //     console.log("Fetching GST HSN Values with URL:", url);
 
-      const response = await fetch(url);
+  //     const response = await fetch(url);
 
-      if (!response.ok) {
-        throw new Error(
-          `Failed to fetch GST values. Status: ${response.status}`
-        );
-      }
+  //     if (!response.ok) {
+  //       throw new Error(
+  //         `Failed to fetch GST values. Status: ${response.status}`
+  //       );
+  //     }
 
-      const data = await response.json();
-      console.log("Fetched GST Values:", data.gstValues);
+  //     const data = await response.json();
+  //     console.log("Fetched GST Values:", data.gstValues);
 
-      setGSTHSNCodes(data.gstValues);
-    } catch (error) {
-      console.error("Error fetching GST values:", error);
-    }
-  };
+  //     setGSTHSNCodes(data.gstValues);
+  //   } catch (error) {
+  //     console.error("Error fetching GST values:", error);
+  //   }
+  // };
 
   useEffect(() => {
     if (storeDomain && email) {
       fetchInvoiceSettings();
-      fetchGSTHSNValues();
+      // fetchGSTHSNValues();
     }
   }, [storeDomain, email]);
+
+  // useEffect(() => {
+  //   console.log("GSTHSNCodes -", GSTHSNCodes);
+  // }, [GSTHSNCodes]);
 
   // console.log("billing_address - InvoiceTemplate1", orders[0].billing_address);
   // console.log("orders - InvoiceTemplate1", orders);
@@ -160,7 +167,7 @@ export function InvoiceTemplate1({ shopdetails, orders, invoiceSettings }) {
                 "Shop Name"
               )
             ) : (
-              <td></td>
+              <></>
             )}
           </h1>
           <p style={{ margin: "0", color: "#718096" }}>
@@ -171,18 +178,18 @@ export function InvoiceTemplate1({ shopdetails, orders, invoiceSettings }) {
                 "N/A"
               )
             ) : (
-              <td></td>
+              <></>
             )}
           </p>
           <p style={{ margin: "0", color: "#718096" }}>
             {invoiceSettings.supplier.showCity ? (
               shopdetails[0].city !== null ? (
-                shopdetails[0].city + ", "
+                shopdetails[0].city + " "
               ) : (
                 "N/A"
               )
             ) : (
-              <td></td>
+              <></>
             )}
             {invoiceSettings.supplier.showZipPinCode ? (
               shopdetails[0].zip !== null ? (
@@ -191,7 +198,7 @@ export function InvoiceTemplate1({ shopdetails, orders, invoiceSettings }) {
                 "N/A"
               )
             ) : (
-              <td></td>
+              <></>
             )}
           </p>
           <p style={{ margin: "0", color: "#718096" }}>
@@ -201,7 +208,7 @@ export function InvoiceTemplate1({ shopdetails, orders, invoiceSettings }) {
                 {shopdetails[0]?.phone ? shopdetails[0].phone : "N/A"}
               </>
             ) : (
-              <td></td>
+              <></>
             )}
           </p>
           {/* <p style={{ margin: '0', color: '#718096' }}>Fax: [000-000-0000]</p> */}
@@ -212,7 +219,7 @@ export function InvoiceTemplate1({ shopdetails, orders, invoiceSettings }) {
                {shopdetails[0].email !== null ? shopdetails[0].email : "N/A"}
               </>
             ) : (
-              <td></td>
+              <></>
             )}
             
           </p>
@@ -223,7 +230,7 @@ export function InvoiceTemplate1({ shopdetails, orders, invoiceSettings }) {
                {456789009876}
               </>
             ) : (
-              <td></td>
+              <></>
             )}
             
           </p>
@@ -259,7 +266,7 @@ export function InvoiceTemplate1({ shopdetails, orders, invoiceSettings }) {
                   </td>
                 </tr>
               ) : (
-                <td></td>
+                <></>
               )}
 
               {invoiceSettings.overview.showInvoiceNumber ? (
@@ -282,7 +289,7 @@ export function InvoiceTemplate1({ shopdetails, orders, invoiceSettings }) {
                   </td>
                 </tr>
               ) : (
-                <td></td>
+                <></>
               )}
             </tbody>
           </table>
@@ -312,7 +319,8 @@ export function InvoiceTemplate1({ shopdetails, orders, invoiceSettings }) {
         </thead>
         <tbody>
           <tr>
-          {invoiceSettings.billing.showBilling ? (<td
+          {invoiceSettings.billing.showBilling ? (
+            <td
               style={{
                 padding: "10px",
                 border: "1px solid #e2e8f0",
@@ -367,7 +375,12 @@ export function InvoiceTemplate1({ shopdetails, orders, invoiceSettings }) {
                 <>
                 {invoiceSettings.shipping.showFullName ?(orders[0].shipping_address.name !== null
                     ? orders[0].shipping_address.name 
-                    : "N/A"):(<></>)} 
+                    : "N/A"):(<></>)} {" "}
+                {invoiceSettings.shipping.showCompany ? (
+                  `(${orders[0].billing_address.company !== null ? orders[0].billing_address.company : "N/A"})`
+                ) : (
+                  <></>
+                )}
                   
                   <br />
                   {invoiceSettings.shipping.showAddress1 ?(orders[0].shipping_address.address1 !== null
@@ -431,10 +444,16 @@ export function InvoiceTemplate1({ shopdetails, orders, invoiceSettings }) {
           </tr>
         </thead>
         <tbody style={{ textAlign: "center" }}>
-          {orders[0].line_items?.map((item) => {
-            const matchedGSTItem = GSTHSNCodes.find(
-              (gstItem) => gstItem.id === item.id
-            );
+          {orders[0].line_items?.map((item, index) => {
+            // console.log('GSTHSNCodes-------',GSTHSNCodes[0].productId);
+            console.log('item-------',item.product_id);
+            
+            const matchedGSTItem = GSTHSNCodes.gstcodes ? GSTHSNCodes.gstcodes.find(
+              (gstItem) => Number(gstItem.productId) === item.product_id
+              ) : GSTHSNCodes.find(
+                (gstItem) => Number(gstItem.productId) === item.product_id
+                );
+            
             const price = parseFloat(item.price) || 0; // Convert to a number and default to 0 if NaN
             const lineAmount =
               item.quantity * price + (item.total_tax || 0) || 0;
@@ -508,7 +527,8 @@ export function InvoiceTemplate1({ shopdetails, orders, invoiceSettings }) {
           </h3>
           <ul style={{ paddingLeft: "14px ", paddingTop: "10px" }}>
             {/* <li>Total payment due in 30 days</li> */}
-            <li>Please include the invoice number on your check</li>
+            {/* <li>Please include the invoice number on your check</li> */}
+            <li>{invoiceSettings.footer.footerNote}</li>
           </ul>
         </div>
         <div style={{ width: "30%" }}>
@@ -568,31 +588,29 @@ export function InvoiceTemplate1({ shopdetails, orders, invoiceSettings }) {
           </p>
         </div>
       </div>
-      <div style={{ height: "300px" }}></div>
-      <p style={{ textAlign: "center", marginTop: "20px", fontSize: "0.9em" }}>
+
+      
+      <p style={{ textAlign: "center", marginTop: "150px", fontSize: "0.9em", borderTop: "1px solid #e2e8f0" }}>
         If you have any questions about this invoice, please contact
         <br />
-        {invoiceSettings.supplier.showHeading ? (
-          <>
-              Name: {shopdetails[0].name !== null ? shopdetails[0].name : "N/A"}{" "}
-            </>):(<></>)}
-        
-        <br />
         {invoiceSettings.supplier.showPhone ? (
-              <>Phone: {shopdetails[0].phone !== null
+              <><strong>Phone:</strong> {shopdetails[0].phone !== null
           ? shopdetails[0].phone
           : "N/A"}{" "}</>
             ):(<></>)}
         
-        <br />
+        {' | '}
         {invoiceSettings.supplier.showEmail ? (
-              <>E-mail: {shopdetails[0].email !== null ? shopdetails[0].email : "N/A"}</>
+              <><strong>E-mail:</strong> {shopdetails[0].email !== null ? shopdetails[0].email : "N/A"}</>
             ):(<></>)}
         
       </p>
       <p style={{ textAlign: "center", fontWeight: "bold" }}>
         Thank You For Choosing Us!
       </p>
+      <SocialMediaIcons shopId={shopId} invoiceSetting={invoiceSettings}/>
     </div>
+    
+
   );
 }

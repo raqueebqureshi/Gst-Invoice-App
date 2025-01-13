@@ -46,6 +46,7 @@ export default function CustomizeTemplate() {
   const [showSupplier, setShowSupplier] = useState(false);
   const [showShipping, setShowShipping] = useState(false);
   const [showBilling, setShowBilling] = useState(false);
+  const [GSTHSNCodes, setGSTHSNCodes] = useState([]);
   const [showLineItems, setShowLineItems] = useState(false);
   const [showTotal, setShowTotal] = useState(false);
   const [showFooter, setShowFooter] = useState(false);
@@ -583,6 +584,42 @@ export default function CustomizeTemplate() {
       tax_exempt: false,
     },
   ];
+
+  const demoGST = [
+    {"productId": "123456789", "productName": "bottle", "gst": "12", "hsn": "456789"},
+    {"productId": "234567890", "productName": "Gift Card", "gst": "12", "hsn": "8961257668837"},
+    {"productId": "345678901", "productName": "Gift Card (Copy)", "gst": "18", "hsn": "8961257668837"},
+    {"productId": "456789012", "productName": "lalal", "gst": "76", "hsn": "8961257668837"},
+    {"productId": "567890123", "productName": "lalal (Copy)", "gst": "56", "hsn": "8961257668837"},
+    {"productId": "678901234", "productName": "new products", "gst": "676", "hsn": "8961257668837"},
+    {"productId": "789012345", "productName": "Random", "gst": "76", "hsn": "8961257668837"},
+    {"productId": "890123456", "productName": "rq", "gst": "56", "hsn": "8961257668837"},
+    {"productId": "901234567", "productName": "Selling Plans Ski Wax (Copy)", "gst": "65", "hsn": "8961257668837"},
+    {"productId": "1012345678", "productName": "Selling Plans Ski Wax (Copy) (Copy)", "gst": "45", "hsn": "8961257668837"},
+    {"productId": "1123456789", "productName": "Selling Plans Ski Wax (Copy) (Copy) (Copy)", "gst": "8", "hsn": "78765"},
+    {"productId": "1223456789", "productName": "Selling Plans Ski Wax (Copy) (Copy) (Copy) (Copy)", "gst": "7", "hsn": "45678"},
+    {"productId": "1323456789", "productName": "The 3ajsdhfb", "gst": "6", "hsn": "9876"},
+    {"productId": "1423456789", "productName": "The 3p Fulfilled Snowboard", "gst": "5", "hsn": "9876"},
+    {"productId": "1523456789", "productName": "The 3p Fulfilled Snowboard (Copy)", "gst": "4", "hsn": "9876"},
+    {"productId": "1623456789", "productName": "The Archived Snowboard", "gst": "6", "hsn": "456"},
+    {"productId": "1723456789", "productName": "The Collection Snowboard: Hydrogen", "gst": "5", "hsn": "345678"},
+    {"productId": "1823456789", "productName": "The Collection Snowboard: Liquid", "gst": "8", "hsn": "6666666"},
+    {"productId": "1923456789", "productName": "The Collection Snowboard: Oxygen", "gst": "5", "hsn": "987654"},
+    {"productId": "2023456789", "productName": "The Compare at Price Snowboard", "gst": "8", "hsn": "65432"},
+    {"productId": "2123456789", "productName": "The Complete Snowboard", "gst": "8", "hsn": "5432"},
+    {"productId": "2223456789", "productName": "The Draft Snowboard", "gst": "5", "hsn": "876543"},
+    {"productId": "2323456789", "productName": "The Hidden Snowboard", "gst": "4", "hsn": "i765432"},
+    {"productId": "2423456789", "productName": "The Inventory Not Tracked Snowboard", "gst": "8", "hsn": "23456789"},
+    {"productId": "2523456789", "productName": "The Multi-location Snowboard", "gst": "4", "hsn": "345678"},
+    {"productId": "2623456789", "productName": "The Multi-managed Snowboard", "gst": "8", "hsn": "87878"},
+    {"productId": "2723456789", "productName": "The Out of Stock Snowboard", "gst": "8", "hsn": "565655"},
+    {"productId": "2823456789", "productName": "The Videographer Snowboard", "gst": "8", "hsn": "34343"},
+    {"productId": "2923456789", "productName": "very new", "gst": "8", "hsn": "878787"}
+  ];
+  
+  
+
+
   const styles = {
     header: {
       display: "flex",
@@ -784,6 +821,20 @@ export default function CustomizeTemplate() {
     }));
   };
 
+  const updateSocialNetworkSetting = (key, value) => {
+    setInvoiceSetting2((prevSettings) => ({
+      ...prevSettings,
+      footer: {
+        ...prevSettings.footer,
+        socialNetworks: {
+          ...prevSettings.footer.socialNetworks,
+          [key]: value, // Only update the specific social network key
+        },
+      },
+    }));
+  };
+  
+
   const handleSupplierCheckboxChange = (key) => {
     setSupplierSettings((prev) => ({
       ...prev,
@@ -858,6 +909,38 @@ export default function CustomizeTemplate() {
     }
   }, [storeDomain, email]);
 
+
+  // const fetchGSTHSNValues = async () => {
+  //   try {
+  //     if (!storeDomain || !email) {
+  //       console.error("Missing storeDomain or email:", {
+  //         storeDomain,
+  //         email: email,
+  //       });
+  //       throw new Error("Invalid storeDomain or email.");
+  //     }
+
+  //     const url = `/api/products/gsthsn?storeDomain=${encodeURIComponent(
+  //       storeDomain
+  //     )}&email=${encodeURIComponent(email)}`;
+  //     console.log("Fetching GST HSN Values with URL:", url);
+
+  //     const response = await fetch(url);
+
+  //     if (!response.ok) {
+  //       throw new Error(
+  //         `Failed to fetch GST values. Status: ${response.status}`
+  //       );
+  //     }
+
+  //     const data = await response.json();
+  //     console.log("Fetched GST Values:", data.gstValues);
+
+  //     setGSTHSNCodes(data.gstValues);
+  //   } catch (error) {
+  //     console.error("Error fetching GST values:", error);
+  //   }
+  // };
   // Example usage:
   const handleShowToast = (message, isError) => {
     // console.log(`${isError ? "Error" : "Info"}: ${message}`);
@@ -907,19 +990,19 @@ export default function CustomizeTemplate() {
       });
   };
 
-  const renderInvoiceTemplate = (currentTemplate, shopdetails, order) => {
+  const renderInvoiceTemplate = (currentTemplate, shopdetails, order, gstcodes) => {
     switch (currentTemplate) {
       case 1:
         return (
-          <InvoiceTemplate1 shopdetails={[shopdetails]} orders={[order]} invoiceSettings={InvoiceSetting2}/>
+          <InvoiceTemplate1 shopdetails={[shopdetails]} orders={[order]} invoiceSettings={InvoiceSetting2} GSTHSNCodes={{gstcodes}}/>
         );
       case 2:
         return (
-          <InvoiceTemplate2 shopdetails={[shopdetails]} orders={[order]} />
+          <InvoiceTemplate2 shopdetails={[shopdetails]} orders={[order]} invoiceSettings={InvoiceSetting2} GSTHSNCodes={{gstcodes}}/>
         );
       case 3:
         return (
-          <InvoiceTemplate3 shopdetails={[shopdetails]} orders={[order]} />
+          <InvoiceTemplate3 shopdetails={[shopdetails]} orders={[order]} invoiceSettings={InvoiceSetting2} GSTHSNCodes={{gstcodes}}/>
         );
       default:
         console.error("Invalid template ID:", currentTemplate);
@@ -1249,6 +1332,7 @@ export default function CustomizeTemplate() {
                             "showTrackingCompany",
                             "showTrackingNo",
                             "showTaxReverseText",
+                            "showOrderId",
                           ].includes(key)
                       ) // Filter out unwanted fields
                       .map((key) =>
@@ -1710,6 +1794,64 @@ export default function CustomizeTemplate() {
                     </a>
                   </p>
 
+                  <div>
+                  <div
+                    style={{
+                      marginTop: "20px",
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: "10px",
+                    }}
+                  >
+                   {Object.keys(InvoiceSetting2.footer.socialNetworks)
+                      .filter(
+                        (key) =>
+                          ![
+                            "showWebsite"
+                            
+                          ].includes(key)
+                      ) // Filter out unwanted fields
+                      .map((key) =>
+                        typeof InvoiceSetting2.footer.socialNetworks[key] === "boolean" ? (
+                          <Checkbox
+                            key={key}
+                            label={key.replace(/([A-Z])/g, " $1").toLowerCase()}
+                            checked={InvoiceSetting2.footer.socialNetworks[key]}
+                            onChange={() =>
+                              updateSocialNetworkSetting(
+                                key,
+                                !InvoiceSetting2.footer.socialNetworks[key]
+                              )
+                            }
+                          />
+                        ) : (
+                          <>
+                          <strong style={{ marginBottom: "0px" }}>Heading</strong>
+                          <TextField
+                            key={key}
+                            value={InvoiceSetting2.footer.socialNetworks[key]}
+                            onChange={(value) =>
+                              updateSocialNetworkSetting(key, value)
+                            }
+                            placeholder={`Enter ${key
+                              .replace(/([A-Z])/g, " $1")
+                              .toLowerCase()}`}
+                          />
+                          </>
+                          
+                        )
+                      )}
+                  </div>
+                  {/* <p style={{ margin: "20px 0", fontWeight: "bold" }}>
+                    Table note
+                  </p>
+                  <TextField
+                    value={tableNote}
+                    onChange={(value) => setTableNote(value)}
+                    placeholder="Eg. All prices will be calculated in INR"
+                  /> */}
+                </div>
+
                   <p style={{ marginTop: "20px", fontWeight: "bold" }}>
                     Thank you note
                   </p>
@@ -1792,7 +1934,7 @@ export default function CustomizeTemplate() {
               {(shopDetails.id && (
                 <>
                 
-                  {renderInvoiceTemplate(templateId, shopDetails, demoOrder[0])}
+                  {renderInvoiceTemplate(templateId, shopDetails, demoOrder[0], demoGST)}
                 </>
               )) ||
                 "No template available"}

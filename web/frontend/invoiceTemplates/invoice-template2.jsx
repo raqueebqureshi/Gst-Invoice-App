@@ -2,15 +2,16 @@ import convertAmountToWords from "../components/ConvertAmount";
 import React from "react";
 import { useState, useEffect } from "react";
 
-
-export function InvoiceTemplate2({ shopdetails, orders, invoiceSettings }) {
+export function InvoiceTemplate2({ shopdetails, orders, invoiceSettings, GSTHSNCodes }) {
   console.log("orders - InvoiceTemplate2", orders[0]);
   console.log("store - details I2", shopdetails[0]);
   console.log("invoiceSettings - InvoiceTemplate2", invoiceSettings);
+  console.log("GSTHSNCodes - InvoiceTemplate3", GSTHSNCodes);
+
 
   const [storeDomain, setStoreDomain] = useState(null);
   const [email, setEmail] = useState(null);
-  const [GSTHSNCodes, setGSTHSNCodes] = useState([]);
+  // const [GSTHSNCodes, setGSTHSNCodes] = useState([]);
   const [InvoiceHeading, setInvoiceHeading] = useState("");
   const [BillHeading, setBillHeading] = useState("");
   const [ShipHeading, setShipHeading] = useState("");
@@ -52,9 +53,7 @@ export function InvoiceTemplate2({ shopdetails, orders, invoiceSettings }) {
       .then(async (response) => {
         if (!response.ok) {
           return response.text().then((errorText) => {
-            throw new Error(
-              errorText || `HTTP error! Status: ${response.status}`
-            );
+            throw new Error(errorText || `HTTP error! Status: ${response.status}`);
           });
         }
         return response.json();
@@ -63,7 +62,7 @@ export function InvoiceTemplate2({ shopdetails, orders, invoiceSettings }) {
         // setInvoiceSettings(data);
         const settings = data;
         console.log("Received response:", settings);
-        
+
         // console.log("Received response:", JSON.stringify(settings));
       })
       .catch((error) => {
@@ -71,42 +70,40 @@ export function InvoiceTemplate2({ shopdetails, orders, invoiceSettings }) {
       });
   };
 
-  const fetchGSTHSNValues = async (products) => {
-    try {
-      if (!storeDomain || !email) {
-        console.error("Missing storeDomain or email:", {
-          storeDomain,
-          email: email,
-        });
-        throw new Error("Invalid storeDomain or email.");
-      }
+  // const fetchGSTHSNValues = async (products) => {
+  //   try {
+  //     if (!storeDomain || !email) {
+  //       console.error("Missing storeDomain or email:", {
+  //         storeDomain,
+  //         email: email,
+  //       });
+  //       throw new Error("Invalid storeDomain or email.");
+  //     }
 
-      const url = `/api/products/gsthsn?storeDomain=${encodeURIComponent(
-        storeDomain
-      )}&email=${encodeURIComponent(email)}`;
-      console.log("Fetching GST HSN Values with URL:", url);
+  //     const url = `/api/products/gsthsn?storeDomain=${encodeURIComponent(storeDomain)}&email=${encodeURIComponent(
+  //       email
+  //     )}`;
+  //     console.log("Fetching GST HSN Values with URL:", url);
 
-      const response = await fetch(url);
+  //     const response = await fetch(url);
 
-      if (!response.ok) {
-        throw new Error(
-          `Failed to fetch GST values. Status: ${response.status}`
-        );
-      }
+  //     if (!response.ok) {
+  //       throw new Error(`Failed to fetch GST values. Status: ${response.status}`);
+  //     }
 
-      const data = await response.json();
-      console.log("Fetched GST Values:", data.gstValues);
+  //     const data = await response.json();
+  //     console.log("Fetched GST Values:", data.gstValues);
 
-      setGSTHSNCodes(data.gstValues);
-    } catch (error) {
-      console.error("Error fetching GST values:", error);
-    }
-  };
+  //     setGSTHSNCodes(data.gstValues);
+  //   } catch (error) {
+  //     console.error("Error fetching GST values:", error);
+  //   }
+  // };
 
   useEffect(() => {
     if (storeDomain && email) {
       fetchInvoiceSettings();
-      fetchGSTHSNValues();
+      // fetchGSTHSNValues();
     }
   }, [storeDomain, email]);
 
@@ -116,11 +113,9 @@ export function InvoiceTemplate2({ shopdetails, orders, invoiceSettings }) {
   // console.log("store - details I", shopdetails[0]);
   useEffect(() => {
     setInvoiceHeading(invoiceSettings.overview.documentTitle || "invoice");
-        setBillHeading(invoiceSettings.billing.heading|| "Bill To");
-        setShipHeading(invoiceSettings.shipping.heading|| "Ship To");
+    setBillHeading(invoiceSettings.billing.heading || "Bill To");
+    setShipHeading(invoiceSettings.shipping.heading || "Ship To");
   }, [orders, shopdetails, invoiceSettings]);
-
-  
 
   return (
     <div
@@ -142,66 +137,91 @@ export function InvoiceTemplate2({ shopdetails, orders, invoiceSettings }) {
           alignItems: "center",
         }}
       >
-        <h1 style={{ margin: 0, fontSize: "24px" }}>TAX INVOICE</h1>
+        <h1 style={{ margin: 0, fontSize: "24px" }}>{InvoiceHeading}</h1>
         <div>
-          <p style={{ margin: 0 }}>INVOICE NO : {orders[0].name}</p>
-          <p style={{ margin: 0 }}>DATE : 04-03-2022</p>
+          {invoiceSettings.overview.showInvoiceNumber ? (
+            <p style={{ margin: 0 }}>INVOICE NO : {orders[0].name}</p>
+          ) : (
+            <></>
+          )}
+          {invoiceSettings.overview.issueDate ? (
+            <p style={{ margin: 0 }}>DATE : {formatDateTime(orders[0].created_at)}</p>
+          ) : (
+            <></>
+          )}
         </div>
       </div>
-
-      <div style={{ marginTop: "20px",  visibility: invoiceSettings.supplier.showSupplier
-              ? "visible"
-              : "hidden"}}>
-        <h2 style={{ margin: 0, fontSize: "20px" }}>
-        {invoiceSettings.supplier.showHeading ? (
-              shopdetails[0].name !== null ? (
-                shopdetails[0].name
-              ) : (
-                "N/A"
-              )
-            ) : (
-              <td></td>
-            )}
-        </h2>
-        <p style={{ margin: "5px 0" }}>
-        {invoiceSettings.supplier.showAddress ? (
+      {invoiceSettings.supplier.showSupplier ? (
+        <div style={{ marginTop: "20px", visibility: invoiceSettings.supplier.showSupplier ? "visible" : "hidden" }}>
+          <h2 style={{ margin: 0, fontSize: "20px" }}>
+            {invoiceSettings.supplier.showHeading ? shopdetails[0].name !== null ? shopdetails[0].name : "N/A" : <></>}
+          </h2>
+          <p style={{ margin: "5px 0" }}>
+            {invoiceSettings.supplier.showAddress ? (
               shopdetails[0].address1 !== null ? (
-                shopdetails[0].address1
+                shopdetails[0].address1 + ", "
               ) : (
                 "N/A"
               )
             ) : (
-              <td></td>
+              <></>
             )}
-          {invoiceSettings.supplier.showCity ? (
+            {invoiceSettings.supplier.showCity ? (
               shopdetails[0].city !== null ? (
-                shopdetails[0].city + ", "
+                shopdetails[0].city + " "
               ) : (
                 "N/A"
               )
             ) : (
-              <td></td>
+              <></>
             )}
-            
-          {/* {shopdetails[0].state !== null ? shopdetails[0].state : "N/A"} */}
-          {invoiceSettings.supplier.showZipPinCode ? (
+
+            {/* {shopdetails[0].state !== null ? shopdetails[0].state : "N/A"} */}
+            {invoiceSettings.supplier.showZipPinCode ? (
               shopdetails[0].zip !== null ? (
                 shopdetails[0].zip + ", "
               ) : (
                 "N/A"
               )
             ) : (
-              <td></td>
+              <></>
             )}
-        </p>
-        {/* <p style={{ margin: '5px 0' }}>GSTIN: AAA21345</p> */}
-        <p style={{ margin: "5px 0" }}>
-          Email ID:{" "}
-          {shopdetails[0].email !== null ? shopdetails[0].email : "N/A"}
-        </p>
-        {/* <p style={{ margin: '5px 0' }}>PAN NO: AAA123456</p> */}
-      </div>
-      <div style={{ height: "20px" }}></div>
+          </p>
+          {/* <p style={{ margin: '5px 0' }}>GSTIN: AAA21345</p> */}
+          <p style={{ margin: "5px 0" }}>
+            {invoiceSettings.supplier.showPhone ? (
+              <>
+                Phone:
+                {shopdetails[0]?.phone ? " " + shopdetails[0].phone : " N/A"}
+              </>
+            ) : (
+              <></>
+            )}
+          </p>
+          <p style={{ margin: "5px 0" }}>
+            {invoiceSettings.supplier.showEmail ? (
+              <>Email ID: {shopdetails[0].email !== null ? shopdetails[0].email : "N/A"}</>
+            ) : (
+              <></>
+            )}
+          </p>
+          <p style={{ margin: "0px 0" }}>
+            {invoiceSettings.supplier.showGSTIN ? (
+              <>
+                GSTIN:
+                {456789009876}
+              </>
+            ) : (
+              <></>
+            )}
+          </p>
+          {/* <p style={{ margin: '5px 0' }}>PAN NO: AAA123456</p> */}
+        </div>
+      ) : (
+        <></>
+      )}
+
+      <div style={{ height: "0px" }}></div>
 
       <div
         style={{
@@ -211,87 +231,196 @@ export function InvoiceTemplate2({ shopdetails, orders, invoiceSettings }) {
         }}
       >
         <div style={{ flex: 1, padding: "10px", backgroundColor: "#e6f2ff" }}>
-          <h3 style={{ margin: 0, fontSize: "16px" }}>Bill To:</h3>
+          {invoiceSettings.billing.showBilling ? (
+            <h3
+              style={{
+                margin: 0,
+                fontSize: "16px",
+                visibility: invoiceSettings.billing.showHeading ? "visible" : "hidden",
+              }}
+            >
+              {BillHeading.toUpperCase()}
+            </h3>
+          ) : (
+            <></>
+          )}
           {orders[0].billing_address !== null ? (
             <>
               <p style={{ margin: "5px 0" }}>
-                {orders[0].billing_address.name !== null
-                  ? orders[0].billing_address.name
-                  : "N/A"}{" "}
+                {invoiceSettings.billing.showFullName ? (
+                  orders[0].billing_address.name !== null ? (
+                    orders[0].billing_address.name
+                  ) : (
+                    "N/A"
+                  )
+                ) : (
+                  <></>
+                )}{" "}
+                {invoiceSettings.billing.showCompany ? (
+                  `(${orders[0].billing_address.company !== null ? orders[0].billing_address.company : "N/A"})`
+                ) : (
+                  <></>
+                )}
               </p>
+              {invoiceSettings.billing.showAddress1 ? (
+                <p style={{ margin: "5px 0" }}>
+                  ADDRESS:
+                  {orders[0].billing_address.address1 !== null ? orders[0].billing_address.address1 + ", " : "N/A"}
+                </p>
+              ) : (
+                <></>
+              )}
               <p style={{ margin: "5px 0" }}>
-                ADDRESS:{" "}
-                {orders[0].billing_address.address1 !== null
-                  ? orders[0].billing_address.address1
-                  : "N/A"}
+                {invoiceSettings.billing.showCity ? (
+                  orders[0].billing_address.city !== null ? (
+                    orders[0].billing_address.city + ", "
+                  ) : (
+                    ""
+                  )
+                ) : (
+                  <></>
+                )}
+
+                {invoiceSettings.billing.showState ? (
+                  orders[0].billing_address.province !== null ? (
+                    orders[0].billing_address.province + ", "
+                  ) : (
+                    ""
+                  )
+                ) : (
+                  <></>
+                )}
+                {invoiceSettings.billing.showZipPinCode ? (
+                  orders[0].billing_address.zip !== null ? (
+                    orders[0].billing_address.zip
+                  ) : (
+                    ""
+                  )
+                ) : (
+                  <></>
+                )}
+                <br />
+                {invoiceSettings.billing.showCountry ? (
+                  orders[0].billing_address.country !== null ? (
+                    orders[0].billing_address.country + ", "
+                  ) : (
+                    ""
+                  )
+                ) : (
+                  <></>
+                )}
               </p>
-              <p style={{ margin: "5px 0" }}>
-                {orders[0].billing_address.city !== null
-                  ? orders[0].billing_address.city
-                  : "N/A"}
-                ,{" "}
-                {orders[0].billing_address.province !== null
-                  ? orders[0].billing_address.province
-                  : "N/A"}{" "}
-                -{" "}
-                {orders[0].billing_address.zip !== null
-                  ? orders[0].billing_address.zip
-                  : "N/A"}
-              </p>
+              {invoiceSettings.billing.showEmail ? (
+                <p style={{ margin: "5px 0" }}>Email ID: {orders[0].email !== null ? orders[0].email : "N/A"}</p>
+              ) : (
+                <></>
+              )}
             </>
           ) : (
             <>
-            <p style={{ margin: "5px 0" }}>
-                Address not available
-              </p>
+              <p style={{ margin: "5px 0" }}>Address not available</p>
             </>
           )}
 
-          <p style={{ margin: "5px 0" }}>
-            Email ID: {orders[0].email !== null ? orders[0].email : "N/A"}
-          </p>
           {/* <p style={{ margin: '5px 0' }}>GSTIN: 07AAFCD5862R1Z8</p> */}
         </div>
         <div style={{ flex: 1, padding: "10px", backgroundColor: "#e6f2ff" }}>
-          <h3 style={{ margin: 0, fontSize: "16px" }}>Ship To:</h3>
-          {orders[0].shipping_address !== null ? (
-            <>
-            <p style={{ margin: "5px 0" }}>
-            {orders[0].shipping_address.name !== null
-              ? orders[0].shipping_address.name
-              : "N/A"}{" "}
-          </p>
-          <p style={{ margin: "5px 0" }}>
-            ADDRESS:{" "}
-            {orders[0].shipping_address.address1 !== null
-              ? orders[0].shipping_address.address1
-              : "N/A"}
-          </p>
-          <p style={{ margin: "5px 0" }}>
-            {orders[0].shipping_address.city !== null
-              ? orders[0].shipping_address.city
-              : "N/A"}
-            ,{" "}
-            {orders[0].shipping_address.province !== null
-              ? orders[0].shipping_address.province
-              : "N/A"}{" "}
-            -{" "}
-            {orders[0].shipping_address.zip !== null
-              ? orders[0].shipping_address.zip
-              : "N/A"}
-          </p>
-            </>
+          {invoiceSettings.shipping.showShipping ? (
+            <h3
+              style={{
+                margin: 0,
+                fontSize: "16px",
+                visibility: invoiceSettings.shipping.showHeading ? "visible" : "hidden",
+              }}
+            >
+              {ShipHeading.toUpperCase()}
+            </h3>
           ) : (
-            <>
-            <p style={{ margin: "5px 0" }}>
-                Address not available
-              </p>
-            </>
+            <></>
           )}
-          
-          <p style={{ margin: "5px 0" }}>
-            Email ID: {orders[0].email !== null ? orders[0].email : "N/A"}
-          </p>
+          {invoiceSettings.shipping.showShipping ? (
+            orders[0].shipping_address !== null ? (
+              <>
+                <p style={{ margin: "5px 0" }}>
+                  {invoiceSettings.shipping.showFullName ? (
+                    orders[0].shipping_address.name !== null ? (
+                      orders[0].shipping_address.name
+                    ) : (
+                      "N/A"
+                    )
+                  ) : (
+                    <></>
+                  )}{" "}
+                  {invoiceSettings.shipping.showCompany ? (
+                    `(${orders[0].billing_address.company !== null ? orders[0].billing_address.company : "N/A"})`
+                  ) : (
+                    <></>
+                  )}
+                </p>
+                <p style={{ margin: "5px 0" }}>
+                  {invoiceSettings.shipping.showAddress1 ? (
+                    <>
+                      ADDRESS:{" "}
+                      {orders[0].shipping_address.address1 !== null ? orders[0].shipping_address.address1 : "N/A"},
+                    </>
+                  ) : (
+                    <></>
+                  )}
+                </p>
+                <p style={{ margin: "5px 0" }}>
+                  {invoiceSettings.shipping.showCity ? (
+                    orders[0].shipping_address.city !== null ? (
+                      orders[0].shipping_address.city + ", "
+                    ) : (
+                      ""
+                    )
+                  ) : (
+                    <></>
+                  )}
+                  {invoiceSettings.shipping.showState ? (
+                    orders[0].shipping_address.province !== null ? (
+                      orders[0].shipping_address.province + ", "
+                    ) : (
+                      ""
+                    )
+                  ) : (
+                    <></>
+                  )}
+                  {invoiceSettings.shipping.showZipPinCode ? (
+                    orders[0].shipping_address.zip !== null ? (
+                      orders[0].shipping_address.zip
+                    ) : (
+                      ""
+                    )
+                  ) : (
+                    <></>
+                  )}
+                  <br />
+                  {invoiceSettings.shipping.showCountry ? (
+                    orders[0].shipping_address.country !== null ? (
+                      orders[0].shipping_address.country + " "
+                    ) : (
+                      ""
+                    )
+                  ) : (
+                    <></>
+                  )}
+                </p>
+                {invoiceSettings.shipping.showEmail ? (
+                  <p style={{ margin: "5px 0" }}>Email ID: {orders[0].email !== null ? orders[0].email : "N/A"}</p>
+                ) : (
+                  <></>
+                )}
+              </>
+            ) : (
+              <>
+                <p style={{ margin: "5px 0" }}>Address not available</p>
+              </>
+            )
+          ) : (
+            <></>
+          )}
+
           {/* <p style={{ margin: '5px 0' }}>GSTIN: 07AAFCD5862R1Z8</p> */}
         </div>
         {/* <div style={{ flex: 1, padding: '10px', backgroundColor: '#e6f2ff' }}>
@@ -309,13 +438,25 @@ export function InvoiceTemplate2({ shopdetails, orders, invoiceSettings }) {
       >
         <thead>
           <tr style={{ backgroundColor: "#e6f2ff" }}>
-            <th style={{ border: "1px solid #000", padding: "8px" }}>
-              Description
-            </th>
-            {/* <th style={{ border: '1px solid #000', padding: '8px' }}>HSN Code</th> */}
-            <th style={{ border: "1px solid #000", padding: "8px" }}>Qty</th>
-            <th style={{ border: "1px solid #000", padding: "8px" }}>Rate</th>
-            <th style={{ border: "1px solid #000", padding: "8px" }}>Amount</th>
+            {invoiceSettings.lineItems.showVariantTitle ? (
+              <th style={{ padding: "10px", textAlign: "left" }}>ITEMS</th>
+            ) : (
+              <></>
+            )}
+            {invoiceSettings.lineItems.showQuantity ? <th style={{ padding: "10px", width: "100px" }}>QTY</th> : <></>}
+            {invoiceSettings.lineItems.showUnitRate ? <th style={{ padding: "10px", width: "100px" }}>RATE</th> : <></>}
+            {invoiceSettings.lineItems.showHSN ? <th style={{ padding: "10px", textAlign: "left" }}>HSN</th> : <></>}
+            {invoiceSettings.lineItems.showTaxAmount ? (
+              <th style={{ padding: "10px", textAlign: "left" }}>GST</th>
+            ) : (
+              <></>
+            )}
+            {invoiceSettings.lineItems.showTaxAmount ? <th style={{ padding: "10px", width: "100px" }}>TAX</th> : <></>}
+            {invoiceSettings.lineItems.showTotalPrice ? (
+              <th style={{ padding: "10px", width: "100px" }}>AMOUNT</th>
+            ) : (
+              <></>
+            )}
           </tr>
         </thead>
 
@@ -326,40 +467,71 @@ export function InvoiceTemplate2({ shopdetails, orders, invoiceSettings }) {
         {/* <td style={{ border: '1px solid #000', padding: '8px' }}></td> */}
 
         <tbody>
-          {orders[0].line_items?.map((item) => (
-            <tr key={item.id}>
-              <td style={{ padding: "10px", border: "1px solid #000" }}>
-                {item.name}
-              </td>
-              <td
-                style={{
-                  padding: "10px",
-                  border: "1px solid #000",
-                  textAlign: "center",
-                }}
-              >
-                {item.quantity || "N/A"}
-              </td>
-              <td
-                style={{
-                  padding: "10px",
-                  border: "1px solid #000",
-                  textAlign: "center",
-                }}
-              >
-                ₹ {item.price || 0}
-              </td>
-              <td
-                style={{
-                  padding: "10px",
-                  border: "1px solid #000",
-                  textAlign: "right",
-                }}
-              >
-                ₹ {item.price || 0}
-              </td>
-            </tr>
-          ))}
+        {orders[0].line_items?.map((item, index) => {
+            // console.log('GSTHSNCodes-------',GSTHSNCodes[0].productId);
+            console.log('item-------',item.product_id);
+            
+            const matchedGSTItem = GSTHSNCodes.find(
+              (gstItem) => Number(gstItem.productId) === item.product_id
+            );
+            
+            const price = parseFloat(item.price) || 0; // Convert to a number and default to 0 if NaN
+            const lineAmount =
+              item.quantity * price + (item.total_tax || 0) || 0;
+            return (
+              <tr key={item.id}>
+                {invoiceSettings.lineItems.showVariantTitle ? (<td style={{ padding: "10px", border: "1px solid #e2e8f0" }}>
+                  {item.name}
+                </td>):(<></>)}
+                {invoiceSettings.lineItems.showQuantity ? (<td
+                  style={{
+                    padding: "10px",
+                    border: "1px solid #e2e8f0",
+                    textAlign: "center",
+                  }}
+                >
+                  {item.quantity || "N/A"}
+                </td>):(<></>)}
+                
+                {invoiceSettings.lineItems.showUnitRate ? (<td
+                  style={{
+                    padding: "10px",
+                    border: "1px solid #e2e8f0",
+                    textAlign: "center",
+                  }}
+                >
+                  ₹{price || "N/A"}
+                </td>):(<></>) }
+                
+                {invoiceSettings.lineItems.showHSN ? (<td style={{ padding: "10px", border: "1px solid #e2e8f0" }}>
+                  {matchedGSTItem?.hsn || "-"}
+                </td>):(<></>)}
+                {invoiceSettings.lineItems.showTaxAmount ? (<td style={{ padding: "10px", border: "1px solid #e2e8f0" }}>
+                  {matchedGSTItem?.gst || "-"}
+                </td>):(<></>)}
+                {invoiceSettings.lineItems.showTaxAmount ? (
+                <td
+                  style={{
+                    padding: "10px",
+                    border: "1px solid #e2e8f0",
+                    textAlign: "center",
+                  }}
+                >
+                  ₹{item.total_tax || "0"}
+                </td>):(<></>)}
+                {invoiceSettings.lineItems.showTotalPrice ? (
+                <td
+                  style={{
+                    padding: "10px",
+                    border: "1px solid #e2e8f0",
+                    textAlign: "right",
+                  }}
+                >
+                  ₹{lineAmount}
+                </td>):(<></>)}
+              </tr>
+            );
+          })}
         </tbody>
       </table>
 
@@ -382,14 +554,14 @@ export function InvoiceTemplate2({ shopdetails, orders, invoiceSettings }) {
         <div style={{ flex: 1 }}>
           <table style={{ width: "100%", borderCollapse: "collapse" }}>
             <tbody>
-              <tr>
-                <td style={{ border: "1px solid #000", padding: "8px" }}>
-                  Total
-                </td>
-                <td style={{ border: "1px solid #000", padding: "8px" }}>
-                  {orders[0].subtotal_price}
-                </td>
-              </tr>
+              {invoiceSettings.total.showSubtotal ? (
+                <tr>
+                  <td style={{ border: "1px solid #000", padding: "8px" }}>Sub Total</td>
+                  <td style={{ border: "1px solid #000", padding: "8px" }}>{orders[0].subtotal_price}</td>
+                </tr>
+              ) : (
+                <></>
+              )}
               {/* <tr>
                 <td style={{ border: '1px solid #000', padding: '8px' }}>Add : CGST @ 14%</td>
                 <td style={{ border: '1px solid #000', padding: '8px' }}></td>
@@ -398,40 +570,42 @@ export function InvoiceTemplate2({ shopdetails, orders, invoiceSettings }) {
                 <td style={{ border: '1px solid #000', padding: '8px' }}>Add : SGST @ 14%</td>
                 <td style={{ border: '1px solid #000', padding: '8px' }}></td>
               </tr> */}
-              <tr>
-                <td style={{ border: "1px solid #000", padding: "8px" }}>
-                  Tax :
-                </td>
-                <td style={{ border: "1px solid #000", padding: "8px" }}>
-                  {" "}
-                  {orders[0].total_tax}
-                </td>
-              </tr>
-              <tr>
+              {invoiceSettings.total.showTax ? (
+                <tr>
+                  <td style={{ border: "1px solid #000", padding: "8px" }}>Tax :</td>
+                  <td style={{ border: "1px solid #000", padding: "8px" }}> {orders[0].total_tax}</td>
+                </tr>
+              ) : (
+                <></>
+              )}
+              {/* <tr>
                 <td style={{ border: "1px solid #000", padding: "8px" }}>
                   Balance Due :
                 </td>
                 <td style={{ border: "1px solid #000", padding: "8px" }}>
                   {orders[0].total_outstanding}
                 </td>
-              </tr>
-              <tr style={{ backgroundColor: "#1e3a8a", color: "white" }}>
-                <td style={{ border: "1px solid #000", padding: "8px" }}>
-                  Grand Total
-                </td>
-                <td style={{ border: "1px solid #000", padding: "8px" }}>
-                  {orders[0].total_price}
-                </td>
-              </tr>
+              </tr> */}
+              {invoiceSettings.total.showTotal ? (
+                <tr style={{ backgroundColor: "#1e3a8a", color: "white" }}>
+                  <td style={{ border: "1px solid #000", padding: "8px" }}>Grand Total</td>
+                  <td style={{ border: "1px solid #000", padding: "8px" }}>{orders[0].total_price}</td>
+                </tr>
+              ) : (
+                <></>
+              )}
             </tbody>
           </table>
         </div>
       </div>
-
-      <div style={{ marginTop: "20px" }}>
-        <p>Total Amount (₹ - In Words) :</p>
-        <p>{convertAmountToWords(orders[0].total_price)}</p>
-      </div>
+      {invoiceSettings.total.showTotal ? (
+        <div style={{ marginTop: "20px" }}>
+          <p>Total Amount (₹ - In Words) :</p>
+          <p>{convertAmountToWords(orders[0].total_price)}</p>
+        </div>
+      ) : (
+        <></>
+      )}
       <div style={{ height: "120px" }}></div>
       <div
         style={{
@@ -442,28 +616,30 @@ export function InvoiceTemplate2({ shopdetails, orders, invoiceSettings }) {
       >
         <div>
           {/* <p>For : {shopdetails[0].name !== null ? shopdetails[0].name : "N/A"}</p> */}
-          <p
-            style={{ textAlign: "left", marginTop: "20px", fontSize: "0.9em" }}
-          >
+          <p style={{ textAlign: "left", marginTop: "20px", fontSize: "0.9em" }}>
             If you have any questions about this invoice, please contact
             <br />
-            Name: {shopdetails[0].name !== null
-              ? shopdetails[0].name
-              : "N/A"}{" "}
+            {invoiceSettings.supplier.showHeading ? (
+              <>Name: {shopdetails[0].name !== null ? shopdetails[0].name : "N/A"} </>
+            ) : (
+              <></>
+            )}{" "}
             <br />
-            Phone:{" "}
-            {shopdetails[0].phone !== null ? shopdetails[0].phone : "N/A"}{" "}
+            {invoiceSettings.supplier.showPhone ? (
+              <>Phone: {shopdetails[0].phone !== null ? shopdetails[0].phone : "N/A"} </>
+            ) : (
+              <></>
+            )}{" "}
             <br />
-            E-mail:{" "}
-            {shopdetails[0].email !== null ? shopdetails[0].email : "N/A"}
+            {invoiceSettings.supplier.showEmail ? (
+              <>E-mail: {shopdetails[0].email !== null ? shopdetails[0].email : "N/A"}</>
+            ) : (
+              <></>
+            )}
           </p>
         </div>
         <div>
-          <p
-            style={{ textAlign: "right", marginTop: "20px", fontSize: "0.9em" }}
-          >
-            Authorised Signatory
-          </p>
+          <p style={{ textAlign: "right", marginTop: "20px", fontSize: "0.9em" }}>Authorised Signatory</p>
         </div>
       </div>
     </div>

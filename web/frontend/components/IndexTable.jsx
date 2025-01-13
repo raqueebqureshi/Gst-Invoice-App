@@ -47,7 +47,11 @@ export function IndexTableEx({ value, shopdetails }) {
   const [orders, setOrders] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [currentTemplateId, setCurrentTemplateId] = useState(null);
+  const [selectedFont, setSelectedFont] = useState("Roboto");
+  
   const [storeDomain, setStoreDomain] = useState(null);
+  const [email, setEmail] = useState(null);  
+  const [GSTHSNCodes, setGSTHSNCodes] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 20;
   const [showToast, setShowToast] = useState({
@@ -56,6 +60,110 @@ export function IndexTableEx({ value, shopdetails }) {
     error: false,
   });
   const [popoverActive, setPopoverActive] = useState({});
+  const [InvoiceSetting2, setInvoiceSetting2] = useState({
+    branding: {
+      showLogo: true,
+      primaryColor: "#000000",
+      fontFamily: "Roboto",
+    },
+    overview: {
+      documentTitle: "Tax Invoice",
+      showOrderId: true,
+      showInvoiceNumber: true,
+      showOrderIdBarcode: true,
+      customizeInvoiceNumber: true,
+      issueDate: true,
+      showTaxReverseText: true,
+      showTrackingCompany: true,
+      showTrackingNo: true,
+      showTrackingBarcode: true,
+      addNote: "",
+      showDeliveryMethod: true,
+    },
+    supplier: {
+      heading: "Supplier",
+      showSupplier: true,
+      supplier: "",
+      showHeading: true,
+      showBusinessName: true,
+      showAddress: true,
+      showApartment: true,
+      showCity: true,
+      showVATNumber: true,
+      showRegisteredNumber: true,
+      showEmail: true,
+      showPhone: true,
+      showGSTIN: true,
+    },
+    shipping: {
+      showShipping: true,
+      heading: "Ship To",
+      showHeading: true,
+      showFullName: true,
+      showAddress1: true,
+      showAddress2: true,
+      showCompany: true,
+      showCity: true,
+      showZipPinCode: true,
+      showState: true,
+      showCountry: true,
+      showEmail: true,
+      showPhone: true,
+      showGSTIN: true,
+    },
+    billing: {
+      showBilling: true,
+      heading: "Bill To",
+      showHeading: true,
+      showFullName: true,
+      showAddress1: true,
+      showAddress2: true,
+      showCompany: true,
+      showCity: true,
+      showZipPinCode: true,
+      showState: true,
+      showCountry: true,
+      showEmail: true,
+      showPhone: true,
+      showGSTIN: true,
+    },
+    lineItems: {
+      showProductImage: true,
+      showSKU: true,
+      showVariantTitle: true,
+      showQuantity: true,
+      showHSN: true,
+      showUnitRate: true,
+      showTotalDiscount: true,
+      showRateAsDiscountedPrice: true,
+      showTaxAmount: true,
+      showTotalPrice: true,
+    },
+    total: {
+      showDiscount: true,
+      showSubtotal: true,
+      showShipping: true,
+      showShippingGSTSplit: true,
+      showRefunded: true,
+      showTax: true,
+      showOutstanding: true,
+      showTotal: true,
+    },
+    footer: {
+      socialNetworks: {
+        showWebsite: true,
+        showFacebook: true,
+        showTwitter: true,
+        showInstagram: true,
+        showPinterest: true,
+        showYoutube: true,
+      },
+      thankYouNote: "Thanks for your purchase",
+      footerNote:
+        "This is an electronically generated invoice, no signature is required",
+    },
+  });
+  
 
   const handleShowToast = (message, error = false) => {
     setShowToast({ active: true, message, error });
@@ -70,6 +178,7 @@ export function IndexTableEx({ value, shopdetails }) {
       .then((data) => {
         if (data.data.data && data.data.data.length > 0) {
           setStoreDomain(data.data.data[0].domain);
+          setEmail(data.data.data[0].email);
         }
       })
       .catch((error) => handleShowToast("Internal Server Error 500", true));
@@ -116,8 +225,91 @@ export function IndexTableEx({ value, shopdetails }) {
     }));
   };
 
+  const fetchInvoiceSettings = async () => {
+    console.log("Sending request to fetch invoice settings");
+
+    return fetch("/api/fetch-invoice-settings", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: email, storeDomain: storeDomain }), // Replace with actual data
+    })
+      .then(async (response) => {
+        console.log('response',response);
+        if (!response.ok) {
+          return response.text().then((errorText) => {
+            throw new Error(
+              errorText || `HTTP error! Status: ${response.status}`
+            );
+          });
+        }
+        return response.json();
+      })
+      .then((data) => {
+        // setInvoiceSettings(data);
+        const settings = data;
+        console.log("Received response:", settings);
+        // // console.log("Received response:", JSON.stringify(settings));
+        if (settings) {
+          setInvoiceSetting2((prevState) => ({
+            ...prevState,
+            ...settings,
+          }));
+          setSelectedFont(settings.branding.fontFamily);
+          setLoading(false);
+        }
+      })
+      .catch((error) => {
+        console.error("Error fetching invoice settings:", error.message);
+      });
+  };
+
+  const fetchGSTHSNValues = async () => {
+    try {
+      if (!storeDomain || !email) {
+        console.error("Missing storeDomain or email:", {
+          storeDomain,
+          email: email,
+        });
+        throw new Error("Invalid storeDomain or email.");
+      }
+
+      const url = `/api/products/gsthsn?storeDomain=${encodeURIComponent(
+        storeDomain
+      )}&email=${encodeURIComponent(email)}`;
+      console.log("Fetching GST HSN Values with URL:", url);
+
+      const response = await fetch(url);
+
+      if (!response.ok) {
+        throw new Error(
+          `Failed to fetch GST values. Status: ${response.status}`
+        );
+      }
+
+      const data = await response.json();
+      console.log("Fetched GST Values:", JSON.stringify(data.gstValues));
+
+      setGSTHSNCodes(data.gstValues);
+    } catch (error) {
+      console.error("Error fetching GST values:", error);
+    }
+  };
+
+useEffect(() => {
+  console.log('storeDomain && email',storeDomain, email);
+  if (storeDomain && email) {
+    console.log('storeDomain && email',storeDomain, email);
+      fetchInvoiceSettings();
+      fetchGSTHSNValues() ; 
+  }
+}, [storeDomain, email]);
+
+useEffect(() => {
+  console.log('GSTHSNCodes',GSTHSNCodes);
+}, [GSTHSNCodes]);
+
   const handlePdfDownload = useCallback(
-    async (order, shopdetails, currentTemplate) => {
+    async (order, shopdetails, currentTemplate ,invoiceSettings, GSTHSNCodes) => {
       if (!order || !currentTemplate) return;
 
       console.log(order, shopdetails, currentTemplate, "PDF download");
@@ -139,19 +331,19 @@ export function IndexTableEx({ value, shopdetails }) {
         switch (currentTemplate) {
           case "1":
             ReactDOM.render(
-              <InvoiceTemplate1 shopdetails={[shopdetails]} orders={[order]} />,
+              <InvoiceTemplate1 shopdetails={[shopdetails]} orders={[order]} invoiceSettings={invoiceSettings} GSTHSNCodes={GSTHSNCodes}/>,
               invoiceContainer
             );
             break;
           case "2":
             ReactDOM.render(
-              <InvoiceTemplate2 shopdetails={[shopdetails]} orders={[order]} />,
+              <InvoiceTemplate2 shopdetails={[shopdetails]} orders={[order]} invoiceSettings={invoiceSettings} GSTHSNCodes={GSTHSNCodes}/>,
               invoiceContainer
             );
             break;
           case "3":
             ReactDOM.render(
-              <InvoiceTemplate3 shopdetails={[shopdetails]} orders={[order]} />,
+              <InvoiceTemplate3 shopdetails={[shopdetails]} orders={[order]} invoiceSettings={invoiceSettings} GSTHSNCodes={GSTHSNCodes}/>,
               invoiceContainer
             );
             break;
@@ -181,7 +373,7 @@ export function IndexTableEx({ value, shopdetails }) {
   );
 
   const handlePrint = useCallback(
-    async (order, shopdetails, currentTemplate) => {
+    async (order, shopdetails, currentTemplate, invoiceSettings, GSTHSNCodes) => {
       if (!order || !currentTemplate) return;
 
       // Logic to print the given order
@@ -201,19 +393,19 @@ export function IndexTableEx({ value, shopdetails }) {
         switch (currentTemplate) {
           case "1":
             ReactDOM.render(
-              <InvoiceTemplate1 shopdetails={[shopdetails]} orders={[order]} />,
+              <InvoiceTemplate1 shopdetails={[shopdetails]} orders={[order]} invoiceSettings={invoiceSettings} GSTHSNCodes={GSTHSNCodes}/>,
               invoiceContainer
             );
             break;
           case "2":
             ReactDOM.render(
-              <InvoiceTemplate2 shopdetails={[shopdetails]} orders={[order]} />,
+              <InvoiceTemplate2 shopdetails={[shopdetails]} orders={[order]} invoiceSettings={invoiceSettings} GSTHSNCodes={GSTHSNCodes}/>,
               invoiceContainer
             );
             break;
           case "3":
             ReactDOM.render(
-              <InvoiceTemplate3 shopdetails={[shopdetails]} orders={[order]} />,
+              <InvoiceTemplate3 shopdetails={[shopdetails]} orders={[order]} invoiceSettings={invoiceSettings} GSTHSNCodes={GSTHSNCodes}/>,
               invoiceContainer
             );
             break;
@@ -315,7 +507,9 @@ export function IndexTableEx({ value, shopdetails }) {
                 handlePdfDownload(
                   paginatedOrders[index],
                   shopdetails,
-                  currentTemplateId
+                  currentTemplateId,
+                  InvoiceSetting2,
+                  GSTHSNCodes
                 );
               }}
               className="btn-actions"
@@ -364,7 +558,9 @@ export function IndexTableEx({ value, shopdetails }) {
                 handlePrint(
                   paginatedOrders[index],
                   shopdetails,
-                  currentTemplateId
+                  currentTemplateId,
+                  InvoiceSetting2,
+                  GSTHSNCodes
                 );
               }}
               className="btn-actions"
