@@ -6,8 +6,8 @@ import multer from "multer";
 const s3 = new S3Client({
   region: process.env.AWS_REGION,
   credentials: {
-    accessKeyId: process.env.AWS_ACCESS_KEY,
-    secretAccessKey: process.env.AWS_SECRET_KEY,
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
   },
 });
 
@@ -16,23 +16,28 @@ const upload = multer({ storage: multer.memoryStorage() });
 
 // Define the function to send and upload invoices
 export const sendInvoiceAndUpload = async (req, res) => {
+
+
   try {
-    const { customerEmail, orderId, storeDetails } = req.body;
+    const { customerEmail, orderId } = req.body;
+    const shopDetails = JSON.parse(req.body.shopDetails);
     const pdfBuffer = req.file.buffer;
 
-    if (!customerEmail || !orderId || !storeDetails) {
+    console.log("shopDetails",shopDetails , "orderId",orderId, "customerEmail",customerEmail);
+
+    if (!customerEmail || !orderId || !shopDetails) {
       return res.status(400).json({ error: "Missing required fields." });
     }
 
     // Upload to AWS S3
-    const s3Key = `${storeDetails.name}/invoices/${orderId}.pdf`;
+    const s3Key = `${shopDetails.name}/invoices/${orderId}.pdf`;
 
     await s3.send(
       new PutObjectCommand({
         Bucket: process.env.AWS_BUCKET_NAME,
         Key: s3Key,
         Body: pdfBuffer,
-        ContentType: "application/pdf",
+        ContentType: "application/pdf", 
       })
     );
 
@@ -56,12 +61,12 @@ export const sendInvoiceAndUpload = async (req, res) => {
       Thank you for shopping with us! Please find your invoice attached.
 
       Best regards,
-      ${storeDetails}
+      Team ${shopDetails.name}
     `;
 
     // Send Email with PDF Attachment
     await transporter.sendMail({
-      from: `"${storeDetails}" <${process.env.SUPPORT_EMAIL}>`,
+      from: `"${shopDetails.name}" <${process.env.SUPPORT_EMAIL}>`,
       to: customerEmail,
       subject: emailSubject,
       text: emailBody,

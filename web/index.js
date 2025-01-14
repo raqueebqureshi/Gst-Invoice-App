@@ -604,7 +604,7 @@ app.get("/api/2024-10/orders.json", async (req, res) => {
     status: 'any',
     fulfillment_status: null,
   });
-  // console.log(OrderAll); // Check the API response in the console
+  console.log(OrderAll); // Check the API response in the console
   res.status(200).send(OrderAll);
 });
 

@@ -29,13 +29,13 @@ export default function Orders() {
     })
     .then(response => response.json())
     .then(data => {
-      // console.log("Store data fetched:", data.data.data[0].domain);
+      console.log("Store data fetched:", data.data.data[0].domain);
       if (data.data.data && data.data.data.length > 0) {
         // Access the domain from the correct property
         setStoreDomain(data.data.data[0].domain); 
-        // console.log("Store domain set:", data.data.data[0].domain);
+        console.log("Store domain set:", data.data.data[0].domain);
       }
-      // console.log("store domain:", storeDomain)
+      console.log("store domain:", storeDomain)
     })
     .catch(error => console.log("Error fetching store details:", error));
   }, []);

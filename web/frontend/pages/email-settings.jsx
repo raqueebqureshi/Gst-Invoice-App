@@ -211,7 +211,7 @@ const EmailSetting = () => {
     })
       .then((request) => request.json())
       .then((response) => {
-        // console.log("Store Details---!", response.data);
+        console.log("Store Details---!", response.data);
         if (response.data.data.length > 0) {
           console.log("Store Details---", response.data.data[0]);
           setShopId(response.data.data[0].id);
@@ -234,7 +234,7 @@ const EmailSetting = () => {
 
   const fetchSMTPConfiguration = async (shopId) => {
     try {
-      // console.log("shopId:", shopId);
+      console.log("shopId:", shopId);
 
       if (!shopId) {
         console.error("Missing shopId.");
@@ -251,11 +251,11 @@ const EmailSetting = () => {
       }
 
       const data = await response.json();
-      // console.log("Fetched settings:", data.smtpData);
+      console.log("Fetched settings:", data.smtpData);
       const smtpdata = data.smtpData;
 
       if (data) {
-        // console.log("Fetched settings:", smtpdata);
+        console.log("Fetched settings:", smtpdata);
         setEmailSettings({
           host: smtpdata.host || "",
           port: smtpdata.port || "",

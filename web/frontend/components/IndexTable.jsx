@@ -21,9 +21,10 @@ import {
   SkeletonDisplayText,
   SkeletonPage,
 } from "@shopify/polaris";
-import {
-  SendIcon
-} from '@shopify/polaris-icons';
+import { VscSend } from "react-icons/vsc";
+
+
+
 import ReactDOM from "react-dom";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
@@ -33,7 +34,6 @@ import { InvoiceTemplate2 } from "../invoiceTemplates/invoice-template2";
 import { InvoiceTemplate3 } from "../invoiceTemplates/invoice-template3";
 import { useIndexResourceState } from "@shopify/polaris";
 import { MenuHorizontalIcon } from "@shopify/polaris-icons";
-import { set } from "mongoose";
 
 const filterOrders = (orders, query) => {
   return orders.filter((order) => {
@@ -47,6 +47,9 @@ const filterOrders = (orders, query) => {
 };
 
 export function IndexTableEx({ value, shopdetails }) {
+  //console.log("Shop Details:-----", shopdetails);
+  const [sendingStatus, setSendingStatus] = useState({}); 
+  const [isSending, setIsSending] = useState(false); 
   const [loading, setLoading] = useState(true);
   const [orders, setOrders] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
@@ -182,7 +185,7 @@ export function IndexTableEx({ value, shopdetails }) {
     })
       .then((response) => response.json())
       .then((data) => {
-        // console.log("Store Details---!", data.data);
+        //console.log("Store Details---!", data.data);
         setShopId(data.data.data[0].id);
         if (data.data.data && data.data.data.length > 0) {
           setStoreDomain(data.data.data[0].domain);
@@ -199,10 +202,11 @@ export function IndexTableEx({ value, shopdetails }) {
         .then((data) => {
           if (data.storeInvoiceTemplate) {
             setCurrentTemplateId(data.storeInvoiceTemplate);
-            console.log("Current Template ID:", currentTemplateId);
+            //console.log("Current Template ID:", currentTemplateId);
           }
         })
-        .catch((error) => console.error("Error fetching template ID:", error));
+        .catch((error) =>
+           console.error("Error fetching template ID:", error));
     }
   }, [storeDomain]);
 
@@ -214,32 +218,49 @@ export function IndexTableEx({ value, shopdetails }) {
       .then((request) => request.json())
       .then((response) => {
         if (response.data) {
-          console.log('response.data',response.data);
+          //console.log('response.data',response.data);
           setOrders(response.data);
           setLoading(false);
           handleShowToast("Orders Synced Complete");
         }
       })
       .catch((error) => {
-        console.error(error);
+        //console.error(error);
         setLoading(false);
         handleShowToast("Internal Server Error 500", true);
       });
   }, []);
 
-
-  const sendInvoiceToCustomer = async (orderDetails, shopDetails, invoiceSettings, customerEmail) => {
+  const handleSendClick = (index) => {
+    if (!sendingStatus[index]) {
+      setSendingStatus((prev) => ({ ...prev, [index]: true })); // Set this row to "sending"
+      quickSendInvoice({
+        orderDetails: paginatedOrders[index],
+        shopDetails: shopdetails,
+        invoiceSettings: InvoiceSetting2,
+        customerEmail: paginatedOrders[index].customer.email,
+        gstcodes: GSTHSNCodes,
+        currentTemplate: currentTemplateId,
+      })
+        .then(() => setSendingStatus((prev) => ({ ...prev, [index]: false }))) // Reset on success
+        .catch(() => setSendingStatus((prev) => ({ ...prev, [index]: false }))); // Reset on failure
+    }
+  };
+ 
+  const sendInvoiceToCustomer = async (orderDetails, shopDetails, invoiceSettings, customerEmail, gstcodes,currentTemplateId ) => {
     try {
+      setIsSending(true);
       // Fetch the generated PDF file as Blob
-      const pdfBlob = await generatePDFBlob(orderDetails, shopDetails, invoiceSettings);
+      const pdfBlob = await generatePDFBlob(orderDetails, shopDetails, invoiceSettings, currentTemplateId, gstcodes);
       
       // Create a FormData object to include the Blob and additional data
       const formData = new FormData();
       formData.append("file", pdfBlob, `Invoice-${orderDetails.order_number}.pdf`);
       formData.append("customerEmail", customerEmail);
       formData.append("orderId", orderDetails.order_number);
-      formData.append("storeDetails", shopDetails.name);
+      formData.append("shopDetails", JSON.stringify(shopDetails));
       
+      console.log("formData",formData);
       // Send request to the backend API
       const response = await fetch("/api/send-invoice", {
         method: "POST",
@@ -247,6 +268,7 @@ export function IndexTableEx({ value, shopdetails }) {
       });
       
       if (response.ok) {
+
         handleShowToast("Invoice sent successfully.");
       } else {
         const errorData = await response.json();
@@ -254,13 +276,13 @@ export function IndexTableEx({ value, shopdetails }) {
         handleShowToast("Failed to send invoice.", true);
       }
     } catch (error) {
-      console.error("Error in sending invoice:", error);
+      //console.error("Error in sending invoice:", error);
       handleShowToast("An error occurred while sending the invoice.", true);
     }
   };
   
   // Helper function to generate PDF as Blob
-  const generatePDFBlob = async (orderDetails, shopDetails, invoiceSettings) => {
+  const generatePDFBlob = async (orderDetails, shopDetails, invoiceSettings, currentTemplateId, gstcodes) => {
     const pdf = new jsPDF("p", "pt", "a4");
   
     // Create an invoice container dynamically
@@ -271,29 +293,29 @@ export function IndexTableEx({ value, shopdetails }) {
     invoiceContainer.style.top = "-9999px";
     document.body.appendChild(invoiceContainer);
   
-    console.log(currentTemplateId, "currentTemplateId");
+    //console.log(currentTemplateId, "currentTemplateId");
     // Render the appropriate template into the container
     switch (currentTemplateId) {
       case "1":
         ReactDOM.render(
-          <InvoiceTemplate1 shopdetails={[shopDetails]} orders={[orderDetails]} />,
+          <InvoiceTemplate1 shopdetails={[shopDetails]} orders={[orderDetails]} invoiceSettings={invoiceSettings} GSTHSNCodes={gstcodes}/>,
           invoiceContainer
         );
         break;
       case "2":
         ReactDOM.render(
-          <InvoiceTemplate2 shopdetails={[shopDetails]} orders={[orderDetails]} />,
+          <InvoiceTemplate2 shopdetails={[shopDetails]} orders={[orderDetails]} invoiceSettings={invoiceSettings} GSTHSNCodes={gstcodes}/>,
           invoiceContainer
         );
         break;
       case "3":
         ReactDOM.render(
-          <InvoiceTemplate3 shopdetails={[shopDetails]} orders={[orderDetails]} />,
+          <InvoiceTemplate3 shopdetails={[shopDetails]} orders={[orderDetails]} invoiceSettings={invoiceSettings} GSTHSNCodes={gstcodes}/>,
           invoiceContainer
         );
         break;
       default:
-        console.error("Invalid template ID:", currentTemplateId);
+        //console.error("Invalid template ID:", currentTemplateId);
         throw new Error("Invalid template ID.");
     }
   
@@ -302,7 +324,7 @@ export function IndexTableEx({ value, shopdetails }) {
       scale: 2,
       useCORS: true,
     });
-    const imgData = canvas.toDataURL("image/png");
+    const imgData = canvas.toDataURL("image/jpeg");
   
     const pdfWidth = pdf.internal.pageSize.getWidth();
     const imgWidth = pdfWidth - 20;
@@ -315,11 +337,12 @@ export function IndexTableEx({ value, shopdetails }) {
     return pdf.output("blob");
   };
   
-  const quickSendInvoice = async (orderDetails, shopDetails, invoiceSettings, customerEmail) => {
+  const quickSendInvoice = async ({orderDetails, shopDetails, invoiceSettings, customerEmail, gstcodes, currentTemplate}) => {
+    //console.log("hhhhhhhhhhhhhhhhhhhhh",orderDetails, shopDetails, invoiceSettings, customerEmail, gstcodes, currentTemplate);
     try {
-      await sendInvoiceToCustomer(orderDetails, shopDetails, invoiceSettings, customerEmail);
+      await sendInvoiceToCustomer(orderDetails, shopDetails, invoiceSettings, customerEmail, gstcodes, currentTemplate);
     } catch (error) {
-      console.error("Error in Quick Send:", error);
+      //console.error("Error in Quick Send:", error);
       handleShowToast("An error occurred while sending the invoice.", true);
     }
   };
@@ -336,7 +359,7 @@ export function IndexTableEx({ value, shopdetails }) {
   };
 
   const fetchInvoiceSettings = async () => {
-    console.log("Sending request to fetch invoice settings");
+    //console.log("Sending request to fetch invoice settings");
 
     return fetch("/api/fetch-invoice-settings", {
       method: "POST",
@@ -344,7 +367,7 @@ export function IndexTableEx({ value, shopdetails }) {
       body: JSON.stringify({ email: email, storeDomain: storeDomain }), // Replace with actual data
     })
       .then(async (response) => {
-        console.log('response',response);
+        //console.log('response',response);
         if (!response.ok) {
           return response.text().then((errorText) => {
             throw new Error(
@@ -357,8 +380,8 @@ export function IndexTableEx({ value, shopdetails }) {
       .then((data) => {
         // setInvoiceSettings(data);
         const settings = data;
-        console.log("Received response:", settings);
-        // // console.log("Received response:", JSON.stringify(settings));
+        //console.log("Received response:", settings);
+        // //console.log("Received response:", JSON.stringify(settings));
         if (settings) {
           setInvoiceSetting2((prevState) => ({
             ...prevState,
@@ -369,7 +392,7 @@ export function IndexTableEx({ value, shopdetails }) {
         }
       })
       .catch((error) => {
-        console.error("Error fetching invoice settings:", error.message);
+        //console.error("Error fetching invoice settings:", error.message);
       });
   };
 
@@ -386,7 +409,7 @@ export function IndexTableEx({ value, shopdetails }) {
       const url = `/api/products/gsthsn?storeDomain=${encodeURIComponent(
         storeDomain
       )}&email=${encodeURIComponent(email)}`;
-      console.log("Fetching GST HSN Values with URL:", url);
+      //console.log("Fetching GST HSN Values with URL:", url);
 
       const response = await fetch(url);
 
@@ -397,32 +420,31 @@ export function IndexTableEx({ value, shopdetails }) {
       }
 
       const data = await response.json();
-      console.log("Fetched GST Values:", JSON.stringify(data.gstValues));
-
+      //console.log("Fetched GST Values:", JSON.stringify(data.gstValues));
       setGSTHSNCodes(data.gstValues);
     } catch (error) {
-      console.error("Error fetching GST values:", error);
+      //console.error("Error fetching GST values:", error);
     }
   };
 
 useEffect(() => {
-  console.log('storeDomain && email',storeDomain, email);
+  //console.log('storeDomain && email',storeDomain, email);
   if (storeDomain && email) {
-    console.log('storeDomain && email',storeDomain, email);
+    //console.log('storeDomain && email',storeDomain, email);
       fetchInvoiceSettings();
       fetchGSTHSNValues() ; 
   }
 }, [storeDomain, email]);
 
 useEffect(() => {
-  console.log('GSTHSNCodes',GSTHSNCodes);
+  //console.log('GSTHSNCodes',GSTHSNCodes);
 }, [GSTHSNCodes]);
 
   const handlePdfDownload = useCallback(
     async (order, shopdetails, currentTemplate ,invoiceSettings, GSTHSNCodes) => {
       if (!order || !currentTemplate) return;
 
-      console.log(order, shopdetails, currentTemplate, "PDF download");
+      //console.log(order, shopdetails, currentTemplate, "PDF download");
       // Logic to generate and download PDF for the given order
       const pdf = new jsPDF("p", "pt", "a4");
       const invoiceContainer = document.createElement("div");
@@ -436,7 +458,7 @@ useEffect(() => {
         currentTemplate,
         shopdetails,
         order,
-        invoiceContainer
+        invoiceContainer, GSTHSNCodes
       ) => {
         switch (currentTemplate) {
           case "1":
@@ -458,11 +480,11 @@ useEffect(() => {
             );
             break;
           default:
-            console.error("Invalid template ID:", currentTemplate);
+            //console.error("Invalid template ID:", currentTemplate);
         }
       };
 
-      renderInvoiceTemplate(currentTemplate, shopdetails, order, invoiceContainer);
+      renderInvoiceTemplate(currentTemplate, shopdetails, order, invoiceContainer, GSTHSNCodes);
 
       const canvas = await html2canvas(invoiceContainer, {
         scale: 2,
@@ -520,7 +542,7 @@ useEffect(() => {
             );
             break;
           default:
-            console.error("Invalid template ID:", currentTemplate);
+            //console.error("Invalid template ID:", currentTemplate);
         }
       };
 
@@ -553,7 +575,7 @@ useEffect(() => {
   );
 
   const { selectedResources, allResourcesSelected, handleSelectionChange } =
-    useIndexResourceState(paginatedOrders);
+  useIndexResourceState(orders.map((order) => order.id));
 
   const rowMarkup = paginatedOrders.map(
     (
@@ -698,39 +720,77 @@ useEffect(() => {
               </div>
             </button>
             <div style={{ marginLeft: "20px" }}>
-              <Popover
-                active={popoverActive[id] || false}
-                activator={
-                  <Button
-                    plain
-                    icon={MenuHorizontalIcon}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      togglePopoverActive(id);
-                    }}
-                    className="btn-popover"
-                  />
-                }
-                onClose={() => togglePopoverActive(id)}
-              >
-              <ActionList
+             
+              {/* <ActionList
                     items={[
                       {
                         content: "Quick Send",
                         onAction: () => {
+                          //console.log('shopDetails', shopdetails);
                           quickSendInvoice(
-                            paginatedOrders[index],
-                            shopdetails,
-                            currentTemplateId,
-                            shopdetails.smtpConfig,
-                            paginatedOrders[index].customer?.email || paginatedOrders[index].customer?.contact_email
+                            {
+                              orderDetails: paginatedOrders[index],
+                              shopDetails: shopdetails,
+                              invoiceSettings: InvoiceSetting2,
+                              customerEmail: paginatedOrders[index].customer.email,
+                              gstcodes: GSTHSNCodes,
+                              currentTemplate: currentTemplateId,
+                              
+                            }
                           );
                         },
                       },
                       { content: "View Invoice" },
                     ]}
-                  />
-                            </Popover>
+                  /> */}
+                  <div
+                  key={index}
+      style={{
+        position: "relative",
+        display: "inline-flex",
+        alignItems: "center",
+        justifyContent: "center",
+      }}
+    >
+      {isSending ? (
+        <Spinner accessibilityLabel="Sending invoice" size="small" />
+      ) : (
+        <VscSend
+          style={{
+            height: "25px",
+            width: "25px",
+            cursor: "pointer",
+            padding: "4px",
+            border: "1px solid black",
+            borderRadius: "6px",
+            boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)",
+            color: "black",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            transition: "all 0.3s ease",
+            backgroundColor: "white",
+            opacity: isSending ? "0.5" : "1",
+            pointerEvents: isSending ? "none" : "auto",
+          }}
+          onClick={() => {
+            if (!isSending) {
+              setIsSending(true);
+              quickSendInvoice({
+                orderDetails: paginatedOrders[index],
+                shopDetails: shopdetails,
+                invoiceSettings: InvoiceSetting2,
+                customerEmail: paginatedOrders[index].customer.email,
+                gstcodes: GSTHSNCodes,
+                currentTemplate: currentTemplateId,
+              })
+                .then(() => setIsSending(false))
+                .catch(() => setIsSending(false));
+            }
+          }}
+        />
+      )}
+    </div>
             </div>
           </ButtonGroup>
         </IndexTable.Cell>
@@ -811,17 +871,10 @@ useEffect(() => {
 
             <AlphaCard>
               <IndexTable
-                resourceName={{ singular: "order", plural: "orders" }}
-                itemCount={paginatedOrders.length}
-                selectedItemsCount={
-                  allResourcesSelected ? "All" : selectedResources.length
-                }
-                onSelectionChange={(selectedItems) => {
-                  handleSelectionChange(selectedItems);
-                  if (selectedItems.length > 10) {
-                    handleShowToast("You can't print or download more than 10 orders in bulk", true);
-                  }
-                }}
+                 resourceName={{ singular: "order", plural: "orders" }}
+                 itemCount={filteredOrders.length}
+                 selectedItemsCount={allResourcesSelected ? "All" : selectedResources.length}
+                 onSelectionChange={handleSelectionChange}
                 headings={[
                   { title: "Order" },
                   { title: "Date" },

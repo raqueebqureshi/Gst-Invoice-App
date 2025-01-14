@@ -35,7 +35,7 @@ export default function HomePage() {
     })
       .then((request) => request.json())
       .then((response) => {
-        // console.log("all products", response);
+        console.log("all products", response);
         setLoading(false); // Stop loading when data is fetched
       })
       .catch((error) => {
