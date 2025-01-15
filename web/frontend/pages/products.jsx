@@ -28,12 +28,13 @@ export default function ProductIndexTable() {
   const [searchTerm, setSearchTerm] = useState("");
   const [tagSearchTerm, setTagSearchTerm] = useState("");
   const [selectedTag, setSelectedTag] = useState(null);
-  const [isLoading, setIsLoading] = useState(false);
   const [selectedItems, setSelectedItems] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 25;
   const [GSTHSNCodes, setGSTHSNCodes] = useState([]);
   const [isSaving, setIsSaving] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
 
   const styles = {
     container: {
@@ -46,7 +47,8 @@ export default function ProductIndexTable() {
       flexDirection: "column",
       alignItems: "center",
       textAlign: "center",
-      gap: "16px",
+      gap: "6px",
+      marginBottom: "16px",
     },
     filters: {
       display: "flex",
@@ -669,12 +671,13 @@ export default function ProductIndexTable() {
     <Frame>
       <div style={styles.container}>
         <div style={styles.header}>
-          <Heading>Products</Heading>
-          <p>Manage HSN & GST rates</p>
-          <div style={styles.buttons}>
+          <strong style={{fontSize:"20px"}}>Products</strong>
+          <strong>Manage HSN & GST rates</strong>
+
+          {/* <div style={styles.buttons}>
             <Button>More actions</Button>
             <Button primary>Bulk edit as CSV</Button>
-          </div>
+          </div> */}
         </div>
         <LegacyCard sectioned style={{ margin: "16px", maxWidth: "1600px" }}>
           <div style={styles.filters}>

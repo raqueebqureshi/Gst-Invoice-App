@@ -8,7 +8,7 @@ import {
   LogoPinterestIcon,
 } from "@shopify/polaris-icons";
 
-const MediaIcons = ({ shopId, invoiceSetting }) => {
+const MediaIcons = ({ socialLink, invoiceSetting }) => {
   const [socialLinks, setSocialLinks] = useState({
     facebookURL: "",
     xURL: "",
@@ -17,26 +17,31 @@ const MediaIcons = ({ shopId, invoiceSetting }) => {
     youtubeURL: "",
   });
 
-  useEffect(() => {
-    fetch(`/api/fetch-store-profile?shopId=${shopId}`, {
-      method: "GET",
-      headers: { "Content-Type": "application/json" },
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        if (data && data.profile) {
-          const profileData = data.profile;
-          console.log("profileData.socialLinks", profileData.socialLinks);
-          setSocialLinks(profileData.socialLinks || {});
-        }
-      })
-      .catch((error) => {
-        console.error("Error fetching store profile:", error);
-      });
-  }, [shopId]);
+//   useEffect(() => {
+//     fetch(`/api/fetch-store-profile?shopId=${shopId}`, {
+//       method: "GET",
+//       headers: { "Content-Type": "application/json" },
+//     })
+//       .then((response) => response.json())
+//       .then((data) => {
+//         if (data && data.profile) {
+//           const profileData = data.profile;
+//           console.log("profileData.socialLinks", profileData.socialLinks);
+//           setSocialLinks(profileData.socialLinks || {});
+//         }
+//       })
+//       .catch((error) => {
+//         console.error("Error fetching store profile:", error);
+//       });
+//   }, [shopId]);
+
+useEffect(() => {
+  setSocialLinks(socialLink);
+}, [socialLink]);
 
   return (
-    <div
+    <>
+    {socialLinks && (<div
       style={{
         display: "flex",
         justifyContent: "center",
@@ -130,7 +135,9 @@ const MediaIcons = ({ shopId, invoiceSetting }) => {
       ) : (
         <></>
       )}
-    </div>
+    </div>)}
+    
+    </>
   );
 };
 
