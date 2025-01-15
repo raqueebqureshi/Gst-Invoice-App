@@ -1,7 +1,7 @@
 # Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
 
 client_id = "78fbc68547f4cc8682944642dc9284c8"
-application_url = "https://everywhere-expression-involved-clubs.trycloudflare.com"
+application_url = "https://flight-brakes-bangkok-prediction.trycloudflare.com"
 embedded = true
 name = "Indian GST App under dev"
 handle = "indian-gst-app-under-dev-1"
@@ -20,9 +20,9 @@ scopes = "read_orders,read_products,write_orders,write_products"
 
 [auth]
 redirect_urls = [
-  "https://everywhere-expression-involved-clubs.trycloudflare.com/auth/callback",
-  "https://everywhere-expression-involved-clubs.trycloudflare.com/auth/shopify/callback",
-  "https://everywhere-expression-involved-clubs.trycloudflare.com/api/auth/callback"
+  "https://flight-brakes-bangkok-prediction.trycloudflare.com/auth/callback",
+  "https://flight-brakes-bangkok-prediction.trycloudflare.com/auth/shopify/callback",
+  "https://flight-brakes-bangkok-prediction.trycloudflare.com/api/auth/callback"
 ]
 
 [pos]

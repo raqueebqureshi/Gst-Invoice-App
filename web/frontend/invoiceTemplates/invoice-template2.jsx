@@ -62,7 +62,7 @@ export function InvoiceTemplate2({ shopdetails, orders, invoiceSettings, GSTHSNC
       .catch((error) => {
         console.error("Error fetching invoice settings:", error.message);
       });
-  };
+  });
 
   // const fetchGSTHSNValues = async (products) => {
   //   try {
