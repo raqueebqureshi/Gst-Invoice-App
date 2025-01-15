@@ -494,6 +494,7 @@ export default function ProductIndexTable() {
       );
     }
   );
+
   // const rowMarkup = paginatedProducts.map(
   //   ({ id, title, images, status, hsn, gst }, index) => (
   //     <IndexTable.Row
@@ -668,152 +669,287 @@ export default function ProductIndexTable() {
   };
 
   return (
-    <Frame>
-      <div style={styles.container}>
-        <div style={styles.header}>
-          <strong style={{fontSize:"20px"}}>Products</strong>
-          <strong>Manage HSN & GST rates</strong>
+    // <Frame>
+    //   <div style={styles.container}>
+    //     <div style={styles.header}>
+    //       <strong style={{fontSize:"20px"}}>Products</strong>
+    //       <strong>Manage HSN & GST rates</strong>
 
-          {/* <div style={styles.buttons}>
-            <Button>More actions</Button>
-            <Button primary>Bulk edit as CSV</Button>
-          </div> */}
+    //       {/* <div style={styles.buttons}>
+    //         <Button>More actions</Button>
+    //         <Button primary>Bulk edit as CSV</Button>
+    //       </div> */}
+    //     </div>
+    //     <LegacyCard sectioned style={{ margin: "16px", maxWidth: "1600px" }}>
+    //       <div style={styles.filters}>
+    //         <div style={styles.searchField}>
+    //           <TextField
+    //             placeholder="Search products"
+    //             value={searchTerm}
+    //             onChange={(value) => setSearchTerm(value)}
+    //             autoComplete="off"
+    //           />
+    //           <Button onClick={handleSearch}>Search</Button>
+    //         </div>
+    //         <div style={styles.searchField}>
+    //           <TextField
+    //             placeholder="Search by tag"
+    //             value={tagSearchTerm}
+    //             onChange={(value) => setTagSearchTerm(value)}
+    //             autoComplete="off"
+    //           />
+    //           <Button onClick={handleTagSearch}>Find</Button>
+    //         </div>
+    //         {selectedTag && <Tag onRemove={handleRemoveTag}>{selectedTag}</Tag>}
+    //         <div style={styles.badgeContainer}>
+    //           <Badge status="info" style={styles.badge}>
+    //             Total: {filteredByTab.length}
+    //           </Badge>
+    //           <Badge status="success" style={styles.badge}>
+    //             Active:{" "}
+    //             {
+    //               filteredByTab.filter(
+    //                 (product) => product.status.toLowerCase() === "active"
+    //               ).length
+    //             }
+    //           </Badge>
+    //           <Badge status="warning" style={styles.badge}>
+    //             Draft:{" "}
+    //             {
+    //               filteredByTab.filter(
+    //                 (product) => product.status.toLowerCase() === "draft"
+    //               ).length
+    //             }
+    //           </Badge>
+    //         </div>
+    //       </div>
+    //       <div style={styles.syncButtonContainer}>
+    //         {/* Save Changes Button */}
+    //         <Button
+    //           primary
+    //           onClick={() => {
+    //             if (selectedItems.length === 0) {
+    //               alert("Please select a product to save changes");
+    //               return;
+    //             } else {
+    //               saveChanges();
+    //             }
+    //           }}
+    //           disabled={isSaving}
+    //         >
+    //           {isSaving ? "Saving..." : "Save Changes"}
+    //         </Button>
+    //         <Button primary onClick={syncProducts}>
+    //           Sync Products
+    //         </Button>
+    //       </div>
+    //       {isLoading ? (
+    //         <SkeletonPage>
+    //           <SkeletonBodyText lines={4} />
+    //         </SkeletonPage>
+    //       ) : (
+    //         <div style={styles.tableContainer}>
+    //           <Tabs
+    //             tabs={[
+    //               { id: "all", content: "All", panelID: "all-products" },
+    //               {
+    //                 id: "active",
+    //                 content: "Active",
+    //                 panelID: "active-products",
+    //               },
+    //               { id: "draft", content: "Draft", panelID: "draft-products" },
+    //               {
+    //                 id: "archived",
+    //                 content: "Archived",
+    //                 panelID: "archived-products",
+    //               },
+    //             ]}
+    //             selected={activeTab}
+    //             onSelect={(index) => {
+    //               setActiveTab(index);
+    //               setCurrentPage(1);
+    //             }}
+    //           >
+    //             <IndexTable
+    //               resourceName={{ singular: "product", plural: "products" }}
+    //               itemCount={filteredByTab.length}
+    //               headings={[
+    //                 { title: "Product Image" },
+    //                 { title: "Product Title" },
+    //                 { title: "Status" },
+    //                 { title: "HSN" },
+    //                 { title: "GST" },
+    //               ]}
+    //               selectedItems={selectedItems}
+    //               selectedItemsCount={
+    //                  selectedItems.length
+    //               }
+    //               onSelectionChange={handleSelectAll}
+    //               bulkActions={[
+    //                 {
+    //                   content: isAllSelected ? "Deselect All" : "Select All",
+    //                   onAction: handleSelectAll,
+    //                 },
+    //               ]}
+    //             >
+    //               {rowMarkup}
+    //             </IndexTable>
+    //             <div style={styles.pagination}>
+    //               <Pagination
+    //                 hasPrevious={currentPage > 1}
+    //                 onPrevious={() =>
+    //                   setCurrentPage((prev) => Math.max(prev - 1, 1))
+    //                 }
+    //                 hasNext={currentPage * itemsPerPage < filteredByTab.length}
+    //                 onNext={() => setCurrentPage((prev) => prev + 1)}
+    //               />
+    //             </div>
+    //           </Tabs>
+    //         </div>
+    //       )}
+    //     </LegacyCard>
+    //   </div>
+    //   {showToast && (
+    //     <Toast
+    //       content="Product Sync completed!"
+    //       onDismiss={() => setShowToast(false)}
+    //     />
+    //   )}
+    // </Frame>
+    <Frame>
+  <div style={styles.container}>
+    <div style={styles.header}>
+      <strong style={{ fontSize: "20px" }}>Products</strong>
+      <strong>Manage HSN & GST rates</strong>
+    </div>
+    <LegacyCard sectioned style={{ margin: "16px", maxWidth: "1600px" }}>
+      <div style={styles.filters}>
+        <div style={styles.searchField}>
+          <TextField
+            placeholder="Search products"
+            value={searchTerm}
+            onChange={(value) => setSearchTerm(value)}
+            autoComplete="off"
+          />
+          <Button onClick={handleSearch}>Search</Button>
         </div>
-        <LegacyCard sectioned style={{ margin: "16px", maxWidth: "1600px" }}>
-          <div style={styles.filters}>
-            <div style={styles.searchField}>
-              <TextField
-                placeholder="Search products"
-                value={searchTerm}
-                onChange={(value) => setSearchTerm(value)}
-                autoComplete="off"
-              />
-              <Button onClick={handleSearch}>Search</Button>
-            </div>
-            <div style={styles.searchField}>
-              <TextField
-                placeholder="Search by tag"
-                value={tagSearchTerm}
-                onChange={(value) => setTagSearchTerm(value)}
-                autoComplete="off"
-              />
-              <Button onClick={handleTagSearch}>Find</Button>
-            </div>
-            {selectedTag && <Tag onRemove={handleRemoveTag}>{selectedTag}</Tag>}
-            <div style={styles.badgeContainer}>
-              <Badge status="info" style={styles.badge}>
-                Total: {filteredByTab.length}
-              </Badge>
-              <Badge status="success" style={styles.badge}>
-                Active:{" "}
-                {
-                  filteredByTab.filter(
-                    (product) => product.status.toLowerCase() === "active"
-                  ).length
-                }
-              </Badge>
-              <Badge status="warning" style={styles.badge}>
-                Draft:{" "}
-                {
-                  filteredByTab.filter(
-                    (product) => product.status.toLowerCase() === "draft"
-                  ).length
-                }
-              </Badge>
-            </div>
-          </div>
-          <div style={styles.syncButtonContainer}>
-            {/* Save Changes Button */}
-            <Button
-              primary
-              onClick={() => {
-                if (selectedItems.length === 0) {
-                  alert("Please select a product to save changes");
-                  return;
-                } else {
-                  saveChanges();
-                }
-              }}
-              disabled={isSaving}
-            >
-              {isSaving ? "Saving..." : "Save Changes"}
-            </Button>
-            <Button primary onClick={syncProducts}>
-              Sync Products
-            </Button>
-          </div>
-          {isLoading ? (
-            <SkeletonPage>
-              <SkeletonBodyText lines={4} />
-            </SkeletonPage>
-          ) : (
-            <div style={styles.tableContainer}>
-              <Tabs
-                tabs={[
-                  { id: "all", content: "All", panelID: "all-products" },
-                  {
-                    id: "active",
-                    content: "Active",
-                    panelID: "active-products",
-                  },
-                  { id: "draft", content: "Draft", panelID: "draft-products" },
-                  {
-                    id: "archived",
-                    content: "Archived",
-                    panelID: "archived-products",
-                  },
-                ]}
-                selected={activeTab}
-                onSelect={(index) => {
-                  setActiveTab(index);
-                  setCurrentPage(1);
-                }}
-              >
-                <IndexTable
-                  resourceName={{ singular: "product", plural: "products" }}
-                  itemCount={filteredByTab.length}
-                  headings={[
-                    { title: "Product Image" },
-                    { title: "Product Title" },
-                    { title: "Status" },
-                    { title: "HSN" },
-                    { title: "GST" },
-                  ]}
-                  selectedItems={selectedItems}
-                  selectedItemsCount={
-                     selectedItems.length
-                  }
-                  onSelectionChange={handleSelectAll}
-                  bulkActions={[
-                    {
-                      content: isAllSelected ? "Deselect All" : "Select All",
-                      onAction: handleSelectAll,
-                    },
-                  ]}
-                >
-                  {rowMarkup}
-                </IndexTable>
-                <div style={styles.pagination}>
-                  <Pagination
-                    hasPrevious={currentPage > 1}
-                    onPrevious={() =>
-                      setCurrentPage((prev) => Math.max(prev - 1, 1))
-                    }
-                    hasNext={currentPage * itemsPerPage < filteredByTab.length}
-                    onNext={() => setCurrentPage((prev) => prev + 1)}
-                  />
-                </div>
-              </Tabs>
-            </div>
-          )}
-        </LegacyCard>
+        <div style={styles.searchField}>
+          <TextField
+            placeholder="Search by tag"
+            value={tagSearchTerm}
+            onChange={(value) => setTagSearchTerm(value)}
+            autoComplete="off"
+          />
+          <Button onClick={handleTagSearch}>Find</Button>
+        </div>
+        {selectedTag && <Tag onRemove={handleRemoveTag}>{selectedTag}</Tag>}
+        <div style={styles.badgeContainer}>
+          <Badge status="info" style={styles.badge}>
+            Total: {filteredByTab.length}
+          </Badge>
+          <Badge status="success" style={styles.badge}>
+            Active:{" "}
+            {
+              filteredByTab.filter(
+                (product) => product.status.toLowerCase() === "active"
+              ).length
+            }
+          </Badge>
+          <Badge status="warning" style={styles.badge}>
+            Draft:{" "}
+            {
+              filteredByTab.filter(
+                (product) => product.status.toLowerCase() === "draft"
+              ).length
+            }
+          </Badge>
+        </div>
       </div>
-      {showToast && (
-        <Toast
-          content="Product Sync completed!"
-          onDismiss={() => setShowToast(false)}
-        />
+      <div style={styles.syncButtonContainer}>
+        <Button
+          primary
+          onClick={() => {
+            if (selectedItems.length === 0) {
+              alert("Please select a product to save changes");
+              return;
+            } else {
+              saveChanges();
+            }
+          }}
+          disabled={isSaving}
+        >
+          {isSaving ? "Saving..." : "Save Changes"}
+        </Button>
+        <Button primary onClick={syncProducts}>
+          Sync Products
+        </Button>
+      </div>
+      {products ? (
+        <SkeletonPage>
+          <SkeletonBodyText lines={4} />
+        </SkeletonPage>
+      ) : (
+        <div style={styles.tableContainer}>
+          <Tabs
+            tabs={[
+              { id: "all", content: "All", panelID: "all-products" },
+              { id: "active", content: "Active", panelID: "active-products" },
+              { id: "draft", content: "Draft", panelID: "draft-products" },
+              { id: "archived", content: "Archived", panelID: "archived-products" },
+            ]}
+            selected={activeTab}
+            onSelect={(index) => {
+              setActiveTab(index);
+              setCurrentPage(1);
+            }}
+          >
+            
+            <IndexTable
+              resourceName={{ singular: "product", plural: "products" }}
+              itemCount={filteredByTab.length}
+              headings={[
+                { title: "Product Image" },
+                { title: "Product Title" },
+                { title: "Status" },
+                { title: "HSN" },
+                { title: "GST" },
+              ]}
+              selectedItemsCount={selectedItems.length}
+              onSelectionChange={handleSelectAll}
+              bulkActions={[
+                {
+                  content: isAllSelected ? "Deselect All" : "Select All",
+                  onAction: handleSelectAll,
+                },
+              ]}
+              emptyState={
+                <div style={{ textAlign: "center", padding: "20px" }}>
+                  {/* <p style={{ fontSize: "16px", color: "#5c5f62" }}>
+                    No products available. Please sync your products or adjust your filters.
+                  </p>
+                  <Button primary onClick={syncProducts}>
+                    Sync Products
+                  </Button> */}
+                </div>
+              }
+            >
+              {rowMarkup}
+            </IndexTable>
+            <div style={styles.pagination}>
+              <Pagination
+                hasPrevious={currentPage > 1}
+                onPrevious={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                hasNext={currentPage * itemsPerPage < filteredByTab.length}
+                onNext={() => setCurrentPage((prev) => prev + 1)}
+              />
+            </div>
+          </Tabs>
+        </div>
       )}
-    </Frame>
+    </LegacyCard>
+  </div>
+  {showToast && <Toast content="Product Sync completed!" onDismiss={() => setShowToast(false)} />}
+</Frame>
+
   );
 }
