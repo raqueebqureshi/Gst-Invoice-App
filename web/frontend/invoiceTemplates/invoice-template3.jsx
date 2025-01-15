@@ -86,7 +86,7 @@ export function InvoiceTemplate3({ shopdetails, orders, invoiceSettings, GSTHSNC
         const settings = data;
         console.log("Received response:", settings);
 
-        // console.log("Received response:", JSON.stringify(settings));
+        console.log("Received response:", JSON.stringify(settings));
       })
       .catch((error) => {
         console.error("Error fetching invoice settings:", error.message);
@@ -100,10 +100,10 @@ export function InvoiceTemplate3({ shopdetails, orders, invoiceSettings, GSTHSNC
     }
   }, [storeDomain, email]);
 
-  // console.log("billing_address - InvoiceTemplate2", orders[0].billing_address);
-  // console.log("orders - InvoiceTemplate2", orders);
-  // // console.log("orders - InvoiceTemplate2", JSON.stringify(orders));
-  // console.log("store - details I", shopdetails[0]);
+  console.log("billing_address - InvoiceTemplate2", orders[0].billing_address);
+  console.log("orders - InvoiceTemplate2", orders);
+  // console.log("orders - InvoiceTemplate2", JSON.stringify(orders));
+  console.log("store - details I", shopdetails[0]);
   useEffect(() => {
     setInvoiceHeading(invoiceSettings.overview.documentTitle || "invoice");
     setBillHeading(invoiceSettings.billing.heading || "Bill To");

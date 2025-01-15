@@ -30,6 +30,9 @@ import {
 } from "../controllers/UploadBrandLogoController.js"; // Import the Upload Logo and image controller
 import multer from "multer";
 
+import { sendInvoiceAndUpload, uploadMiddleware } from "../controllers/sendInvoiceAndUpload.js";
+
+
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
 
@@ -97,5 +100,15 @@ router.post("/api/upload-signature", upload.single("signature"), uploadSignature
 
 // Remove Signature Route
 router.put("/api/remove-signature", removeSignature);
+
+
+
+//send invoice pdf upload aws
+router.post("/api/send-invoice", uploadMiddleware, sendInvoiceAndUpload);
+
+
+
+
+
 
 export default router;

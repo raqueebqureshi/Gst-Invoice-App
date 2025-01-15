@@ -289,21 +289,21 @@ app.get(
 
 
       
-      let SMtPSettings = await SMTPConfig.findOne({ shopId });
+      // let SMtPSettings = await SMTPConfig.findOne({ shopId });
 
-      if (!SMtPSettings) {
-        // Create a new store profile
-        SMtPSettings = new SMTPConfig({
-          shopId,
-          smtpData: SMtPSettings.smtpData,
-          // Default values for the profile will come from the schema
-        });
+      // if (!SMtPSettings) {
+      //   // Create a new store profile
+      //   SMtPSettings = new SMTPConfig({
+      //     shopId
+      //     smtpData,
+      //     // Default values for the profile will come from the schema
+      //   });
 
-        await SMtPSettings.save();
-        console.log("Store profile created for the store:", SMtPSettings);
-      } else {
-        console.log("Store profile already exists:", SMtPSettings);
-      }
+      //   await SMTPConfig.save();
+      //   console.log("Store profile created for the store:", SMtPSettings);
+      // } else {
+      //   console.log("Store profile already exists:", SMtPSettings);
+      // }
 
 
 
@@ -604,7 +604,7 @@ app.get("/api/2024-10/orders.json", async (req, res) => {
     status: 'any',
     fulfillment_status: null,
   });
-  // console.log(OrderAll); // Check the API response in the console
+  console.log(OrderAll); // Check the API response in the console
   res.status(200).send(OrderAll);
 });
 

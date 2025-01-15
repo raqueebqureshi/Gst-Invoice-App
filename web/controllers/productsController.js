@@ -112,7 +112,7 @@ export const updateProductsInDB = async (req, res) => {
 export const getAndHSNValuesFromDB = async (req, res) => {
   const { storeDomain, email } = req.query;
 
-  // console.log("Fetch GST Request Query:", req.query);
+  console.log("Fetch GST Request Query:", req.query);
 
   // Validate input
   if (!storeDomain || !email) {

@@ -619,12 +619,14 @@ export function InvoiceTemplate1({ shopdetails, orders, invoiceSettings, GSTHSNC
         <tbody style={{ textAlign: "center" }}>
           {orders[0].line_items?.map((item, index) => {
             // console.log('GSTHSNCodes-------',GSTHSNCodes[0].productId);
-            console.log("item-------", item.product_id);
-
-            const matchedGSTItem = GSTHSNCodes.gstcodes
-              ? GSTHSNCodes.gstcodes.find((gstItem) => Number(gstItem.productId) === item.product_id)
-              : GSTHSNCodes.find((gstItem) => Number(gstItem.productId) === item.product_id);
-
+            console.log('item-------',item.product_id);
+            
+            const matchedGSTItem = GSTHSNCodes.gstcodes ? GSTHSNCodes.gstcodes.find(
+              (gstItem) => Number(gstItem.productId) === item.product_id
+              ) : GSTHSNCodes.find(
+                (gstItem) => Number(gstItem.productId) === item.product_id
+                );
+            
             const price = parseFloat(item.price) || 0; // Convert to a number and default to 0 if NaN
             const lineAmount = item.quantity * price + (item.total_tax || 0) || 0;
             return (

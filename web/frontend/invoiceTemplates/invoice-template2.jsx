@@ -60,13 +60,51 @@ export function InvoiceTemplate2({ shopdetails, orders, invoiceSettings, GSTHSNC
         }
       })
       .catch((error) => {
-        console.error("Error fetching store profile:", error);
+        console.error("Error fetching invoice settings:", error.message);
       });
-  }, [shopId]);
+  };
 
+  // const fetchGSTHSNValues = async (products) => {
+  //   try {
+  //     if (!storeDomain || !email) {
+  //       console.error("Missing storeDomain or email:", {
+  //         storeDomain,
+  //         email: email,
+  //       });
+  //       throw new Error("Invalid storeDomain or email.");
+  //     }
 
+  //     const url = `/api/products/gsthsn?storeDomain=${encodeURIComponent(storeDomain)}&email=${encodeURIComponent(
+  //       email
+  //     )}`;
+  //     console.log("Fetching GST HSN Values with URL:", url);
 
-  
+  //     const response = await fetch(url);
+
+  //     if (!response.ok) {
+  //       throw new Error(`Failed to fetch GST values. Status: ${response.status}`);
+  //     }
+
+  //     const data = await response.json();
+  //     console.log("Fetched GST Values:", data.gstValues);
+
+  //     setGSTHSNCodes(data.gstValues);
+  //   } catch (error) {
+  //     console.error("Error fetching GST values:", error);
+  //   }
+  // };
+
+  useEffect(() => {
+    if (storeDomain && email) {
+      fetchInvoiceSettings();
+      // fetchGSTHSNValues();
+    }
+  }, [storeDomain, email]);
+
+  // console.log("billing_address - InvoiceTemplate2", orders[0].billing_address);
+  // console.log("orders - InvoiceTemplate2", orders);
+  // // console.log("orders - InvoiceTemplate2", JSON.stringify(orders));
+  // console.log("store - details I", shopdetails[0]);
   useEffect(() => {
     setInvoiceHeading(invoiceSettings.overview.documentTitle || "invoice");
     setBillHeading(invoiceSettings.billing.heading || "Bill To");
@@ -534,14 +572,14 @@ export function InvoiceTemplate2({ shopdetails, orders, invoiceSettings, GSTHSNC
         {/* <td style={{ border: '1px solid #000', padding: '8px' }}></td> */}
 
         <tbody>
-          {orders[0].line_items?.map((item, index) => {
+        {orders[0].line_items?.map((item, index) => {
             // console.log('GSTHSNCodes-------',GSTHSNCodes[0].productId);
-            console.log("item-------", item.product_id);
-
-            const matchedGSTItem = GSTHSNCodes.gstcodes
-              ? GSTHSNCodes.gstcodes.find((gstItem) => Number(gstItem.productId) === item.product_id)
-              : GSTHSNCodes.find((gstItem) => Number(gstItem.productId) === item.product_id);
-
+            console.log('item-------',item.product_id);
+            
+            const matchedGSTItem = GSTHSNCodes.find(
+              (gstItem) => Number(gstItem.productId) === item.product_id
+            );
+            
             const price = parseFloat(item.price) || 0; // Convert to a number and default to 0 if NaN
             const lineAmount = item.quantity * price + (item.total_tax || 0) || 0;
             return (

@@ -109,13 +109,13 @@ export default function Settings() {
       .then((response) => response.json())
       .then((data) => {
         const shopInfo = data?.data?.data?.[0];
-        // console.log("Shop info:", shopInfo);
+        console.log("Shop info:", shopInfo);
         setStoreDomain(shopInfo.domain || "");
         setEmail(shopInfo.email || "");
         setshopId(shopInfo.id || "");
-        // console.log("Store domain:", storeDomain);
-        // console.log("Email:", email);
-        // console.log("ShopID:", shopId);
+        console.log("Store domain:", storeDomain);
+        console.log("Email:", email);
+        console.log("ShopID:", shopId);
       })
       .catch((error) => console.log("Error fetching shop info:", error));
   }, []);
@@ -142,7 +142,7 @@ export default function Settings() {
             setSignatureUrl(profileData.images.signatureURL);
           }
           console.log("Shop Profile Data", profileData);
-          // console.log("Logo URL:", logoFile);
+          console.log("Logo URL:", logoFile);
         }
       })
       .catch((error) => {

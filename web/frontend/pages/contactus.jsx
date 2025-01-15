@@ -15,7 +15,7 @@ export default function ContactUs() {
 
 
 //Fetch store details and send with email
-  useEffect(() => {
+  useEffect(() => { 
     fetch("/api/shop/all", {
       method: "GET",
       headers: { "Content-Type": "application/json" }

@@ -2,8 +2,8 @@ import React from "react";
 import ReusableFunctions from "../ReusableFunctions";
 
 const CreativeInvoiceTemplate = ({ invoiceData, userData }) => {
-  // console.log("invoiceData:",invoiceData);
-  // console.log("userData:",userData);
+  console.log("invoiceData:",invoiceData);
+  console.log("userData:",userData);
   // const logo = userData?.brandLogoUrl || invoiceData?.brandLogoUrl || "";
 
   return (

@@ -2,7 +2,7 @@ import InvoiceTemplate from "../Models/InvoiceTemplateModel.js";
 
 // Controller to fetch template settings
 export const getTemplateSettings = async (req, res) => {
-  // console.log("Request body:", req.body);
+  console.log("Request body:", req.body);
 
   try {
     const { email, storeDomain } = req.body ||{};
