@@ -250,9 +250,9 @@ app.get(
         });
 
         await store.save();
-        // console.log("New store data saved to DB after app installation.");
+        console.log("New store data saved to DB after app installation.");
       } else {
-        // console.log("Store already exists in DB:", store);
+        console.log("Store already exists in DB:", store);
       }
 
       // Check if the store profile exists

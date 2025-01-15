@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { MdOutlineFileDownload, MdPrint } from "react-icons/md";
 import { FaArrowAltCircleDown } from "react-icons/fa";
+import ReactDOMServer from "react-dom/server";
 import {
   Pagination,
   Button,
@@ -530,69 +531,182 @@ useEffect(() => {
     []
   );
 
+  // const handlePrint = useCallback(
+  //   async (order, shopdetails, currentTemplate, invoiceSettings, GSTHSNCodes) => {
+  //     if (!order || !currentTemplate) return;
+
+  //     // Logic to print the given order
+  //     const invoiceContainer = document.createElement("div");
+  //     invoiceContainer.style.width = "794px";
+  //     invoiceContainer.style.height = "1123px";
+  //     invoiceContainer.style.position = "absolute";
+  //     invoiceContainer.style.top = "-9999px";
+  //     document.body.appendChild(invoiceContainer);
+
+  //     const renderInvoiceTemplate = (
+  //       currentTemplate,
+  //       shopdetails,
+  //       order,
+  //       invoiceContainer
+  //     ) => {
+  //       switch (currentTemplate) {
+  //         case "1":
+  //           ReactDOM.render(
+  //             <InvoiceTemplate1 shopdetails={[shopdetails]} orders={[order]} invoiceSettings={invoiceSettings} GSTHSNCodes={GSTHSNCodes}/>,
+  //             invoiceContainer
+  //           );
+  //           break;
+  //         case "2":
+  //           ReactDOM.render(
+  //             <InvoiceTemplate2 shopdetails={[shopdetails]} orders={[order]} invoiceSettings={invoiceSettings} GSTHSNCodes={GSTHSNCodes}/>,
+  //             invoiceContainer
+  //           );
+  //           break;
+  //         case "3":
+  //           ReactDOM.render(
+  //             <InvoiceTemplate3 shopdetails={[shopdetails]} orders={[order]} invoiceSettings={invoiceSettings} GSTHSNCodes={GSTHSNCodes}/>,
+  //             invoiceContainer
+  //           );
+  //           break;
+  //         default:
+  //           //console.error("Invalid template ID:", currentTemplate);
+  //       }
+  //     };
+
+  //     renderInvoiceTemplate(currentTemplate, shopdetails, order, invoiceContainer);
+
+  //     const printWindow = window.open("", "_blank");
+  //     printWindow.document.write(`
+  //     <html>
+  //       <head>
+  //         <title>Print Invoice</title>
+  //       </head>
+  //       <body>${invoiceContainer.innerHTML}</body>
+  //     </html>
+  //     `);
+  //     printWindow.document.close();
+  //     printWindow.onload = () => {
+  //       printWindow.print();
+  //       printWindow.close();
+  //     };
+
+  //     document.body.removeChild(invoiceContainer);
+  //   },
+  //   []
+  // );
+
+
+
   const handlePrint = useCallback(
     async (order, shopdetails, currentTemplate, invoiceSettings, GSTHSNCodes) => {
       if (!order || !currentTemplate) return;
-
-      // Logic to print the given order
-      const invoiceContainer = document.createElement("div");
-      invoiceContainer.style.width = "794px";
-      invoiceContainer.style.height = "1123px";
-      invoiceContainer.style.position = "absolute";
-      invoiceContainer.style.top = "-9999px";
-      document.body.appendChild(invoiceContainer);
-
-      const renderInvoiceTemplate = (
-        currentTemplate,
-        shopdetails,
-        order,
-        invoiceContainer
-      ) => {
+  
+      // Render the invoice component as an HTML string
+      const renderInvoiceTemplate = () => {
         switch (currentTemplate) {
           case "1":
-            ReactDOM.render(
-              <InvoiceTemplate1 shopdetails={[shopdetails]} orders={[order]} invoiceSettings={invoiceSettings} GSTHSNCodes={GSTHSNCodes}/>,
-              invoiceContainer
+            return ReactDOMServer.renderToString(
+              <InvoiceTemplate1
+                shopdetails={[shopdetails]}
+                orders={[order]}
+                invoiceSettings={invoiceSettings}
+                GSTHSNCodes={GSTHSNCodes}
+              />
             );
-            break;
           case "2":
-            ReactDOM.render(
-              <InvoiceTemplate2 shopdetails={[shopdetails]} orders={[order]} invoiceSettings={invoiceSettings} GSTHSNCodes={GSTHSNCodes}/>,
-              invoiceContainer
+            return ReactDOMServer.renderToString(
+              <InvoiceTemplate2
+                shopdetails={[shopdetails]}
+                orders={[order]}
+                invoiceSettings={invoiceSettings}
+                GSTHSNCodes={GSTHSNCodes}
+              />
             );
-            break;
           case "3":
-            ReactDOM.render(
-              <InvoiceTemplate3 shopdetails={[shopdetails]} orders={[order]} invoiceSettings={invoiceSettings} GSTHSNCodes={GSTHSNCodes}/>,
-              invoiceContainer
+            return ReactDOMServer.renderToString(
+              <InvoiceTemplate3
+                shopdetails={[shopdetails]}
+                orders={[order]}
+                invoiceSettings={invoiceSettings}
+                GSTHSNCodes={GSTHSNCodes}
+              />
             );
-            break;
           default:
-            //console.error("Invalid template ID:", currentTemplate);
+            console.error("Invalid template ID:", currentTemplate);
+            return "";
         }
       };
-
-      renderInvoiceTemplate(currentTemplate, shopdetails, order, invoiceContainer);
-
-      const printWindow = window.open("", "_blank");
-      printWindow.document.write(`
-      <html>
-        <head>
-          <title>Print Invoice</title>
-        </head>
-        <body>${invoiceContainer.innerHTML}</body>
-      </html>
-      `);
-      printWindow.document.close();
-      printWindow.onload = () => {
-        printWindow.print();
-        printWindow.close();
-      };
-
-      document.body.removeChild(invoiceContainer);
+  
+      const invoiceContent = renderInvoiceTemplate();
+  
+      const printWindow = window.open("", "_blank", "width=794px,height=1123px");
+      if (printWindow) {
+        // Tailwind CSS and custom styles for printing
+        const tailwindStylesheet = `
+          <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" />
+        `;
+  
+        const customStyles = `
+          <style>
+            body, html {
+              margin: 0;
+              padding: 0;
+              font-family: Arial, sans-serif;
+             
+            }
+            @page {
+              size: 350mm 297mm; /* A4 size in mm */
+              margin: 0; /* No margins */
+            }
+            @media print {
+              body {
+                -webkit-print-color-adjust: exact;
+                overflow: hidden;
+              }
+            }
+            .invoice-container {
+              
+             
+          
+              
+              
+             
+            }
+          </style>
+        `;
+  
+        printWindow.document.open();
+        printWindow.document.write(`
+          <!DOCTYPE html>
+          <html lang="en">
+            <head>
+              <meta charset="UTF-8">
+              <meta name="viewport" content="width=device-width, initial-scale=1.0">
+              <title>Print Invoice</title>
+              ${tailwindStylesheet}
+              ${customStyles}
+            </head>
+            <body>
+              <div class="invoice-container">
+                ${invoiceContent}
+              </div>
+            </body>
+          </html>
+        `);
+        printWindow.document.close();
+  
+        printWindow.onload = () => {
+          printWindow.print();
+          printWindow.close();
+        };
+      } else {
+        console.error("Failed to open a new window for printing.");
+      }
     },
     []
   );
+  
+  
 
   const filteredOrders = filterOrders(orders, searchQuery);
   const paginatedOrders = filteredOrders.slice(

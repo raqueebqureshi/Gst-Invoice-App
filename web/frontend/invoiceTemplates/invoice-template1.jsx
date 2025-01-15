@@ -18,7 +18,7 @@ export function InvoiceTemplate1({ shopdetails, orders, invoiceSettings, GSTHSNC
   const [InvoiceHeading, setInvoiceHeading] = useState("");
   const [BillHeading, setBillHeading] = useState("");
   const [ShipHeading, setShipHeading] = useState("");
-  const [selectedFont, setSelectedFont] = useState("Roboto");
+  const [selectedFont, setSelectedFont] = useState("Roboto, sans-serif");
 
   const formatDateTime = (dateString) => {
     const date = new Date(dateString);
@@ -74,6 +74,7 @@ export function InvoiceTemplate1({ shopdetails, orders, invoiceSettings, GSTHSNC
     setBillHeading(invoiceSettings.billing.heading || "Bill To");
     setShipHeading(invoiceSettings.shipping.heading || "Ship To");
     setSelectedFont(invoiceSettings.branding.fontFamily);
+    console.log('invoiceSettings.branding.fontFamily', invoiceSettings.branding.fontFamily);
     console.log("selectedFont", selectedFont);
   }, [orders, shopdetails, invoiceSettings, selectedFont]);
 

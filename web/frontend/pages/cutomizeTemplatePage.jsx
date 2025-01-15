@@ -1624,11 +1624,12 @@ export default function CustomizeTemplate() {
                 </div>
                 <div>
                   <p style={{ marginBottom: "10px" }}>
-                    To show signature, upload signature in{" "}
+                  To display your signature and update social media <strong>links</strong>, please visit the{" "}
                     <a href="/settings" style={{ color: "#0070f3", textDecoration: "underline" }}>
-                      settings
+                     Profile settings
                     </a>
                   </p>
+                  
 
                   <div>
                     <div

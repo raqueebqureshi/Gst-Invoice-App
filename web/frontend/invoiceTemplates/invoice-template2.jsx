@@ -18,6 +18,7 @@ export function InvoiceTemplate2({ shopdetails, orders, invoiceSettings, GSTHSNC
   const [ShipHeading, setShipHeading] = useState("");
   const [shopId, setshopId] = useState("");
   const [shopProfile, setShopProfile] = useState({});
+  const [selectedFont, setSelectedFont] = useState("Roboto, sans-serif");
   const formatDateTime = (dateString) => {
     const date = new Date(dateString);
     return new Intl.DateTimeFormat("en-US", {
@@ -94,12 +95,12 @@ export function InvoiceTemplate2({ shopdetails, orders, invoiceSettings, GSTHSNC
   //   }
   // };
 
-  useEffect(() => {
-    if (storeDomain && email) {
-      fetchInvoiceSettings();
-      // fetchGSTHSNValues();
-    }
-  }, [storeDomain, email]);
+  // useEffect(() => {
+  //   if (storeDomain && email) {
+  //     fetchInvoiceSettings();
+  //     // fetchGSTHSNValues();
+  //   }
+  // }, [storeDomain, email]);
 
   // console.log("billing_address - InvoiceTemplate2", orders[0].billing_address);
   // console.log("orders - InvoiceTemplate2", orders);
@@ -109,7 +110,10 @@ export function InvoiceTemplate2({ shopdetails, orders, invoiceSettings, GSTHSNC
     setInvoiceHeading(invoiceSettings.overview.documentTitle || "invoice");
     setBillHeading(invoiceSettings.billing.heading || "Bill To");
     setShipHeading(invoiceSettings.shipping.heading || "Ship To");
-  }, [orders, shopdetails, invoiceSettings]);
+    setSelectedFont(invoiceSettings.branding.fontFamily);
+    console.log('invoiceSettings.branding.fontFamily', invoiceSettings.branding.fontFamily);
+    console.log("selectedFont", selectedFont);
+  }, [orders, shopdetails, invoiceSettings, selectedFont]);
 
   return (
     <div
@@ -117,6 +121,7 @@ export function InvoiceTemplate2({ shopdetails, orders, invoiceSettings, GSTHSNC
         fontFamily: "Arial, sans-serif",
         width: "54vw", // Full viewport width
         margin: "0 auto",
+        fontFamily: selectedFont,
         padding: "20px",
         border: "1px solid #ccc",
         backgroundColor: "#fff",
@@ -576,9 +581,11 @@ export function InvoiceTemplate2({ shopdetails, orders, invoiceSettings, GSTHSNC
             // console.log('GSTHSNCodes-------',GSTHSNCodes[0].productId);
             console.log('item-------',item.product_id);
             
-            const matchedGSTItem = GSTHSNCodes.find(
+            const matchedGSTItem = GSTHSNCodes.gstcodes ? GSTHSNCodes.gstcodes.find(
               (gstItem) => Number(gstItem.productId) === item.product_id
-            );
+              ) : GSTHSNCodes.find(
+                (gstItem) => Number(gstItem.productId) === item.product_id
+                );
             
             const price = parseFloat(item.price) || 0; // Convert to a number and default to 0 if NaN
             const lineAmount = item.quantity * price + (item.total_tax || 0) || 0;

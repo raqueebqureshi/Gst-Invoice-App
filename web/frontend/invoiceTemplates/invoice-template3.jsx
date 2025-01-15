@@ -19,6 +19,7 @@ export function InvoiceTemplate3({ shopdetails, orders, invoiceSettings, GSTHSNC
   const [ShipHeading, setShipHeading] = useState("");
   const [shopId, setshopId] = useState("");
   const [shopProfile, setShopProfile] = useState({});
+  const [selectedFont, setSelectedFont] = useState("Roboto, sans-serif");
   const formatDateTime = (dateString) => {
     const date = new Date(dateString);
     return new Intl.DateTimeFormat("en-US", {
@@ -108,7 +109,10 @@ export function InvoiceTemplate3({ shopdetails, orders, invoiceSettings, GSTHSNC
     setInvoiceHeading(invoiceSettings.overview.documentTitle || "invoice");
     setBillHeading(invoiceSettings.billing.heading || "Bill To");
     setShipHeading(invoiceSettings.shipping.heading || "Ship To");
-  }, [orders, shopdetails, invoiceSettings]);
+    setSelectedFont(invoiceSettings.branding.fontFamily);
+    console.log('invoiceSettings.branding.fontFamily', invoiceSettings.branding.fontFamily);
+    console.log("selectedFont", selectedFont);
+  }, [orders, shopdetails, invoiceSettings, selectedFont]);
 
   return (
     <div
@@ -116,6 +120,7 @@ export function InvoiceTemplate3({ shopdetails, orders, invoiceSettings, GSTHSNC
         maxWidth: "900px",
         margin: "0 auto",
         padding: "0px",
+        fontFamily: selectedFont,
         backgroundColor: "white",
         boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)",
         border: "1px solid #000",
