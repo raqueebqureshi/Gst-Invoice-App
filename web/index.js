@@ -302,11 +302,11 @@ app.get(
             // Optionally set default values here if different from schema defaults
           });
 
-   await smtpConfig.save();
-   console.log("SMTP configuration created for the store:", smtpConfig);
- } else {
-   console.log("SMTP configuration already exists:", smtpConfig);
- }
+          await smtpConfig.save();
+          console.log("SMTP configuration created for the store:", smtpConfig);
+        } else {
+          console.log("SMTP configuration already exists:", smtpConfig);
+        }
 
 
 

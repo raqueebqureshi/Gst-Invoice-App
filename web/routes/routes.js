@@ -32,6 +32,10 @@ import multer from "multer";
 
 import { sendInvoiceAndUpload, uploadMiddleware } from "../controllers/sendInvoiceAndUpload.js";
 
+import {
+  sendTestEmailFromCustomerSMTP,
+  sendTestEmailFromAppSMTP,
+} from "../controllers/sendTestEmail.js";
 
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
@@ -107,6 +111,14 @@ router.put("/api/remove-signature", removeSignature);
 router.post("/api/send-invoice", uploadMiddleware, sendInvoiceAndUpload);
 
 
+
+//send test email to customer using smtp
+
+// Route to send test email using customer's SMTP settings
+router.post("/api/send-test-email-customer-smtp", sendTestEmailFromCustomerSMTP);
+
+// Route to send test email using app's default SMTP settings
+router.post("/api/send-test-email-app-smtp", sendTestEmailFromAppSMTP);
 
 
 
