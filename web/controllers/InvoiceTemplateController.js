@@ -36,7 +36,7 @@ export const updateTemplateSettings = async (req, res) => {
   
   try {
     const { email, storeDomain, updatedSettings } = req.body;
-    console.log("Request body:", req.body);
+    // console.log("Request body:", req.body);
     // Validate inputs
     if (!email || !storeDomain || !updatedSettings) {
       return res.status(400).json({ error: "Email, storeDomain, and updatedSettings are required" });

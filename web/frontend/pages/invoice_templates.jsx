@@ -22,22 +22,24 @@ export default function Orders() {
 
   // Fetch the store domain
   useEffect(() => {
-    console.log("Fetching store details...");
+    // console.log("Fetching store details...");
     fetch("/api/2024-10/shop.json", {
       method: "GET",
       headers: { "Content-Type": "application/json" }
     })
     .then(response => response.json())
     .then(data => {
-      console.log("Store data fetched:", data.data.data[0].domain);
+      // console.log("Store data fetched:", data.data.data[0].domain);
       if (data.data.data && data.data.data.length > 0) {
         // Access the domain from the correct property
         setStoreDomain(data.data.data[0].domain); 
-        console.log("Store domain set:", data.data.data[0].domain);
+        // console.log("Store domain set:", data.data.data[0].domain);
       }
-      console.log("store domain:", storeDomain)
+      // console.log("store domain:", storeDomain)
     })
-    .catch(error => console.log("Error fetching store details:", error));
+    .catch(error => {
+      // console.log("Error fetching store details:", error)
+    });
   }, []);
 
   useEffect(() => {
@@ -46,7 +48,7 @@ export default function Orders() {
         .then(response => response.json())
         .then(data => {
           if (data.storeInvoiceTemplate) {
-            console.log("Fetched template ID from DB:", data.storeInvoiceTemplate);
+            // console.log("Fetched template ID from DB:", data.storeInvoiceTemplate);
             setSelectedTemplate(data.storeInvoiceTemplate); // Store template ID for comparison or other use
             setLoading(false);  
           }
@@ -58,7 +60,7 @@ export default function Orders() {
 
   // Function to handle invoice template selection
   const handleSelectTemplate = (templateId) => {
-    console.log("Selected template:", templateId);
+    // console.log("Selected template:", templateId);
     if (storeDomain) {
       fetch("/api/update-invoice-template", {
         method: "POST",
@@ -70,13 +72,13 @@ export default function Orders() {
       })
       .then(response => response.json())
       .then(data => {
-        console.log("API response for updating template:", data);
+        // console.log("API response for updating template:", data);
         setSelectedTemplate(data.storeInvoiceTemplate); // Update selected template state
 
       })
       .catch(error => console.error("Error updating template:", error));
     } else {
-      console.log("Store domain not available; cannot update template");
+      // console.log("Store domain not available; cannot update template");
     }
   };
 
@@ -100,7 +102,7 @@ export default function Orders() {
             title="Pain"
             // primaryAction=" Customize available soon.."
             secondaryAct={() => {
-              console.log("Navigating to Customize Template Page");
+              // console.log("Navigating to Customize Template Page");
               navigate('/customizeTemplatePage', {state:{
                 templateId: 1,
                 
@@ -108,7 +110,7 @@ export default function Orders() {
             }}
             isSelected={selectedTemplate === "1"} // Set isSelected based on selectedTemplate
             onSelect={() => {
-              console.log("Bold template select button clicked");
+              // console.log("Bold template select button clicked");
               if (selectedTemplate !== "1") handleSelectTemplate("1");
             }}
             description="Make a statement without overwhelming your clients. Elegant invoice design."
@@ -119,7 +121,7 @@ export default function Orders() {
             title="Classic"
             // primaryAction=" Customize available soon.."
             secondaryAct={() => {
-              console.log("Navigating to Customize Template Page");
+              // console.log("Navigating to Customize Template Page");
               navigate('/customizeTemplatePage', {state:{
                 templateId: 2,
                 
@@ -127,7 +129,7 @@ export default function Orders() {
             }}
             isSelected={selectedTemplate === "2"} // Set isSelected based on selectedTemplate
             onSelect={() => {
-              console.log("Celestial template select button clicked");
+              // console.log("Celestial template select button clicked");
               if (selectedTemplate !== "2") handleSelectTemplate("2");
             }}
             description="Our elegant invoice showcases a simple design."
@@ -138,7 +140,7 @@ export default function Orders() {
             title="Decent"
             // primaryAction=" Customize available soon.."
             secondaryAct={() => {
-              console.log("Navigating to Customize Template Page");
+              // console.log("Navigating to Customize Template Page");
               navigate('/customizeTemplatePage', {state:{
                 templateId: 3,
                 
@@ -146,7 +148,7 @@ export default function Orders() {
             }}
             isSelected={selectedTemplate === "3"} // Set isSelected based on selectedTemplate
             onSelect={() => {
-              console.log("Celestial template select button clicked");
+              // console.log("Celestial template select button clicked");
               if (selectedTemplate !== "3") handleSelectTemplate("3");
             }}
             description="Designed for professionals, this sleek invoice exudes competence and confidence, leaving a lasting impression."

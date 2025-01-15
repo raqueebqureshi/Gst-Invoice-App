@@ -36,15 +36,19 @@ export function InvoiceTemplate1({ shopdetails, orders, invoiceSettings, GSTHSNC
     })
       .then((request) => request.json())
       .then((response) => {
-        console.log("Store Details---!", response.data);
+        // console.log("Store Details---!", response.data);
         if (response.data.data.length > 0) {
-          console.log("Store Details---", response.data.data[0]);
+          // console.log("Store Details---", response.data.data[0]);
           setshopId(response.data.data[0].id || "");
           setStoreDomain(response.data.data[0].domain);
           setEmail(response.data.data[0].email);
         }
       })
-      .catch((error) => console.log(error));
+      .catch((error) => 
+      {
+        // console.log(error);
+      }
+    );
   }, []);
 
   useEffect(() => {

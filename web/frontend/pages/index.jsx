@@ -35,11 +35,11 @@ export default function HomePage() {
     })
       .then((request) => request.json())
       .then((response) => {
-        console.log("all products", response);
+        // console.log("all products", response);
         setLoading(false); // Stop loading when data is fetched
       })
       .catch((error) => {
-        console.log(error);
+        // console.log(error);
         setLoading(false); // Stop loading on error
       });
   }, []);
@@ -53,10 +53,10 @@ export default function HomePage() {
       .then((request) => request.json())
       .then((response) => {
         if (response.data.length > 0) {
-          console.log("Store Details ", response.data);
+          // console.log("Store Details ", response.data);
           setShopDetails(response.data[0]);
           setStoreName(response.data.data[0].name);
-          console.log("store name : ", storeName);
+          // console.log("store name : ", storeName);
         }
       })
       .catch((error) => console.log(error));
@@ -113,7 +113,7 @@ export default function HomePage() {
                     content: "Learn more",
                     url: "https://delhidigital.co",
                     onAction: () => {
-                      console.log("Learn more clicked");
+                      // console.log("Learn more clicked");
                       // You can also handle navigation or additional logic here
                     },
                   }}
