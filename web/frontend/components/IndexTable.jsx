@@ -1,4 +1,3 @@
-//all imports are here
 import React, { useEffect, useState, useCallback } from "react";
 import { MdOutlineFileDownload, MdPrint } from "react-icons/md";
 import { FaArrowAltCircleDown } from "react-icons/fa";
@@ -44,9 +43,6 @@ const filterOrders = (orders, query) => {
 };
 
 export function OrderTableEx({ value, shopdetails }) {
-  //console.log("Shop Details:-----", shopdetails);
-  const [sendingStatus, setSendingStatus] = useState({}); 
-  const [isSending, setIsSending] = useState(false); 
   const [loading, setLoading] = useState(true);
   const [orders, setOrders] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");

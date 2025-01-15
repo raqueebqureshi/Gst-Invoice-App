@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, use } from "react";
 import {
   IndexTable,
   LegacyCard,
@@ -13,7 +13,11 @@ import {
   Tag,
   Pagination,
   Heading,
+  Modal,
 } from "@shopify/polaris";
+import ToastNotification from "../components/ToastNotification"; // Import the ToastNotification component
+import { set } from "mongoose";
+
 
 export default function ProductIndexTable() {
   const [products, setProducts] = useState([]);
@@ -25,6 +29,7 @@ export default function ProductIndexTable() {
   const [activeProductCount, setActiveProductCount] = useState(0);
   const [activeTab, setActiveTab] = useState(0);
   const [showToast, setShowToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [tagSearchTerm, setTagSearchTerm] = useState("");
   const [selectedTag, setSelectedTag] = useState(null);
@@ -33,72 +38,10 @@ export default function ProductIndexTable() {
   const itemsPerPage = 25;
   const [GSTHSNCodes, setGSTHSNCodes] = useState([]);
   const [isSaving, setIsSaving] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-
-
-  const styles = {
-    container: {
-      maxWidth: "100%",
-      margin: "0 auto",
-      padding: "16px",
-    },
-    header: {
-      display: "flex",
-      flexDirection: "column",
-      alignItems: "center",
-      textAlign: "center",
-      gap: "6px",
-      marginBottom: "16px",
-    },
-    filters: {
-      display: "flex",
-      flexWrap: "wrap",
-      gap: "16px",
-      justifyContent: "space-between",
-      alignItems: "center",
-    },
-    searchField: {
-      flex: "1 1 300px",
-      minWidth: "300px",
-    },
-    buttons: {
-      display: "flex",
-      flexWrap: "wrap",
-      gap: "8px",
-      padding: "8px",
-    },
-    syncButtonContainer: {
-      display: "flex",
-      justifyContent: "flex-end",
-      marginTop: "16px",
-      gap: "16px",
-    },
-    tableContainer: {
-      overflowX: "auto",
-    },
-    pagination: {
-      marginTop: "16px",
-      display: "flex",
-      justifyContent: "center",
-    },
-    badgeContainer: {
-      display: "flex",
-      gap: "16px",
-      flexWrap: "wrap",
-      justifyContent: "space-evenly",
-      alignItems: "center",
-    },
-    badge: {
-      margin: "4px",
-    },
-    responsiveImage: {
-      border: "0.1px solid black",
-      borderRadius: "5px",
-      width: "100%",
-      maxWidth: "50px",
-      height: "50px",
-    },
-  };
+  const [isLoading, setIsLoading] = useState(true);
+  const [showModal, setShowModal] = useState(false);
+  const [bulkHSN, setBulkHSN] = useState("");
+  const [bulkGST, setBulkGST] = useState("");
 
   const fetchShopInfo = async () => {
     try {
@@ -153,6 +96,7 @@ export default function ProductIndexTable() {
         setActiveProductCount(activeCount);
         setDraftProductCount(draftCount);
         setShowToast(true);
+        setToastMessage("Products fetched successfully.");
         console.log("storeDomain && email:", storeDomain, email);
         if (storeDomain && email) {
           console.log("products--:", productsWithEditableFields);
@@ -176,17 +120,15 @@ export default function ProductIndexTable() {
         throw new Error("Invalid storeDomain or email.");
       }
 
-      const url = `/api/products/gsthsn?storeDomain=${encodeURIComponent(
-        storeDomain
-      )}&email=${encodeURIComponent(email)}`;
+      const url = `/api/products/gsthsn?storeDomain=${encodeURIComponent(storeDomain)}&email=${encodeURIComponent(
+        email
+      )}`;
       console.log("Fetching GST HSN Values with URL:", url);
 
       const response = await fetch(url);
 
       if (!response.ok) {
-        throw new Error(
-          `Failed to fetch GST values. Status: ${response.status}`
-        );
+        throw new Error(`Failed to fetch GST values. Status: ${response.status}`);
       }
 
       const data = await response.json();
@@ -221,16 +163,13 @@ export default function ProductIndexTable() {
       setFilteredProducts(updatedProducts);
       setProductCount(updatedProducts.length);
 
-      const activeCount = updatedProducts.filter(
-        (product) => product.status.toLowerCase() === "active"
-      ).length;
-      const draftCount = updatedProducts.filter(
-        (product) => product.status.toLowerCase() === "draft"
-      ).length;
+      const activeCount = updatedProducts.filter((product) => product.status.toLowerCase() === "active").length;
+      const draftCount = updatedProducts.filter((product) => product.status.toLowerCase() === "draft").length;
 
       setActiveProductCount(activeCount);
       setDraftProductCount(draftCount);
       console.log("Updated Products with GST/HSN:", updatedProducts);
+      
     } else {
       updateProductsWithGSTHSN(gstValues);
     }
@@ -279,6 +218,7 @@ export default function ProductIndexTable() {
       if (response.ok) {
         console.log("Products saved successfully to the database.");
         setShowToast(true);
+        setToastMessage("Products synced successfully.");
       } else {
         console.error("Failed to save products to the database.");
       }
@@ -288,6 +228,12 @@ export default function ProductIndexTable() {
       setIsLoading(false);
     }
   };
+
+  useEffect(() => {
+    setTimeout(() => {
+      setShowToast(false);
+    }, 3000);
+  }, [showToast]);
 
   useEffect(() => {
     const initializeData = async () => {
@@ -319,8 +265,7 @@ export default function ProductIndexTable() {
       return;
     }
     const taggedProducts = products.filter(
-      (product) =>
-        product.tags && product.tags.includes(tagSearchTerm.toLowerCase())
+      (product) => product.tags && product.tags.includes(tagSearchTerm.toLowerCase())
     );
     setFilteredProducts(taggedProducts);
     setSelectedTag(tagSearchTerm);
@@ -335,9 +280,7 @@ export default function ProductIndexTable() {
   const handleSelectAll = () => {
     const currentPageIds = paginatedProducts.map(({ id }) => id);
     if (isAllSelected) {
-      setSelectedItems((prevSelectedItems) =>
-        prevSelectedItems.filter((id) => !currentPageIds.includes(id))
-      );
+      setSelectedItems((prevSelectedItems) => prevSelectedItems.filter((id) => !currentPageIds.includes(id)));
     } else {
       setSelectedItems((prevSelectedItems) => [
         ...prevSelectedItems,
@@ -367,14 +310,9 @@ export default function ProductIndexTable() {
     return false;
   });
 
-  const paginatedProducts = filteredByTab.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
+  const paginatedProducts = filteredByTab.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
-  const isAllSelected =
-    paginatedProducts.length > 0 &&
-    paginatedProducts.every(({ id }) => selectedItems.includes(id));
+  const isAllSelected = paginatedProducts.length > 0 && paginatedProducts.every(({ id }) => selectedItems.includes(id));
 
   const [editableValues, setEditableValues] = useState(
     paginatedProducts.reduce((acc, product) => {
@@ -445,55 +383,59 @@ export default function ProductIndexTable() {
       return updatedValues; // Return the updated editable values
     });
   };
-  const rowMarkup = paginatedProducts.map(
-    ({ id, title, images, status, hsn, gst }, index) => {
-      const { HSN, GST } = editableValues[id] || {
-        HSN: hsn || "",
-        GST: gst || "",
-      }; // Get current editable values
+  const rowMarkup = paginatedProducts.map(({ id, title, images, status, hsn, gst }, index) => {
+    const { HSN, GST } = editableValues[id] || {
+      HSN: hsn || "",
+      GST: gst || "",
+    }; // Get current editable values
 
-      return (
-        <IndexTable.Row
+    return (
+      <IndexTable.Row
         id={id}
         key={id}
         selected={selectedItems.includes(id)}
         position={index}
         onClick={() => handleRowSelection(id)}
       >
-          <IndexTable.Cell>
-            <img
-              src={images[0]?.src}
-              alt={images[0]?.alt}
-              style={styles.responsiveImage}
-              onClick={(e) => e.stopPropagation()} // Prevent event propagation
-            />
-          </IndexTable.Cell>
-          <IndexTable.Cell>
-            <span style={{ fontWeight: "bold" }}>{title}</span>
-          </IndexTable.Cell>
-          <IndexTable.Cell>{status}</IndexTable.Cell>
-          <IndexTable.Cell>
-            <TextField
-              placeholder="Enter HSN"
-              value={HSN}
-              onChange={(value) => handleHSNChange(id, value)}
-              autoComplete="off"
-              onClick={(e) => e.stopPropagation()} // Prevent event propagation
-            />
-          </IndexTable.Cell>
-          <IndexTable.Cell>
-            <TextField
-              placeholder="Enter GST"
-              value={GST}
-              onChange={(value) => handleGSTChange(id, value)}
-              autoComplete="off"
-              onClick={(e) => e.stopPropagation()} // Prevent event propagation
-            />
-          </IndexTable.Cell>
-        </IndexTable.Row>
-      );
-    }
-  );
+        <IndexTable.Cell>
+          <img
+            src={images[0]?.src}
+            alt={images[0]?.alt}
+            style={{
+              border: "0.1px solid black",
+              borderRadius: "5px",
+              width: "100%",
+              maxWidth: "50px",
+              height: "50px",
+            }}
+            onClick={(e) => e.stopPropagation()} // Prevent event propagation
+          />
+        </IndexTable.Cell>
+        <IndexTable.Cell>
+          <span style={{ fontWeight: "bold" }}>{title}</span>
+        </IndexTable.Cell>
+        <IndexTable.Cell>{status}</IndexTable.Cell>
+        <IndexTable.Cell>
+          <TextField
+            placeholder="Enter HSN"
+            value={HSN}
+            onChange={(value) => handleHSNChange(id, value)}
+            autoComplete="off"
+            onClick={(e) => e.stopPropagation()} // Prevent event propagation
+          />
+        </IndexTable.Cell>
+        <IndexTable.Cell>
+          <TextField
+            placeholder="Enter GST"
+            value={GST}
+            onChange={(value) => handleGSTChange(id, value)}
+            autoComplete="off"
+            onClick={(e) => e.stopPropagation()} // Prevent event propagation
+          />
+        </IndexTable.Cell>
+      </IndexTable.Row>
+    );
+  });
 
   // const rowMarkup = paginatedProducts.map(
   //   ({ id, title, images, status, hsn, gst }, index) => (
@@ -640,7 +582,7 @@ export default function ProductIndexTable() {
 
       const responseData = await response.json();
       console.log("API Response:", responseData);
-      alert("Changes saved successfully!");
+      // alert("Changes saved successfully!");
       // Reset editable values to blank after successful save
 
       setIsSaving(false);
@@ -661,6 +603,8 @@ export default function ProductIndexTable() {
       // Clear selected items
       fetchProducts();
       setSelectedItems([]);
+      showToast(true);
+      setToastMessage("Products updated successfully.");
     } catch (error) {
       console.error("Error saving changes:", error);
       setIsSaving(false);
@@ -668,288 +612,287 @@ export default function ProductIndexTable() {
     }
   };
 
-  return (
-    // <Frame>
-    //   <div style={styles.container}>
-    //     <div style={styles.header}>
-    //       <strong style={{fontSize:"20px"}}>Products</strong>
-    //       <strong>Manage HSN & GST rates</strong>
+  const saveBulkChanges = async () => {
+    setIsSaving(true);
+    const updates = selectedItems.map((id) => ({
+      id,
+      HSN: bulkHSN,
+      GST: bulkGST,
+    }));
 
-    //       {/* <div style={styles.buttons}>
-    //         <Button>More actions</Button>
-    //         <Button primary>Bulk edit as CSV</Button>
-    //       </div> */}
-    //     </div>
-    //     <LegacyCard sectioned style={{ margin: "16px", maxWidth: "1600px" }}>
-    //       <div style={styles.filters}>
-    //         <div style={styles.searchField}>
-    //           <TextField
-    //             placeholder="Search products"
-    //             value={searchTerm}
-    //             onChange={(value) => setSearchTerm(value)}
-    //             autoComplete="off"
-    //           />
-    //           <Button onClick={handleSearch}>Search</Button>
-    //         </div>
-    //         <div style={styles.searchField}>
-    //           <TextField
-    //             placeholder="Search by tag"
-    //             value={tagSearchTerm}
-    //             onChange={(value) => setTagSearchTerm(value)}
-    //             autoComplete="off"
-    //           />
-    //           <Button onClick={handleTagSearch}>Find</Button>
-    //         </div>
-    //         {selectedTag && <Tag onRemove={handleRemoveTag}>{selectedTag}</Tag>}
-    //         <div style={styles.badgeContainer}>
-    //           <Badge status="info" style={styles.badge}>
-    //             Total: {filteredByTab.length}
-    //           </Badge>
-    //           <Badge status="success" style={styles.badge}>
-    //             Active:{" "}
-    //             {
-    //               filteredByTab.filter(
-    //                 (product) => product.status.toLowerCase() === "active"
-    //               ).length
-    //             }
-    //           </Badge>
-    //           <Badge status="warning" style={styles.badge}>
-    //             Draft:{" "}
-    //             {
-    //               filteredByTab.filter(
-    //                 (product) => product.status.toLowerCase() === "draft"
-    //               ).length
-    //             }
-    //           </Badge>
-    //         </div>
-    //       </div>
-    //       <div style={styles.syncButtonContainer}>
-    //         {/* Save Changes Button */}
-    //         <Button
-    //           primary
-    //           onClick={() => {
-    //             if (selectedItems.length === 0) {
-    //               alert("Please select a product to save changes");
-    //               return;
-    //             } else {
-    //               saveChanges();
-    //             }
-    //           }}
-    //           disabled={isSaving}
-    //         >
-    //           {isSaving ? "Saving..." : "Save Changes"}
-    //         </Button>
-    //         <Button primary onClick={syncProducts}>
-    //           Sync Products
-    //         </Button>
-    //       </div>
-    //       {isLoading ? (
-    //         <SkeletonPage>
-    //           <SkeletonBodyText lines={4} />
-    //         </SkeletonPage>
-    //       ) : (
-    //         <div style={styles.tableContainer}>
-    //           <Tabs
-    //             tabs={[
-    //               { id: "all", content: "All", panelID: "all-products" },
-    //               {
-    //                 id: "active",
-    //                 content: "Active",
-    //                 panelID: "active-products",
-    //               },
-    //               { id: "draft", content: "Draft", panelID: "draft-products" },
-    //               {
-    //                 id: "archived",
-    //                 content: "Archived",
-    //                 panelID: "archived-products",
-    //               },
-    //             ]}
-    //             selected={activeTab}
-    //             onSelect={(index) => {
-    //               setActiveTab(index);
-    //               setCurrentPage(1);
-    //             }}
-    //           >
-    //             <IndexTable
-    //               resourceName={{ singular: "product", plural: "products" }}
-    //               itemCount={filteredByTab.length}
-    //               headings={[
-    //                 { title: "Product Image" },
-    //                 { title: "Product Title" },
-    //                 { title: "Status" },
-    //                 { title: "HSN" },
-    //                 { title: "GST" },
-    //               ]}
-    //               selectedItems={selectedItems}
-    //               selectedItemsCount={
-    //                  selectedItems.length
-    //               }
-    //               onSelectionChange={handleSelectAll}
-    //               bulkActions={[
-    //                 {
-    //                   content: isAllSelected ? "Deselect All" : "Select All",
-    //                   onAction: handleSelectAll,
-    //                 },
-    //               ]}
-    //             >
-    //               {rowMarkup}
-    //             </IndexTable>
-    //             <div style={styles.pagination}>
-    //               <Pagination
-    //                 hasPrevious={currentPage > 1}
-    //                 onPrevious={() =>
-    //                   setCurrentPage((prev) => Math.max(prev - 1, 1))
-    //                 }
-    //                 hasNext={currentPage * itemsPerPage < filteredByTab.length}
-    //                 onNext={() => setCurrentPage((prev) => prev + 1)}
-    //               />
-    //             </div>
-    //           </Tabs>
-    //         </div>
-    //       )}
-    //     </LegacyCard>
-    //   </div>
-    //   {showToast && (
-    //     <Toast
-    //       content="Product Sync completed!"
-    //       onDismiss={() => setShowToast(false)}
-    //     />
-    //   )}
-    // </Frame>
+    try {
+      const response = await fetch("/api/products/update", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          storeDomain,
+          email,
+          products: updates,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorDetails = await response.json();
+        console.error("API Error:", errorDetails);
+        setIsSaving(false);
+        alert(`Failed to save changes: ${errorDetails.message}`);
+        return;
+      }
+
+      // alert("Changes saved successfully!");
+      setShowModal(false);
+      setSelectedItems([]);
+      fetchProducts();
+      showToast(true);
+      setToastMessage("Products updated successfully.");
+    } catch (error) {
+      console.error("Error saving changes:", error);
+      // alert("An error occurred while saving changes.");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  return (
     <Frame>
-  <div style={styles.container}>
-    <div style={styles.header}>
-      <strong style={{ fontSize: "20px" }}>Products</strong>
-      <strong>Manage HSN & GST rates</strong>
-    </div>
-    <LegacyCard sectioned style={{ margin: "16px", maxWidth: "1600px" }}>
-      <div style={styles.filters}>
-        <div style={styles.searchField}>
-          <TextField
-            placeholder="Search products"
-            value={searchTerm}
-            onChange={(value) => setSearchTerm(value)}
-            autoComplete="off"
-          />
-          <Button onClick={handleSearch}>Search</Button>
-        </div>
-        <div style={styles.searchField}>
-          <TextField
-            placeholder="Search by tag"
-            value={tagSearchTerm}
-            onChange={(value) => setTagSearchTerm(value)}
-            autoComplete="off"
-          />
-          <Button onClick={handleTagSearch}>Find</Button>
-        </div>
-        {selectedTag && <Tag onRemove={handleRemoveTag}>{selectedTag}</Tag>}
-        <div style={styles.badgeContainer}>
-          <Badge status="info" style={styles.badge}>
-            Total: {filteredByTab.length}
-          </Badge>
-          <Badge status="success" style={styles.badge}>
-            Active:{" "}
-            {
-              filteredByTab.filter(
-                (product) => product.status.toLowerCase() === "active"
-              ).length
-            }
-          </Badge>
-          <Badge status="warning" style={styles.badge}>
-            Draft:{" "}
-            {
-              filteredByTab.filter(
-                (product) => product.status.toLowerCase() === "draft"
-              ).length
-            }
-          </Badge>
-        </div>
-      </div>
-      <div style={styles.syncButtonContainer}>
-        <Button
-          primary
-          onClick={() => {
-            if (selectedItems.length === 0) {
-              alert("Please select a product to save changes");
-              return;
-            } else {
-              saveChanges();
-            }
+      <div
+        style={{
+          maxWidth: "100%",
+          margin: "0 auto",
+          padding: "16px",
+        }}
+      >
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            textAlign: "center",
+            gap: "6px",
+            marginBottom: "16px",
           }}
-          disabled={isSaving}
         >
-          {isSaving ? "Saving..." : "Save Changes"}
-        </Button>
-        <Button primary onClick={syncProducts}>
-          Sync Products
-        </Button>
-      </div>
-      {products ? (
-        <SkeletonPage>
-          <SkeletonBodyText lines={4} />
-        </SkeletonPage>
-      ) : (
-        <div style={styles.tableContainer}>
-          <Tabs
-            tabs={[
-              { id: "all", content: "All", panelID: "all-products" },
-              { id: "active", content: "Active", panelID: "active-products" },
-              { id: "draft", content: "Draft", panelID: "draft-products" },
-              { id: "archived", content: "Archived", panelID: "archived-products" },
-            ]}
-            selected={activeTab}
-            onSelect={(index) => {
-              setActiveTab(index);
-              setCurrentPage(1);
+          <strong style={{ fontSize: "20px" }}>Products</strong>
+          <strong>Manage HSN & GST rates</strong>
+
+          <div
+            style={{
+              display: "flex",
+              gap: "16px",
+              flexWrap: "wrap",
+              justifyContent: "space-evenly",
+              alignItems: "center",
             }}
           >
-            
-            <IndexTable
-              resourceName={{ singular: "product", plural: "products" }}
-              itemCount={filteredByTab.length}
-              headings={[
-                { title: "Product Image" },
-                { title: "Product Title" },
-                { title: "Status" },
-                { title: "HSN" },
-                { title: "GST" },
-              ]}
-              selectedItemsCount={selectedItems.length}
-              onSelectionChange={handleSelectAll}
-              bulkActions={[
-                {
-                  content: isAllSelected ? "Deselect All" : "Select All",
-                  onAction: handleSelectAll,
-                },
-              ]}
-              emptyState={
-                <div style={{ textAlign: "center", padding: "20px" }}>
-                  {/* <p style={{ fontSize: "16px", color: "#5c5f62" }}>
-                    No products available. Please sync your products or adjust your filters.
-                  </p>
-                  <Button primary onClick={syncProducts}>
-                    Sync Products
-                  </Button> */}
-                </div>
-              }
-            >
-              {rowMarkup}
-            </IndexTable>
-            <div style={styles.pagination}>
-              <Pagination
-                hasPrevious={currentPage > 1}
-                onPrevious={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-                hasNext={currentPage * itemsPerPage < filteredByTab.length}
-                onNext={() => setCurrentPage((prev) => prev + 1)}
-              />
-            </div>
-          </Tabs>
+            <Badge status="info" style={{ margin: "4px" }}>
+              Total: {filteredByTab.length}
+            </Badge>
+            <Badge status="success" style={{ margin: "4px" }}>
+              Active: {filteredByTab.filter((product) => product.status.toLowerCase() === "active").length}
+            </Badge>
+            <Badge status="warning" style={{ margin: "4px" }}>
+              Draft: {filteredByTab.filter((product) => product.status.toLowerCase() === "draft").length}
+            </Badge>
+          </div>
         </div>
-      )}
-    </LegacyCard>
+        <LegacyCard sectioned style={{ margin: "16px", maxWidth: "1600px" }}>
+        <div
+  style={{
+    display: "grid",
+    gridTemplateColumns: "3fr 3fr 3fr", // Three columns layout: 3 parts search fields, 1 part buttons
+    gap: "6px", // Space between columns
+    marginBottom: "26px",
+    alignItems: "center",
+    width: "100%",
+  }}
+>
+  {/* Search Products Field */}
+  <div
+    style={{
+      display: "flex",
+      gap: "8px", // Space between TextField and Button
+      width: "100%",
+    }}
+  >
+    <TextField
+      placeholder="Search products"
+      value={searchTerm}
+      onChange={(value) => setSearchTerm(value)}
+      autoComplete="off"
+      style={{ width: "100%" }}
+    />
+    <Button primary onClick={handleSearch}>
+      Search
+    </Button>
   </div>
-  {showToast && <Toast content="Product Sync completed!" onDismiss={() => setShowToast(false)} />}
-</Frame>
 
+  {/* Search by Tag Field */}
+  <div
+    style={{
+      display: "flex",
+      gap: "8px",
+      width: "100%",
+    }}
+  >
+    <TextField
+      placeholder="Search by tag"
+      value={tagSearchTerm}
+      onChange={(value) => setTagSearchTerm(value)}
+      autoComplete="off"
+      style={{ width: "100%" }}
+    />
+    <Button primary onClick={handleTagSearch}>
+      Find
+    </Button>
+  </div>
+
+  {/* Buttons aligned right */}
+  <div
+    style={{
+      display: "flex",
+      justifyContent: "flex-end", // Align buttons to the right
+      gap: "8px",
+    }}
+  >
+    <Button
+      primary
+      onClick={() => {
+        if (selectedItems.length === 0) {
+          alert("Please select a product to save changes");
+          return;
+        } else {
+          saveChanges();
+        }
+      }}
+      disabled={isSaving}
+    >
+      {isSaving ? "Saving..." : "Save Changes"}
+    </Button>
+    <Button primary onClick={syncProducts}>
+      Sync Products
+    </Button>
+  </div>
+</div>
+
+
+          {/* Tag Display */}
+{selectedTag && (
+  <div
+    style={{
+      marginTop: "16px",
+      display: "flex",
+      justifyContent: "flex-start", // Align to the left
+    }}
+  >
+    <Tag onRemove={handleRemoveTag}>{selectedTag}</Tag>
+  </div>
+)}
+
+
+          
+
+          {isLoading ? (
+            <SkeletonPage>
+              <SkeletonBodyText lines={4} />
+            </SkeletonPage>
+          ) : (
+            <div
+              style={{
+                overflowX: "auto",
+              }}
+            >
+              <Tabs
+                tabs={[
+                  { id: "all", content: "All", panelID: "all-products" },
+                  { id: "active", content: "Active", panelID: "active-products" },
+                  { id: "draft", content: "Draft", panelID: "draft-products" },
+                  { id: "archived", content: "Archived", panelID: "archived-products" },
+                ]}
+                selected={activeTab}
+                onSelect={(index) => {
+                  setActiveTab(index);
+                  setCurrentPage(1);
+                }}
+              >
+                <IndexTable
+                  resourceName={{ singular: "product", plural: "products" }}
+                  itemCount={filteredByTab.length}
+                  headings={[
+                    { title: "Product Image" },
+                    { title: "Product Title" },
+                    { title: "Status" },
+                    { title: "HSN" },
+                    { title: "GST" },
+                  ]}
+                  selectedItems={selectedItems}
+                  selectedItemsCount={selectedItems.length}
+                  onSelectionChange={handleSelectAll}
+                  bulkActions={[
+                    {
+                      content: "Bulk Edit",
+                      onAction: () => setShowModal(true),
+                    },
+                  ]}
+                >
+                  {rowMarkup}
+                </IndexTable>
+                <div
+                  style={{
+                    marginTop: "16px",
+                    display: "flex",
+                    justifyContent: "center",
+                  }}
+                >
+                  <Pagination
+                    hasPrevious={currentPage > 1}
+                    onPrevious={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                    hasNext={currentPage * itemsPerPage < filteredByTab.length}
+                    onNext={() => setCurrentPage((prev) => prev + 1)}
+                  />
+                </div>
+              </Tabs>
+            </div>
+          )}
+        </LegacyCard>
+      </div>
+      <Modal
+        open={showModal}
+        onClose={() => setShowModal(false)}
+        title="Bulk Edit HSN & GST"
+        primaryAction={{
+          content: "Save",
+          onAction: saveBulkChanges,
+          loading: isSaving,
+        }}
+        secondaryActions={[
+          {
+            content: "Cancel",
+            onAction: () => setShowModal(false),
+          },
+        ]}
+      >
+        <Modal.Section>
+          <TextField
+            label="HSN"
+            placeholder="Enter HSN"
+            value={bulkHSN}
+            onChange={(value) => setBulkHSN(value)}
+            autoComplete="off"
+          />
+          <TextField
+            label="GST"
+            placeholder="Enter GST"
+            value={bulkGST}
+            onChange={(value) => setBulkGST(value)}
+            autoComplete="off"
+          />
+        </Modal.Section>
+      </Modal>
+      {showToast && 
+      <ToastNotification
+      message={toastMessage}
+      duration={3000} // Optional, can be customized
+    />}
+    </Frame>
   );
 }
