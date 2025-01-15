@@ -421,7 +421,8 @@ export function IndexTableEx({ value, shopdetails }) {
       }
 
       const data = await response.json();
-      //console.log("Fetched GST Values:", JSON.stringify(data.gstValues));
+      console.log("Fetched GST Values:", data.gstValues);
+
       setGSTHSNCodes(data.gstValues);
     } catch (error) {
       //console.error("Error fetching GST values:", error);

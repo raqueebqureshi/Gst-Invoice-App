@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback, use } from "react";
+import React, { useEffect, useState, useCallback, use,useReducer } from "react";
 import {
   Button,
   Icon,
@@ -29,11 +29,11 @@ import { InvoiceTemplate2 } from "../invoiceTemplates/invoice-template2";
 import { InvoiceTemplate3 } from "../invoiceTemplates/invoice-template3";
 
 export default function CustomizeTemplate() {
- 
   const navigate = useNavigate(); // Initialize useNavigate
-  const [selectedFont, setSelectedFont] = useState("Roboto");
+  const [selectedFont, setSelectedFont] = useState("Roboto, sans-serif");
   const [storeDomain, setStoreDomain] = useState(null);
-  const [email, setEmail] = useState(null);  
+  const [shopId, setshopId] = useState("");
+  const [email, setEmail] = useState(null);
   const location = useLocation();
   const { state } = location;
   const [shopDetails, setShopDetails] = useState([]);
@@ -51,139 +51,18 @@ export default function CustomizeTemplate() {
   const [showTotal, setShowTotal] = useState(false);
   const [showFooter, setShowFooter] = useState(false);
   const [loading, setLoading] = useState(true);
-
+  const [isSaving, setIsSaving] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
   
 
-  const [invoiceSettings, setInvoiceSettings] = useState({
-    branding: {
-      showLogo: false, // Taken from "showLogo"
-      primaryColor: "#000000", // Added field
-      fontFamily: "Arial", // Added field
-    },
-    // generalSettings: {
-    //   showBrandingAndStyle: false,
-    //   showOverview: false,
-    //   showSupplier: false,
-    //   showShipping: false,
-    //   showBilling: false,
-    //   showLineItems: false,
-    //   showAdditionalText: false,
-    //   showTotal: false,
-    //   showFooters: false,
-    //   showDropdown: false,
-    // },
-    headings: {
-      shippingHeading: "Ship To", // Taken from shipping.heading
-      billingHeading: "Bill To", // Taken from billing.heading
-      supplierHeading: "Supplier", // Taken from supplier.heading
-      documentTitle: "Tax Invoice", // Taken from overview.documentTitle
-    },
-    toggles: {
-      showBillingChecked: false, // Taken from billing.showBilling
-      showShippingChecked: false, // Taken from shipping.showShipping
-      showSupplierChecked: false, // Taken from supplier.showSupplier
-    },
-    // tableNote: "Eg. All prices will be calculated in INR",
-    overviewSettings: {
-      showOrderId: false, // overview.showOrderId
-      showInvoiceNumber: false, // overview.showInvoiceNumber
-      //   showOrderIdBarcode: false, // overview.showOrderIdBarcode
-      //   customizeInvoiceNumber: false, // overview.customizeInvoiceNumber
-      issueDate: false, // overview.issueDate
-      //   showTaxReverseText: false, // overview.showTaxReverseText
-      //   showTrackingCompany: false, // overview.showTrackingCompany
-      //   showTrackingNo: false, // overview.showTrackingNo
-      //   showTrackingBarcode: false, // overview.showTrackingBarcode
-      //   addNote: "", // overview.addNote
 
-      //   showQrCode: false, // Added
-      //   showDeliveryMethod: false, // overview.showDeliveryMethod
-    },
-    supplierSettings: {
-      showSupplier: true, // supplier.showSupplier
-
-      //   showHeading: false, // supplier.showHeading
-      showBusinessName: false, // supplier.showBusinessName
-      showAddress: false, // supplier.showAddress
-      //   showApartment: false, // supplier.showApartment
-      showCity: false, // supplier.showCity
-      //   showVATNumber: false, // supplier.showVATNumber
-      //   showRegisteredNumber: false, // supplier.showRegisteredNumber
-      showEmail: false, // supplier.showEmail
-      showPhone: false, // supplier.showPhone
-      showGst: false, // supplier.showGSTIN
-    },
-    shippingSettings: {
-      //   showShipping: true, // shipping.showShipping
-      showHeading: true, // shipping.showHeading
-      showFullName: true, // shipping.showFullName
-      showAddress1: true, // shipping.showAddress1
-      //   showAddress2: false, // shipping.showAddress2
-      //   showCompany: true, // shipping.showCompany
-      showCity: true, // shipping.showCity
-      showPinCode: true, // shipping.showZipPinCode
-      showState: true, // shipping.showState
-      showCountry: true, // shipping.showCountry
-      showEmail: true, // shipping.showEmail
-      showPhone: true, // shipping.showPhone
-      showGst: false, // shipping.showGSTIN
-    },
-    billingSettings: {
-      //   showBilling: true, // billing.showBilling
-      //   heading: "Bill To", // billing.heading
-      showHeading: true, // billing.showHeading
-      showFullName: true, // billing.showFullName
-      showAddress1: true, // billing.showAddress1
-      //   showAddress2: false, // billing.showAddress2
-      showCompany: true, // billing.showCompany
-      showCity: true, // billing.showCity
-      showPinCode: true, // billing.showZipPinCode
-      showState: true, // billing.showState
-      showCountry: true, // billing.showCountry
-      showEmail: true, // billing.showEmail
-      showPhone: true, // billing.showPhone
-      showGst: false, // billing.showGSTIN
-    },
-    lineItemsSettings: {
-      showTitle: true, // lineItems.showVariantTitle
-      showHsn: false, // lineItems.showHSN
-      //   showProductImage: false, // lineItems.showProductImage
-      //   showSKU: true, // lineItems.showSKU
-      showUnitRate: true, // lineItems.showUnitRate
-      showQuantity: true, // lineItems.showQuantity
-      //   showTotalDiscount: false, // lineItems.showTotalDiscount
-      //   showRateAsDiscountedPrice: false, // lineItems.showRateAsDiscountedPrice
-      showTaxAmount: true, // lineItems.showTaxAmount
-      showTotalPrice: true, // lineItems.showTotalPrice
-    },
-    totalSettings: {
-      showSubtotal: true, // total.showSubtotal
-      showDiscount: true, // total.showDiscount
-      //   showShipping: true, // total.showShipping
-      //   showShippingGstSplit: false, // total.showShippingGSTSplit
-      //   showRefunded: false, // total.showRefunded
-      showTax: true, // total.showTax
-      showTotal: true, // total.showTotal
-      showOutstanding: false, // total.showOutstanding
-    },
-    otherSettings: {
-      thankYouNote: "Thanks for your purchase", // footer.thankYouNote
-      note: "This is an electronically generated invoice, no signature is required", // footer.footerNote
-      socialLinks: {
-        Website: false,
-        Facebook: false,
-        Twitter: false,
-        Instagram: false,
-        Pinterest: false,
-        Youtube: false,
-      },
-    },
-  });
+  
 
   const [InvoiceSetting2, setInvoiceSetting2] = useState({
     branding: {
       showLogo: true,
+      showSignature: true,
       primaryColor: "#000000",
       fontFamily: "Roboto",
     },
@@ -280,8 +159,7 @@ export default function CustomizeTemplate() {
         showYoutube: false,
       },
       thankYouNote: "Thanks for your purchase",
-      footerNote:
-        "This is an electronically generated invoice, no signature is required",
+      footerNote: "This is an electronically generated invoice, no signature is required",
     },
   });
 
@@ -586,39 +464,41 @@ export default function CustomizeTemplate() {
   ];
 
   const demoGST = [
-    {"productId": "123456789", "productName": "bottle", "gst": "12", "hsn": "456789"},
-    {"productId": "234567890", "productName": "Gift Card", "gst": "12", "hsn": "8961257668837"},
-    {"productId": "345678901", "productName": "Gift Card (Copy)", "gst": "18", "hsn": "8961257668837"},
-    {"productId": "456789012", "productName": "lalal", "gst": "76", "hsn": "8961257668837"},
-    {"productId": "567890123", "productName": "lalal (Copy)", "gst": "56", "hsn": "8961257668837"},
-    {"productId": "678901234", "productName": "new products", "gst": "676", "hsn": "8961257668837"},
-    {"productId": "789012345", "productName": "Random", "gst": "76", "hsn": "8961257668837"},
-    {"productId": "890123456", "productName": "rq", "gst": "56", "hsn": "8961257668837"},
-    {"productId": "901234567", "productName": "Selling Plans Ski Wax (Copy)", "gst": "65", "hsn": "8961257668837"},
-    {"productId": "1012345678", "productName": "Selling Plans Ski Wax (Copy) (Copy)", "gst": "45", "hsn": "8961257668837"},
-    {"productId": "1123456789", "productName": "Selling Plans Ski Wax (Copy) (Copy) (Copy)", "gst": "8", "hsn": "78765"},
-    {"productId": "1223456789", "productName": "Selling Plans Ski Wax (Copy) (Copy) (Copy) (Copy)", "gst": "7", "hsn": "45678"},
-    {"productId": "1323456789", "productName": "The 3ajsdhfb", "gst": "6", "hsn": "9876"},
-    {"productId": "1423456789", "productName": "The 3p Fulfilled Snowboard", "gst": "5", "hsn": "9876"},
-    {"productId": "1523456789", "productName": "The 3p Fulfilled Snowboard (Copy)", "gst": "4", "hsn": "9876"},
-    {"productId": "1623456789", "productName": "The Archived Snowboard", "gst": "6", "hsn": "456"},
-    {"productId": "1723456789", "productName": "The Collection Snowboard: Hydrogen", "gst": "5", "hsn": "345678"},
-    {"productId": "1823456789", "productName": "The Collection Snowboard: Liquid", "gst": "8", "hsn": "6666666"},
-    {"productId": "1923456789", "productName": "The Collection Snowboard: Oxygen", "gst": "5", "hsn": "987654"},
-    {"productId": "2023456789", "productName": "The Compare at Price Snowboard", "gst": "8", "hsn": "65432"},
-    {"productId": "2123456789", "productName": "The Complete Snowboard", "gst": "8", "hsn": "5432"},
-    {"productId": "2223456789", "productName": "The Draft Snowboard", "gst": "5", "hsn": "876543"},
-    {"productId": "2323456789", "productName": "The Hidden Snowboard", "gst": "4", "hsn": "i765432"},
-    {"productId": "2423456789", "productName": "The Inventory Not Tracked Snowboard", "gst": "8", "hsn": "23456789"},
-    {"productId": "2523456789", "productName": "The Multi-location Snowboard", "gst": "4", "hsn": "345678"},
-    {"productId": "2623456789", "productName": "The Multi-managed Snowboard", "gst": "8", "hsn": "87878"},
-    {"productId": "2723456789", "productName": "The Out of Stock Snowboard", "gst": "8", "hsn": "565655"},
-    {"productId": "2823456789", "productName": "The Videographer Snowboard", "gst": "8", "hsn": "34343"},
-    {"productId": "2923456789", "productName": "very new", "gst": "8", "hsn": "878787"}
+    { productId: "123456789", productName: "bottle", gst: "12", hsn: "456789" },
+    { productId: "234567890", productName: "Gift Card", gst: "12", hsn: "8961257668837" },
+    { productId: "345678901", productName: "Gift Card (Copy)", gst: "18", hsn: "8961257668837" },
+    { productId: "456789012", productName: "lalal", gst: "76", hsn: "8961257668837" },
+    { productId: "567890123", productName: "lalal (Copy)", gst: "56", hsn: "8961257668837" },
+    { productId: "678901234", productName: "new products", gst: "676", hsn: "8961257668837" },
+    { productId: "789012345", productName: "Random", gst: "76", hsn: "8961257668837" },
+    { productId: "890123456", productName: "rq", gst: "56", hsn: "8961257668837" },
+    { productId: "901234567", productName: "Selling Plans Ski Wax (Copy)", gst: "65", hsn: "8961257668837" },
+    { productId: "1012345678", productName: "Selling Plans Ski Wax (Copy) (Copy)", gst: "45", hsn: "8961257668837" },
+    { productId: "1123456789", productName: "Selling Plans Ski Wax (Copy) (Copy) (Copy)", gst: "8", hsn: "78765" },
+    {
+      productId: "1223456789",
+      productName: "Selling Plans Ski Wax (Copy) (Copy) (Copy) (Copy)",
+      gst: "7",
+      hsn: "45678",
+    },
+    { productId: "1323456789", productName: "The 3ajsdhfb", gst: "6", hsn: "9876" },
+    { productId: "1423456789", productName: "The 3p Fulfilled Snowboard", gst: "5", hsn: "9876" },
+    { productId: "1523456789", productName: "The 3p Fulfilled Snowboard (Copy)", gst: "4", hsn: "9876" },
+    { productId: "1623456789", productName: "The Archived Snowboard", gst: "6", hsn: "456" },
+    { productId: "1723456789", productName: "The Collection Snowboard: Hydrogen", gst: "5", hsn: "345678" },
+    { productId: "1823456789", productName: "The Collection Snowboard: Liquid", gst: "8", hsn: "6666666" },
+    { productId: "1923456789", productName: "The Collection Snowboard: Oxygen", gst: "5", hsn: "987654" },
+    { productId: "2023456789", productName: "The Compare at Price Snowboard", gst: "8", hsn: "65432" },
+    { productId: "2123456789", productName: "The Complete Snowboard", gst: "8", hsn: "5432" },
+    { productId: "2223456789", productName: "The Draft Snowboard", gst: "5", hsn: "876543" },
+    { productId: "2323456789", productName: "The Hidden Snowboard", gst: "4", hsn: "i765432" },
+    { productId: "2423456789", productName: "The Inventory Not Tracked Snowboard", gst: "8", hsn: "23456789" },
+    { productId: "2523456789", productName: "The Multi-location Snowboard", gst: "4", hsn: "345678" },
+    { productId: "2623456789", productName: "The Multi-managed Snowboard", gst: "8", hsn: "87878" },
+    { productId: "2723456789", productName: "The Out of Stock Snowboard", gst: "8", hsn: "565655" },
+    { productId: "2823456789", productName: "The Videographer Snowboard", gst: "8", hsn: "34343" },
+    { productId: "2923456789", productName: "very new", gst: "8", hsn: "878787" },
   ];
-  
-  
-
 
   const styles = {
     header: {
@@ -657,7 +537,7 @@ export default function CustomizeTemplate() {
     alphaCardPreview: {
       borderRadius: "12px",
       padding: "20px",
-      
+      alignItems: "center",
       backgroundColor: "#ffffff",
     },
     sidebarTitle: {
@@ -689,20 +569,19 @@ export default function CustomizeTemplate() {
     },
 
     previewContainer: {
-      border: "1px solid #dcdcde",
-      borderRadius: "8px",
+      // border: "1px solid #dcdcde",
+      // borderRadius: "8px",
       overflow: "hidden",
-      display: "inline-flex",  // Changed to "inline-flex" for child-based sizing
+      display: "inline-flex", // Changed to "inline-flex" for child-based sizing
       justifyContent: "center",
       alignItems: "center",
-      
-      boxShadow: "0 1px 3px rgba(0, 0, 0, 0.1)",
-      backgroundColor: "#f9fafb",
+      // boxShadow: "0 1px 3px rgba(0, 0, 0, 0.1)",
+      // backgroundColor: "#f9fafb",
       width: "fit-content", // Automatically adjust width based on child content
       height: "fit-content", // Automatically adjust height based on child content
-      padding: "16px", // Optional: Add padding to maintain spacing around content
+      // padding: "px", // Optional: Add padding to maintain spacing around content
     },
-    
+
     button: {
       width: "120px",
       textAlign: "center",
@@ -801,15 +680,8 @@ export default function CustomizeTemplate() {
     },
   };
 
-  const updateInvoiceSetting = (section, key, value) => {
-    setInvoiceSettings((prevSettings) => ({
-      ...prevSettings,
-      [section]: {
-        ...prevSettings[section],
-        [key]: value, // Dynamically set key-value pair
-      },
-    }));
-  };
+  const useForceUpdate = () => useReducer(() => ({}), {})[1];
+  const forceUpdate = useForceUpdate();
 
   const updateInvoiceSetting2 = (section, key, value) => {
     setInvoiceSetting2((prevSettings) => ({
@@ -833,14 +705,13 @@ export default function CustomizeTemplate() {
       },
     }));
   };
-  
 
-  const handleSupplierCheckboxChange = (key) => {
-    setSupplierSettings((prev) => ({
-      ...prev,
-      [key]: !prev[key],
-    }));
-  };
+  // const handleSupplierCheckboxChange = (key) => {
+  //   setSupplierSettings((prev) => ({
+  //     ...prev,
+  //     [key]: !prev[key],
+  //   }));
+  // };
 
   // Fetch store details
   useEffect(() => {
@@ -859,56 +730,89 @@ export default function CustomizeTemplate() {
           }
           setStoreDomain(response.data.data[0].domain);
           setEmail(response.data.data[0].email);
+          setshopId(response.data.data[0].id);
         }
       })
-      .catch((error) =>  console.log(error));
+      .catch((error) => console.log(error));
   }, []);
 
-  const fetchInvoiceSettings = async () => {
-      // console.log("Sending request to fetch invoice settings");
+  useEffect(() => {
+    fetch(`/api/fetch-store-profile?shopId=${shopId}`, {
+      method: "GET",
+      headers: { "Content-Type": "application/json" },
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        if (data && data.profile) {
+         
+          console.log("Shop Profile Data",data.profile );
 
-      return fetch("/api/fetch-invoice-settings", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: email, storeDomain: storeDomain }), // Replace with actual data
+      //     const newCustomColor = data?.profile?.storeProfile?.brandColor || "#ff6600"; // Example custom color from API
+
+      //     console.log('newCustomColor', newCustomColor);  
+      // // Update the Custom color directly
+      // const customOption = colorOptions.find((option) => option.value === "Custom");
+      // console.log('customOption', customOption);  
+      // if (customOption) customOption.color = newCustomColor;
+      
+
+      // forceUpdate(); // Force re-render after updating color
+        }
       })
-        .then(async (response) => {
-          if (!response.ok) {
-            return response.text().then((errorText) => {
-              throw new Error(
-                errorText || `HTTP error! Status: ${response.status}`
-              );
-            });
+      .catch((error) => {
+        console.error("Error fetching store profile:", error);
+      });
+  }, [shopId]);
+
+  const fetchInvoiceSettings = async () => {
+    // console.log("Sending request to fetch invoice settings");
+
+    return fetch("/api/fetch-invoice-settings", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: email, storeDomain: storeDomain }), // Replace with actual data
+    })
+      .then(async (response) => {
+        if (!response.ok) {
+          return response.text().then((errorText) => {
+            throw new Error(errorText || `HTTP error! Status: ${response.status}`);
+          });
+        }
+        return response.json();
+      })
+      .then((data) => {
+        // setInvoiceSettings(data);
+        const settings = data;
+        console.log("Received response:", settings);
+        // console.log("Received response:", JSON.stringify(settings));
+        if (settings) {
+          setInvoiceSetting2((prevState) => ({
+            ...prevState,
+            ...settings,
+          }));
+
+          console.log('settings.branding.fontFamily', settings.branding.fontFamily);
+          const matchedFont = fontOptions.find(
+            (font) => font.fontFamily === settings.branding.fontFamily
+          );
+          if (matchedFont) {
+            setSelectedFont(matchedFont); // Set the label as selected font
+          } else {
+            setSelectedFont("Roboto, sans-serif"); // Default fallback
           }
-          return response.json();
-        })
-        .then((data) => {
-          // setInvoiceSettings(data);
-          const settings = data;
-          // console.log("Received response:", settings);
-          // // console.log("Received response:", JSON.stringify(settings));
-          if (settings) {
-            setInvoiceSetting2((prevState) => ({
-              ...prevState,
-              ...settings,
-            }));
-            setSelectedFont(settings.branding.fontFamily);
-            setLoading(false);
-          }
-        })
-        .catch((error) => {
-          console.error("Error fetching invoice settings:", error.message);
-        });
-    };
+          setLoading(false);
+        }
+      })
+      .catch((error) => {
+        console.error("Error fetching invoice settings:", error.message);
+      });
+  };
 
   useEffect(() => {
-    
-
     if (storeDomain && email) {
       fetchInvoiceSettings();
     }
   }, [storeDomain, email]);
-
 
   // const fetchGSTHSNValues = async () => {
   //   try {
@@ -957,6 +861,7 @@ export default function CustomizeTemplate() {
     //   updatedSettings: invoiceSettings,
     // });
     // const updatedSettings = invoiceSettings;
+    setIsSaving(true);
     return fetch("/api/update-invoice-settings", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
@@ -969,9 +874,7 @@ export default function CustomizeTemplate() {
       .then(async (response) => {
         if (!response.ok) {
           return response.text().then((errorText) => {
-            throw new Error(
-              errorText || `HTTP error! Status: ${response.status}`
-            );
+            throw new Error(errorText || `HTTP error! Status: ${response.status}`);
           });
         }
         return response.json();
@@ -984,9 +887,11 @@ export default function CustomizeTemplate() {
         if (storeDomain && email) {
           fetchInvoiceSettings();
         }
+        setIsSaving(false);
       })
       .catch((error) => {
         console.error("Error updating invoice settings:", error.message);
+        setIsSaving(false);
       });
   };
 
@@ -994,15 +899,30 @@ export default function CustomizeTemplate() {
     switch (currentTemplate) {
       case 1:
         return (
-          <InvoiceTemplate1 shopdetails={[shopdetails]} orders={[order]} invoiceSettings={InvoiceSetting2} GSTHSNCodes={{gstcodes}}/>
+          <InvoiceTemplate1
+            shopdetails={[shopdetails]}
+            orders={[order]}
+            invoiceSettings={InvoiceSetting2}
+            GSTHSNCodes={{ gstcodes }}
+          />
         );
       case 2:
         return (
-          <InvoiceTemplate2 shopdetails={[shopdetails]} orders={[order]} invoiceSettings={InvoiceSetting2} GSTHSNCodes={{gstcodes}}/>
+          <InvoiceTemplate2
+            shopdetails={[shopdetails]}
+            orders={[order]}
+            invoiceSettings={InvoiceSetting2}
+            GSTHSNCodes={{ gstcodes }}
+          />
         );
       case 3:
         return (
-          <InvoiceTemplate3 shopdetails={[shopdetails]} orders={[order]} invoiceSettings={InvoiceSetting2} GSTHSNCodes={{gstcodes}}/>
+          <InvoiceTemplate3
+            shopdetails={[shopdetails]}
+            orders={[order]}
+            invoiceSettings={InvoiceSetting2}
+            GSTHSNCodes={{ gstcodes }}
+          />
         );
       default:
         console.error("Invalid template ID:", currentTemplate);
@@ -1010,12 +930,15 @@ export default function CustomizeTemplate() {
     }
   };
 
+  
   const colorOptions = [
+    { label: "Gray", value: "Gray", color: "#535151" },
     { label: "Black", value: "Black", color: "#000000" },
     { label: "Purple", value: "Purple", color: "#800080" },
-    { label: "Light Green", value: "Light Green", color: "#90ee90" },
+    { label: "Dark Green", value: "Dark Green", color: "#006400" },
     { label: "Dark Blue", value: "Dark Blue", color: "#00008b" },
-    // { label: "Custom", value: "Custom", color: "#000000" },
+    { label: "Navy Blue", value: "Navy Blue", color: "#001f3f" },
+    // { label: "Custom", value: "Custom", color: "#0f0" },
   ];
 
   const menuItems = [
@@ -1062,8 +985,8 @@ export default function CustomizeTemplate() {
   const handleColorSelect = (value) => {
     updateInvoiceSetting2("branding", "primaryColor", value);
     // console.log(
-      // "invoiceSettings.branding.primaryColor",
-      // invoiceSettings.branding.primaryColor
+    // "invoiceSettings.branding.primaryColor",
+    // invoiceSettings.branding.primaryColor
     // );
     // setPrimaryColor(value);
   };
@@ -1072,18 +995,30 @@ export default function CustomizeTemplate() {
     {
       label: "Roboto",
       preview: "Almost before we knew it.",
-      fontFamily: "'Roboto', sans-serif", // Font family for Roboto
+      fontFamily: "Roboto, sans-serif", // Clean, modern sans-serif
     },
     {
       label: "Merriweather",
       preview: "Almost before we knew it.",
-      fontFamily: "'Merriweather', serif", // A formal, classic serif font
+      fontFamily: "Merriweather, serif", // Classic, formal serif font
     },
+
+    {
+      label: "Fira Code",
+      preview: "Almost before we knew it.",
+      fontFamily: "Fira Code, monospace", // Excellent for code-like styling
+    },
+    {
+      label: "Montserrat",
+      preview: "Almost before we knew it.",
+      fontFamily: "Montserrat, sans-serif", // Clean and modern styling
+    }
+    
   ];
 
   const handleFontSelect = (font) => {
-    setSelectedFont(font);
-    updateInvoiceSetting2("branding", "fontFamily", font);
+    setSelectedFont(font); // Set selected font label
+    updateInvoiceSetting2("branding", "fontFamily", font.fontFamily); // Update font in branding
     setShowDropdown(false);
   };
 
@@ -1138,8 +1073,8 @@ export default function CustomizeTemplate() {
               ]}
             />
           </Popover> */}
-          <Button primary onClick={() => updateInvoiceSettingAPI()}>
-            Save Template
+          <Button primary onClick={() => updateInvoiceSettingAPI()} disabled={isSaving}>
+            {isSaving ? "Saving..." : "Save Template"}
           </Button>
         </div>
       </div>
@@ -1182,19 +1117,16 @@ export default function CustomizeTemplate() {
                       <div
                         key={font.label}
                         style={{
-                          ...styles.dropdownItem,
-                          ...(selectedFont === font.label
-                            ? styles.dropdownItemSelected
-                            : {}),
+                          fontFamily: font.fontFamily,
+                          backgroundColor: selectedFont === font ? "#ddd" : "#fff",
+                          padding: "8px 12px",
+                          // border: "1px solid #ccc",
+                          marginBottom: "5px",
+                          cursor: "pointer",
                         }}
-                        onMouseEnter={(e) =>
-                          (e.currentTarget.style.backgroundColor = "#f6f6f7")
-                        }
-                        onMouseLeave={(e) =>
-                          (e.currentTarget.style.backgroundColor =
-                            "transparent")
-                        }
-                        onClick={() => handleFontSelect(font.label)}
+                        onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#f6f6f7")}
+                        onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
+                        onClick={() => handleFontSelect(font)}
                       >
                         <div>
                           <strong>{font.label}</strong>
@@ -1214,13 +1146,19 @@ export default function CustomizeTemplate() {
                   </div>
                 )}
                 <div>
-                  <Checkbox
-                    label="Show logo"
-                    checked={InvoiceSetting2.branding.showLogo} // Bind the state to the checkbox
-                    onChange={(newChecked) =>
-                      updateInvoiceSetting2("branding", "showLogo", newChecked)
-                    } // Update state on change
-                  />
+                <div style={{ display: "flex", flexDirection: "column", justifyContent: "space-between",  gap: "10px"}}>
+  <Checkbox
+    label="Show logo"
+    checked={InvoiceSetting2.branding.showLogo} // Bind the state to the checkbox
+    onChange={(newChecked) => updateInvoiceSetting2("branding", "showLogo", newChecked)} // Update state on change
+  />
+  <Checkbox
+    label="Show Signature"
+    checked={InvoiceSetting2.branding.showSignature} // Bind the state to the checkbox
+    onChange={(newChecked) => updateInvoiceSetting2("branding", "showSignature", newChecked)} // Update state on change
+  />
+</div>
+
                   {/* <p style={{ margin: "10px 0", fontWeight: "bold" }}>
                     Logo size
                   </p>
@@ -1232,9 +1170,7 @@ export default function CustomizeTemplate() {
                   />
                   <p style={{ marginTop: "10px" }}>{logoSize}px</p> */}
 
-                  <p style={{ margin: "10px 0", fontWeight: "bold" }}>
-                    Primary color
-                  </p>
+                  <p style={{ margin: "10px 0", fontWeight: "bold" }}>Primary color</p>
                   <hr />
                   <div>
                     {colorOptions.map((option) => (
@@ -1242,10 +1178,7 @@ export default function CustomizeTemplate() {
                         key={option.value}
                         style={{
                           ...styles.colorOption,
-                          ...(InvoiceSetting2.branding.primaryColor ===
-                          option.color
-                            ? styles.colorOptionSelected
-                            : {}),
+                          ...(InvoiceSetting2.branding.primaryColor === option.color ? styles.colorOptionSelected : {}),
                         }}
                         onClick={() => handleColorSelect(option.color)}
                       >
@@ -1264,11 +1197,8 @@ export default function CustomizeTemplate() {
                   <hr />
                   <p style={{ margin: "10px 0" }}>Font Family</p>
                   <div style={styles.dropdownContainer}>
-                    <div
-                      style={styles.dropdownButton}
-                      onClick={() => setShowDropdown((prev) => !prev)}
-                    >
-                      {selectedFont}
+                    <div style={styles.dropdownButton} onClick={() => setShowDropdown((prev) => !prev)}>
+                      {selectedFont.label}
                       <span>▼</span>
                     </div>
 
@@ -1341,24 +1271,14 @@ export default function CustomizeTemplate() {
                             key={key}
                             label={key.replace(/([A-Z])/g, " $1").toLowerCase()}
                             checked={InvoiceSetting2.overview[key]}
-                            onChange={() =>
-                              updateInvoiceSetting2(
-                                "overview",
-                                key,
-                                !InvoiceSetting2.overview[key]
-                              )
-                            }
+                            onChange={() => updateInvoiceSetting2("overview", key, !InvoiceSetting2.overview[key])}
                           />
                         ) : (
                           <TextField
                             key={key}
                             value={InvoiceSetting2.overview[key]}
-                            onChange={(value) =>
-                              updateInvoiceSetting2("overview", key, value)
-                            }
-                            placeholder={`Enter ${key
-                              .replace(/([A-Z])/g, " $1")
-                              .toLowerCase()}`}
+                            onChange={(value) => updateInvoiceSetting2("overview", key, value)}
+                            placeholder={`Enter ${key.replace(/([A-Z])/g, " $1").toLowerCase()}`}
                           />
                         )
                       )}
@@ -1391,7 +1311,6 @@ export default function CustomizeTemplate() {
                   <span>Supplier</span>
                 </div>
                 <div>
-                  
                   <div
                     style={{
                       marginTop: "10px",
@@ -1409,7 +1328,6 @@ export default function CustomizeTemplate() {
                             "showRegisteredNumber",
                             "showVATNumber",
                             "supplier",
-                            
                           ].includes(key)
                       ) // Filter out unwanted fields
                       .map((key) =>
@@ -1418,9 +1336,7 @@ export default function CustomizeTemplate() {
                             key={key}
                             label={key.replace(/([A-Z])/g, " $1").toLowerCase()}
                             checked={InvoiceSetting2.supplier[key]}
-                            onChange={() =>
-                              updateInvoiceSetting2("supplier", key, !InvoiceSetting2.supplier[key])
-                            }
+                            onChange={() => updateInvoiceSetting2("supplier", key, !InvoiceSetting2.supplier[key])}
                           />
                         ) : (
                           <>
@@ -1472,41 +1388,25 @@ export default function CustomizeTemplate() {
                     }}
                   >
                     {Object.keys(InvoiceSetting2.shipping)
-                      .filter(
-                        (key) =>
-                          ![
-                            "showAddress2",
-                          ].includes(key)
-                      ) // Filter out unwanted fields
+                      .filter((key) => !["showAddress2", "showGSTIN"].includes(key)) // Filter out unwanted fields
                       .map((key) =>
                         typeof InvoiceSetting2.shipping[key] === "boolean" ? (
                           <Checkbox
                             key={key}
                             label={key.replace(/([A-Z])/g, " $1").toLowerCase()}
                             checked={InvoiceSetting2.shipping[key]}
-                            onChange={() =>
-                              updateInvoiceSetting2(
-                                "shipping",
-                                key,
-                                !InvoiceSetting2.shipping[key]
-                              )
-                            }
+                            onChange={() => updateInvoiceSetting2("shipping", key, !InvoiceSetting2.shipping[key])}
                           />
                         ) : (
                           <>
-                          <strong style={{ marginBottom: "0px" }}>Heading</strong>
-                          <TextField
-                            key={key}
-                            value={InvoiceSetting2.shipping[key]}
-                            onChange={(value) =>
-                              updateInvoiceSetting2("shipping", key, value)
-                            }
-                            placeholder={`Enter ${key
-                              .replace(/([A-Z])/g, " $1")
-                              .toLowerCase()}`}
-                          />
+                            <strong style={{ marginBottom: "0px" }}>Heading</strong>
+                            <TextField
+                              key={key}
+                              value={InvoiceSetting2.shipping[key]}
+                              onChange={(value) => updateInvoiceSetting2("shipping", key, value)}
+                              placeholder={`Enter ${key.replace(/([A-Z])/g, " $1").toLowerCase()}`}
+                            />
                           </>
-                          
                         )
                       )}
                   </div>
@@ -1538,7 +1438,6 @@ export default function CustomizeTemplate() {
                   <span>Billing</span>
                 </div>
                 <div>
-                  
                   <div
                     style={{
                       marginTop: "20px",
@@ -1548,42 +1447,25 @@ export default function CustomizeTemplate() {
                     }}
                   >
                     {Object.keys(InvoiceSetting2.billing)
-                      .filter(
-                        (key) =>
-                          ![
-                            "showAddress2",
-                            
-                          ].includes(key)
-                      ) // Filter out unwanted fields
+                      .filter((key) => !["showAddress2", "showGSTIN"].includes(key)) // Filter out unwanted fields
                       .map((key) =>
                         typeof InvoiceSetting2.billing[key] === "boolean" ? (
                           <Checkbox
                             key={key}
                             label={key.replace(/([A-Z])/g, " $1").toLowerCase()}
                             checked={InvoiceSetting2.billing[key]}
-                            onChange={() =>
-                              updateInvoiceSetting2(
-                                "billing",
-                                key,
-                                !InvoiceSetting2.billing[key]
-                              )
-                            }
+                            onChange={() => updateInvoiceSetting2("billing", key, !InvoiceSetting2.billing[key])}
                           />
                         ) : (
                           <>
-                          <strong style={{ marginBottom: "0px" }}>Heading</strong>
-                          <TextField
-                            key={key}
-                            value={InvoiceSetting2.billing[key]}
-                            onChange={(value) =>
-                              updateInvoiceSetting2("billing", key, value)
-                            }
-                            placeholder={`Enter ${key
-                              .replace(/([A-Z])/g, " $1")
-                              .toLowerCase()}`}
-                          />
+                            <strong style={{ marginBottom: "0px" }}>Heading</strong>
+                            <TextField
+                              key={key}
+                              value={InvoiceSetting2.billing[key]}
+                              onChange={(value) => updateInvoiceSetting2("billing", key, value)}
+                              placeholder={`Enter ${key.replace(/([A-Z])/g, " $1").toLowerCase()}`}
+                            />
                           </>
-                          
                         )
                       )}
                   </div>
@@ -1606,18 +1488,12 @@ export default function CustomizeTemplate() {
                       setShowLineItems(false);
                     }}
                   >
-                    <Icon
-                      source={ArrowLeftIcon}
-                      color="base"
-                      style={{ width: "16px", height: "16px" }}
-                    />
+                    <Icon source={ArrowLeftIcon} color="base" style={{ width: "16px", height: "16px" }} />
                   </div>
                   <span>Line items</span>
                 </div>
                 <div>
-                  <p style={{ marginBottom: "10px", fontWeight: "bold" }}>
-                    General
-                  </p>
+                  <p style={{ marginBottom: "10px", fontWeight: "bold" }}>General</p>
                   <div
                     style={{
                       marginTop: "10px",
@@ -1629,14 +1505,9 @@ export default function CustomizeTemplate() {
                     {Object.keys(InvoiceSetting2.lineItems)
                       .filter(
                         (key) =>
-                          ![
-                            "showProductImage",
-                            "showRateAsDiscountedPrice",
-                            "showSKU",
-                            "showTotalDiscount",
-
-                            
-                          ].includes(key)
+                          !["showProductImage", "showRateAsDiscountedPrice", "showSKU", "showTotalDiscount"].includes(
+                            key
+                          )
                       ) // Filter out unwanted fields
                       .map((key) =>
                         typeof InvoiceSetting2.lineItems[key] === "boolean" ? (
@@ -1644,36 +1515,24 @@ export default function CustomizeTemplate() {
                             key={key}
                             label={key.replace(/([A-Z])/g, " $1").toLowerCase()}
                             checked={InvoiceSetting2.lineItems[key]}
-                            onChange={() =>
-                              updateInvoiceSetting2(
-                                "lineItems",
-                                key,
-                                !InvoiceSetting2.lineItems[key]
-                              )
-                            }
+                            onChange={() => updateInvoiceSetting2("lineItems", key, !InvoiceSetting2.lineItems[key])}
                           />
                         ) : (
                           <>
-                          <strong style={{ marginBottom: "0px" }}>Heading</strong>
-                          <TextField
-                            key={key}
-                            value={InvoiceSetting2.lineItems[key]}
-                            onChange={(value) =>
-                              updateInvoiceSetting2("lineItems", key, value)
-                            }
-                            placeholder={`Enter ${key
-                              .replace(/([A-Z])/g, " $1")
-                              .toLowerCase()}`}
-                          />
+                            <strong style={{ marginBottom: "0px" }}>Heading</strong>
+                            <TextField
+                              key={key}
+                              value={InvoiceSetting2.lineItems[key]}
+                              onChange={(value) => updateInvoiceSetting2("lineItems", key, value)}
+                              placeholder={`Enter ${key.replace(/([A-Z])/g, " $1").toLowerCase()}`}
+                            />
                           </>
-                          
                         )
                       )}
                   </div>
                 </div>
               </div>
-            ) :
-            showTotal ? (
+            ) : showTotal ? (
               <div>
                 <div style={styles.sidebarTitle}>
                   <div
@@ -1690,11 +1549,7 @@ export default function CustomizeTemplate() {
                       setShowTotal(false);
                     }}
                   >
-                    <Icon
-                      source={ArrowLeftIcon}
-                      color="base"
-                      style={{ width: "16px", height: "16px" }}
-                    />
+                    <Icon source={ArrowLeftIcon} color="base" style={{ width: "16px", height: "16px" }} />
                   </div>
                   <span>Total</span>
                 </div>
@@ -1707,7 +1562,7 @@ export default function CustomizeTemplate() {
                       gap: "10px",
                     }}
                   >
-                   {Object.keys(InvoiceSetting2.total)
+                    {Object.keys(InvoiceSetting2.total)
                       .filter(
                         (key) =>
                           ![
@@ -1716,7 +1571,6 @@ export default function CustomizeTemplate() {
                             "showRefunded",
                             "showOutstanding",
                             "showDiscount",
-                            
                           ].includes(key)
                       ) // Filter out unwanted fields
                       .map((key) =>
@@ -1725,29 +1579,18 @@ export default function CustomizeTemplate() {
                             key={key}
                             label={key.replace(/([A-Z])/g, " $1").toLowerCase()}
                             checked={InvoiceSetting2.total[key]}
-                            onChange={() =>
-                              updateInvoiceSetting2(
-                                "total",
-                                key,
-                                !InvoiceSetting2.total[key]
-                              )
-                            }
+                            onChange={() => updateInvoiceSetting2("total", key, !InvoiceSetting2.total[key])}
                           />
                         ) : (
                           <>
-                          <strong style={{ marginBottom: "0px" }}>Heading</strong>
-                          <TextField
-                            key={key}
-                            value={InvoiceSetting2.total[key]}
-                            onChange={(value) =>
-                              updateInvoiceSetting2("total", key, value)
-                            }
-                            placeholder={`Enter ${key
-                              .replace(/([A-Z])/g, " $1")
-                              .toLowerCase()}`}
-                          />
+                            <strong style={{ marginBottom: "0px" }}>Heading</strong>
+                            <TextField
+                              key={key}
+                              value={InvoiceSetting2.total[key]}
+                              onChange={(value) => updateInvoiceSetting2("total", key, value)}
+                              placeholder={`Enter ${key.replace(/([A-Z])/g, " $1").toLowerCase()}`}
+                            />
                           </>
-                          
                         )
                       )}
                   </div>
@@ -1775,74 +1618,53 @@ export default function CustomizeTemplate() {
                     }}
                     onClick={() => setShowFooter(false)}
                   >
-                    <Icon
-                      source={ArrowLeftIcon}
-                      color="base"
-                      style={{ width: "16px", height: "16px" }}
-                    />
+                    <Icon source={ArrowLeftIcon} color="base" style={{ width: "16px", height: "16px" }} />
                   </div>
                   <span>Others</span>
                 </div>
                 <div>
                   <p style={{ marginBottom: "10px" }}>
                     To show signature, upload signature in{" "}
-                    <a
-                      href="/settings"
-                      style={{ color: "#0070f3", textDecoration: "underline" }}
-                    >
+                    <a href="/settings" style={{ color: "#0070f3", textDecoration: "underline" }}>
                       settings
                     </a>
                   </p>
 
                   <div>
-                  <div
-                    style={{
-                      marginTop: "20px",
-                      display: "flex",
-                      flexDirection: "column",
-                      gap: "10px",
-                    }}
-                  >
-                   {Object.keys(InvoiceSetting2.footer.socialNetworks)
-                      .filter(
-                        (key) =>
-                          ![
-                            "showWebsite"
-                            
-                          ].includes(key)
-                      ) // Filter out unwanted fields
-                      .map((key) =>
-                        typeof InvoiceSetting2.footer.socialNetworks[key] === "boolean" ? (
-                          <Checkbox
-                            key={key}
-                            label={key.replace(/([A-Z])/g, " $1").toLowerCase()}
-                            checked={InvoiceSetting2.footer.socialNetworks[key]}
-                            onChange={() =>
-                              updateSocialNetworkSetting(
-                                key,
-                                !InvoiceSetting2.footer.socialNetworks[key]
-                              )
-                            }
-                          />
-                        ) : (
-                          <>
-                          <strong style={{ marginBottom: "0px" }}>Heading</strong>
-                          <TextField
-                            key={key}
-                            value={InvoiceSetting2.footer.socialNetworks[key]}
-                            onChange={(value) =>
-                              updateSocialNetworkSetting(key, value)
-                            }
-                            placeholder={`Enter ${key
-                              .replace(/([A-Z])/g, " $1")
-                              .toLowerCase()}`}
-                          />
-                          </>
-                          
-                        )
-                      )}
-                  </div>
-                  {/* <p style={{ margin: "20px 0", fontWeight: "bold" }}>
+                    <div
+                      style={{
+                        marginTop: "20px",
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: "10px",
+                      }}
+                    >
+                      {Object.keys(InvoiceSetting2.footer.socialNetworks)
+                        .filter((key) => !["showWebsite"].includes(key)) // Filter out unwanted fields
+                        .map((key) =>
+                          typeof InvoiceSetting2.footer.socialNetworks[key] === "boolean" ? (
+                            <Checkbox
+                              key={key}
+                              label={key.replace(/([A-Z])/g, " $1").toLowerCase()}
+                              checked={InvoiceSetting2.footer.socialNetworks[key]}
+                              onChange={() =>
+                                updateSocialNetworkSetting(key, !InvoiceSetting2.footer.socialNetworks[key])
+                              }
+                            />
+                          ) : (
+                            <>
+                              <strong style={{ marginBottom: "0px" }}>Heading</strong>
+                              <TextField
+                                key={key}
+                                value={InvoiceSetting2.footer.socialNetworks[key]}
+                                onChange={(value) => updateSocialNetworkSetting(key, value)}
+                                placeholder={`Enter ${key.replace(/([A-Z])/g, " $1").toLowerCase()}`}
+                              />
+                            </>
+                          )
+                        )}
+                    </div>
+                    {/* <p style={{ margin: "20px 0", fontWeight: "bold" }}>
                     Table note
                   </p>
                   <TextField
@@ -1850,38 +1672,25 @@ export default function CustomizeTemplate() {
                     onChange={(value) => setTableNote(value)}
                     placeholder="Eg. All prices will be calculated in INR"
                   /> */}
-                </div>
+                  </div>
 
-                  <p style={{ marginTop: "20px", fontWeight: "bold" }}>
-                    Thank you note
-                  </p>
+                  <p style={{ marginTop: "20px", fontWeight: "bold" }}>Thank you note</p>
                   <TextField
                     multiline={4}
                     maxLength={1000}
                     value={InvoiceSetting2.footer.thankYouNote}
-                    onChange={(value) =>
-                      updateInvoiceSetting2(
-                        "footer",
-                        "thankYouNote",
-                        value
-                      )
-                    }
+                    onChange={(value) => updateInvoiceSetting2("footer", "thankYouNote", value)}
                     placeholder="Enter your thank you note"
                   />
 
-                  <p style={{ marginTop: "20px", fontWeight: "bold" }}>
-                    Customer note
-                  </p>
+                  <p style={{ marginTop: "20px", fontWeight: "bold" }}>Customer note</p>
                   <TextField
                     multiline={4}
                     maxLength={1000}
                     value={InvoiceSetting2.footer.footerNote}
-                    onChange={(value) =>
-                      updateInvoiceSetting2("footer", "footerNote", value)
-                    }
+                    onChange={(value) => updateInvoiceSetting2("footer", "footerNote", value)}
                     placeholder="Enter footer note"
                   />
-
                 </div>
               </div>
             ) : (
@@ -1892,12 +1701,8 @@ export default function CustomizeTemplate() {
                     <div
                       key={index}
                       style={styles.menuItem}
-                      onMouseEnter={(e) =>
-                        (e.currentTarget.style.backgroundColor = "#f1f3f5")
-                      }
-                      onMouseLeave={(e) =>
-                        (e.currentTarget.style.backgroundColor = "transparent")
-                      }
+                      onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#f1f3f5")}
+                      onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
                       onClick={item.onClick}
                     >
                       <div style={styles.menuText}>
@@ -1913,36 +1718,32 @@ export default function CustomizeTemplate() {
             )}
           </AlphaCard>
         </div>
-        
-        <AlphaCard style={styles.alphaCardPreview}>
-          <div style={styles.sidebarTitle}>Preview</div>
-          {loading ? (
-      <div style={{ display: 'flex', justifyContent: 'center', marginTop: '150px' }}>
-        <Spinner accessibilityLabel="Loading Spinner" size="large" />
-      </div>
-    ) : (
-          <div style={styles.previewContainer}>
-            {/* <span>Template preview</span> */}
-            <div
-              style={{
-                padding: "0px",
-                overflowY: "auto",
-                overflowX: "auto",
-                maxHeight: "100%",
-              }}
-            >
-              {(shopDetails.id && (
-                <>
-                
-                  {renderInvoiceTemplate(templateId, shopDetails, demoOrder[0], demoGST)}
-                </>
-              )) ||
-                "No template available"}
-            </div>
 
-          </div>
-          )}
-        </AlphaCard>
+        <div style={{ display: "flex", justifyContent: "center" }}>
+          <AlphaCard style={styles.alphaCardPreview}>
+            <div style={styles.sidebarTitle}>Preview</div>
+            {loading ? (
+              <div style={{ display: "flex", justifyContent: "center", marginTop: "150px" }}>
+                <Spinner accessibilityLabel="Loading Spinner" size="large" />
+              </div>
+            ) : (
+              <div style={styles.previewContainer}>
+                {/* <span>Template preview</span> */}
+                <div
+                  style={{
+                    padding: "0px",
+                    overflowY: "auto",
+                    overflowX: "auto",
+                    maxHeight: "100%",
+                  }}
+                >
+                  {(shopDetails.id && <>{renderInvoiceTemplate(templateId, shopDetails, demoOrder[0], demoGST)}</>) ||
+                    "No template available"}
+                </div>
+              </div>
+            )}
+          </AlphaCard>
+        </div>
       </div>
     </div>
   );
