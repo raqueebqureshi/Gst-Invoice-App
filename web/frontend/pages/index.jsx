@@ -10,7 +10,7 @@ import {
   Spinner,
 } from "@shopify/polaris";
 import { BannerEx } from "../components/Banner";
-import { IndexTableEx } from "../components/IndexTable.jsx";
+import { OrderTableEx } from "../components/IndexTable.jsx";
 import "@shopify/polaris/build/esm/styles.css";
 import "../styles.css";
 import { useEffect, useState } from "react";

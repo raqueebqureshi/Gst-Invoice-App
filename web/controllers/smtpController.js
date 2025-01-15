@@ -174,23 +174,34 @@ export const checkForStatus = async (req, res) => {
 };
 
 // Update SMTP configuration
+
 export const updateSMTPConfig = async (req, res) => {
   try {
     const { shopId, updatedSettings } = req.body;
+    console.log("updatedSettings", updatedSettings, "shopId", shopId);
 
     if (!shopId || !updatedSettings) {
       return res.status(400).json({ error: "Shop ID and updated settings are required." });
     }
 
-    const smtpConfig = await SMTPConfig.findOneAndUpdate(
-      { shopId },
-      { $set: updatedSettings },
-      { new: true }
-    );
-
-    if (!smtpConfig) {
+    // Find the existing SMTP configuration
+    const existingConfig = await SMTPConfig.findOne({ shopId });
+    if (!existingConfig) {
       return res.status(404).json({ error: "SMTP configuration not found for the given shop ID." });
     }
+
+    // Merge existing smtpData with updated settings
+    const mergedData = {
+      ...existingConfig.smtpData.toObject(), // Convert Mongoose object to plain object
+      ...updatedSettings,
+    };
+
+    // Update the database
+    const smtpConfig = await SMTPConfig.findOneAndUpdate(
+      { shopId },
+      { $set: { smtpData: mergedData } },
+      { new: true }
+    );
 
     res.status(200).json({
       message: "SMTP Configuration updated successfully.",
@@ -201,6 +212,7 @@ export const updateSMTPConfig = async (req, res) => {
     res.status(500).json({ error: "An error occurred while updating the SMTP configuration." });
   }
 };
+
 
 
 

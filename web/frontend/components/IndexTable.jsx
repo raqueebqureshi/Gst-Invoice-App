@@ -47,7 +47,7 @@ const filterOrders = (orders, query) => {
   });
 };
 
-export function IndexTableEx({ value, shopdetails }) {
+export function OrderTableEx({ value, shopdetails }) {
   //console.log("Shop Details:-----", shopdetails);
   const [sendingStatus, setSendingStatus] = useState({}); 
   const [isSending, setIsSending] = useState(false); 

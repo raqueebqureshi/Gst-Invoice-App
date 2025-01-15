@@ -2,7 +2,7 @@ import { Page } from "@shopify/polaris";
 
 import { useTranslation } from "react-i18next";
 
-import { IndexTableEx } from "../components/IndexTable.jsx";
+import { OrderTableEx } from "../components/IndexTable.jsx";
 import "@shopify/polaris/build/esm/styles.css";
 import { useEffect, useState } from 'react';
 
@@ -38,7 +38,7 @@ export default function Orders() {
   return (
     <Page fullWidth>
   
-      <IndexTableEx value={1} fullWidth shopdetails={shopDetails} />
+      <OrderTableEx value={1} fullWidth shopdetails={shopDetails} />
 
       
     </Page>

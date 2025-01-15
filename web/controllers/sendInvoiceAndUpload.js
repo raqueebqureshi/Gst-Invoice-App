@@ -1,7 +1,7 @@
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import nodemailer from "nodemailer";
 import multer from "multer";
-
+import SMTPConfig from "../Models/SMTPConfig.js";
 // Configure AWS S3
 const s3 = new S3Client({
   region: process.env.AWS_REGION,
@@ -116,7 +116,12 @@ export const sendInvoiceAndUpload = async (req, res) => {
     let smtpConfig = null;
 
     const shopSMTPConfig = await SMTPConfig.findOne({ shopId: shopDetails.id });
-    if (shopSMTPConfig && shopSMTPConfig.smtpData.sendByOwnEmail) {
+    console.log("shopSMTPConfig", shopSMTPConfig);
+    if(!shopSMTPConfig) {
+      return res.status(400).json({ error: "SMTP configuration not found." });
+    }
+
+    if (shopSMTPConfig.smtpData.sendByOwnEmail) {
       console.log("Using shop's own email settings");
 
       smtpConfig = {
