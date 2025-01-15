@@ -14,6 +14,35 @@ include_config_on_deploy = true
 [webhooks]
 api_version = "2024-10"
 
+  [[webhooks.subscriptions]]
+  topics = [ "orders/create" ]
+  delivery_method = "http"
+  uri = "/webhooks/app/orders-create"
+
+  [[webhooks.subscriptions]]
+  topics = [ "app/uninstalled" ]
+  delivery_method = "http"
+  uri = "/webhooks/app/uninstalled"
+
+  [[webhooks.subscriptions]]
+  topics = [ "customers/data_request" ]
+  delivery_method = "http"
+  uri = "/webhooks/customers/data_request"
+
+  [[webhooks.subscriptions]]
+  topics = [ "customers/redact" ]
+  delivery_method = "http"
+  uri = "/webhooks/customers/redact"
+
+  [[webhooks.subscriptions]]
+  topics = [ "shop/redact" ]
+  delivery_method = "http"
+  uri = "/webhooks/shop/redact"
+
+  [[webhooks.subscriptions]]
+  compliance_topics = [ "customers/data_request", "customers/redact", "shop/redact" ]
+  uri = "https://ceremony-consent-ideas-yo.trycloudflare.com/webhooks"
+
 [access_scopes]
 # Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
 scopes = "read_orders,read_products,write_orders,write_products"

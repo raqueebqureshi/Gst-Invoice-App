@@ -399,13 +399,13 @@ const EmailSetting = () => {
         console.error("Missing shopId:", shopId);
         throw new Error("Invalid shopId.");
       }
-
-      const response = await fetch("/api/smtp/save", {
-        method: "POST",
+let updatedSettings = smtpData
+      const response = await fetch("/api/smtp/update", {
+        method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           shopId,
-          smtpData,
+          updatedSettings,
         }),
       });
 

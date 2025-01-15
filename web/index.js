@@ -7,7 +7,7 @@ import shopify from "./shopify.js";
 import productCreator from "./product-creator.js";
 import PrivacyWebhookHandlers from "./privacy.js";  
 import nodemailer from 'nodemailer';
-import bodyPaser from 'body-parser';
+import bodyParser from "body-parser";
 import dotenv from 'dotenv';
 import crypto from 'crypto';
 import Store from './Models/storeModel.js';
@@ -15,6 +15,9 @@ import connectDB from './database/db.js';
 import routes from './routes/routes.js'; // Import the product routes
 import InvoiceTemplate from './Models/InvoiceTemplateModel.js';
 import StoreProfile from './Models/storeInfoModel.js';
+import { shopifyApi } from "@shopify/shopify-api";
+import { DeliveryMethod } from "@shopify/shopify-api";
+
 import SMTPConfig from "./Models/SMTPConfig.js";
 dotenv.config();
 
@@ -205,6 +208,7 @@ const hmacValidation = (req, res, next) => {
 
 //after installation
 // After app installation
+
 app.get(
   shopify.config.auth.callbackPath,
   shopify.auth.callback(),
@@ -288,22 +292,21 @@ app.get(
       }
 
 
-      
-      // let SMtPSettings = await SMTPConfig.findOne({ shopId });
+        // Check if the SMTP configuration exists
+        let smtpConfig = await SMTPConfig.findOne({ shopId });
 
-      // if (!SMtPSettings) {
-      //   // Create a new store profile
-      //   SMtPSettings = new SMTPConfig({
-      //     shopId
-      //     smtpData,
-      //     // Default values for the profile will come from the schema
-      //   });
+        if (!smtpConfig) {
+          // Create a default SMTP configuration
+          smtpConfig = new SMTPConfig({
+            shopId,
+            // Optionally set default values here if different from schema defaults
+          });
 
-      //   await SMTPConfig.save();
-      //   console.log("Store profile created for the store:", SMtPSettings);
-      // } else {
-      //   console.log("Store profile already exists:", SMtPSettings);
-      // }
+   await smtpConfig.save();
+   console.log("SMTP configuration created for the store:", smtpConfig);
+ } else {
+   console.log("SMTP configuration already exists:", smtpConfig);
+ }
 
 
 
@@ -354,9 +357,6 @@ app.put('/api/update-product-count', async (req, res) => {
     res.status(500).json({ message: "Failed to update product count" });
   }
 });
-
-
-
 
 
 
@@ -457,6 +457,9 @@ app.post('/api/send-email', (req, res) => {
 
 // webhooks for Compliance webhooks shopify 
 
+// Middleware for Shopify webhooks
+app.use("/api/webhooks", bodyParser.raw({ type: "application/json" }));
+
 // Customer Data Request Endpoint
 app.post('/api/webhooks/customers/data_request', hmacValidation, async (req, res) => {
   try {
@@ -554,6 +557,30 @@ app.post('/api/webhooks/shop/redact', hmacValidation,  async (req, res) => {
   }
 });
 
+// Webhook route for `app/uninstalled`
+app.post("/api/webhooks/app/uninstalled", async (req, res) => {
+  try {
+    const payload = JSON.parse(req.body.toString()); // Parse raw body
+    const { shop_domain } = payload;
+    console.log(`App uninstalled webhook received for shop: ${shop_domain}`);
+
+    // Cleanup logic: Delete store data
+    const storeData = await Store.findOneAndDelete({ storeDomain: shop_domain });
+
+    if (storeData) {
+      res.status(200).json({ message: "App uninstalled successfully" });
+      console.log(`Store data removed for domain: ${shop_domain}`);
+    } else {
+      res.status(404).json({ message: "Store not found" });
+    }
+  } catch (error) {
+    console.error("Error handling app uninstalled webhook:", error);
+    res.status(500).json({ message: "Failed to process app uninstalled webhook" });
+  }
+});
+
+
+
 const PORT = parseInt(
   process.env.BACKEND_PORT || process.env.PORT || "8081", 
   10
@@ -572,9 +599,56 @@ app.get(
   shopify.auth.callback(),
   shopify.redirectToShopifyOrAppRoot()
 );
+
+//configuring webhooks
 app.post(
   shopify.config.webhooks.path,
-  shopify.processWebhooks({ webhookHandlers: PrivacyWebhookHandlers })
+  shopify.processWebhooks({ webhookHandlers:  {
+    CUSTOMERS_DATA_REQUEST: {
+      deliveryMethod: DeliveryMethod.Http,
+      callbackUrl: "/api/webhooks",
+      callback: async (topic, shop, body, webhookId) => {
+        const payload = JSON.parse(body);
+        
+      },
+    },
+  
+    CUSTOMERS_REDACT: {
+      deliveryMethod: DeliveryMethod.Http,
+      callbackUrl: "/api/webhooks",
+      callback: async (topic, shop, body, webhookId) => {
+        const payload = JSON.parse(body);
+       
+      },
+    },
+  
+    SHOP_REDACT: {
+      deliveryMethod: DeliveryMethod.Http,
+      callbackUrl: "/api/webhooks",
+      callback: async (topic, shop, body, webhookId) => {
+        const payload = JSON.parse(body);
+      },
+    },
+    APP_UNINSTALLED: {
+      deliveryMethod: DeliveryMethod.Http,
+      callbackUrl: "/api/webhooks/",
+      callback: async (topic, shop, body) => {
+        const payload = JSON.parse(body);
+        console.log("App Uninstalled Payload:", payload);
+        // Add logic for cleanup (e.g., delete shop data)
+      },
+    },
+    PRODUCTS_UPDATE: {
+      deliveryMethod: DeliveryMethod.Http,
+      callbackUrl: "/api/webhooks/",
+      callback: async (topic, shop, body) => {
+        const payload = JSON.parse(body);
+        console.log("App Uninstalled Payload:", payload);
+        // Add logic for cleanup (e.g., delete shop data)
+      },
+    },
+  }
+   })
 );
 
 // If you are adding routes outside of the /api path, remember to
