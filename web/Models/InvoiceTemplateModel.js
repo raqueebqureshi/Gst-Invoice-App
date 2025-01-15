@@ -8,6 +8,7 @@ const InvoiceTemplateSchema = new mongoose.Schema({
     showLogo: { type: Boolean, default: false },
     primaryColor: { type: String, default: "#000000" },
     fontFamily: { type: String, default: "Roboto" },
+    showSignature: { type: Boolean, default: false },
   },
   overview: {
     documentTitle: { type: String, default: "Tax Invoice" },

@@ -1,7 +1,7 @@
 # Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
 
 client_id = "78fbc68547f4cc8682944642dc9284c8"
-application_url = "https://acute-ae-fatty-light.trycloudflare.com"
+application_url = "https://sword-ease-infrastructure-analyzed.trycloudflare.com"
 embedded = true
 name = "Indian GST App under dev"
 handle = "indian-gst-app-under-dev-1"
@@ -14,15 +14,44 @@ include_config_on_deploy = true
 [webhooks]
 api_version = "2024-10"
 
+  [[webhooks.subscriptions]]
+  topics = [ "orders/create" ]
+  delivery_method = "http"
+  uri = "/webhooks/app/orders-create"
+
+  [[webhooks.subscriptions]]
+  topics = [ "app/uninstalled" ]
+  delivery_method = "http"
+  uri = "/webhooks/app/uninstalled"
+
+  [[webhooks.subscriptions]]
+  topics = [ "customers/data_request" ]
+  delivery_method = "http"
+  uri = "/webhooks/customers/data_request"
+
+  [[webhooks.subscriptions]]
+  topics = [ "customers/redact" ]
+  delivery_method = "http"
+  uri = "/webhooks/customers/redact"
+
+  [[webhooks.subscriptions]]
+  topics = [ "shop/redact" ]
+  delivery_method = "http"
+  uri = "/webhooks/shop/redact"
+
+  [[webhooks.subscriptions]]
+  compliance_topics = [ "customers/data_request", "customers/redact", "shop/redact" ]
+  uri = "https://ceremony-consent-ideas-yo.trycloudflare.com/webhooks"
+
 [access_scopes]
 # Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
 scopes = "read_orders,read_products,write_orders,write_products"
 
 [auth]
 redirect_urls = [
-  "https://acute-ae-fatty-light.trycloudflare.com/auth/callback",
-  "https://acute-ae-fatty-light.trycloudflare.com/auth/shopify/callback",
-  "https://acute-ae-fatty-light.trycloudflare.com/api/auth/callback"
+  "https://sword-ease-infrastructure-analyzed.trycloudflare.com/auth/callback",
+  "https://sword-ease-infrastructure-analyzed.trycloudflare.com/auth/shopify/callback",
+  "https://sword-ease-infrastructure-analyzed.trycloudflare.com/api/auth/callback"
 ]
 
 [pos]
