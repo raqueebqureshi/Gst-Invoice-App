@@ -1743,7 +1743,7 @@ export function OrderTableEx({ value, shopdetails }) {
         )} */}
         {loading ? (
           <SkeletonPage primaryAction>
-            <SkeletonDisplayText size="large" />
+            {/* <SkeletonDisplayText size="large" /> */}
             <SkeletonBodyText lines={3} />
           </SkeletonPage>
         ) : (
