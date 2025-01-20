@@ -85,7 +85,7 @@ export default function Settings() {
     setLogoFile(URL.createObjectURL(acceptedFiles[0]));
     if (acceptedFiles[0]) {
       handleLogoUpload(acceptedFiles[0]);
-      console.log("acceptedFiles[0]", acceptedFiles[0]);
+      // console.log("acceptedFiles[0]", acceptedFiles[0]);
     }
   }, []);
 
@@ -93,7 +93,7 @@ export default function Settings() {
     setSignatureFile(URL.createObjectURL(acceptedFiles[0]));
     if (acceptedFiles[0]) {
       handleSignatureUpload(acceptedFiles[0]);
-      console.log("acceptedFiles[0]", acceptedFiles[0]);
+      // console.log("acceptedFiles[0]", acceptedFiles[0]);
     }
   }, []);
 
@@ -109,13 +109,13 @@ export default function Settings() {
       .then((response) => response.json())
       .then((data) => {
         const shopInfo = data?.data?.data?.[0];
-        console.log("Shop info:", shopInfo);
+        // console.log("Shop info:", shopInfo);
         setStoreDomain(shopInfo.domain || "");
         setEmail(shopInfo.email || "");
         setshopId(shopInfo.id || "");
-        console.log("Store domain:", storeDomain);
-        console.log("Email:", email);
-        console.log("ShopID:", shopId);
+        // console.log("Store domain:", storeDomain);
+        // console.log("Email:", email);
+        // console.log("ShopID:", shopId);
       })
       .catch((error) => console.log("Error fetching shop info:", error));
   }, []);
@@ -141,8 +141,8 @@ export default function Settings() {
           if (profileData.images.signatureURL !== "" && profileData.images.signatureURL !== null) {
             setSignatureUrl(profileData.images.signatureURL);
           }
-          console.log("Shop Profile Data", profileData);
-          console.log("Logo URL:", logoFile);
+          // console.log("Shop Profile Data", profileData);
+          // console.log("Logo URL:", logoFile);
         }
       })
       .catch((error) => {
@@ -151,9 +151,9 @@ export default function Settings() {
   }, [shopId]);
 
   useEffect(() => {
-    console.log("logoUrl:", logoUrl);
-    console.log("signatureUrl:", signatureUrl);
-    console.log("images", images);
+    // console.log("logoUrl:", logoUrl);
+    // console.log("signatureUrl:", signatureUrl);
+    // console.log("images", images);
   }, [logoUrl, signatureUrl]);
 
   useEffect(() => {
@@ -184,7 +184,7 @@ export default function Settings() {
 
       if (response.ok) {
         const responseData = await response.json();
-        console.log("Settings saved successfully:", responseData);
+        // console.log("Settings saved successfully:", responseData);
         setIsSaving(false);
       } else {
         const errorData = await response.json();
@@ -219,7 +219,7 @@ export default function Settings() {
       }
 
       const data = await response.json();
-      console.log("data", data);
+      // console.log("data", data);
       setUploadLogoStatus("Uploaded successful!");
       setImages((prevImages) => ({
         ...prevImages,
@@ -232,7 +232,7 @@ export default function Settings() {
   };
 
   const handleLogoDelete = async (shopId) => {
-    console.log("Deleting logo with URL:", shopId);
+    // console.log("Deleting logo with URL:", shopId);
     if (!logoUrl) {
       setUploadLogoStatus("No logo to delete.");
       return;
@@ -251,7 +251,7 @@ export default function Settings() {
       }
 
       const data = await response.json();
-      console.log(data);
+      // console.log(data);
       setUploadLogoStatus("Logo deleted successfully!");
       setLogoUrl(""); // Clear the image URL after deletion
       setImages({
@@ -285,7 +285,7 @@ export default function Settings() {
       }
 
       const data = await response.json();
-      console.log("data", data);
+      // console.log("data", data);
       setUploadSignatureStatus("Uploaded successful!");
       setImages((prevImages) => ({
         ...prevImages,
@@ -298,7 +298,7 @@ export default function Settings() {
   };
 
   const handleSignatureDelete = async (shopId) => {
-    console.log("Signature with URL:", shopId);
+    // console.log("Signature with URL:", shopId);
     if (!signatureUrl) {
       setUploadSignatureStatus("No Signature to delete.");
       return;
@@ -317,7 +317,7 @@ export default function Settings() {
       }
 
       const data = await response.json();
-      console.log(data);
+      // console.log(data);
       setUploadSignatureStatus("Signature deleted successfully!");
       setSignatureUrl(""); // Clear the image URL after deletion
       setImages({

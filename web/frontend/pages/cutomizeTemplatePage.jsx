@@ -745,7 +745,7 @@ export default function CustomizeTemplate() {
       .then((data) => {
         if (data && data.profile) {
          
-          console.log("Shop Profile Data",data.profile );
+          // console.log("Shop Profile Data",data.profile );
 
       //     const newCustomColor = data?.profile?.storeProfile?.brandColor || "#ff6600"; // Example custom color from API
 
@@ -882,7 +882,7 @@ export default function CustomizeTemplate() {
       .then((data) => {
         // setInvoiceSettings(data);
         const updateSettings = data;
-        console.log("Received updated response:", updateSettings);
+        // console.log("Received updated response:", updateSettings);
         // navigate(-1);
         if (storeDomain && email) {
           fetchInvoiceSettings();
@@ -1624,11 +1624,12 @@ export default function CustomizeTemplate() {
                 </div>
                 <div>
                   <p style={{ marginBottom: "10px" }}>
-                    To show signature, upload signature in{" "}
+                  To display your signature and update social media <strong>links</strong>, please visit the{" "}
                     <a href="/settings" style={{ color: "#0070f3", textDecoration: "underline" }}>
-                      settings
+                     Profile settings
                     </a>
                   </p>
+                  
 
                   <div>
                     <div

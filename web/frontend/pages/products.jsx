@@ -50,7 +50,7 @@ export default function ProductIndexTable() {
         headers: { "Content-Type": "application/json" },
       });
       const data = await response.json();
-      console.log("API Response:", data.data.data[0]); // Check the response structure
+      // console.log("API Response:", data.data.data[0]); // Check the response structure
       if (data?.data?.data?.length > 0) {
         const shopInfo = data.data.data[0];
         setStoreDomain(shopInfo.domain);
@@ -72,13 +72,13 @@ export default function ProductIndexTable() {
       const data = await response.json();
       if (data.data.length > 0) {
         const fetchedProducts = data.data;
-        console.log("fetchedProducts  :", fetchedProducts);
+        // console.log("fetchedProducts  :", fetchedProducts);
         const productsWithEditableFields = data.data.map((product) => ({
           ...product,
           editableHSN: product.HSN || "",
           editableGST: product.GST || "",
         }));
-        console.log("productsWithEditableFields:", productsWithEditableFields);
+        // console.log("productsWithEditableFields:", productsWithEditableFields);
         setProducts(productsWithEditableFields);
         setFilteredProducts(productsWithEditableFields);
         // setProducts(fetchedProducts);
@@ -97,9 +97,9 @@ export default function ProductIndexTable() {
         setDraftProductCount(draftCount);
         setShowToast(true);
         setToastMessage("Products fetched successfully.");
-        console.log("storeDomain && email:", storeDomain, email);
+        // console.log("storeDomain && email:", storeDomain, email);
         if (storeDomain && email) {
-          console.log("products--:", productsWithEditableFields);
+          // console.log("products--:", productsWithEditableFields);
           fetchGSTHSNValues(productsWithEditableFields); // Fetch GST HSN values
         }
       }
@@ -123,7 +123,7 @@ export default function ProductIndexTable() {
       const url = `/api/products/gsthsn?storeDomain=${encodeURIComponent(storeDomain)}&email=${encodeURIComponent(
         email
       )}`;
-      console.log("Fetching GST HSN Values with URL:", url);
+      // console.log("Fetching GST HSN Values with URL:", url);
 
       const response = await fetch(url);
 
@@ -132,7 +132,7 @@ export default function ProductIndexTable() {
       }
 
       const data = await response.json();
-      console.log("Fetched GST Values:", data.gstValues);
+      // console.log("Fetched GST Values:", data.gstValues);
 
       setGSTHSNCodes(data.gstValues);
 
@@ -144,8 +144,8 @@ export default function ProductIndexTable() {
   };
 
   const updateProductsWithGSTHSN = (gstValues, products) => {
-    console.log("gstValues:", gstValues);
-    console.log("products:", products);
+    // console.log("gstValues:", gstValues);
+    // console.log("products:", products);
     if (products.length !== 0) {
       const updatedProducts = products.map((product) => {
         const matchedGSTHSN = gstValues.find((items) => {
@@ -168,7 +168,7 @@ export default function ProductIndexTable() {
 
       setActiveProductCount(activeCount);
       setDraftProductCount(draftCount);
-      console.log("Updated Products with GST/HSN:", updatedProducts);
+      // console.log("Updated Products with GST/HSN:", updatedProducts);
       
     } else {
       updateProductsWithGSTHSN(gstValues);
@@ -213,10 +213,10 @@ export default function ProductIndexTable() {
         }),
       });
 
-      console.log("response.body:", response.body);
+      // console.log("response.body:", response.body);
 
       if (response.ok) {
-        console.log("Products saved successfully to the database.");
+        // console.log("Products saved successfully to the database.");
         setShowToast(true);
         setToastMessage("Products synced successfully.");
       } else {
@@ -346,9 +346,9 @@ export default function ProductIndexTable() {
       });
 
       setProducts(updatedProducts); // Update the products state
-      console.log(`HSN for ${id} changed to ${value}`);
-      console.log("editableValues:", updatedValues);
-      console.log("products:", updatedProducts);
+      // console.log(`HSN for ${id} changed to ${value}`);
+      // console.log("editableValues:", updatedValues);
+      // console.log("products:", updatedProducts);
 
       return updatedValues; // Return the updated editable values
     });
@@ -376,9 +376,9 @@ export default function ProductIndexTable() {
       });
 
       setProducts(updatedProducts); // Update the products state
-      console.log(`GST for ${id} changed to ${value}`);
-      console.log("editableValues:", updatedValues);
-      console.log("products:", updatedProducts);
+      // console.log(`GST for ${id} changed to ${value}`);
+      // console.log("editableValues:", updatedValues);
+      // console.log("products:", updatedProducts);
 
       return updatedValues; // Return the updated editable values
     });
@@ -535,18 +535,18 @@ export default function ProductIndexTable() {
     const updates = selectedItems.map((id) => {
       const product = products.find((product) => product.id === id);
 
-      console.log(
-        "id:",
-        product.id,
-        " HSN:",
-        product.editableHSN,
-        "GST:",
-        product.editableGST,
-        "storeDomain:",
-        storeDomain,
-        "email:",
-        email
-      );
+      // console.log(
+      //   "id:",
+      //   product.id,
+      //   " HSN:",
+      //   product.editableHSN,
+      //   "GST:",
+      //   product.editableGST,
+      //   "storeDomain:",
+      //   storeDomain,
+      //   "email:",
+      //   email
+      // );
 
       return {
         id: product.id,
@@ -603,7 +603,7 @@ export default function ProductIndexTable() {
       // Clear selected items
       fetchProducts();
       setSelectedItems([]);
-      showToast(true);
+      setShowToast(true);
       setToastMessage("Products updated successfully.");
     } catch (error) {
       console.error("Error saving changes:", error);
@@ -643,7 +643,7 @@ export default function ProductIndexTable() {
       setShowModal(false);
       setSelectedItems([]);
       fetchProducts();
-      showToast(true);
+      setShowToast(true);
       setToastMessage("Products updated successfully.");
     } catch (error) {
       console.error("Error saving changes:", error);

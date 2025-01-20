@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { MdOutlineFileDownload, MdPrint } from "react-icons/md";
 import { FaArrowAltCircleDown } from "react-icons/fa";
+import ReactDOMServer from "react-dom/server";
 import {
   Pagination,
   Button,
@@ -21,6 +22,10 @@ import {
   SkeletonDisplayText,
   SkeletonPage,
 } from "@shopify/polaris";
+import { VscSend } from "react-icons/vsc";
+
+
+
 import ReactDOM from "react-dom";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
@@ -43,6 +48,9 @@ const filterOrders = (orders, query) => {
 };
 
 export function OrderTableEx({ value, shopdetails }) {
+  //console.log("Shop Details:-----", shopdetails);
+  const [sendingStatus, setSendingStatus] = useState({}); 
+  const [isSending, setIsSending] = useState(false); 
   const [loading, setLoading] = useState(true);
   const [orders, setOrders] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
@@ -53,6 +61,9 @@ export function OrderTableEx({ value, shopdetails }) {
   const [email, setEmail] = useState(null);  
   const [GSTHSNCodes, setGSTHSNCodes] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
+  const [sendingRowId, setSendingRowId] = useState(null);
+  const [isEmailEnabled, setIsEmailEnabled] = useState(false);
+  const [shopId, setShopId] = useState(null);
   const itemsPerPage = 20;
   const [showToast, setShowToast] = useState({
     active: false,
@@ -176,9 +187,12 @@ export function OrderTableEx({ value, shopdetails }) {
     })
       .then((response) => response.json())
       .then((data) => {
+        //console.log("Store Details---!", data.data);
+        setShopId(data.data.data[0].id);
         if (data.data.data && data.data.data.length > 0) {
           setStoreDomain(data.data.data[0].domain);
           setEmail(data.data.data[0].email);
+          setShopId(data.data.data[0].id);
         }
       })
       .catch((error) => handleShowToast("Internal Server Error 500", true));
@@ -191,9 +205,11 @@ export function OrderTableEx({ value, shopdetails }) {
         .then((data) => {
           if (data.storeInvoiceTemplate) {
             setCurrentTemplateId(data.storeInvoiceTemplate);
+            //console.log("Current Template ID:", currentTemplateId);
           }
         })
-        .catch((error) => console.error("Error fetching template ID:", error));
+        .catch((error) =>
+           console.error("Error fetching template ID:", error));
     }
   }, [storeDomain]);
 
@@ -205,18 +221,161 @@ export function OrderTableEx({ value, shopdetails }) {
       .then((request) => request.json())
       .then((response) => {
         if (response.data) {
-          console.log('response.data',response.data);
+          //console.log('response.data',response.data);
           setOrders(response.data);
           setLoading(false);
           handleShowToast("Orders Synced Complete");
         }
       })
       .catch((error) => {
-        console.error(error);
+        //console.error(error);
         setLoading(false);
         handleShowToast("Internal Server Error 500", true);
       });
   }, []);
+
+  const handleSendClick = (index) => {
+    if (!sendingStatus[index]) {
+      setSendingStatus((prev) => ({ ...prev, [index]: true })); // Set this row to "sending"
+      quickSendInvoice({
+        orderDetails: paginatedOrders[index],
+        shopDetails: shopdetails,
+        invoiceSettings: InvoiceSetting2,
+        customerEmail: paginatedOrders[index].customer.email,
+        gstcodes: GSTHSNCodes,
+        currentTemplate: currentTemplateId,
+      })
+        .then(() => setSendingStatus((prev) => ({ ...prev, [index]: false }))) // Reset on success
+        .catch(() => setSendingStatus((prev) => ({ ...prev, [index]: false }))); // Reset on failure
+    }
+  };
+ 
+  const sendInvoiceToCustomer = async (orderDetails, shopDetails, invoiceSettings, customerEmail, gstcodes,currentTemplateId ) => {
+    try {
+      setIsSending(true);
+      // Fetch the generated PDF file as Blob
+      const pdfBlob = await generatePDFBlob(orderDetails, shopDetails, invoiceSettings, currentTemplateId, gstcodes);
+      
+      // Create a FormData object to include the Blob and additional data
+      const formData = new FormData();
+      formData.append("file", pdfBlob, `Invoice-${orderDetails.order_number}.pdf`);
+      formData.append("customerEmail", customerEmail);
+      formData.append("orderId", orderDetails.order_number);
+      formData.append("shopDetails", JSON.stringify(shopDetails));
+      
+      // console.log("formData",formData);
+      // Send request to the backend API
+      const response = await fetch("/api/send-invoice", {
+        method: "POST",
+        body: formData,
+      });
+      
+      if (response.ok) {
+
+        handleShowToast("Invoice sent successfully.");
+      } else {
+        const errorData = await response.json();
+        console.error("Error sending invoice:", errorData);
+        handleShowToast("Failed to send invoice.", true);
+      }
+    } catch (error) {
+      //console.error("Error in sending invoice:", error);
+      handleShowToast("An error occurred while sending the invoice.", true);
+    }
+  };
+
+  useEffect(() => {
+    fetch(`/api/smtp/get?shopId=${shopId}`, {
+      method: "GET",
+      headers: { "Content-Type": "application/json" },
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        if (data) {
+         
+          // console.log("Shop Profile Data",data );
+          if(data.smtpData.sendByOwnEmail || data.smtpData.sendByAppEmail){
+            setIsEmailEnabled(true);
+          } else{
+            setIsEmailEnabled(false);
+          }
+          
+        }
+      })
+      .catch((error) => {
+        console.error("Error fetching store profile:", error);
+      });
+  }, [shopId]);
+  
+  // Helper function to generate PDF as Blob
+  const generatePDFBlob = async (orderDetails, shopDetails, invoiceSettings, currentTemplateId, gstcodes) => {
+    const pdf = new jsPDF("p", "pt", "a4");
+  
+    // Create an invoice container dynamically
+    const invoiceContainer = document.createElement("div");
+    invoiceContainer.style.width = "794px";
+    invoiceContainer.style.height = "1123px";
+    invoiceContainer.style.position = "absolute";
+    invoiceContainer.style.top = "-9999px";
+    document.body.appendChild(invoiceContainer);
+  
+    //console.log(currentTemplateId, "currentTemplateId");
+    // Render the appropriate template into the container
+    switch (currentTemplateId) {
+      case "1":
+        ReactDOM.render(
+          <InvoiceTemplate1 shopdetails={[shopDetails]} orders={[orderDetails]} invoiceSettings={invoiceSettings} GSTHSNCodes={gstcodes}/>,
+          invoiceContainer
+        );
+        break;
+      case "2":
+        ReactDOM.render(
+          <InvoiceTemplate2 shopdetails={[shopDetails]} orders={[orderDetails]} invoiceSettings={invoiceSettings} GSTHSNCodes={gstcodes}/>,
+          invoiceContainer
+        );
+        break;
+      case "3":
+        ReactDOM.render(
+          <InvoiceTemplate3 shopdetails={[shopDetails]} orders={[orderDetails]} invoiceSettings={invoiceSettings} GSTHSNCodes={gstcodes}/>,
+          invoiceContainer
+        );
+        break;
+      default:
+        //console.error("Invalid template ID:", currentTemplateId);
+        throw new Error("Invalid template ID.");
+    }
+  
+    // Convert the rendered HTML to a canvas and generate a PDF Blob
+    const canvas = await html2canvas(invoiceContainer, {
+      scale: 2,
+      useCORS: true,
+    });
+    const imgData = canvas.toDataURL("image/jpeg");
+  
+    const pdfWidth = pdf.internal.pageSize.getWidth();
+    const imgWidth = pdfWidth - 20;
+    const imgHeight = (canvas.height * imgWidth) / canvas.width;
+  
+    pdf.addImage(imgData, "PNG", 10, 10, imgWidth, imgHeight);
+    document.body.removeChild(invoiceContainer);
+  
+    // Return PDF as Blob
+    return pdf.output("blob");
+  };
+  
+  const quickSendInvoice = async ({orderDetails, shopDetails, invoiceSettings, customerEmail, gstcodes, currentTemplate}) => {
+    //console.log("hhhhhhhhhhhhhhhhhhhhh",orderDetails, shopDetails, invoiceSettings, customerEmail, gstcodes, currentTemplate);
+    try {
+      await sendInvoiceToCustomer(orderDetails, shopDetails, invoiceSettings, customerEmail, gstcodes, currentTemplate);
+    } catch (error) {
+      //console.error("Error in Quick Send:", error);
+      handleShowToast("An error occurred while sending the invoice.", true);
+    }
+  };
+  
+  
+  
+  
 
   const togglePopoverActive = (orderId) => {
     setPopoverActive((prevState) => ({
@@ -226,7 +385,7 @@ export function OrderTableEx({ value, shopdetails }) {
   };
 
   const fetchInvoiceSettings = async () => {
-    console.log("Sending request to fetch invoice settings");
+    //console.log("Sending request to fetch invoice settings");
 
     return fetch("/api/fetch-invoice-settings", {
       method: "POST",
@@ -234,7 +393,7 @@ export function OrderTableEx({ value, shopdetails }) {
       body: JSON.stringify({ email: email, storeDomain: storeDomain }), // Replace with actual data
     })
       .then(async (response) => {
-        console.log('response',response);
+        //console.log('response',response);
         if (!response.ok) {
           return response.text().then((errorText) => {
             throw new Error(
@@ -247,8 +406,8 @@ export function OrderTableEx({ value, shopdetails }) {
       .then((data) => {
         // setInvoiceSettings(data);
         const settings = data;
-        console.log("Received response:", settings);
-        // // console.log("Received response:", JSON.stringify(settings));
+        //console.log("Received response:", settings);
+        // //console.log("Received response:", JSON.stringify(settings));
         if (settings) {
           setInvoiceSetting2((prevState) => ({
             ...prevState,
@@ -259,7 +418,7 @@ export function OrderTableEx({ value, shopdetails }) {
         }
       })
       .catch((error) => {
-        console.error("Error fetching invoice settings:", error.message);
+        //console.error("Error fetching invoice settings:", error.message);
       });
   };
 
@@ -276,7 +435,7 @@ export function OrderTableEx({ value, shopdetails }) {
       const url = `/api/products/gsthsn?storeDomain=${encodeURIComponent(
         storeDomain
       )}&email=${encodeURIComponent(email)}`;
-      console.log("Fetching GST HSN Values with URL:", url);
+      //console.log("Fetching GST HSN Values with URL:", url);
 
       const response = await fetch(url);
 
@@ -291,28 +450,28 @@ export function OrderTableEx({ value, shopdetails }) {
 
       setGSTHSNCodes(data.gstValues);
     } catch (error) {
-      console.error("Error fetching GST values:", error);
+      //console.error("Error fetching GST values:", error);
     }
   };
 
 useEffect(() => {
-  console.log('storeDomain && email',storeDomain, email);
+  //console.log('storeDomain && email',storeDomain, email);
   if (storeDomain && email) {
-    console.log('storeDomain && email',storeDomain, email);
+    //console.log('storeDomain && email',storeDomain, email);
       fetchInvoiceSettings();
       fetchGSTHSNValues() ; 
   }
 }, [storeDomain, email]);
 
 useEffect(() => {
-  console.log('GSTHSNCodes',GSTHSNCodes);
+  //console.log('GSTHSNCodes',GSTHSNCodes);
 }, [GSTHSNCodes]);
 
   const handlePdfDownload = useCallback(
     async (order, shopdetails, currentTemplate ,invoiceSettings, GSTHSNCodes) => {
       if (!order || !currentTemplate) return;
 
-      console.log(order, shopdetails, currentTemplate, "PDF download");
+      //console.log(order, shopdetails, currentTemplate, "PDF download");
       // Logic to generate and download PDF for the given order
       const pdf = new jsPDF("p", "pt", "a4");
       const invoiceContainer = document.createElement("div");
@@ -326,7 +485,7 @@ useEffect(() => {
         currentTemplate,
         shopdetails,
         order,
-        invoiceContainer
+        invoiceContainer, GSTHSNCodes
       ) => {
         switch (currentTemplate) {
           case "1":
@@ -348,11 +507,11 @@ useEffect(() => {
             );
             break;
           default:
-            console.error("Invalid template ID:", currentTemplate);
+            //console.error("Invalid template ID:", currentTemplate);
         }
       };
 
-      renderInvoiceTemplate(currentTemplate, shopdetails, order, invoiceContainer);
+      renderInvoiceTemplate(currentTemplate, shopdetails, order, invoiceContainer, GSTHSNCodes);
 
       const canvas = await html2canvas(invoiceContainer, {
         scale: 2,
@@ -372,69 +531,182 @@ useEffect(() => {
     []
   );
 
+  // const handlePrint = useCallback(
+  //   async (order, shopdetails, currentTemplate, invoiceSettings, GSTHSNCodes) => {
+  //     if (!order || !currentTemplate) return;
+
+  //     // Logic to print the given order
+  //     const invoiceContainer = document.createElement("div");
+  //     invoiceContainer.style.width = "794px";
+  //     invoiceContainer.style.height = "1123px";
+  //     invoiceContainer.style.position = "absolute";
+  //     invoiceContainer.style.top = "-9999px";
+  //     document.body.appendChild(invoiceContainer);
+
+  //     const renderInvoiceTemplate = (
+  //       currentTemplate,
+  //       shopdetails,
+  //       order,
+  //       invoiceContainer
+  //     ) => {
+  //       switch (currentTemplate) {
+  //         case "1":
+  //           ReactDOM.render(
+  //             <InvoiceTemplate1 shopdetails={[shopdetails]} orders={[order]} invoiceSettings={invoiceSettings} GSTHSNCodes={GSTHSNCodes}/>,
+  //             invoiceContainer
+  //           );
+  //           break;
+  //         case "2":
+  //           ReactDOM.render(
+  //             <InvoiceTemplate2 shopdetails={[shopdetails]} orders={[order]} invoiceSettings={invoiceSettings} GSTHSNCodes={GSTHSNCodes}/>,
+  //             invoiceContainer
+  //           );
+  //           break;
+  //         case "3":
+  //           ReactDOM.render(
+  //             <InvoiceTemplate3 shopdetails={[shopdetails]} orders={[order]} invoiceSettings={invoiceSettings} GSTHSNCodes={GSTHSNCodes}/>,
+  //             invoiceContainer
+  //           );
+  //           break;
+  //         default:
+  //           //console.error("Invalid template ID:", currentTemplate);
+  //       }
+  //     };
+
+  //     renderInvoiceTemplate(currentTemplate, shopdetails, order, invoiceContainer);
+
+  //     const printWindow = window.open("", "_blank");
+  //     printWindow.document.write(`
+  //     <html>
+  //       <head>
+  //         <title>Print Invoice</title>
+  //       </head>
+  //       <body>${invoiceContainer.innerHTML}</body>
+  //     </html>
+  //     `);
+  //     printWindow.document.close();
+  //     printWindow.onload = () => {
+  //       printWindow.print();
+  //       printWindow.close();
+  //     };
+
+  //     document.body.removeChild(invoiceContainer);
+  //   },
+  //   []
+  // );
+
+
+
   const handlePrint = useCallback(
     async (order, shopdetails, currentTemplate, invoiceSettings, GSTHSNCodes) => {
       if (!order || !currentTemplate) return;
-
-      // Logic to print the given order
-      const invoiceContainer = document.createElement("div");
-      invoiceContainer.style.width = "794px";
-      invoiceContainer.style.height = "1123px";
-      invoiceContainer.style.position = "absolute";
-      invoiceContainer.style.top = "-9999px";
-      document.body.appendChild(invoiceContainer);
-
-      const renderInvoiceTemplate = (
-        currentTemplate,
-        shopdetails,
-        order,
-        invoiceContainer
-      ) => {
+  
+      // Render the invoice component as an HTML string
+      const renderInvoiceTemplate = () => {
         switch (currentTemplate) {
           case "1":
-            ReactDOM.render(
-              <InvoiceTemplate1 shopdetails={[shopdetails]} orders={[order]} invoiceSettings={invoiceSettings} GSTHSNCodes={GSTHSNCodes}/>,
-              invoiceContainer
+            return ReactDOMServer.renderToString(
+              <InvoiceTemplate1
+                shopdetails={[shopdetails]}
+                orders={[order]}
+                invoiceSettings={invoiceSettings}
+                GSTHSNCodes={GSTHSNCodes}
+              />
             );
-            break;
           case "2":
-            ReactDOM.render(
-              <InvoiceTemplate2 shopdetails={[shopdetails]} orders={[order]} invoiceSettings={invoiceSettings} GSTHSNCodes={GSTHSNCodes}/>,
-              invoiceContainer
+            return ReactDOMServer.renderToString(
+              <InvoiceTemplate2
+                shopdetails={[shopdetails]}
+                orders={[order]}
+                invoiceSettings={invoiceSettings}
+                GSTHSNCodes={GSTHSNCodes}
+              />
             );
-            break;
           case "3":
-            ReactDOM.render(
-              <InvoiceTemplate3 shopdetails={[shopdetails]} orders={[order]} invoiceSettings={invoiceSettings} GSTHSNCodes={GSTHSNCodes}/>,
-              invoiceContainer
+            return ReactDOMServer.renderToString(
+              <InvoiceTemplate3
+                shopdetails={[shopdetails]}
+                orders={[order]}
+                invoiceSettings={invoiceSettings}
+                GSTHSNCodes={GSTHSNCodes}
+              />
             );
-            break;
           default:
             console.error("Invalid template ID:", currentTemplate);
+            return "";
         }
       };
-
-      renderInvoiceTemplate(currentTemplate, shopdetails, order, invoiceContainer);
-
-      const printWindow = window.open("", "_blank");
-      printWindow.document.write(`
-      <html>
-        <head>
-          <title>Print Invoice</title>
-        </head>
-        <body>${invoiceContainer.innerHTML}</body>
-      </html>
-      `);
-      printWindow.document.close();
-      printWindow.onload = () => {
-        printWindow.print();
-        printWindow.close();
-      };
-
-      document.body.removeChild(invoiceContainer);
+  
+      const invoiceContent = renderInvoiceTemplate();
+  
+      const printWindow = window.open("", "_blank", "width=794px,height=1123px");
+      if (printWindow) {
+        // Tailwind CSS and custom styles for printing
+        const tailwindStylesheet = `
+          <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" />
+        `;
+  
+        const customStyles = `
+          <style>
+            body, html {
+              margin: 0;
+              padding: 0;
+              font-family: Arial, sans-serif;
+             
+            }
+            @page {
+              size: 350mm 297mm; /* A4 size in mm */
+              margin: 0; /* No margins */
+            }
+            @media print {
+              body {
+                -webkit-print-color-adjust: exact;
+                overflow: hidden;
+              }
+            }
+            .invoice-container {
+              
+             
+          
+              
+              
+             
+            }
+          </style>
+        `;
+  
+        printWindow.document.open();
+        printWindow.document.write(`
+          <!DOCTYPE html>
+          <html lang="en">
+            <head>
+              <meta charset="UTF-8">
+              <meta name="viewport" content="width=device-width, initial-scale=1.0">
+              <title>Print Invoice</title>
+              ${tailwindStylesheet}
+              ${customStyles}
+            </head>
+            <body>
+              <div class="invoice-container">
+                ${invoiceContent}
+              </div>
+            </body>
+          </html>
+        `);
+        printWindow.document.close();
+  
+        printWindow.onload = () => {
+          printWindow.print();
+          printWindow.close();
+        };
+      } else {
+        console.error("Failed to open a new window for printing.");
+      }
     },
     []
   );
+  
+  
 
   const filteredOrders = filterOrders(orders, searchQuery);
   const paginatedOrders = filteredOrders.slice(
@@ -443,7 +715,7 @@ useEffect(() => {
   );
 
   const { selectedResources, allResourcesSelected, handleSelectionChange } =
-    useIndexResourceState(paginatedOrders);
+  useIndexResourceState(orders.map((order) => order.id));
 
   const rowMarkup = paginatedOrders.map(
     (
@@ -455,12 +727,12 @@ useEffect(() => {
         key={id}
         selected={selectedResources.includes(id)}
         position={index}
-        onClick={(event) => {
-          const clickedElement = event.target.closest(".btn-actions, .btn-popover");
-          if (clickedElement) {
-            event.stopPropagation();
-          }
-        }}
+        // onClick={(event) => {
+        //   const clickedElement = event.target.closest(".btn-actions, .btn-popover");
+        //   if (clickedElement) {
+        //     event.stopPropagation();
+        //   }
+        // }}
       >
         <IndexTable.Cell>
           {loading ? <SkeletonBodyText lines={1} /> : <Text variation="strong">{order_number}</Text>}
@@ -588,25 +860,86 @@ useEffect(() => {
               </div>
             </button>
             <div style={{ marginLeft: "20px" }}>
-              <Popover
-                active={popoverActive[id] || false}
-                activator={
-                  <Button
-                    plain
-                    icon={MenuHorizontalIcon}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      togglePopoverActive(id);
-                    }}
-                    className="btn-popover"
-                  />
-                }
-                onClose={() => togglePopoverActive(id)}
-              >
-                <ActionList
-                  items={[{ content: "Quick Send" }, { content: "View Invoice" }]}
-                />
-              </Popover>
+             
+              {/* <ActionList
+                    items={[
+                      {
+                        content: "Quick Send",
+                        onAction: () => {
+                          //console.log('shopDetails', shopdetails);
+                          quickSendInvoice(
+                            {
+                              orderDetails: paginatedOrders[index],
+                              shopDetails: shopdetails,
+                              invoiceSettings: InvoiceSetting2,
+                              customerEmail: paginatedOrders[index].customer.email,
+                              gstcodes: GSTHSNCodes,
+                              currentTemplate: currentTemplateId,
+                              
+                            }
+                          );
+                        },
+                      },
+                      { content: "View Invoice" },
+                    ]}
+                  /> */}
+                  <div
+                  key={index}
+      style={{
+        position: "relative",
+        display: "inline-flex",
+        alignItems: "center",
+        justifyContent: "center",
+      }}
+    >
+     { sendingRowId === id ? (
+        <Spinner accessibilityLabel="Sending invoice" size="small" />
+      ) : (
+        <VscSend
+          style={{
+            height: "25px",
+            width: "25px",
+            cursor: "pointer",
+            padding: "4px",
+            border: "1px solid black",
+            borderRadius: "6px",
+            boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)",
+            color: "black",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            transition: "all 0.3s ease",
+            backgroundColor: "white",
+            opacity: isSending ? "0.5" : "1",
+            pointerEvents: isSending ? "none" : "auto",
+          }}
+          disabled={isEmailEnabled ? false : true}
+          onClick={() => {
+            console.log('isEmailEnabled', isEmailEnabled);
+            if(isEmailEnabled){
+              if (!isSending) {
+                setSendingRowId(id);
+                setIsSending(true); 
+                quickSendInvoice({
+                  orderDetails: paginatedOrders[index],
+                  shopDetails: shopdetails,
+                  invoiceSettings: InvoiceSetting2,
+                  customerEmail: paginatedOrders[index].customer.email,
+                  gstcodes: GSTHSNCodes,
+                  currentTemplate: currentTemplateId,
+                })
+                  .then(() =>{ setIsSending(false); setSendingRowId(null);})
+                  .catch(() => {setIsSending(false); setSendingRowId(null);});
+              }
+            }else{
+              console.log('clicked');
+              handleShowToast("Please turn on email configuration.", true);
+            }
+            
+          }}
+        />
+      )}
+    </div>
             </div>
           </ButtonGroup>
         </IndexTable.Cell>
@@ -653,16 +986,18 @@ useEffect(() => {
               />
               <Button
                 primary
-                onClick={() =>
-                  handleBulkPrintDownload(
-                    orders.filter((order) =>
-                      selectedResources.includes(order.id)
-                    ),
-                    shopdetails,
-                    currentTemplateId
-                  )
+                disabled={false}
+                onClick={() =>{
+                  // handleBulkPrintDownload(
+                  //   orders.filter((order) =>
+                  //     selectedResources.includes(order.id)
+                  //   ),
+                  //   shopdetails,
+                  //   currentTemplateId
+                  // )
+                  }
                 }
-                disabled={selectedResources.length < 1 || selectedResources.length > 10}
+                // disabled={selectedResources.length < 1 || selectedResources.length > 10}
               >
                 <FaArrowAltCircleDown
                   style={{ height: "20px", width: "20px" }}
@@ -670,16 +1005,18 @@ useEffect(() => {
               </Button>
               <Button
                 primary
-                onClick={() =>
-                  handleBulkPrintDownload(
-                    orders.filter((order) =>
-                      selectedResources.includes(order.id)
-                    ),
-                    shopdetails,
-                    currentTemplateId
-                  )
+                disabled={false}
+                onClick={() =>{
+                  // handleBulkPrintDownload(
+                  //   orders.filter((order) =>
+                  //     selectedResources.includes(order.id)
+                  //   ),
+                  //   shopdetails,
+                  //   currentTemplateId
+                  // )
+                  }
                 }
-                disabled={selectedResources.length < 1 || selectedResources.length > 10}
+                // disabled={selectedResources.length < 1 || selectedResources.length > 10}
               >
                 <MdPrint style={{ height: "20px", width: "20px" }} />
               </Button>
@@ -687,17 +1024,10 @@ useEffect(() => {
 
             <AlphaCard>
               <IndexTable
-                resourceName={{ singular: "order", plural: "orders" }}
-                itemCount={paginatedOrders.length}
-                selectedItemsCount={
-                  allResourcesSelected ? "All" : selectedResources.length
-                }
-                onSelectionChange={(selectedItems) => {
-                  handleSelectionChange(selectedItems);
-                  if (selectedItems.length > 10) {
-                    handleShowToast("You can't print or download more than 10 orders in bulk", true);
-                  }
-                }}
+                 resourceName={{ singular: "order", plural: "orders" }}
+                 itemCount={filteredOrders.length}
+                 selectedItemsCount={allResourcesSelected ? "All" : selectedResources.length}
+                 onSelectionChange={handleSelectionChange}
                 headings={[
                   { title: "Order" },
                   { title: "Date" },
@@ -728,7 +1058,7 @@ useEffect(() => {
             </AlphaCard>
             <FooterHelp>
               Need Help{" "}
-              <Link url="" removeUnderline>
+              <Link to="/contact-us" removeUnderline>
                 please click here
               </Link>
             </FooterHelp>

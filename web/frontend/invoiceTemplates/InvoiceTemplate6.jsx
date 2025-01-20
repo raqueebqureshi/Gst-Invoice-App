@@ -3,9 +3,9 @@ import ReusableFunctions from "../ReusableFunctions";
 
 const CreativeInvoice = ({invoiceData, userData}) => {
 
-    console.log("invoiceData:",invoiceData);
-    console.log("userData:",userData);
-    console.log("customerData:",customerData);
+    // console.log("invoiceData:",invoiceData);
+    // console.log("userData:",userData);
+    // console.log("customerData:",customerData);
   
 
   const calculateTotal = () => {

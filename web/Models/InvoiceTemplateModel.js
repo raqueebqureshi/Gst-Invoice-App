@@ -7,7 +7,7 @@ const InvoiceTemplateSchema = new mongoose.Schema({
   branding: {
     showLogo: { type: Boolean, default: false },
     primaryColor: { type: String, default: "#000000" },
-    fontFamily: { type: String, default: "Roboto" },
+    fontFamily: { type: String, default: "Roboto, sans-serif" },
     showSignature: { type: Boolean, default: false },
   },
   overview: {

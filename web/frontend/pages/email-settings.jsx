@@ -26,6 +26,10 @@ import {
   EmailFollowUpIcon,
 } from "@shopify/polaris-icons";
 import { CustomPasswordInput } from "../components/CustomPasswordInput";
+import { set } from "mongoose";
+import ToastNotification from "../components/ToastNotification"; // Import the ToastNotification component
+import e from "cors";
+
 
 const EmailSetting = () => {
   const [isConnected, setIsConnected] = useState(true); // Mock connection status
@@ -45,6 +49,8 @@ const EmailSetting = () => {
   const [active, setActive] = useState(false);
   const [isEnabled, setIsEnabled] = useState(false);
   const [isEnabledByApp, setIsEnabledByApp] = useState(false);
+  const [showToast, setShowToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState("");
   const [sendEmailOnOrderPlaced, setsendEmailOnOrderPlaced] = useState();
 
   const [shopId, setShopId] = useState("");
@@ -61,6 +67,9 @@ const EmailSetting = () => {
     }else{
       updateToggleSetting(shopId, !isEnabled);
     }
+    if(isEnabledByApp){
+      updateToggleSettingbyApp(shopId, !isEnabledByApp);
+    }
   };
 
   const handleButtonByAppToggle = () => {
@@ -70,7 +79,17 @@ const EmailSetting = () => {
     }else{
       updateToggleSettingbyApp(shopId, !isEnabledByApp);
     }
+    if(isEnabled){
+      updateToggleSetting(shopId, !isEnabled);
+      setOpen(false);
+    }
   };
+
+  useEffect(() => {
+    setTimeout(() => {
+      setShowToast(false);
+    }, 3000);
+  }, [showToast]);
 
   const handleButtonSendAuto = () => {
     setsendEmailOnOrderPlaced((prev) => !prev);
@@ -91,11 +110,11 @@ const EmailSetting = () => {
   };
 
   const handleTestConfiguration = () => {
-    console.log("Testing SMTP Configuration...", emailSettings);
+    // console.log("Testing SMTP Configuration...", emailSettings);
   };
 
   const handleSave = () => {
-    console.log("Saving Email Settings...", emailSettings);
+    // console.log("Saving Email Settings...", emailSettings);
     if (!shopId) {
       console.error("Missing shopId:", shopId);
       throw new Error("Invalid shopId.");
@@ -211,13 +230,15 @@ const EmailSetting = () => {
     })
       .then((request) => request.json())
       .then((response) => {
-        console.log("Store Details---!", response.data);
+        // console.log("Store Details---!", response.data);
         if (response.data.data.length > 0) {
           console.log("Store Details---", response.data.data[0]);
           setShopId(response.data.data[0].id);
         }
       })
-      .catch((error) => console.log(error));
+      .catch((error) =>{
+        //  console.log(error)
+        });
   }, []);
 
   useEffect(() => {
@@ -228,13 +249,13 @@ const EmailSetting = () => {
   }, [shopId]);
 
   useEffect(() => {
-    console.log("emailSettings", emailSettings);
+    // console.log("emailSettings", emailSettings);
     
   }, [emailSettings]);
 
   const fetchSMTPConfiguration = async (shopId) => {
     try {
-      console.log("shopId:", shopId);
+      // console.log("shopId:", shopId);
 
       if (!shopId) {
         console.error("Missing shopId.");
@@ -251,11 +272,11 @@ const EmailSetting = () => {
       }
 
       const data = await response.json();
-      console.log("Fetched settings:", data.smtpData);
+      // console.log("Fetched settings:", data.smtpData);
       const smtpdata = data.smtpData;
 
       if (data) {
-        console.log("Fetched settings:", smtpdata);
+        // console.log("Fetched settings:", smtpdata);
         setEmailSettings({
           host: smtpdata.host || "",
           port: smtpdata.port || "",
@@ -274,7 +295,7 @@ const EmailSetting = () => {
 
   const fetchToggleSetting = async (shopId) => {
     try {
-      console.log("shopId:", shopId);
+      // console.log("shopId:", shopId);
 
       if (!shopId) {
         console.error("Missing shopId.");
@@ -291,7 +312,7 @@ const EmailSetting = () => {
       }
 
       const data = await response.json();
-      console.log("fetchToggleSetting:", data);
+      // console.log("fetchToggleSetting:", data);
      setIsEnabled(data.sendByOwnEmail);
      setIsEnabledByApp(data.sendByAppEmail);
      setsendEmailOnOrderPlaced(data.sendOnOrderPlaced);
@@ -302,8 +323,8 @@ const EmailSetting = () => {
 
   const updateToggleSetting = async (shopId, sendByOwnEmail) => {
     try {
-      console.log("shopId:", shopId);
-      console.log("sendByOwnEmail:", sendByOwnEmail);
+      // console.log("shopId:", shopId);
+      // console.log("sendByOwnEmail:", sendByOwnEmail);
       if (!shopId) {
         console.error("Missing shopId.");
         throw new Error("Invalid shopId.");
@@ -323,8 +344,14 @@ const EmailSetting = () => {
       }
 
       const data = await response.json();
-      console.log("fetchToggleSetting:", data);
+      // console.log("fetchToggleSetting:", data);
      setIsEnabled(data.updatedConfig.sendByOwnEmail);
+     setShowToast(true);
+     if(data.updatedConfig.sendByOwnEmail){
+      setToastMessage('Your email has been configured.');
+     }else{
+      setToastMessage('Your email has been disabled.');
+     }
      
     } catch (error) {
       console.error("Error while fetching settings:", error);
@@ -333,8 +360,8 @@ const EmailSetting = () => {
 
   const updateToggleSettingbyApp = async (shopId, sendByAppEmail) => {
     try {
-      console.log("shopId:", shopId);
-      console.log("sendByAppEmail:", sendByAppEmail);
+      // console.log("shopId:", shopId);
+      // console.log("sendByAppEmail:", sendByAppEmail);
       if (!shopId) {
         console.error("Missing shopId.");
         throw new Error("Invalid shopId.");
@@ -354,8 +381,15 @@ const EmailSetting = () => {
       }
 
       const data = await response.json();
-      console.log("fetchToggleSetting:", data);
+      // console.log("fetchToggleSetting:", data);
      setIsEnabledByApp(data.updatedConfig.sendByAppEmail);
+     setShowToast(true);
+     if(data.updatedConfig.sendByAppEmail){
+      setToastMessage('App email has been configured.');
+     }else{
+      setToastMessage('App email has been disabled.');
+     }
+     
     } catch (error) {
       console.error("Error while fetching settings:", error);
     }
@@ -363,8 +397,8 @@ const EmailSetting = () => {
 
   const updateToggleSettingonOrderPlaced = async (shopId, sendOnOrderPlaced) => {
     try {
-      console.log("shopId:", shopId);
-      console.log("sendOnOrderPlaced:", sendOnOrderPlaced);
+      // console.log("shopId:", shopId);
+      // console.log("sendOnOrderPlaced:", sendOnOrderPlaced);
       if (!shopId) {
         console.error("Missing shopId.");
         throw new Error("Invalid shopId.");
@@ -384,16 +418,24 @@ const EmailSetting = () => {
       }
 
       const data = await response.json();
-      console.log("fetchToggleSetting:", data);
+      // console.log("fetchToggleSetting:", data);
      setsendEmailOnOrderPlaced(data.updatedConfig.sendOnOrderPlaced);
+     setShowToast(true);
+     if(data.updatedConfig.sendOnOrderPlaced){
+      setToastMessage('On order email has been enabled.');
+     }
+     else{
+      setToastMessage('On order email has been disabled.');
+     }
+     
     } catch (error) {
       console.error("Error while fetching settings:", error);
     }
   };
 
   const saveSMTPConfiguration = async (shopId, smtpData) => {
-    console.log("shopId ", shopId);
-    console.log("smtpData ", smtpData);
+    // console.log("shopId ", shopId);
+    // console.log("smtpData ", smtpData);
     try {
       if (!shopId) {
         console.error("Missing shopId:", shopId);
@@ -414,7 +456,7 @@ let updatedSettings = smtpData
       }
 
       const data = await response.json();
-      console.log("Saved settings:", data);
+      // console.log("Saved settings:", data);
     } catch (error) {
       console.error("Error while save settings:", error);
     }
@@ -623,7 +665,9 @@ let updatedSettings = smtpData
                 <Badge status={sendEmailOnOrderPlaced ? "success" : "critical"}>
                   {sendEmailOnOrderPlaced ? "Enabled" : "Disabled"}
                 </Badge>
-                <div onClick={handleButtonSendAuto} style={styles.toggleWrapper}>
+                <div onClick={() =>
+                  {// handleButtonSendAuto}
+                }} style={styles.toggleWrapper} disabled>
                   <div
                     style={{
                       ...styles.toggleCircle,
@@ -638,6 +682,11 @@ let updatedSettings = smtpData
           </VerticalStack>
         </AlphaCard>
       </div>
+      {showToast && 
+      <ToastNotification
+      message={toastMessage}
+      duration={3000} // Optional, can be customized
+    />}
     </Page>
   );
 };

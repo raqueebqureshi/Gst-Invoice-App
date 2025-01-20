@@ -222,7 +222,7 @@ app.get(
       });
 
       const shopDetails = shopInfo.data[0]; // Handle array or object
-      console.log("Shop Details:", shopDetails);
+      // console.log("Shop Details:", shopDetails);
 
       const {
         id: shopId,
@@ -268,9 +268,9 @@ app.get(
         });
 
         await storeProfile.save();
-        console.log("Store profile created for the store:", storeProfile);
+        // console.log("Store profile created for the store:", storeProfile);
       } else {
-        console.log("Store profile already exists:", storeProfile);
+        // console.log("Store profile already exists:", storeProfile);
       }
 
       // Check if the invoice template exists
@@ -286,9 +286,9 @@ app.get(
         });
 
         await invoiceTemplate.save();
-        console.log("Invoice template created for the store:", invoiceTemplate);
+        // console.log("Invoice template created for the store:", invoiceTemplate);
       } else {
-        console.log("Invoice template already exists:", invoiceTemplate);
+        // console.log("Invoice template already exists:", invoiceTemplate);
       }
 
 
@@ -303,9 +303,9 @@ app.get(
           });
 
           await smtpConfig.save();
-          console.log("SMTP configuration created for the store:", smtpConfig);
+          // console.log("SMTP configuration created for the store:", smtpConfig);
         } else {
-          console.log("SMTP configuration already exists:", smtpConfig);
+          // console.log("SMTP configuration already exists:", smtpConfig);
         }
 
 
@@ -324,7 +324,7 @@ app.get(
 
 //to update product count into db
 app.put('/api/update-product-count', async (req, res) => {
-  console.log("Received request body:", req.body);
+  // console.log("Received request body:", req.body);
 
   const { storeDomain, productCount } = req.body || {};
 
@@ -363,7 +363,7 @@ app.put('/api/update-product-count', async (req, res) => {
 // Update invoice template API
 app.post('/api/update-invoice-template', async (req, res) => {
   const { storeDomain, invoiceTemplate } = req.body;
-  console.log("Received request body:", req.body);
+  // console.log("Received request body:", req.body);
 
   if (!storeDomain || !invoiceTemplate) {
     res.status(400).json({ message: 'Missing storeDomain or invoiceTemplate' });
@@ -379,7 +379,7 @@ app.post('/api/update-invoice-template', async (req, res) => {
     );
 
     if (updatedStore) {
-      console.log("Invoice template updated successfully:", updatedStore.storeInvoiceTemplate);
+      // console.log("Invoice template updated successfully:", updatedStore.storeInvoiceTemplate);
       res.status(200).json({
         message: "Invoice template updated successfully",
         storeInvoiceTemplate: updatedStore.storeInvoiceTemplate
@@ -398,7 +398,7 @@ app.post('/api/update-invoice-template', async (req, res) => {
 // Fetch invoice template ID based on storeDomain
 app.get('/api/get-invoice-template', async (req, res) => {
   const { storeDomain } = req.query;
-  console.log("Fetching invoice template for storeDomain:", storeDomain);
+  // console.log("Fetching invoice template for storeDomain:", storeDomain);
 
   if (!storeDomain) {
     res.status(400).json({ message: 'Missing storeDomain' });
@@ -409,7 +409,7 @@ app.get('/api/get-invoice-template', async (req, res) => {
     // Query the database to find the store by storeDomain and retrieve the template ID
     const store = await Store.findOne({ storeDomain }, 'storeInvoiceTemplate');
     if (store) {
-      console.log("Fetched invoice template:", store.storeInvoiceTemplate);
+      // console.log("Fetched invoice template:", store.storeInvoiceTemplate);
       res.status(200).json({ storeInvoiceTemplate: store.storeInvoiceTemplate });
     } else {
       res.status(404).json({ message: "Store not found" });
@@ -464,7 +464,7 @@ app.use("/api/webhooks", bodyParser.raw({ type: "application/json" }));
 app.post('/api/webhooks/customers/data_request', hmacValidation, async (req, res) => {
   try {
     const { shop_domain } = req.body;
-    console.log(`Customer data request received for shop: ${shop_domain}`);
+    // console.log(`Customer data request received for shop: ${shop_domain}`);
 
     // Fetch store data based on the storeDomain
     const storeData = await Store.findOne({ storeDomain: shop_domain });
@@ -496,7 +496,7 @@ app.post('/api/webhooks/customers/data_request', hmacValidation, async (req, res
 app.post('/api/webhooks/customers/redact',hmacValidation, async (req, res) => {
   try {
     const { shop_domain } = req.body;
-    console.log(`Customer data erasure request received for shop: ${shop_domain}`);
+    // console.log(`Customer data erasure request received for shop: ${shop_domain}`);
 
     // Fetch store data to acknowledge what is being erased
     const storeData = await Store.findOne({ storeDomain: shop_domain });
@@ -528,7 +528,7 @@ app.post('/api/webhooks/customers/redact',hmacValidation, async (req, res) => {
 app.post('/api/webhooks/shop/redact', hmacValidation,  async (req, res) => {
   try {
     const { shop_domain } = req.body;
-    console.log(`Shop data erasure request received for shop: ${shop_domain}`);
+    // console.log(`Shop data erasure request received for shop: ${shop_domain}`);
 
     // Fetch and delete store data from MongoDB
     const storeData = await Store.findOneAndDelete({ storeDomain: shop_domain });
@@ -547,7 +547,7 @@ app.post('/api/webhooks/shop/redact', hmacValidation,  async (req, res) => {
           storeProductCount: storeData.storeProductCount,
         },
       });
-      console.log(`Store data erased for domain: ${shop_domain}`);
+      // console.log(`Store data erased for domain: ${shop_domain}`);
     } else {
       res.status(404).json({ message: 'Store not found' });
     }
@@ -562,14 +562,14 @@ app.post("/api/webhooks/app/uninstalled", async (req, res) => {
   try {
     const payload = JSON.parse(req.body.toString()); // Parse raw body
     const { shop_domain } = payload;
-    console.log(`App uninstalled webhook received for shop: ${shop_domain}`);
+    // console.log(`App uninstalled webhook received for shop: ${shop_domain}`);
 
     // Cleanup logic: Delete store data
     const storeData = await Store.findOneAndDelete({ storeDomain: shop_domain });
 
     if (storeData) {
       res.status(200).json({ message: "App uninstalled successfully" });
-      console.log(`Store data removed for domain: ${shop_domain}`);
+      // console.log(`Store data removed for domain: ${shop_domain}`);
     } else {
       res.status(404).json({ message: "Store not found" });
     }
@@ -634,7 +634,7 @@ app.post(
       callbackUrl: "/api/webhooks/",
       callback: async (topic, shop, body) => {
         const payload = JSON.parse(body);
-        console.log("App Uninstalled Payload:", payload);
+        // console.log("App Uninstalled Payload:", payload);
         // Add logic for cleanup (e.g., delete shop data)
       },
     },
@@ -643,7 +643,7 @@ app.post(
       callbackUrl: "/api/webhooks/",
       callback: async (topic, shop, body) => {
         const payload = JSON.parse(body);
-        console.log("App Uninstalled Payload:", payload);
+        // console.log("App Uninstalled Payload:", payload);
         // Add logic for cleanup (e.g., delete shop data)
       },
     },
@@ -678,7 +678,7 @@ app.get("/api/2024-10/orders.json", async (req, res) => {
     status: 'any',
     fulfillment_status: null,
   });
-  console.log(OrderAll); // Check the API response in the console
+  // console.log(OrderAll); // Check the API response in the console
   res.status(200).send(OrderAll);
 });
 
@@ -719,7 +719,7 @@ app.post("/api/products", async (_req, res) => {
   try {
     await productCreator(res.locals.shopify.session);
   } catch (e) {
-    console.log(`Failed to process products/create: ${e.message}`);
+    // console.log(`Failed to process products/create: ${e.message}`);
     status = 500;
     error = e.message;
   }

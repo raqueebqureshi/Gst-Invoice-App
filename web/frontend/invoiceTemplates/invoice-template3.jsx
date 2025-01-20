@@ -6,10 +6,10 @@ import SocialMediaIcons from "../components/GlobalSocialIcons";
 
 
 export function InvoiceTemplate3({ shopdetails, orders, invoiceSettings, GSTHSNCodes }) {
-  console.log("orders - InvoiceTemplate3", orders[0]);
-  console.log("store - details I3", shopdetails[0]);
-  console.log("invoiceSettings - InvoiceTemplate3", invoiceSettings);
-  console.log("GSTHSNCodes - InvoiceTemplate3", GSTHSNCodes);
+  // console.log("orders - InvoiceTemplate3", orders[0]);
+  // console.log("store - details I3", shopdetails[0]);
+  // console.log("invoiceSettings - InvoiceTemplate3", invoiceSettings);
+  // console.log("GSTHSNCodes - InvoiceTemplate3", GSTHSNCodes);
 
   const [storeDomain, setStoreDomain] = useState(null);
   const [email, setEmail] = useState(null);
@@ -19,6 +19,7 @@ export function InvoiceTemplate3({ shopdetails, orders, invoiceSettings, GSTHSNC
   const [ShipHeading, setShipHeading] = useState("");
   const [shopId, setshopId] = useState("");
   const [shopProfile, setShopProfile] = useState({});
+  const [selectedFont, setSelectedFont] = useState("Roboto, sans-serif");
   const formatDateTime = (dateString) => {
     const date = new Date(dateString);
     return new Intl.DateTimeFormat("en-US", {
@@ -35,9 +36,9 @@ export function InvoiceTemplate3({ shopdetails, orders, invoiceSettings, GSTHSNC
     })
       .then((request) => request.json())
       .then((response) => {
-        console.log("Store Details---!", response.data);
+        // console.log("Store Details---!", response.data);
         if (response.data.data.length > 0) {
-          console.log("Store Details---", response.data.data[0]);
+          // console.log("Store Details---", response.data.data[0]);
 
           setStoreDomain(response.data.data[0].domain);
           setEmail(response.data.data[0].email);
@@ -66,7 +67,7 @@ export function InvoiceTemplate3({ shopdetails, orders, invoiceSettings, GSTHSNC
   }, [shopId]);
 
   const fetchInvoiceSettings = async () => {
-    console.log("Sending request to fetch invoice settings");
+    // console.log("Sending request to fetch invoice settings");
 
     return fetch("/api/fetch-invoice-settings", {
       method: "POST",
@@ -84,9 +85,9 @@ export function InvoiceTemplate3({ shopdetails, orders, invoiceSettings, GSTHSNC
       .then((data) => {
         // setInvoiceSettings(data);
         const settings = data;
-        console.log("Received response:", settings);
+        // console.log("Received response:", settings);
 
-        console.log("Received response:", JSON.stringify(settings));
+        // console.log("Received response:", JSON.stringify(settings));
       })
       .catch((error) => {
         console.error("Error fetching invoice settings:", error.message);
@@ -100,15 +101,18 @@ export function InvoiceTemplate3({ shopdetails, orders, invoiceSettings, GSTHSNC
     }
   }, [storeDomain, email]);
 
-  console.log("billing_address - InvoiceTemplate2", orders[0].billing_address);
-  console.log("orders - InvoiceTemplate2", orders);
-  // console.log("orders - InvoiceTemplate2", JSON.stringify(orders));
-  console.log("store - details I", shopdetails[0]);
+  // console.log("billing_address - InvoiceTemplate2", orders[0].billing_address);
+  // console.log("orders - InvoiceTemplate2", orders);
+ // console.log("orders - InvoiceTemplate2", JSON.stringify(orders));
+  // console.log("store - details I", shopdetails[0]);
   useEffect(() => {
     setInvoiceHeading(invoiceSettings.overview.documentTitle || "invoice");
     setBillHeading(invoiceSettings.billing.heading || "Bill To");
     setShipHeading(invoiceSettings.shipping.heading || "Ship To");
-  }, [orders, shopdetails, invoiceSettings]);
+    setSelectedFont(invoiceSettings.branding.fontFamily);
+    console.log('invoiceSettings.branding.fontFamily', invoiceSettings.branding.fontFamily);
+    console.log("selectedFont", selectedFont);
+  }, [orders, shopdetails, invoiceSettings, selectedFont]);
 
   return (
     <div
@@ -116,6 +120,7 @@ export function InvoiceTemplate3({ shopdetails, orders, invoiceSettings, GSTHSNC
         maxWidth: "900px",
         margin: "0 auto",
         padding: "0px",
+        fontFamily: selectedFont,
         backgroundColor: "white",
         boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)",
         border: "1px solid #000",
