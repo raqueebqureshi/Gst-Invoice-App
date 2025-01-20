@@ -1,20 +1,30 @@
-# fly.toml app configuration file generated for gst-invoice-app-wild-feather-8989 on 2024-11-07T16:06:51+05:30
+# fly.toml app configuration file generated for indian-gst-invoice-ddc on 2025-01-16T23:58:44+05:30
 #
 # See https://fly.io/docs/reference/configuration/ for information about how to use this file.
 #
 
-app = 'gst-invoice-app-wild-feather-8989'
+app = 'indian-gst-invoice-ddc'
 primary_region = 'bom'
 
 [build]
 
 [env]
+  APP_URL = 'https://indian-gst-invoice-ddc.fly.dev/'
+  AWS_ACCESS_KEY_ID = 'AKIAVVZOOFSWBLENG65Z'
+  AWS_BUCKET_NAME = 'user-profile-ddc'
+  AWS_REGION = 'ap-south-1'
+  AWS_SECRET_ACCESS_KEY = 'AD0oyGtOnXTNb9fJPbFpC56CqWpQe/OFfkOVRSGG'
+  ENCRYPTION_SECRET_KEY = 'abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890'
+  HOST = 'https://indian-gst-invoice-ddc.fly.dev/'
   MONGO_URI = 'mongodb+srv://soyal:xlZbWx90Irbr6Tfn@clusterddc.j8lav.mongodb.net/DDC-SHOPIFY-GST-APP?retryWrites=true&w=majority'
-  PORT = "8081"
+  PORT = '8081'
   SCOPES = 'read_orders,read_products,write_products'
+  SECRET_KEY = 'abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890'
   SHOPIFY_API_KEY = 'f91cb213006ab6fb5448b00b9a44c33c'
-  HOST = 'https://gst-invoice-app-wild-feather-8989.fly.dev'
   SUPPORT_EMAIL = 'delhiappco@gmail.com'
+  SUPPORT_EMAIL_FROM = 'delhiappco@gmail.com'
+  SUPPORT_EMAIL_HOST = 'smtp.gmail.com'
+  SUPPORT_EMAIL_PORT = '587'
   SUPPORT_PASSWORD = 'qlei dunz wqsb mzad'
 
 [http_service]

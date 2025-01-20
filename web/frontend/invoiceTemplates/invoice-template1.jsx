@@ -1,13 +1,25 @@
 import React from "react";
+import { useState, useEffect } from "react";
+import SocialMediaIcons from "../components/GlobalSocialIcons";
+import convertAmountToWords from "../components/ConvertAmount";
+import { hexToRgba } from "../components/hex";
+import { Shop } from "@mui/icons-material";
 
+export function InvoiceTemplate1({ shopdetails, orders, invoiceSettings, GSTHSNCodes }) {
+  // console.log("orders - InvoiceTemplate1", orders);
+  // console.log("invoiceSettings - InvoiceTemplate1", invoiceSettings);
+  // console.log("GSTHSNCodes - InvoiceTemplate1", GSTHSNCodes.gstcodes);
 
-export function InvoiceTemplate1({ shopdetails, orders }) {
-  
-  
-  
-  // console.log("billing_address - InvoiceTemplate1", orders[0].billing_address);
-  console.log("orders - InvoiceTemplate1", orders[0]);
-  console.log("store - details I", shopdetails[0]);
+  const [storeDomain, setStoreDomain] = useState(null);
+  const [email, setEmail] = useState(null);
+  const [shopId, setshopId] = useState("");
+  const [shopProfile, setShopProfile] = useState({});
+  // const [GSTHSNCodes, setGSTHSNCodes] = useState([]);
+  const [InvoiceHeading, setInvoiceHeading] = useState("");
+  const [BillHeading, setBillHeading] = useState("");
+  const [ShipHeading, setShipHeading] = useState("");
+  const [selectedFont, setSelectedFont] = useState("Roboto");
+
   const formatDateTime = (dateString) => {
     const date = new Date(dateString);
     return new Intl.DateTimeFormat("en-US", {
@@ -17,13 +29,57 @@ export function InvoiceTemplate1({ shopdetails, orders }) {
     }).format(date);
   };
 
+  useEffect(() => {
+    fetch("/api/2024-10/shop.json", {
+      method: "GET",
+      headers: { "Content-Type": "application/json" },
+    })
+      .then((request) => request.json())
+      .then((response) => {
+        console.log("Store Details---!", response.data);
+        if (response.data.data.length > 0) {
+          console.log("Store Details---", response.data.data[0]);
+          setshopId(response.data.data[0].id || "");
+          setStoreDomain(response.data.data[0].domain);
+          setEmail(response.data.data[0].email);
+        }
+      })
+      .catch((error) => console.log(error));
+  }, []);
+
+  useEffect(() => {
+    fetch(`/api/fetch-store-profile?shopId=${shopId}`, {
+      method: "GET",
+      headers: { "Content-Type": "application/json" },
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        if (data && data.profile) {
+          const profileData = data.profile;
+          // console.log("profileData", profileData);
+          setShopProfile(profileData || {});
+        }
+      })
+      .catch((error) => {
+        console.error("Error fetching store profile:", error);
+      });
+  }, [shopId]);
+
+  useEffect(() => {
+    setInvoiceHeading(invoiceSettings.overview.documentTitle || "invoice");
+    setBillHeading(invoiceSettings.billing.heading || "Bill To");
+    setShipHeading(invoiceSettings.shipping.heading || "Ship To");
+    setSelectedFont(invoiceSettings.branding.fontFamily);
+    console.log("selectedFont", selectedFont);
+  }, [orders, shopdetails, invoiceSettings, selectedFont]);
+
   return (
     <div
       style={{
-        fontFamily: "Arial, sans-serif",
+        fontFamily: selectedFont,
         maxWidth: "800px",
         margin: "0 auto",
-        padding: "20px",
+        padding: `${invoiceSettings.branding.showLogo ? "0px" : "20px"} 20px`,
         border: "1px solid #ccc",
         backgroundColor: "#fff",
       }}
@@ -31,82 +87,434 @@ export function InvoiceTemplate1({ shopdetails, orders }) {
       <div
         style={{
           display: "flex",
+          flex: 1,
           justifyContent: "space-between",
           marginBottom: "20px",
+          marginTop: "10px",
         }}
       >
-        <div>
-          <h1 style={{ color: "#4a5568", marginBottom: "5px" }}>
-            {shopdetails[0].name !== null ? shopdetails[0].name : "Shop Name"}
-          </h1>
-          <p style={{ margin: "0", color: "#718096" }}>
-            {shopdetails[0].address1 !== null ? shopdetails[0].address1 : "N/A"},
-          </p>
-          <p style={{ margin: "0", color: "#718096" }}>
-            {shopdetails[0].city !== null ? shopdetails[0].city : "N/A"},
-             {shopdetails[0].zip !== null ? shopdetails[0].zip : "N/A"},
-          </p>
-          <p style={{ margin: "0", color: "#718096" }}>
-            Phone: {shopdetails[0].phone !== null ? shopdetails[0].phone : "N/A"}
-          </p>
-          {/* <p style={{ margin: '0', color: '#718096' }}>Fax: [000-000-0000]</p> */}
-          <p style={{ margin: "0", color: "#718096" }}>
-            Website: {shopdetails.domain !== null ? shopdetails.domain : "N/A"}
-          </p>
-        </div>
-        <div style={{ textAlign: "right" }}>
-          <h2
+        <div
+          style={{
+            visibility: invoiceSettings.supplier.showSupplier ? "visible" : "hidden",
+          }}
+        >
+          <div>
+            {invoiceSettings.branding.showLogo ? (
+              <>
+                <img
+                  src={
+                    shopProfile?.images?.logoURL ||
+                    "https://www.matkaklubi.ee/wp-content/uploads/2016/12/logo-placeholder-generic.200x200.png"
+                  }
+                  alt={""}
+                  style={{
+                    maxWidth: "45px",
+                    maxHeight: "45px",
+                    objectFit: "contain",
+                    borderRadius: "4px",
+                  }}
+                />
+              </>
+            ) : (
+              <></>
+            )}
+            <h1
+              style={{
+                color: invoiceSettings.branding.primaryColor || "#4a5568",
+                marginBottom: "5px",
+                fontWeight: 600,
+                fontSize: "20px",
+              }}
+            >
+              {invoiceSettings.supplier.showHeading ? (
+                shopdetails[0].name !== null ? (
+                  shopdetails[0].name
+                ) : (
+                  "Shop Name"
+                )
+              ) : (
+                <></>
+              )}
+            </h1>
+          </div>
+
+          <p
             style={{
-              color: "#4299e1",
-              fontSize: "2.5em",
-              marginBottom: "10px",
+              margin: "0",
+              //  color: "#718096"
             }}
           >
-            INVOICE
+            {invoiceSettings.supplier.showAddress ? (
+              shopdetails[0].address1 !== null ? (
+                shopdetails[0].address1
+              ) : (
+                "N/A"
+              )
+            ) : (
+              <></>
+            )}
+          </p>
+          <p style={{ margin: "0" }}>
+            {invoiceSettings.supplier.showCity ? (
+              shopdetails[0].city !== null ? (
+                shopdetails[0].city + " "
+              ) : (
+                "N/A"
+              )
+            ) : (
+              <></>
+            )}
+            {/* {invoiceSettings.supplier.showZipPinCode ? (
+              shopdetails[0].zip !== null ? (
+                shopdetails[0].zip + ", "
+              ) : (
+                "N/A"
+              )
+            ) : (
+              <></>
+            )} */}
+          </p>
+          <p style={{ margin: "0" }}>
+            {invoiceSettings.supplier.showPhone ? (
+              <>
+                <strong>Phone: </strong>
+                {shopdetails[0]?.phone ? shopdetails[0].phone : "N/A"}
+              </>
+            ) : (
+              <></>
+            )}
+          </p>
+          {/* <p style={{ margin: '0', color: '#718096' }}>Fax: [000-000-0000]</p> */}
+          <p style={{ margin: "0" }}>
+            {invoiceSettings.supplier.showEmail ? (
+              <>
+                <strong>Email: </strong>
+                {shopdetails[0].email !== null ? shopdetails[0].email : "N/A"}
+              </>
+            ) : (
+              <></>
+            )}
+          </p>
+          <p style={{ margin: "0" }}>
+            {invoiceSettings.supplier.showGSTIN ? (
+              <>
+                <strong>GSTIN: </strong>
+                {shopProfile?.storeProfile?.gstNumber || "N/A"}
+              </>
+            ) : (
+              <></>
+            )}
+          </p>
+        </div>
+
+        <div style={{ textAlign: "right", marginTop: `${invoiceSettings.branding.showLogo ? "60px" : "0px"} ` }}>
+          <h2
+            style={{
+              color: hexToRgba(invoiceSettings.branding.primaryColor, 0.7) || "#4299e1",
+              fontSize: "2.5em",
+              marginBottom: "20px",
+            }}
+          >
+            {InvoiceHeading}
           </h2>
           <table style={{ borderCollapse: "collapse" }}>
             <tbody>
-              <tr>
-                <td
-                  style={{
-                    padding: "5px 10px",
-                    border: "1px solid #e2e8f0",
-                    backgroundColor: "#edf2f7",
-                  }}
-                >
-                  DATE
-                </td>
-                <td
-                  style={{ padding: "5px 10px", border: "1px solid #e2e8f0" }}
-                >
-                  {formatDateTime(orders[0].processed_at)}
-                </td>
-              </tr>
-              <tr>
-                <td
-                  style={{
-                    padding: "5px 10px",
-                    border: "1px solid #e2e8f0",
-                    backgroundColor: "#edf2f7",
-                  }}
-                >
-                  INVOICE #
-                </td>
-                <td
-                  style={{ padding: "5px 10px", border: "1px solid #e2e8f0" }}
-                >
-                  {orders[0].order_number !== null
-                    ? orders[0].order_number
-                    : "N/A"}
-                </td>
-              </tr>
-              
+              {invoiceSettings.overview.issueDate ? (
+                <tr>
+                  <td
+                    style={{
+                      padding: "5px 10px",
+                      border: `1px solid ${hexToRgba(invoiceSettings.branding.primaryColor, 0.07) || "#e2e8f0"}`,
+                      backgroundColor: hexToRgba(invoiceSettings.branding.primaryColor, 0.07) || "#edf2f7",
+                    }}
+                  >
+                    DATE
+                  </td>
+                  <td
+                    style={{
+                      padding: "5px 10px",
+                      border: `1px solid ${hexToRgba(invoiceSettings.branding.primaryColor, 0.07) || "#e2e8f0"}`,
+                    }}
+                  >
+                    {/* {formatDateTime(orders[0].processed_at)} */}
+                    {formatDateTime(orders[0].created_at)}
+                  </td>
+                </tr>
+              ) : (
+                <></>
+              )}
+
+              {invoiceSettings.overview.showInvoiceNumber ? (
+                <tr>
+                  <td
+                    style={{
+                      padding: "5px 10px",
+                      border: `1px solid ${hexToRgba(invoiceSettings.branding.primaryColor, 0.07) || "#e2e8f0"}`,
+                      backgroundColor: hexToRgba(invoiceSettings.branding.primaryColor, 0.07) || "#edf2f7",
+                    }}
+                  >
+                    INVOICE #
+                  </td>
+                  <td
+                    style={{
+                      padding: "5px 10px",
+                      border: `1px solid ${hexToRgba(invoiceSettings.branding.primaryColor, 0.07) || "#e2e8f0"}`,
+                    }}
+                  >
+                    {orders[0].order_number !== null ? orders[0].order_number : "N/A"}
+                  </td>
+                </tr>
+              ) : (
+                <></>
+              )}
             </tbody>
           </table>
         </div>
       </div>
 
-      
+      <table
+        style={{
+          width: "100%",
+          borderCollapse: "collapse",
+          marginBottom: "20px",
+          marginTop: "20px",
+        }}
+      >
+        <thead>
+          <tr style={{ backgroundColor: invoiceSettings.branding.primaryColor || "#4a5568", color: "white" }}>
+            {invoiceSettings.billing.showBilling ? (
+              <th
+                style={{
+                  padding: "10px",
+                  textAlign: "left",
+                  width: "50%",
+                  visibility: invoiceSettings.billing.showHeading ? "visible" : "hidden",
+                }}
+              >
+                {BillHeading.toUpperCase()}
+              </th>
+            ) : (
+              <></>
+            )}
+
+            {invoiceSettings.shipping.showShipping ? (
+              <th
+                style={{
+                  padding: "10px",
+                  textAlign: "left",
+                  width: "50%",
+                  visibility: invoiceSettings.shipping.showHeading ? "visible" : "hidden",
+                }}
+              >
+                {ShipHeading.toUpperCase()}
+              </th>
+            ) : (
+              <></>
+            )}
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            {invoiceSettings.billing.showBilling ? (
+              <td
+                style={{
+                  padding: "10px",
+                  border: `1px solid ${hexToRgba(invoiceSettings.branding.primaryColor, 0.07) || "#e2e8f0"}`,
+                  width: "50%",
+                }}
+              >
+                {orders[0].billing_address !== null ? (
+                  <>
+                    {invoiceSettings.billing.showFullName ? (
+                      orders[0].billing_address.name !== null ? (
+                        orders[0].billing_address.name
+                      ) : (
+                        "N/A"
+                      )
+                    ) : (
+                      <></>
+                    )}{" "}
+                    {invoiceSettings.billing.showCompany ? (
+                      `(${orders[0].billing_address.company !== null ? orders[0].billing_address.company : "N/A"})`
+                    ) : (
+                      <></>
+                    )}
+                    <br />
+                    {invoiceSettings.billing.showAddress1 ? (
+                      orders[0].billing_address.address1 !== null ? (
+                        orders[0].billing_address.address1 + ", "
+                      ) : (
+                        "N/A"
+                      )
+                    ) : (
+                      <></>
+                    )}
+                    {/* {orders[0].billing_address.address2 !== null
+                    ? orders[0].billing_address.address2
+                    : ""}
+                  ,{" "} */}
+                    {invoiceSettings.billing.showCity ? (
+                      orders[0].billing_address.city !== null ? (
+                        orders[0].billing_address.city + ", "
+                      ) : (
+                        ""
+                      )
+                    ) : (
+                      <></>
+                    )}
+                    {invoiceSettings.billing.showState ? (
+                      orders[0].billing_address.province !== null ? (
+                        orders[0].billing_address.province + ", "
+                      ) : (
+                        ""
+                      )
+                    ) : (
+                      <></>
+                    )}
+                    {invoiceSettings.billing.showCountry ? (
+                      orders[0].billing_address.country !== null ? (
+                        orders[0].billing_address.country + ", "
+                      ) : (
+                        ""
+                      )
+                    ) : (
+                      <></>
+                    )}
+                    {invoiceSettings.billing.showZipPinCode ? (
+                      orders[0].billing_address.zip !== null ? (
+                        orders[0].billing_address.zip
+                      ) : (
+                        ""
+                      )
+                    ) : (
+                      <></>
+                    )}
+                    <br />
+                    {invoiceSettings.billing.showEmail ? (
+                      <p>
+                        <strong>Email:</strong> {orders[0].email || "N/A"}
+                      </p>
+                    ) : (
+                      <></>
+                    )}
+                    {invoiceSettings.billing.showPhone ? (
+                      <p>
+                        <strong>Tel:</strong> {orders[0].billing_address.phone || "N/A"}
+                      </p>
+                    ) : (
+                      <></>
+                    )}
+                  </>
+                ) : (
+                  <>Address not available</>
+                )}
+              </td>
+            ) : (
+              <></>
+            )}
+
+            {invoiceSettings.shipping.showShipping ? (
+              <td
+                style={{
+                  padding: "10px",
+                  border: `1px solid ${hexToRgba(invoiceSettings.branding.primaryColor, 0.07) || "#e2e8f0"}`,
+                  width: "50%",
+                }}
+              >
+                {orders[0].shipping_address !== null ? (
+                  <>
+                    {invoiceSettings.shipping.showFullName ? (
+                      orders[0].shipping_address.name !== null ? (
+                        orders[0].shipping_address.name
+                      ) : (
+                        "N/A"
+                      )
+                    ) : (
+                      <></>
+                    )}{" "}
+                    {invoiceSettings.shipping.showCompany ? (
+                      `(${orders[0].billing_address.company !== null ? orders[0].billing_address.company : "N/A"})`
+                    ) : (
+                      <></>
+                    )}
+                    <br />
+                    {invoiceSettings.shipping.showAddress1 ? (
+                      orders[0].shipping_address.address1 !== null ? (
+                        orders[0].shipping_address.address1 + ", "
+                      ) : (
+                        "N/A"
+                      )
+                    ) : (
+                      <></>
+                    )}
+                    {/* {orders[0].shipping_address.address2 !== null
+                    ? orders[0].shipping_address.address2
+                    : ""}
+                  ,{" "} */}
+                    {invoiceSettings.shipping.showCity ? (
+                      orders[0].shipping_address.city !== null ? (
+                        orders[0].shipping_address.city + ", "
+                      ) : (
+                        ""
+                      )
+                    ) : (
+                      <></>
+                    )}
+                    {invoiceSettings.shipping.showState ? (
+                      orders[0].shipping_address.province !== null ? (
+                        orders[0].shipping_address.province + ", "
+                      ) : (
+                        ""
+                      )
+                    ) : (
+                      <></>
+                    )}
+                    {invoiceSettings.shipping.showCountry ? (
+                      orders[0].shipping_address.country !== null ? (
+                        orders[0].shipping_address.country + ", "
+                      ) : (
+                        ""
+                      )
+                    ) : (
+                      <></>
+                    )}
+                    {invoiceSettings.shipping.showZipPinCode ? (
+                      orders[0].shipping_address.zip !== null ? (
+                        orders[0].shipping_address.zip
+                      ) : (
+                        ""
+                      )
+                    ) : (
+                      <></>
+                    )}
+                    <br />
+                    {invoiceSettings.shipping.showEmail ? (
+                      <p>
+                        <strong>Email:</strong> {orders[0].email || "N/A"}
+                      </p>
+                    ) : (
+                      <></>
+                    )}
+                    {invoiceSettings.shipping.showPhone ? (
+                      <p>
+                        <strong>Tel:</strong> {orders[0].shipping_address.phone || "N/A"}
+                      </p>
+                    ) : (
+                      <></>
+                    )}
+                  </>
+                ) : (
+                  <>Address not availble</>
+                )}
+              </td>
+            ) : (
+              <></>
+            )}
+          </tr>
+        </tbody>
+      </table>
+      {/* console.log("orders", {orders.line_items.map((item) => item.name)}); */}
+
       <table
         style={{
           width: "100%",
@@ -115,201 +523,434 @@ export function InvoiceTemplate1({ shopdetails, orders }) {
         }}
       >
         <thead>
-          <tr style={{ backgroundColor: "#4a5568", color: "white" }}>
-            <th style={{ padding: "10px", textAlign: "left", width: "50%" }}>
-              BILL TO
-            </th>
-            <th style={{ padding: "10px", textAlign: "left", width: "50%" }}>
-              SHIP TO
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td
-              style={{
-                padding: "10px",
-                border: "1px solid #e2e8f0",
-                width: "50%",
-              }}
-            >
-              {orders[0].billing_address.name !== null
-                ? orders[0].billing_address.name
-                : "N/A"},<br />
-              {orders[0].billing_address.address1 !== null
-                ? orders[0].billing_address.address1
-                : "N/A"}
-              ,{" "}
-              {orders[0].billing_address.address2 !== null
-                ? orders[0].billing_address.address2
-                : ""}
-              ,{" "}
-              {orders[0].billing_address.city !== null
-                ? orders[0].billing_address.city
-                : ""}
-              ,{" "}
-              {orders[0].billing_address.province !== null
-                ? orders[0].billing_address.province
-                : ""}
-              ,{" "}
-              {orders[0].billing_address.country !== null
-                ? orders[0].billing_address.country
-                : ""}
-              ,{" "}
-              {orders[0].billing_address.zip !== null
-                ? orders[0].billing_address.zip
-                : ""}
-              
-            </td>
-            <td
-              style={{
-                padding: "10px",
-                border: "1px solid #e2e8f0",
-                width: "50%",
-              }}
-            >{orders[0].shipping_address.name !== null
-              ? orders[0].shipping_address.name
-              : "N/A"},<br />
-              {orders[0].shipping_address.address1 !== null
-                ? orders[0].shipping_address.address1
-                : "N/A"}
-              ,{" "}
-              {orders[0].shipping_address.address2 !== null
-                ? orders[0].shipping_address.address2
-                : ""}
-              ,{" "}
-              {orders[0].shipping_address.city !== null
-                ? orders[0].shipping_address.city
-                : ""}
-              ,{" "}
-              {orders[0].shipping_address.province !== null
-                ? orders[0].shipping_address.province
-                : ""}
-              ,{" "}
-              {orders[0].shipping_address.country !== null
-                ? orders[0].shipping_address.country
-                : ""}
-              ,{" "}
-              {orders[0].shipping_address.zip !== null
-                ? orders[0].shipping_address.zip
-                : ""}
-              
-            </td>
-          </tr>
-        </tbody>
-      </table>
-      {/* console.log("orders", {orders.line_items.map((item) => item.name)}); */}
-     
-      <table
-  style={{
-    width: "100%",
-    borderCollapse: "collapse",
-    marginBottom: "20px",
-  }}
->
-  <thead>
-    <tr style={{ backgroundColor: "#4a5568", color: "white" }}>
-      <th style={{ padding: "10px", textAlign: "left" }}>ITEMS</th>
-      <th style={{ padding: "10px", width: "100px" }}>QTY</th>
-      <th style={{ padding: "10px", width: "100px" }}>TAX</th>
-      <th style={{ padding: "10px", width: "100px" }}>AMOUNT</th>
-    </tr>
-  </thead>
-  <tbody>
-    {
-      orders[0].line_items?.map((item) => (
-        <tr key={item.id}>
-          <td style={{ padding: "10px", border: "1px solid #e2e8f0" }}>
-            {item.name}
-          </td>
-          <td style={{ padding: "10px", border: "1px solid #e2e8f0", textAlign: "center" }}>
-            {item.quantity || "N/A"}
-          </td>
-          <td style={{ padding: "10px", border: "1px solid #e2e8f0", textAlign: "center" }}>
-          ₹ {item.total_tax|| "0"}
-          </td>
-          <td
+          <tr
             style={{
-              padding: "10px",
-              border: "1px solid #e2e8f0",
-              textAlign: "right",
+              backgroundColor: invoiceSettings.branding.primaryColor || "#4a5568",
+              color: "white",
+              textAlign: "center",
             }}
           >
-            ₹ {(item.price || 0)}
-          </td>
-        </tr>
-      ))
-   }
-  </tbody>
-</table>
+            {invoiceSettings.lineItems.showVariantTitle ? (
+              <th
+                style={{
+                  padding: "10px",
+                  border: `1px solid ${hexToRgba(invoiceSettings.branding.primaryColor, 0.07) || "#e2e8f0"}`,
+                }}
+              >
+                ITEMS
+              </th>
+            ) : (
+              <></>
+            )}
+            {invoiceSettings.lineItems.showQuantity ? (
+              <th
+                style={{
+                  padding: "10px",
+                  border: `1px solid ${hexToRgba(invoiceSettings.branding.primaryColor, 0.07) || "#e2e8f0"}`,
+                }}
+              >
+                QTY
+              </th>
+            ) : (
+              <></>
+            )}
+            {invoiceSettings.lineItems.showUnitRate ? (
+              <th
+                style={{
+                  padding: "10px",
+                  border: `1px solid ${hexToRgba(invoiceSettings.branding.primaryColor, 0.07) || "#e2e8f0"}`,
+                }}
+              >
+                RATE
+              </th>
+            ) : (
+              <></>
+            )}
+            {invoiceSettings.lineItems.showHSN ? (
+              <th
+                style={{
+                  padding: "10px",
+                  border: `1px solid ${hexToRgba(invoiceSettings.branding.primaryColor, 0.07) || "#e2e8f0"}`,
+                }}
+              >
+                HSN
+              </th>
+            ) : (
+              <></>
+            )}
+            {invoiceSettings.lineItems.showTaxAmount ? (
+              <th
+                style={{
+                  padding: "10px",
+                  border: `1px solid ${hexToRgba(invoiceSettings.branding.primaryColor, 0.07) || "#e2e8f0"}`,
+                }}
+              >
+                GST
+              </th>
+            ) : (
+              <></>
+            )}
+            {invoiceSettings.lineItems.showTaxAmount ? (
+              <th
+                style={{
+                  padding: "10px",
+                  border: `1px solid ${hexToRgba(invoiceSettings.branding.primaryColor, 0.07) || "#e2e8f0"}`,
+                }}
+              >
+                TAX
+              </th>
+            ) : (
+              <></>
+            )}
+            {invoiceSettings.lineItems.showTotalPrice ? (
+              <th
+                style={{
+                  padding: "10px",
+                  border: `1px solid ${hexToRgba(invoiceSettings.branding.primaryColor, 0.07) || "#e2e8f0"}`,
+                }}
+              >
+                AMOUNT
+              </th>
+            ) : (
+              <></>
+            )}
+          </tr>
+        </thead>
+        <tbody style={{ textAlign: "center" }}>
+          {orders[0].line_items?.map((item, index) => {
+            // console.log('GSTHSNCodes-------',GSTHSNCodes[0].productId);
+            console.log('item-------',item.product_id);
+            
+            const matchedGSTItem = GSTHSNCodes.gstcodes ? GSTHSNCodes.gstcodes.find(
+              (gstItem) => Number(gstItem.productId) === item.product_id
+              ) : GSTHSNCodes.find(
+                (gstItem) => Number(gstItem.productId) === item.product_id
+                );
+            
+            const price = parseFloat(item.price) || 0; // Convert to a number and default to 0 if NaN
+            const lineAmount = item.quantity * price + (item.total_tax || 0) || 0;
+            return (
+              <tr key={item.id}>
+                {invoiceSettings.lineItems.showVariantTitle ? (
+                  <td
+                    style={{
+                      padding: "10px",
+                      border: `1px solid ${hexToRgba(invoiceSettings.branding.primaryColor, 0.07) || "#e2e8f0"}`,
+                    }}
+                  >
+                    {item.name}
+                  </td>
+                ) : (
+                  <></>
+                )}
+                {invoiceSettings.lineItems.showQuantity ? (
+                  <td
+                    style={{
+                      padding: "10px",
+                      border: `1px solid ${hexToRgba(invoiceSettings.branding.primaryColor, 0.07) || "#e2e8f0"}`,
+                      textAlign: "center",
+                    }}
+                  >
+                    {item.quantity || "N/A"}
+                  </td>
+                ) : (
+                  <></>
+                )}
 
+                {invoiceSettings.lineItems.showUnitRate ? (
+                  <td
+                    style={{
+                      padding: "10px",
+                      border: `1px solid ${hexToRgba(invoiceSettings.branding.primaryColor, 0.07) || "#e2e8f0"}`,
+                      textAlign: "center",
+                    }}
+                  >
+                    ₹{price || "N/A"}
+                  </td>
+                ) : (
+                  <></>
+                )}
 
+                {invoiceSettings.lineItems.showHSN ? (
+                  <td
+                    style={{
+                      padding: "10px",
+                      border: `1px solid ${hexToRgba(invoiceSettings.branding.primaryColor, 0.07) || "#e2e8f0"}`,
+                    }}
+                  >
+                    {matchedGSTItem?.hsn || "-"}
+                  </td>
+                ) : (
+                  <></>
+                )}
+                {invoiceSettings.lineItems.showTaxAmount ? (
+                  <td
+                    style={{
+                      padding: "10px",
+                      border: `1px solid ${hexToRgba(invoiceSettings.branding.primaryColor, 0.07) || "#e2e8f0"}`,
+                    }}
+                  >
+                    {matchedGSTItem?.gst || "-"}
+                  </td>
+                ) : (
+                  <></>
+                )}
+                {invoiceSettings.lineItems.showTaxAmount ? (
+                  <td
+                    style={{
+                      padding: "10px",
+                      border: `1px solid ${hexToRgba(invoiceSettings.branding.primaryColor, 0.07) || "#e2e8f0"}`,
+                      textAlign: "center",
+                    }}
+                  >
+                    ₹{item.total_tax || "0"}
+                  </td>
+                ) : (
+                  <></>
+                )}
+                {invoiceSettings.lineItems.showTotalPrice ? (
+                  <td
+                    style={{
+                      padding: "10px",
+                      border: `1px solid ${hexToRgba(invoiceSettings.branding.primaryColor, 0.07) || "#e2e8f0"}`,
+                      textAlign: "center",
+                    }}
+                  >
+                    ₹{lineAmount}
+                  </td>
+                ) : (
+                  <></>
+                )}
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
 
       <div style={{ display: "flex", justifyContent: "space-between" }}>
         <div style={{ width: "50%" }}>
           <h3
             style={{
-              backgroundColor: "#4a5568",
+              backgroundColor: invoiceSettings.branding.primaryColor || "#4a5568",
               color: "white",
               padding: "5px 10px",
             }}
           >
             OTHER COMMENTS
           </h3>
-          <ol style={{ paddingLeft: "10px ", paddingTop: "10px" }}>
+          <ul style={{ paddingLeft: "14px ", paddingTop: "10px" }}>
             {/* <li>Total payment due in 30 days</li> */}
-            <li>Please include the invoice number on your check</li>
-          </ol>
+            {/* <li>Please include the invoice number on your check</li> */}
+            <li>{invoiceSettings.footer.footerNote}</li>
+          </ul>
+          {invoiceSettings.total.showTotal ? (
+            <div style={{ marginTop: "20px", marginLeft: "10px" }}>
+              <p style={{ margin: "0", fontWeight: "bold" }}>Total Amount (₹ - In Words):</p>
+              <p style={{ fontStyle: "italic", color: "#4a5568" }}>
+                {convertAmountToWords(orders[0].total_price || 0)}
+              </p>
+            </div>
+          ) : null}
+          {invoiceSettings.supplier.showHeading ? (
+            <p
+              style={{
+                marginTop: "10px",
+                fontSize: "0.9em",
+                padding: "10px",
+                backgroundColor: hexToRgba(invoiceSettings.branding.primaryColor, 0.07) || "#f7fafc",
+                // borderRadius: "4px",
+              }}
+            >
+              Make all checks payable to:
+              <br />
+              <strong>{shopdetails[0].name}</strong>
+            </p>
+          ) : (
+            <></>
+          )}
         </div>
-        <div style={{ width: "30%" }}>
-          <table style={{ width: "100%", borderCollapse: "collapse" }}>
+        <div style={{ width: "40%" }}>
+          <h3
+            style={{
+              backgroundColor: invoiceSettings.branding.primaryColor || "#4a5568",
+              color: "white",
+              padding: "6px 10px",
+              marginBottom: "0px",
+            }}
+          >
+            PAYMENT SUMMARY
+          </h3>
+          <table
+            style={{
+              width: "100%",
+              borderCollapse: "collapse",
+              backgroundColor: "#f7fafc",
+              // borderRadius: "8px",
+              overflow: "hidden",
+            }}
+          >
             <tbody>
-              <tr>
-                <td style={{ padding: "5px" }}>Subtotal</td>
-                <td style={{ padding: "5px", textAlign: "right" }}>₹ {orders[0].subtotal_price !== null 
-                ? orders[0].subtotal_price : "0.00"}</td>
-              </tr>
-              <tr>
-                <td style={{ padding: "5px" }}>Taxable</td>
-                <td style={{ padding: "5px", textAlign: "right" }}>₹ {orders[0].total_tax !== null 
-                ? orders[0].total_tax : "0.00"}</td>
-              </tr>
-              {/* <tr>
-                <td style={{ padding: "5px" }}>Tax rate</td>
-                <td style={{ padding: "5px", textAlign: "right" }}>6.250%</td>
-              </tr>
-              <tr>
-                <td style={{ padding: "5px" }}>Tax due</td>
-                <td style={{ padding: "5px", textAlign: "right" }}>21.56</td>
-              </tr> */}
-              {/* <tr>
-                <td style={{ padding: "5px" }}>Other</td>
-                <td style={{ padding: "5px", textAlign: "right" }}></td>
-              </tr> */}
-              <tr style={{ fontWeight: "bold" }}>
-                <td style={{ padding: "5px" }}>TOTAL</td>
-                <td style={{ padding: "5px", textAlign: "right" }}>₹ {orders[0].total_price !== null ? orders[0].total_price : "0.00"}</td>
-              </tr>
+              {invoiceSettings.total.showSubtotal ? (
+                <tr>
+                  <td
+                    style={{
+                      padding: "10px",
+                      fontWeight: "bold",
+                      backgroundColor: hexToRgba(invoiceSettings.branding.primaryColor, 0.07) || "#edf2f7",
+                      borderBottom: `1px solid ${hexToRgba(invoiceSettings.branding.primaryColor, 0.07) || "#e2e8f0"}`,
+                    }}
+                  >
+                    Subtotal
+                  </td>
+                  <td
+                    style={{
+                      padding: "10px",
+                      textAlign: "right",
+                      borderBottom: `1px solid ${hexToRgba(invoiceSettings.branding.primaryColor, 0.07) || "#e2e8f0"}`,
+                    }}
+                  >
+                    ₹ {orders[0].subtotal_price !== null ? Number(orders[0].subtotal_price).toFixed(2) : "0.00"}
+                  </td>
+                </tr>
+              ) : null}
+              {invoiceSettings.total.showTax ? (
+                <tr>
+                  <td
+                    style={{
+                      padding: "10px",
+                      fontWeight: "bold",
+                      backgroundColor: hexToRgba(invoiceSettings.branding.primaryColor, 0.07) || "#edf2f7",
+                      borderBottom: `1px solid ${hexToRgba(invoiceSettings.branding.primaryColor, 0.07) || "#e2e8f0"}`,
+                    }}
+                  >
+                    Taxable
+                  </td>
+                  <td
+                    style={{
+                      padding: "10px",
+                      textAlign: "right",
+                      borderBottom: `1px solid ${hexToRgba(invoiceSettings.branding.primaryColor, 0.07) || "#e2e8f0"}`,
+                    }}
+                  >
+                    ₹ {orders[0].total_tax !== null ? Number(orders[0].total_tax).toFixed(2) : "0.00"}
+                  </td>
+                </tr>
+              ) : null}
+              {invoiceSettings.total.showTotal ? (
+                <tr>
+                  <td
+                    style={{
+                      padding: "10px",
+                      fontWeight: "bold",
+                      backgroundColor: invoiceSettings.branding.primaryColor || "#4a5568",
+                      color: "white",
+                      borderTop: `1px solid ${hexToRgba(invoiceSettings.branding.primaryColor, 0.07) || "#e2e8f0"}`,
+                    }}
+                  >
+                    TOTAL
+                  </td>
+                  <td
+                    style={{
+                      padding: "10px",
+                      textAlign: "right",
+                      fontWeight: "bold",
+                      backgroundColor: invoiceSettings.branding.primaryColor || "#4a5568",
+                      color: "white",
+                    }}
+                  >
+                    ₹ {orders[0].total_price !== null ? Number(orders[0].total_price).toFixed(2) : "0.00"}
+                  </td>
+                </tr>
+              ) : null}
             </tbody>
           </table>
-          <p style={{ marginTop: "10px", fontSize: "0.9em" }}>
-            Make all checks payable to
-            <br />
-            {shopdetails[0].name}
-          </p>
         </div>
       </div>
-      <div style={{ height: "300px" }}></div>
-      <p style={{ textAlign: "center", marginTop: "20px", fontSize: "0.9em" }}>
+
+      {invoiceSettings.branding.showSignature ? (
+        <>
+          {" "}
+          {shopProfile?.images?.signatureURL && (
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "flex-end", // Aligns the content to the right
+                marginTop: "150px",
+              }}
+            >
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <img
+                  src={
+                    shopProfile?.images?.signatureURL ||
+                    "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTxBsiydbUVBWJUaBP_GVwmkNpZX-eUkOrn1Q&s"
+                  }
+                  alt={""}
+                  style={{
+                    maxWidth: "55px",
+                    maxHeight: "55px",
+                    objectFit: "contain",
+                    borderRadius: "4px",
+                  }}
+                />
+                <p
+                  style={{
+                    textAlign: "center",
+                    fontSize: "0.9em",
+                  }}
+                >
+                  Authorised Signatory
+                </p>
+              </div>
+            </div>
+          )}
+        </>
+      ) : (
+        <>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "flex-end", // Aligns the content to the right
+              marginTop: "150px",
+            }}
+          ></div>
+        </>
+      )}
+
+      <p style={{ textAlign: "center", marginTop: "10px", fontSize: "0.9em", borderTop: "1px solid #e2e8f0" }}>
         If you have any questions about this invoice, please contact
         <br />
-        Name: {shopdetails[0].name !== null ? shopdetails[0].name : "N/A"} <br />
-        Phone: {shopdetails[0].phone !== null ? shopdetails[0].phone : "N/A"} <br />
-        E-mail: {shopdetails[0].email !== null ? shopdetails[0].email : "N/A"}
+        {invoiceSettings.supplier.showPhone ? (
+          <>
+            <strong>Phone:</strong> {shopdetails[0].phone !== null ? shopdetails[0].phone : "N/A"}{" "}
+          </>
+        ) : (
+          <></>
+        )}
+        {" | "}
+        {invoiceSettings.supplier.showEmail ? (
+          <>
+            <strong>E-mail:</strong> {shopdetails[0].email !== null ? shopdetails[0].email : "N/A"}
+          </>
+        ) : (
+          <></>
+        )}
       </p>
       <p style={{ textAlign: "center", fontWeight: "bold" }}>
-        Thank You For Choosing Us!
+        {invoiceSettings.footer.thankYouNote || "Thank You For Choosing Us!"}
       </p>
+      <div style={{ marginBottom: "20px" }}>
+        {shopProfile.socialLinks && (
+          <SocialMediaIcons socialLink={shopProfile.socialLinks} invoiceSetting={invoiceSettings} />
+        )}
+        {/* <SocialMediaIcons socialLink={shopProfile.socialLinks} invoiceSetting={invoiceSettings} /> */}
+      </div>
     </div>
   );
 }

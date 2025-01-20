@@ -1,0 +1,29 @@
+/* ProductIndexTable.css */
+.responsive-container {
+    width: 90%;
+    margin: auto;
+    max-width: 1200px;
+  }
+  
+  .product-image {
+    max-width: 50px;
+    max-height: 50px;
+    object-fit: contain;
+  }
+  
+  .product-title {
+    font-weight: bold;
+  }
+  
+  @media (max-width: 768px) {
+    .responsive-container {
+      width: 100%;
+      padding: 16px;
+    }
+  
+    .product-image {
+      max-width: 40px;
+      max-height: 40px;
+    }
+  }
+  

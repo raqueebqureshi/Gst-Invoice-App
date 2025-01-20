@@ -5,31 +5,37 @@ import { MediaCardExample2 } from "../components/MediaCard";
 import invoice1 from '../assets/invoice.png'
 import invoice2 from '../assets/invoice2.png'
 import invoice3 from '../assets/invoice3.png'
+import { useNavigate } from 'react-router-dom';
+
+import CustomizeTemplatePage from './cutomizeTemplatePage';
 
 
 
 
 export default function Orders() {
-  const [storeDomain, setStoreDomain] = useState(null);
+  const [storeDomain, setStoreDomain] = useState();
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate(); // Initialize useNavigate
+
 
   const [selectedTemplate, setSelectedTemplate] = useState(); // Default to template 1
 
   // Fetch the store domain
   useEffect(() => {
     console.log("Fetching store details...");
-    fetch("/api/shop/all", {
+    fetch("/api/2024-10/shop.json", {
       method: "GET",
       headers: { "Content-Type": "application/json" }
     })
     .then(response => response.json())
     .then(data => {
-      console.log("Store data fetched:", data);
-      if (data.data && data.data.length > 0) {
+      console.log("Store data fetched:", data.data.data[0].domain);
+      if (data.data.data && data.data.data.length > 0) {
         // Access the domain from the correct property
-        setStoreDomain(data.data[0].domain); 
-        console.log("Store domain set:", data.data[0].domain);
+        setStoreDomain(data.data.data[0].domain); 
+        console.log("Store domain set:", data.data.data[0].domain);
       }
+      console.log("store domain:", storeDomain)
     })
     .catch(error => console.log("Error fetching store details:", error));
   }, []);
@@ -78,7 +84,7 @@ export default function Orders() {
   return (
     <>
     {loading ? (
-      <div style={{ display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
+      <div style={{ display: 'flex', justifyContent: 'center', marginTop: '200px' }}>
         <Spinner accessibilityLabel="Loading Spinner" size="large" />
       </div>
     ) :
@@ -92,7 +98,14 @@ export default function Orders() {
             // imageSrc="assets/invoice.png"
             imageSrc={invoice1}
             title="Pain"
-            primaryAction=" Customize available soon.."
+            // primaryAction=" Customize available soon.."
+            secondaryAct={() => {
+              console.log("Navigating to Customize Template Page");
+              navigate('/customizeTemplatePage', {state:{
+                templateId: 1,
+                
+              }}); // Navigate to the CustomizeTemplatePage
+            }}
             isSelected={selectedTemplate === "1"} // Set isSelected based on selectedTemplate
             onSelect={() => {
               console.log("Bold template select button clicked");
@@ -104,7 +117,14 @@ export default function Orders() {
            imageSrc={invoice2}
             // imageSrc="assets/invoice2.png"
             title="Classic"
-            primaryAction=" Customize available soon.."
+            // primaryAction=" Customize available soon.."
+            secondaryAct={() => {
+              console.log("Navigating to Customize Template Page");
+              navigate('/customizeTemplatePage', {state:{
+                templateId: 2,
+                
+              }}); // Navigate to the CustomizeTemplatePage
+            }}
             isSelected={selectedTemplate === "2"} // Set isSelected based on selectedTemplate
             onSelect={() => {
               console.log("Celestial template select button clicked");
@@ -116,7 +136,14 @@ export default function Orders() {
            imageSrc={invoice3}
             // imageSrc="assets/invoice3.png"
             title="Decent"
-            primaryAction=" Customize available soon.."
+            // primaryAction=" Customize available soon.."
+            secondaryAct={() => {
+              console.log("Navigating to Customize Template Page");
+              navigate('/customizeTemplatePage', {state:{
+                templateId: 3,
+                
+              }}); // Navigate to the CustomizeTemplatePage
+            }}
             isSelected={selectedTemplate === "3"} // Set isSelected based on selectedTemplate
             onSelect={() => {
               console.log("Celestial template select button clicked");

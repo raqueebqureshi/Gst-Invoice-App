@@ -1,5 +1,5 @@
 import { Routes as ReactRouterRoutes, Route } from "react-router-dom";
-
+import CustomizeTemplatePage from "./pages/cutomizeTemplatePage";
 /**
  * File-based routing.
  * @desc File-based routing that uses React Router under the hood.
@@ -26,11 +26,12 @@ export default function Routes({ pages }) {
     <ReactRouterRoutes>
       {routeComponents}
       <Route path="*" element={<NotFound />} />
+      <Route path="/customizeTemplatePage" element={<CustomizeTemplatePage />} />
     </ReactRouterRoutes>
   );
 }
 
-function useRoutes(pages) {
+function useRoutes(pages) { 
   const routes = Object.keys(pages)
     .map((key) => {
       let path = key
