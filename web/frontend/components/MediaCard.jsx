@@ -56,8 +56,9 @@ export function MediaCardExample2({
           >
             {isSelected ? 'Selected' : 'Select'}
           </Button>
-          <Button size="medium" onClick={secondaryAct}>
-            {isSelected ? 'Customize' : 'Preview & Customize'}
+          
+          <Button size="medium" onClick={secondaryAct} disabled={!isSelected}>
+            { 'Customize' }
           </Button>
         </LegacyStack>
       </div>

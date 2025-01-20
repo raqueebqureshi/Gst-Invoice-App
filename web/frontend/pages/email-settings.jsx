@@ -86,9 +86,11 @@ const EmailSetting = () => {
   };
 
   useEffect(() => {
-    setTimeout(() => {
-      setShowToast(false);
-    }, 3000);
+    if(showToast){
+      setTimeout(() => {
+        setShowToast(!showToast);
+      }, 3000);
+    }
   }, [showToast]);
 
   const handleButtonSendAuto = () => {
@@ -232,7 +234,7 @@ const EmailSetting = () => {
       .then((response) => {
         // console.log("Store Details---!", response.data);
         if (response.data.data.length > 0) {
-          console.log("Store Details---", response.data.data[0]);
+          // console.log("Store Details---", response.data.data[0]);
           setShopId(response.data.data[0].id);
         }
       })
@@ -683,10 +685,18 @@ let updatedSettings = smtpData
         </AlphaCard>
       </div>
       {showToast && 
-      <ToastNotification
+  <div style={{
+    position: 'fixed',
+    bottom: '20px', 
+    right: '20px',
+    zIndex: 9999,
+  }}>
+    <ToastNotification
       message={toastMessage}
-      duration={3000} // Optional, can be customized
-    />}
+      duration={3000} 
+    />
+  </div>
+}
     </Page>
   );
 };

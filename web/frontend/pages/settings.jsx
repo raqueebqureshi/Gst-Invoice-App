@@ -10,6 +10,8 @@ import {
   DropZone,
   Thumbnail,
 } from "@shopify/polaris";
+import ToastNotification from "../components/ToastNotification";
+
 import { RiDeleteBinLine } from "react-icons/ri"; // FontAwesome
 import { Collapsible, HorizontalStack, VerticalStack, Icon } from "@shopify/polaris";
 import { ChevronDownIcon, ChevronUpIcon, DeleteIcon } from "@shopify/polaris-icons";
@@ -28,11 +30,13 @@ export default function Settings() {
   const [uploadSignatureStatus, setUploadSignatureStatus] = useState("");
   const [logoUrl, setLogoUrl] = useState("");
   const [signatureUrl, setSignatureUrl] = useState("");
-  const [showToast, setShowToast] = useState({
-    active: false,
-    message: "",
-    error: false,
-  });
+  const [showToast, setShowToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState("");
+  // const [showToast, setShowToast] = useState({
+  //   active: false,
+  //   message: "",
+  //   error: false,
+  // });
   const [storeProfile, setStoreProfile] = useState({
     firstName: "",
     lastName: "",
@@ -97,10 +101,18 @@ export default function Settings() {
     }
   }, []);
 
-  const handleShowToast = (message, error = false) => {
-    setShowToast({ active: true, message, error });
-  };
+  // const handleShowToast = (message, error = false) => {
+  //   setShowToast({ active: true, message, error });
+  // };
   //   // Fetch initial data for store domain and email
+
+  useEffect(() => {
+    setTimeout(() => {
+      if (showToast) {
+        setShowToast(false);
+      }
+    }, 3000);
+  }, [showToast]);
   useEffect(() => {
     fetch("/api/2024-10/shop.json", {
       method: "GET",
@@ -186,10 +198,14 @@ export default function Settings() {
         const responseData = await response.json();
         // console.log("Settings saved successfully:", responseData);
         setIsSaving(false);
+        setShowToast(true);
+        setToastMessage("Settings saved successfully!");
       } else {
         const errorData = await response.json();
-        console.error("Failed to save settings:", errorData);
+        console.error(":", errorData);
         setIsSaving(false);
+        setShowToast(true);
+        setToastMessage("Failed to save settings!");
       }
     } catch (error) {
       console.error("Error while saving settings:", error);
@@ -846,7 +862,18 @@ export default function Settings() {
             </FormLayout>
           </AlphaCard>
         )}
-
+{showToast && (
+                  <div
+                    style={{
+                      position: "fixed",
+                      bottom: "20px",
+                      right: "20px",
+                      zIndex: 9999,
+                    }}
+                  >
+                    <ToastNotification message={toastMessage} duration={3000} />
+                  </div>
+                )}
         <div style={footerButtonStyle}>
           <LegacyStack distribution="trailing">
             <Button primary onClick={handleSave} loading={isSaving}>

@@ -4,20 +4,21 @@ import { useState, useEffect } from "react";
 import SocialMediaIcons from "../components/GlobalSocialIcons";
 import { hexToRgba } from "../components/hex";
 
-export function InvoiceTemplate2({ shopdetails, orders, invoiceSettings, GSTHSNCodes }) {
-  console.log("orders - InvoiceTemplate2", orders[0]);
-  console.log("store - details I2", shopdetails[0]);
-  console.log("invoiceSettings - InvoiceTemplate2", invoiceSettings);
-  console.log("GSTHSNCodes - InvoiceTemplate2", GSTHSNCodes);
+export function InvoiceTemplate2({ shopdetails, orders, invoiceSettings, GSTHSNCodes, shopProfile }) {
+  // console.log("orders - InvoiceTemplate2", orders[0]);
+  // console.log("store - details I2", shopdetails[0]);
+  // console.log("invoiceSettings - InvoiceTemplate2", invoiceSettings);
+  // console.log("GSTHSNCodes - InvoiceTemplate2", GSTHSNCodes);
+  // console.log("shopProfile", shopProfile);
 
   const [storeDomain, setStoreDomain] = useState(null);
   const [email, setEmail] = useState(null);
   // const [GSTHSNCodes, setGSTHSNCodes] = useState([]);
-  const [InvoiceHeading, setInvoiceHeading] = useState("");
-  const [BillHeading, setBillHeading] = useState("");
-  const [ShipHeading, setShipHeading] = useState("");
+  const [InvoiceHeading, setInvoiceHeading] = useState("INVOICE");
+  const [BillHeading, setBillHeading] = useState("BILL TO");
+  const [ShipHeading, setShipHeading] = useState("SHIP To");
   const [shopId, setshopId] = useState("");
-  const [shopProfile, setShopProfile] = useState({});
+  // const [shopProfile, setShopProfile] = useState({});
   const [selectedFont, setSelectedFont] = useState("Roboto, sans-serif");
   const formatDateTime = (dateString) => {
     const date = new Date(dateString);
@@ -35,9 +36,9 @@ export function InvoiceTemplate2({ shopdetails, orders, invoiceSettings, GSTHSNC
     })
       .then((request) => request.json())
       .then((response) => {
-        console.log("Store Details---!", response.data);
+        // console.log("Store Details---!", response.data);
         if (response.data.data.length > 0) {
-          console.log("Store Details---", response.data.data[0]);
+          // console.log("Store Details---", response.data.data[0]);
 
           setStoreDomain(response.data.data[0].domain);
           setEmail(response.data.data[0].email);
@@ -47,23 +48,23 @@ export function InvoiceTemplate2({ shopdetails, orders, invoiceSettings, GSTHSNC
       .catch((error) => console.log(error));
   }, []);
 
-  useEffect(() => {
-    fetch(`/api/fetch-store-profile?shopId=${shopId}`, {
-      method: "GET",
-      headers: { "Content-Type": "application/json" },
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        if (data && data.profile) {
-          const profileData = data.profile;
-          // console.log("profileData", profileData);
-          setShopProfile(profileData || {});
-        }
-      })
-      .catch((error) => {
-        console.error("Error fetching invoice settings:", error.message);
-      });
-  });
+  // useEffect(() => {
+  //   fetch(`/api/fetch-store-profile?shopId=${shopId}`, {
+  //     method: "GET",
+  //     headers: { "Content-Type": "application/json" },
+  //   })
+  //     .then((response) => response.json())
+  //     .then((data) => {
+  //       if (data && data.profile) {
+  //         const profileData = data.profile;
+  //         // console.log("profileData", profileData);
+  //         setShopProfile(profileData || {});
+  //       }
+  //     })
+  //     .catch((error) => {
+  //       console.error("Error fetching invoice settings:", error.message);
+  //     });
+  // });
 
   // const fetchGSTHSNValues = async (products) => {
   //   try {
@@ -111,18 +112,17 @@ export function InvoiceTemplate2({ shopdetails, orders, invoiceSettings, GSTHSNC
     setBillHeading(invoiceSettings.billing.heading || "Bill To");
     setShipHeading(invoiceSettings.shipping.heading || "Ship To");
     setSelectedFont(invoiceSettings.branding.fontFamily);
-    console.log('invoiceSettings.branding.fontFamily', invoiceSettings.branding.fontFamily);
-    console.log("selectedFont", selectedFont);
+    // console.log("invoiceSettings.branding.fontFamily", invoiceSettings.branding.fontFamily);
+    // console.log("selectedFont", selectedFont);
   }, [orders, shopdetails, invoiceSettings, selectedFont]);
 
   return (
     <div
       style={{
-        fontFamily: "Arial, sans-serif",
-        width: "54vw", // Full viewport width
-        margin: "0 auto",
         fontFamily: selectedFont,
-        padding: "20px",
+        maxWidth: "900px",
+        margin: "0 auto",
+        padding: `20px`,
         border: "1px solid #ccc",
         backgroundColor: "#fff",
       }}
@@ -225,13 +225,7 @@ export function InvoiceTemplate2({ shopdetails, orders, invoiceSettings, GSTHSNC
             )}
           </p>
           <p style={{ margin: "0px 0" }}>
-            {invoiceSettings.supplier.showGSTIN ? (
-              <>
-                GSTIN: {shopProfile?.storeProfile?.gstNumber || "N/A"}
-              </>
-            ) : (
-              <></>
-            )}
+            {invoiceSettings.supplier.showGSTIN ? <>GSTIN: {shopProfile?.storeProfile?.gstNumber || "N/A"}</> : <></>}
           </p>
           {/* <p style={{ margin: '5px 0' }}>PAN NO: AAA123456</p> */}
         </div>
@@ -340,7 +334,9 @@ export function InvoiceTemplate2({ shopdetails, orders, invoiceSettings, GSTHSNC
                 <></>
               )}
               {invoiceSettings.billing.showPhone ? (
-                <p style={{ margin: "5px 0" }}>PH: {orders[0].billing_address.phone !== null ? orders[0].billing_address.phone : "N/A"}</p>
+                <p style={{ margin: "5px 0" }}>
+                  PH: {orders[0].billing_address.phone !== null ? orders[0].billing_address.phone : "N/A"}
+                </p>
               ) : (
                 <></>
               )}
@@ -447,10 +443,12 @@ export function InvoiceTemplate2({ shopdetails, orders, invoiceSettings, GSTHSNC
                   <></>
                 )}
                 {invoiceSettings.shipping.showPhone ? (
-                <p style={{ margin: "5px 0" }}>PH: {orders[0].shipping_address.phone !== null ? orders[0].shipping_address.phone : "N/A"}</p>
-              ) : (
-                <></>
-              )}
+                  <p style={{ margin: "5px 0" }}>
+                    PH: {orders[0].shipping_address.phone !== null ? orders[0].shipping_address.phone : "N/A"}
+                  </p>
+                ) : (
+                  <></>
+                )}
               </>
             ) : (
               <>
@@ -577,18 +575,16 @@ export function InvoiceTemplate2({ shopdetails, orders, invoiceSettings, GSTHSNC
         {/* <td style={{ border: '1px solid #000', padding: '8px' }}></td> */}
 
         <tbody>
-        {orders[0].line_items?.map((item, index) => {
+          {orders[0].line_items?.map((item, index) => {
             // console.log('GSTHSNCodes-------',GSTHSNCodes[0].productId);
-            console.log('item-------',item.product_id);
-            
-            const matchedGSTItem = GSTHSNCodes.gstcodes ? GSTHSNCodes.gstcodes.find(
-              (gstItem) => Number(gstItem.productId) === item.product_id
-              ) : GSTHSNCodes.find(
-                (gstItem) => Number(gstItem.productId) === item.product_id
-                );
-            
+            // console.log('item-------',item.product_id);
+
+            const matchedGSTItem = GSTHSNCodes.gstcodes
+              ? GSTHSNCodes.gstcodes.find((gstItem) => Number(gstItem.productId) === item.product_id)
+              : GSTHSNCodes.find((gstItem) => Number(gstItem.productId) === item.product_id);
+
             const price = parseFloat(item.price) || 0; // Convert to a number and default to 0 if NaN
-            const lineAmount = item.quantity * price + (item.total_tax || 0) || 0;
+            const lineAmount = item.quantity * price + (Number(item?.tax_lines[0]?.price) || 0) || 0;
             return (
               <tr key={item.id}>
                 {invoiceSettings.lineItems.showVariantTitle ? (
@@ -663,7 +659,7 @@ export function InvoiceTemplate2({ shopdetails, orders, invoiceSettings, GSTHSNC
                       textAlign: "center",
                     }}
                   >
-                    ₹{item.total_tax || "0"}
+                    ₹{item?.tax_lines[0]?.price || "0"}
                   </td>
                 ) : (
                   <></>
@@ -847,50 +843,55 @@ export function InvoiceTemplate2({ shopdetails, orders, invoiceSettings, GSTHSNC
             {invoiceSettings.footer.thankYouNote || "Thank You For Choosing Us!"}
           </p>
         </div>
-        {invoiceSettings.branding.showSignature ? (<>
-        { shopProfile?.images?.signatureURL &&(<div
-  style={{
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    justifyContent: "center",
-  }}
->
-  <img
-    src={
-      shopProfile?.images?.signatureURL ||
-      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTxBsiydbUVBWJUaBP_GVwmkNpZX-eUkOrn1Q&s"
-    }
-    alt={""}
-    style={{
-      maxWidth: "55px",
-      maxHeight: "55px",
-      objectFit: "contain",
-      borderRadius: "4px",
-    }}
-  />
-  <p
-    style={{
-      textAlign: "center",
-      // marginTop: "px",
-      fontSize: "0.9em",
-    }}
-  >
-    Authorised Signatory
-  </p>
-</div>)}
-</>
-      ):(<><div
-        style={{
-          display: "flex",
-          justifyContent: "flex-end", // Aligns the content to the right
-          marginTop: "150px",
-        }}
-      ></div></>)}
-        
-
+        {invoiceSettings.branding.showSignature ? (
+          <>
+            {shopProfile?.images?.signatureURL && (
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <img
+                  src={
+                    shopProfile?.images?.signatureURL ||
+                    "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTxBsiydbUVBWJUaBP_GVwmkNpZX-eUkOrn1Q&s"
+                  }
+                  alt={""}
+                  style={{
+                    maxWidth: "55px",
+                    maxHeight: "55px",
+                    objectFit: "contain",
+                    borderRadius: "4px",
+                  }}
+                />
+                <p
+                  style={{
+                    textAlign: "center",
+                    // marginTop: "px",
+                    fontSize: "0.9em",
+                  }}
+                >
+                  Authorised Signatory
+                </p>
+              </div>
+            )}
+          </>
+        ) : (
+          <>
+            {/* <div
+              style={{
+                display: "flex",
+                justifyContent: "flex-end", // Aligns the content to the right
+                marginTop: "0px",
+              }}
+            ></div> */}
+          </>
+        )}
       </div>
-      
+
       <div>
         {shopProfile.socialLinks && (
           <SocialMediaIcons socialLink={shopProfile.socialLinks} invoiceSetting={invoiceSettings} />
