@@ -3,7 +3,10 @@ import mongoose from "mongoose";
 const StoreProfileSchema = new mongoose.Schema({
   storeDomain: { type: String, required: true, unique: true }, // Unique store domain
   email: { type: String, required: true }, // Store email
-  shopId : { type: String, required: true }, // Store ID
+  shopId: { type: String, required: true }, // Store ID
+  dateOfInstall: { type: Date, default: Date.now }, // Installation date
+  previousOrderMonthCount: { type: Number, default: 0 }, // Previous order month count, can be changed
+
   storeProfile: {
     firstName: { type: String, default: "" },
     lastName: { type: String, default: "" },
@@ -32,10 +35,21 @@ const StoreProfileSchema = new mongoose.Schema({
 
   socialLinks: {
     facebookURL: { type: String, default: "" },
-    xURL: { type: String, default: "" }, 
+    xURL: { type: String, default: "" },
     instagramURL: { type: String, default: "" },
     pinterestURL: { type: String, default: "" },
     youtubeURL: { type: String, default: "" },
+  },
+
+  plans: {
+    planId: { type: Number, default: 1 }, // Default plan ID (1 = free plan, 2 = paid plan)
+    planStartDate: { type: Date, default: null }, // Plan start date
+  },
+
+  stats: {
+    totalInvoiceDownload: { type: Number, default: 0 }, // Total invoice downloads
+    totalInvoicePrint: { type: Number, default: 0 }, // Total invoice prints
+    totalInvoiceSent: { type: Number, default: 0 }, // Total invoices sent
   },
 });
 

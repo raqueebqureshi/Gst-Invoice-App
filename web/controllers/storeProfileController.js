@@ -72,3 +72,127 @@ export const fetchShopProfile = async (req, res) => {
       .json({ error: "An error occurred while fetching the store profile." });
   }
 };
+
+
+
+//update stats in db :
+
+//update total download
+export const updateTotalInvoiceDownload = async (req, res) => {
+  const { shopId, incrementBy } = req.body;
+
+  if (!shopId || incrementBy === undefined) {
+    return res.status(400).json({
+      success: false,
+      message: "shopId and incrementBy are required.",
+    });
+  }
+
+  try {
+    const store = await StoreProfile.findOneAndUpdate(
+      { shopId },
+      { $inc: { "stats.totalInvoiceDownload": incrementBy } },
+      { new: true }
+    );
+
+    if (!store) {
+      return res.status(404).json({
+        success: false,
+        message: "Store not found.",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Total invoice downloads updated successfully.",
+      data: store.stats.totalInvoiceDownload,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Error updating total invoice downloads.",
+      error,
+    });
+  }
+};
+
+
+
+//update total print 
+export const updateTotalInvoicePrint = async (req, res) => {
+  const { shopId, incrementBy } = req.body;
+
+  if (!shopId || incrementBy === undefined) {
+    return res.status(400).json({
+      success: false,
+      message: "shopId and incrementBy are required.",
+    });
+  }
+
+  try {
+    const store = await StoreProfile.findOneAndUpdate(
+      { shopId },
+      { $inc: { "stats.totalInvoicePrint": incrementBy } },
+      { new: true }
+    );
+
+    if (!store) {
+      return res.status(404).json({
+        success: false,
+        message: "Store not found.",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Total invoice prints updated successfully.",
+      data: store.stats.totalInvoicePrint,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Error updating total invoice prints.",
+      error,
+    });
+  }
+};
+
+
+//update total invoice sent 
+export const updateTotalInvoiceSent = async (req, res) => {
+  const { shopId, incrementBy } = req.body;
+
+  if (!shopId || incrementBy === undefined) {
+    return res.status(400).json({
+      success: false,
+      message: "shopId and incrementBy are required.",
+    });
+  }
+
+  try {
+    const store = await StoreProfile.findOneAndUpdate(
+      { shopId },
+      { $inc: { "stats.totalInvoiceSent": incrementBy } },
+      { new: true }
+    );
+
+    if (!store) {
+      return res.status(404).json({
+        success: false,
+        message: "Store not found.",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Total invoices sent updated successfully.",
+      data: store.stats.totalInvoiceSent,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Error updating total invoices sent.",
+      error,
+    });
+  }
+};
