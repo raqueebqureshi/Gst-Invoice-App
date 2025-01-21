@@ -194,6 +194,8 @@ export default function ProductIndexTable() {
     fetchData(); // Call the fetchData function
   }, [storeDomain, email]); // Run when storeDomain or storeEmail changes
 
+  
+
   const syncProducts = async () => {
     setIsLoading(true);
     await fetchProducts();
@@ -290,12 +292,16 @@ export default function ProductIndexTable() {
   };
 
   const handleRowSelection = (id) => {
+    // console.log('handleRowSelection - id:', id);
     setSelectedItems((prevSelectedItems) => {
+      
       if (prevSelectedItems.includes(id)) {
+        // console.log('prevSelectedItems', prevSelectedItems);
         // If the row is already selected, remove it from the selection
         return prevSelectedItems.filter((itemId) => itemId !== id);
       } else {
         // Otherwise, add it to the selection
+        // console.log('prevSelectedItems', prevSelectedItems);
         return [...prevSelectedItems, id];
       }
     });

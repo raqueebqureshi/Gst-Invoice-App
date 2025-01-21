@@ -37,9 +37,10 @@ export default function CustomizeTemplate() {
   const location = useLocation();
   const { state } = location;
   const [shopDetails, setShopDetails] = useState([]);
-  const { templateId } = state || {};
+  const {templateId} = state ||{};
+  const [CurrentTemplate, setCurrentTemplate] = useState();
 
-  // console.log("templateId", templateId);
+  
 
   const [showBrandingAndStyle, setShowBrandingAndStyle] = useState(false);
   const [showOverview, setShowOverview] = useState(false);
@@ -47,6 +48,7 @@ export default function CustomizeTemplate() {
   const [showShipping, setShowShipping] = useState(false);
   const [showBilling, setShowBilling] = useState(false);
   const [GSTHSNCodes, setGSTHSNCodes] = useState([]);
+  const [shopProfile, setShopProfile] = useState({});
   const [showLineItems, setShowLineItems] = useState(false);
   const [showTotal, setShowTotal] = useState(false);
   const [showFooter, setShowFooter] = useState(false);
@@ -167,301 +169,139 @@ export default function CustomizeTemplate() {
     {
       line_items: [
         {
-          id: 14721915060453,
-          admin_graphql_api_id: "gid://shopify/LineItem/14721915060453",
+          id: 14846286201061,
+          admin_graphql_api_id: "gid://shopify/LineItem/14846286201061",
           attributed_staffs: [],
           current_quantity: 1,
           fulfillable_quantity: 1,
           fulfillment_service: "manual",
           fulfillment_status: null,
           gift_card: false,
-          grams: 5000,
-          name: "Demo Product - Powder",
-          price: "500.00",
+          grams: 4536,
+          name: "The Complete Snowboard - Dawn",
+          price: "699.95",
           price_set: {
-            shop_money: {
-              amount: "500.00",
-              currency_code: "INR",
-            },
-            presentment_money: {
-              amount: "500.00",
-              currency_code: "INR",
-            },
+            shop_money: { amount: "699.95", currency_code: "INR" },
+            presentment_money: { amount: "699.95", currency_code: "INR" },
           },
           product_exists: true,
-          product_id: 123456789,
+          product_id: 8961257668837,
           properties: [],
           quantity: 1,
           requires_shipping: true,
-          sku: "DEMO-SKU",
+          sku: null,
           taxable: true,
-          title: "Demo Product",
+          title: "The Complete Snowboard",
           total_discount: "0.00",
           total_discount_set: {
-            shop_money: {
-              amount: "0.00",
-              currency_code: "INR",
-            },
-            presentment_money: {
-              amount: "0.00",
-              currency_code: "INR",
-            },
+            shop_money: { amount: "0.00", currency_code: "INR" },
+            presentment_money: { amount: "0.00", currency_code: "INR" },
           },
-          variant_id: 987654321,
+          variant_id: 46199772774629,
           variant_inventory_management: "shopify",
-          variant_title: "Powder",
-          vendor: "Demo Vendor",
-          tax_lines: [],
+          variant_title: "Dawn",
+          vendor: "Snowboard Vendor",
+          tax_lines: [
+            {
+              channel_liable: false,
+              price: "125.99",
+              price_set: {
+                shop_money: { amount: "125.99", currency_code: "INR" },
+                presentment_money: { amount: "125.99", currency_code: "INR" },
+              },
+              rate: 0.18,
+              title: "IGST",
+            },
+          ],
           duties: [],
           discount_allocations: [],
         },
       ],
-      app_id: 123456,
+      app_id: 1354745,
       billing_address: {
-        first_name: "John",
-        address1: "123 Demo Street",
-        phone: "+1234567890",
-        city: "Demo City",
-        zip: "12345",
-        province: "Demo Province",
-        country: "Demo Country",
-        last_name: "Doe",
-        address2: null,
-        company: "Demo Company",
-        latitude: 45.4191773,
-        longitude: -75.6967303,
-        name: "John Doe",
-        country_code: "DC",
-        province_code: "DP",
+        first_name: "Soyal",
+        address1: "Shalimar Garden",
+        phone: "+917535964612",
+        city: "Ghaziabad",
+        zip: "201005",
+        province: "Uttar Pradesh",
+        country: "India",
+        last_name: "KHan",
+        address2: "876",
+        company: "Delhi Digital co",
+        latitude: 28.6904801,
+        longitude: 77.3360364,
+        name: "Soyal KHan",
+        country_code: "IN",
+        province_code: "UP",
       },
-      browser_ip: "192.168.1.1",
+      browser_ip: "49.36.183.197",
       buyer_accepts_marketing: false,
       cancel_reason: null,
       cancelled_at: null,
       cart_token: null,
-      checkout_token: "demo-checkout-token",
+      checkout_token: "240ebd377238b76b9958cd5cbb270dba",
       client_details: {
-        accept_language: "en-US",
-        browser_height: 1080,
-        browser_ip: "192.168.1.1",
-        browser_width: 1920,
+        accept_language: null,
+        browser_height: null,
+        browser_ip: "49.36.183.197",
+        browser_width: null,
         session_hash: null,
-        user_agent: "Mozilla/5.0",
+        user_agent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
       },
       closed_at: null,
-      company: null,
-      confirmation_number: "DEMO123",
-      created_at: "2024-01-01T00:00:00-00:00",
+      confirmation_number: "WNNRARG2U",
+      created_at: "2025-01-14T14:28:45-05:00",
       currency: "INR",
-      current_subtotal_price: "500.00",
-      current_subtotal_price_set: {
-        shop_money: {
-          amount: "500.00",
-          currency_code: "INR",
-        },
-        presentment_money: {
-          amount: "500.00",
-          currency_code: "INR",
-        },
-      },
-      current_total_additional_fees_set: null,
+      current_subtotal_price: "699.95",
       current_total_discounts: "0.00",
-      current_total_discounts_set: {
-        shop_money: {
-          amount: "0.00",
-          currency_code: "INR",
-        },
-        presentment_money: {
-          amount: "0.00",
-          currency_code: "INR",
-        },
-      },
-      current_total_duties_set: null,
-      current_total_price: "500.00",
-      current_total_price_set: {
-        shop_money: {
-          amount: "500.00",
-          currency_code: "INR",
-        },
-        presentment_money: {
-          amount: "500.00",
-          currency_code: "INR",
-        },
-      },
-      current_total_tax: "0.00",
-      current_total_tax_set: {
-        shop_money: {
-          amount: "0.00",
-          currency_code: "INR",
-        },
-        presentment_money: {
-          amount: "0.00",
-          currency_code: "INR",
-        },
-      },
+      current_total_price: "825.94",
+      current_total_tax: "125.99",
       customer: {
-        created_at: "2024-01-01T00:00:00-00:00",
-        currency: "INR",
-        email: "john.doe@example.com",
-        email_marketing_consent: {
-          state: "subscribed",
-          opt_in_level: "single_opt_in",
-          consent_updated_at: null,
-        },
-        first_name: "John",
-        id: 123456,
-        last_name: "Doe",
-        multipass_identifier: null,
-        note: null,
-        phone: "+1234567890",
-        sms_marketing_consent: {
-          state: "not_subscribed",
-          opt_in_level: "single_opt_in",
-          consent_updated_at: null,
-          consent_collected_from: "OTHER",
-        },
-        state: "disabled",
-        tags: "",
-        tax_exempt: false,
-        tax_exemptions: [],
-        updated_at: "2024-01-01T00:00:00-00:00",
+        first_name: "Soyal",
+        last_name: "Khan",
+        email: "soyal@delhidigital.co",
+        phone: "+917535964612",
         verified_email: true,
-        admin_graphql_api_id: "gid://shopify/Customer/123456",
+        default_address: {
+          address1: "Shalimar Garden",
+          city: "Ghaziabad",
+          province: "Uttar Pradesh",
+          zip: "201005",
+          country: "India",
+          phone: "+917535964612",
+          name: "Soyal KHan",
+        },
       },
-      customer_locale: "en",
-      discount_applications: [],
-      discount_codes: [],
-      email: "john.doe@example.com",
-      estimated_taxes: false,
+      email: "soyal@delhidigital.co",
       financial_status: "paid",
-      fulfillment_status: null,
-      fulfillments: [],
-      id: 1234567890,
-      landing_site: null,
-      location_id: null,
-      merchant_of_record_app_id: null,
-      name: "#1234",
-      note: null,
-      note_attributes: [],
-      number: 1234,
-      order_number: 1234,
-      order_status_url: "https://example.com/order/1234",
-      original_total_additional_fees_set: null,
-      original_total_duties_set: null,
-      payment_gateway_names: ["manual"],
-      payment_terms: null,
-      phone: "+1234567890",
-      po_number: null,
-      presentment_currency: "INR",
-      processed_at: "2024-01-01T00:00:00-00:00",
-      referring_site: null,
-      refunds: [],
+      id: 6137511936229,
+      name: "#1031",
+      order_number: 1031,
+      processed_at: "2025-01-14T14:28:44-05:00",
       shipping_address: {
-        first_name: "John",
-        address1: "456 Demo Lane",
-        phone: "+1234567890",
-        city: "Demo City",
-        zip: "67890",
-        province: "Demo Province",
-        country: "Demo Country",
-        last_name: "Doe",
-        address2: null,
-        company: "Demo Shipping Co",
-        latitude: 45.4191773,
-        longitude: -75.6967303,
-        name: "John Doe",
-        country_code: "DC",
-        province_code: "DP",
+        first_name: "Soyal",
+        address1: "Shalimar Garden",
+        phone: "+917535964612",
+        city: "Ghaziabad",
+        zip: "201005",
+        province: "Uttar Pradesh",
+        country: "India",
+        last_name: "KHan",
+        address2: "876",
+        company: "Delhi Digital co",
       },
-      shipping_lines: [],
-      source_identifier: "demo-source",
-      source_name: "shopify_draft_order",
-      source_url: null,
-      subtotal_price: "500.00",
-      subtotal_price_set: {
-        shop_money: {
-          amount: "500.00",
-          currency_code: "INR",
-        },
-        presentment_money: {
-          amount: "500.00",
-          currency_code: "INR",
-        },
-      },
+      subtotal_price: "699.95",
       tags: "",
-      tax_lines: [],
-      taxes_included: false,
-      test: false,
-      token: "demo-token",
       total_discounts: "0.00",
-      total_discounts_set: {
-        shop_money: {
-          amount: "0.00",
-          currency_code: "INR",
-        },
-        presentment_money: {
-          amount: "0.00",
-          currency_code: "INR",
-        },
-      },
-      total_line_items_price: "500.00",
-      total_line_items_price_set: {
-        shop_money: {
-          amount: "500.00",
-          currency_code: "INR",
-        },
-        presentment_money: {
-          amount: "500.00",
-          currency_code: "INR",
-        },
-      },
-      total_outstanding: "0.00",
-      total_price: "500.00",
-      total_price_set: {
-        shop_money: {
-          amount: "500.00",
-          currency_code: "INR",
-        },
-        presentment_money: {
-          amount: "500.00",
-          currency_code: "INR",
-        },
-      },
-      total_shipping_price_set: {
-        shop_money: {
-          amount: "0.00",
-          currency_code: "INR",
-        },
-        presentment_money: {
-          amount: "0.00",
-          currency_code: "INR",
-        },
-      },
-      total_tax: "0.00",
-      total_tax_set: {
-        shop_money: {
-          amount: "0.00",
-          currency_code: "INR",
-        },
-        presentment_money: {
-          amount: "0.00",
-          currency_code: "INR",
-        },
-      },
-      total_tip_received: "0.00",
-      total_weight: 5000,
-      updated_at: "2024-01-01T00:00:00-00:00",
-      user_id: 123456,
-      admin_graphql_api_id: "gid://shopify/Order/1234567890",
-      checkout_id: 987654321,
-      confirmed: true,
-      contact_email: "john.doe@example.com",
-      device_id: null,
-      landing_site_ref: null,
-      reference: "demo-reference",
-      tax_exempt: false,
+      total_line_items_price: "699.95",
+      total_price: "825.94",
+      total_tax: "125.99",
+      total_weight: 4536,
+      updated_at: "2025-01-14T14:28:46-05:00",
     },
   ];
+  
 
   const demoGST = [
     { productId: "123456789", productName: "bottle", gst: "12", hsn: "456789" },
@@ -744,7 +584,11 @@ export default function CustomizeTemplate() {
       .then((response) => response.json())
       .then((data) => {
         if (data && data.profile) {
-         
+          if (data && data.profile) {
+            const profileData = data.profile;
+            console.log("profileData", profileData);
+            setShopProfile(profileData || {});
+          }
           // console.log("Shop Profile Data",data.profile );
 
       //     const newCustomColor = data?.profile?.storeProfile?.brandColor || "#ff6600"; // Example custom color from API
@@ -763,6 +607,31 @@ export default function CustomizeTemplate() {
         console.error("Error fetching store profile:", error);
       });
   }, [shopId]);
+
+
+  useEffect(() => {
+    if (storeDomain) {
+      fetch(`/api/get-invoice-template?storeDomain=${storeDomain}`)
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.storeInvoiceTemplate) {
+            // setCurrentTemplate(data.storeInvoiceTemplate);
+            //console.log("Current Template ID:", currentTemplateId);
+            if(templateId){
+              setCurrentTemplate(templateId);
+            }else{
+              setCurrentTemplate(data.storeInvoiceTemplate);
+              
+            }
+          }
+        })
+        .catch((error) => console.error("Error fetching template ID:", error));
+    }
+
+    
+  }, [storeDomain]);
+  // console.log("templateId", templateId);
+ 
 
   const fetchInvoiceSettings = async () => {
     // console.log("Sending request to fetch invoice settings");
@@ -807,6 +676,8 @@ export default function CustomizeTemplate() {
         console.error("Error fetching invoice settings:", error.message);
       });
   };
+
+  
 
   useEffect(() => {
     if (storeDomain && email) {
@@ -895,7 +766,7 @@ export default function CustomizeTemplate() {
       });
   };
 
-  const renderInvoiceTemplate = (currentTemplate, shopdetails, order, gstcodes) => {
+  const renderInvoiceTemplate = (currentTemplate, shopdetails, order, gstcodes, shopProfile) => {
     switch (currentTemplate) {
       case 1:
         return (
@@ -904,6 +775,7 @@ export default function CustomizeTemplate() {
             orders={[order]}
             invoiceSettings={InvoiceSetting2}
             GSTHSNCodes={{ gstcodes }}
+            shopProfile={shopProfile}
           />
         );
       case 2:
@@ -913,6 +785,7 @@ export default function CustomizeTemplate() {
             orders={[order]}
             invoiceSettings={InvoiceSetting2}
             GSTHSNCodes={{ gstcodes }}
+            shopProfile={shopProfile}
           />
         );
       case 3:
@@ -922,6 +795,7 @@ export default function CustomizeTemplate() {
             orders={[order]}
             invoiceSettings={InvoiceSetting2}
             GSTHSNCodes={{ gstcodes }}
+            shopProfile={shopProfile}
           />
         );
       default:
@@ -1738,7 +1612,7 @@ export default function CustomizeTemplate() {
                     maxHeight: "100%",
                   }}
                 >
-                  {(shopDetails.id && <>{renderInvoiceTemplate(templateId, shopDetails, demoOrder[0], demoGST)}</>) ||
+                  {(shopDetails.id && <>{renderInvoiceTemplate(Number(CurrentTemplate), shopDetails, demoOrder[0], demoGST, shopProfile)}</>) ||
                     "No template available"}
                 </div>
               </div>

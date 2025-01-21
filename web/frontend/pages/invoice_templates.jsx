@@ -6,6 +6,8 @@ import invoice1 from '../assets/invoice.png'
 import invoice2 from '../assets/invoice2.png'
 import invoice3 from '../assets/invoice3.png'
 import { useNavigate } from 'react-router-dom';
+import ToastNotification from "../components/ToastNotification"; // Import the ToastNotification component
+
 
 import CustomizeTemplatePage from './cutomizeTemplatePage';
 
@@ -16,7 +18,16 @@ export default function Orders() {
   const [storeDomain, setStoreDomain] = useState();
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate(); // Initialize useNavigate
+  const [showToast, setShowToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState("");
 
+  useEffect(() => {
+    if(showToast){
+      setTimeout(() => {
+        setShowToast(!showToast);
+      }, 3000);
+    }
+  }, [showToast]);
 
   const [selectedTemplate, setSelectedTemplate] = useState(); // Default to template 1
 
@@ -48,9 +59,10 @@ export default function Orders() {
         .then(response => response.json())
         .then(data => {
           if (data.storeInvoiceTemplate) {
-            // console.log("Fetched template ID from DB:", data.storeInvoiceTemplate);
+            // console.log("Fetched template ID from DB:",  data.storeInvoiceTemplate);
             setSelectedTemplate(data.storeInvoiceTemplate); // Store template ID for comparison or other use
             setLoading(false);  
+            
           }
         })
         .catch(error => console.error("Error fetching template ID:", error));
@@ -74,7 +86,8 @@ export default function Orders() {
       .then(data => {
         // console.log("API response for updating template:", data);
         setSelectedTemplate(data.storeInvoiceTemplate); // Update selected template state
-
+        setShowToast(true);
+        setToastMessage('Templated Selected');
       })
       .catch(error => console.error("Error updating template:", error));
     } else {
@@ -91,9 +104,9 @@ export default function Orders() {
       </div>
     ) :
     <Page fullWidth>
+      
       <TitleBar title="Invoice Templates" />
       <Layout>
-
         <p style={{ paddingTop: '20px', textAlign: 'start', width: '90%', fontWeight: '600' }}>Available Invoice Templates</p>
         <div style={{ paddingTop: '20px', display: 'flex', flexDirection: 'column', gap: '10px', width: '90%' }}>
           <MediaCardExample2
@@ -153,14 +166,31 @@ export default function Orders() {
             }}
             description="Designed for professionals, this sleek invoice exudes competence and confidence, leaving a lasting impression."
           />
+          
         </div>
+        
       </Layout>
       <FooterHelp style={{ marginTop: '40px' }}>
         Didn't find what you were looking for? Reach out to support at{' '}
         <Link url="mailto:support@delhidigital.co">support@delhidigital.co</Link>
       </FooterHelp>
+      {showToast && 
+  <div style={{
+    position: 'fixed',
+    bottom: '20px', 
+    right: '20px',
+    zIndex: 9999,
+  }}>
+    <ToastNotification
+      message={toastMessage}
+      duration={3000} 
+    />
+  </div>
+}
+
     </Page>
     }
+    
     </>
   );
 }

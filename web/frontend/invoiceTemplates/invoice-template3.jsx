@@ -5,7 +5,7 @@ import { hexToRgba } from "../components/hex";
 import SocialMediaIcons from "../components/GlobalSocialIcons";
 
 
-export function InvoiceTemplate3({ shopdetails, orders, invoiceSettings, GSTHSNCodes }) {
+export function InvoiceTemplate3({ shopdetails, orders, invoiceSettings, GSTHSNCodes,shopProfile }) {
   // console.log("orders - InvoiceTemplate3", orders[0]);
   // console.log("store - details I3", shopdetails[0]);
   // console.log("invoiceSettings - InvoiceTemplate3", invoiceSettings);
@@ -14,11 +14,11 @@ export function InvoiceTemplate3({ shopdetails, orders, invoiceSettings, GSTHSNC
   const [storeDomain, setStoreDomain] = useState(null);
   const [email, setEmail] = useState(null);
   // const [GSTHSNCodes, setGSTHSNCodes] = useState([]);
-  const [InvoiceHeading, setInvoiceHeading] = useState("");
-  const [BillHeading, setBillHeading] = useState("");
-  const [ShipHeading, setShipHeading] = useState("");
+  const [InvoiceHeading, setInvoiceHeading] = useState("INVOICE");
+  const [BillHeading, setBillHeading] = useState("BILL TO");
+  const [ShipHeading, setShipHeading] = useState("SHIP To");
   const [shopId, setshopId] = useState("");
-  const [shopProfile, setShopProfile] = useState({});
+  // const [shopProfile, setShopProfile] = useState({});
   const [selectedFont, setSelectedFont] = useState("Roboto, sans-serif");
   const formatDateTime = (dateString) => {
     const date = new Date(dateString);
@@ -48,23 +48,23 @@ export function InvoiceTemplate3({ shopdetails, orders, invoiceSettings, GSTHSNC
       .catch((error) => console.log(error));
   }, []);
 
-  useEffect(() => {
-    fetch(`/api/fetch-store-profile?shopId=${shopId}`, {
-      method: "GET",
-      headers: { "Content-Type": "application/json" },
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        if (data && data.profile) {
-          const profileData = data.profile;
-          // console.log("profileData", profileData);
-          setShopProfile(profileData || {});
-        }
-      })
-      .catch((error) => {
-        console.error("Error fetching store profile:", error);
-      });
-  }, [shopId]);
+  // useEffect(() => {
+  //   fetch(`/api/fetch-store-profile?shopId=${shopId}`, {
+  //     method: "GET",
+  //     headers: { "Content-Type": "application/json" },
+  //   })
+  //     .then((response) => response.json())
+  //     .then((data) => {
+  //       if (data && data.profile) {
+  //         const profileData = data.profile;
+  //         // console.log("profileData", profileData);
+  //         setShopProfile(profileData || {});
+  //       }
+  //     })
+  //     .catch((error) => {
+  //       console.error("Error fetching store profile:", error);
+  //     });
+  // }, [shopId]);
 
   const fetchInvoiceSettings = async () => {
     // console.log("Sending request to fetch invoice settings");
@@ -110,8 +110,8 @@ export function InvoiceTemplate3({ shopdetails, orders, invoiceSettings, GSTHSNC
     setBillHeading(invoiceSettings.billing.heading || "Bill To");
     setShipHeading(invoiceSettings.shipping.heading || "Ship To");
     setSelectedFont(invoiceSettings.branding.fontFamily);
-    console.log('invoiceSettings.branding.fontFamily', invoiceSettings.branding.fontFamily);
-    console.log("selectedFont", selectedFont);
+    // console.log('invoiceSettings.branding.fontFamily', invoiceSettings.branding.fontFamily);
+    // console.log("selectedFont", selectedFont);
   }, [orders, shopdetails, invoiceSettings, selectedFont]);
 
   return (
@@ -578,14 +578,14 @@ export function InvoiceTemplate3({ shopdetails, orders, invoiceSettings, GSTHSNC
           <tbody style={{ textAlign: "center" }}>
             {orders[0].line_items?.map((item, index) => {
               // console.log('GSTHSNCodes-------',GSTHSNCodes[0].productId);
-              console.log("item-------", item.product_id);
+              // console.log("item-------", item.product_id);
 
               const matchedGSTItem = GSTHSNCodes.gstcodes
                 ? GSTHSNCodes.gstcodes.find((gstItem) => Number(gstItem.productId) === item.product_id)
                 : GSTHSNCodes.find((gstItem) => Number(gstItem.productId) === item.product_id);
 
               const price = parseFloat(item.price) || 0; // Convert to a number and default to 0 if NaN
-              const lineAmount = item.quantity * price + (item.total_tax || 0) || 0;
+              const lineAmount = item.quantity * price + (Number(item?.tax_lines[0]?.price) || 0) || 0;
               return (
                 <tr key={item.id}>
                   {invoiceSettings.lineItems.showVariantTitle ? (
@@ -660,7 +660,7 @@ export function InvoiceTemplate3({ shopdetails, orders, invoiceSettings, GSTHSNC
                         textAlign: "center",
                       }}
                     >
-                      ₹{item.total_tax || "0"}
+                      ₹{item?.tax_lines[0]?.price || "0"}
                     </td>
                   ) : (
                     <></>
