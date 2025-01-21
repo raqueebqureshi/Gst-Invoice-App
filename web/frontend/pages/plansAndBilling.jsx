@@ -1,0 +1,1 @@
+// https://admin.shopify.com/store/devstore134/charges/gst-invoice-app-2/pricing_plans

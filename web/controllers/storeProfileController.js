@@ -43,7 +43,7 @@ export const updateStoreProfile = async (req, res) => {
 
 
 
-
+// fetch whole data from profile
 export const fetchShopProfile = async (req, res) => {
   try {
     // Extract shopId from the request query or body

@@ -29,6 +29,8 @@ export default function App() {
             <a href="/settings">{t("NavigationMenu.settings")}</a>
             <a href="/contactus">{t("NavigationMenu.contactus")}</a>
             <a href="/email-settings">{t("NavigationMenu.email-settings")}</a>
+            <a href="/plans">{t("NavigationMenu.plans")}</a>
+            
             
           </NavMenu>
         

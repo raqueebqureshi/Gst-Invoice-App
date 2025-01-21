@@ -48,5 +48,13 @@
     "primaryAction": "Primary action",
     "secondaryAction": "Secondary action",
     "title": "Email Settings"
+  },
+
+  "Plans": {
+    "body": "Body",
+    "heading": "Heading",
+    "primaryAction": "Primary action",
+    "secondaryAction": "Secondary action",
+    "title": "Plans and billing"
   }
 }
