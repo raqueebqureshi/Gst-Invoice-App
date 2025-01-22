@@ -628,7 +628,7 @@ export default function ProductIndexTable() {
    };
 
 
-   console.log("Payload to API:", payload);
+  //  console.log("Payload to API:", payload);
 
 
    try {
@@ -651,7 +651,7 @@ export default function ProductIndexTable() {
 
 
      const responseData = await response.json();
-     console.log("API Response:", responseData);
+    //  console.log("API Response:", responseData);
      // alert("Changes saved successfully!");
      // Reset editable values to blank after successful save
 

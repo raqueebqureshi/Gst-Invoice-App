@@ -22,9 +22,9 @@ export default function Orders() {
     })
     .then(request => request.json())
     .then(response => {
-      console.log("Store Details---!",response.data);
+      // console.log("Store Details---!",response.data);
       if (response.data.data.length > 0) {
-        console.log("Store Details---",response.data.data[0]);
+        // console.log("Store Details---",response.data.data[0]);
         setShopDetails(response.data.data[0]);
     
       }

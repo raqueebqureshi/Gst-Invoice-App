@@ -2,10 +2,14 @@ import React, { useState, useEffect } from "react";
 
 const PricingPlans = ({currentPlanId}) => {
   const [isYearly, setIsYearly] = useState(false);
-  const [storeName, setStoreName] = useState(""); // State to hold the store name
-  const currentOrders = 40; // Example: Change order count here
-  const milestones = [0, 50, 1000, 25000]; // Define milestones
-  const maxOrders = milestones[milestones.length - 1]; // Last milestone is max
+const [storeName, setStoreName] = useState(""); // State to hold the store name
+const currentOrders = 60; // Example: Change order count here
+const milestones = [0, 50, 1000, "Unlimited"]; // Define milestones
+
+const maxOrders = typeof milestones[milestones.length - 1] === "number" 
+  ? milestones[milestones.length - 1] 
+  : milestones[milestones.length - 2]; // Last numeric milestone
+
   // Fetch store details and set store name
   useEffect(() => {
     fetch("/api/2024-10/shop.json", {
@@ -38,12 +42,15 @@ const PricingPlans = ({currentPlanId}) => {
 
   // Calculate the progress percentage based on the milestones
   const progressPercentage = (() => {
-    const lower = milestones.find((milestone) => milestone <= currentOrders);
-    const upper = milestones.find((milestone) => milestone > currentOrders) || maxOrders;
+  if (!milestones || milestones.length === 0) return 0; // Handle empty milestones
 
-    if (upper === lower) return (lower / maxOrders) * 100; // Special case: exact match with maxOrders
-    return ((currentOrders - lower) / (upper - lower)) * (100 / (milestones.length - 1));
-  })();
+  // Ensure currentOrders does not exceed maxOrders
+  const clampedOrders = Math.min(currentOrders, maxOrders);
+
+  // Calculate cumulative percentage
+  return (clampedOrders / maxOrders) * 100;
+})();
+  
 
   const plans = [
     {
@@ -56,12 +63,12 @@ const PricingPlans = ({currentPlanId}) => {
     },
     {
       title: "Pro",
-      monthlyPrice: "$11.99",
-      yearlyPrice: "$100/year ($43 off)",
+      monthlyPrice: "$9.99",
+      yearlyPrice: "$89.99/year (36% off)",
       orderLimit: "1000 Orders per month",
       planId: "1",
       features: [
-        "Everything in Free+",
+        "Including Free plan +",
         "Customizable Template",
         "Use 5+ Templates",
         "Bulk Download Invoices",
@@ -71,12 +78,12 @@ const PricingPlans = ({currentPlanId}) => {
     },
     {
       title: "Business",
-      monthlyPrice: "$45",
-      yearlyPrice: "$500/year ($40 off)",
+      monthlyPrice: "$39.99",
+      yearlyPrice: "$339.99/year ($139 off)",
       orderLimit: "Unlimited Orders",
       planId: "2",
       features: [
-        "Everything in Basic + Pro",
+        "Including Free plan + ",
         "Customizable Template",
         "Use 5+ Templates",
         "Bulk Download Invoices",
@@ -117,8 +124,8 @@ const PricingPlans = ({currentPlanId}) => {
         </div>
 
         {/* Progress Bar */}
-        <div style={styles.progressContainer}>
-          <div style={styles.progressBar}>
+        {/* <div style={styles.progressContainer}> */}
+          {/* <div style={styles.progressBar}>
             <div
               style={{
                 ...styles.progressFill,
@@ -133,13 +140,13 @@ const PricingPlans = ({currentPlanId}) => {
             >
               {currentOrders} orders
             </div>
-          </div>
-          <div style={styles.progressLabels}>
-            {milestones.map((milestone, index) => (
+          </div> */}
+          {/* <div style={styles.progressLabels}> */}
+            {/* {milestones.map((milestone, index) => (
               <span key={index}>{milestone}</span>
-            ))}
-          </div>
-        </div>
+            ))} */}
+          {/* </div>
+        </div> */}
 
         {/* Plans Grid */}
         <div style={styles.plansGrid}>
@@ -159,7 +166,7 @@ const PricingPlans = ({currentPlanId}) => {
                 <>             
                <span style={{display:"flex", alignItems:"center",
                  background:"#d5ebff", paddingRight:"5px", paddingLeft:"5px", 
-                 borderRadius:"10px", fontSize:"12px", color:"#0f304f", textAlign:"center"}}
+                 borderRadius:"10px", fontSize:"12px", color:"#0f304f", textAlign:"center", marginBottom:"10px"}}
                  >Current
                  </span>
                 </>) }
@@ -316,7 +323,7 @@ const styles = {
       marginBottom: "8px",
     },
     planPrice: {
-      fontSize: "24px",
+      fontSize: "20px",
       fontWeight: "bold",
       marginBottom: "16px",
     },

@@ -78,6 +78,7 @@ export function OrderTableEx({ value, shopdetails }) {
   //   message: "",
   //   error: false,
   // });
+
   const [popoverActive, setPopoverActive] = useState({});
   const [InvoiceSetting2, setInvoiceSetting2] = useState({
     branding: {
@@ -193,7 +194,7 @@ export function OrderTableEx({ value, shopdetails }) {
     })
       .then((response) => response.json())
       .then((data) => {
-        console.log("Store Details---!", data.data);
+        // console.log("Store Details---!", data.data);
         setShopId(data.data.data[0].id);
         if (data.data.data && data.data.data.length > 0) {
           setStoreDomain(data.data.data[0].domain);
@@ -206,7 +207,7 @@ export function OrderTableEx({ value, shopdetails }) {
           })
             .then((request) => request.json())
             .then((response) => {
-              console.log("plan---!", response);
+              // console.log("plan---!", response);
               // const tempID = response.data.planId.split('/').pop();
               // console.log("tempID" ,tempID);
               const fetchedPlanId = response.updatedStore.plans.planId;
@@ -221,20 +222,7 @@ export function OrderTableEx({ value, shopdetails }) {
         // handleShowToast("Internal Server Error 500", true)
       });
 
-    const storedResponse = JSON.parse(localStorage.getItem("billingInfo"));
-    const proPlanResponse = JSON.parse(localStorage.getItem("proplan"));
-    const businessPlanResponse = JSON.parse(localStorage.getItem("businessplan"));
-    const currentPlanId = "1";
-    // Compare the numeric part with the plans
-    if (currentPlanId === proPlanResponse || currentPlanId === businessPlanResponse) {
-      setIsSubscribed(true);
-      console.log(
-        "Current Plan:",
-        proPlanResponse === currentPlanId ? `Pro: ${proPlanResponse}` : `Business: ${businessPlanResponse}`
-      );
-    } else {
-      setIsSubscribed(false);
-    }
+    
   }, []);
 
   useEffect(() => {
@@ -261,7 +249,7 @@ export function OrderTableEx({ value, shopdetails }) {
         if (response.data) {
           //console.log('response.data',response.data);
           setOrders(response.data);
-          console.log(response.data.length);
+          // console.log(response.data.length);
           setLoading(false);
           // handleShowToast("Orders Synced Complete");
           setShowToast(true);
@@ -291,13 +279,37 @@ export function OrderTableEx({ value, shopdetails }) {
       .then((data) => {
         if (data && data.profile) {
           const profileData = data.profile;
-          console.log("profileData", profileData);
+          // console.log("profileData", profileData);
           setShopProfile(profileData || {});
+
+    localStorage.setItem("planInfo", JSON.stringify(data.profile.plans));
+    localStorage.setItem("proplan", JSON.stringify('1'));
+    localStorage.setItem("businessplan", JSON.stringify('2'));
+
+    const storedResponse = JSON.parse(localStorage.getItem("planInfo"));
+    const proPlanResponse = JSON.parse(localStorage.getItem("proplan"));
+    const businessPlanResponse = JSON.parse(localStorage.getItem("businessplan"));
+    console.log('storedResponse',storedResponse); 
+    const currentPlanId = storedResponse.planId;
+    // Compare the numeric part with the plans
+    if (currentPlanId === proPlanResponse || currentPlanId === businessPlanResponse) {
+      setIsSubscribed(true);
+      console.log(
+        "Current Plan:",
+        proPlanResponse === currentPlanId ? `Pro: ${proPlanResponse}` : `Business: ${businessPlanResponse}`
+      );
+    } else {
+      setIsSubscribed(false);
+    }
         }
       })
       .catch((error) => {
         console.error("Error fetching store profile:", error);
-      });}
+      });
+    
+    
+    }
+
   }, [shopId]);
 
   useEffect(() => {

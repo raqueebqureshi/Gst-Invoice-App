@@ -23,7 +23,7 @@ export default function ContactUs() {
     .then(request => request.json())
     .then(response => {
       if (response.data.length > 0) {
-        console.log("Store Details ",response.data[0]);
+        // console.log("Store Details ",response.data[0]);
         setStoreName(response.data[0].name);
         setStoreDetails({
           Store_name: response.data[0].name,
@@ -32,7 +32,7 @@ export default function ContactUs() {
           domain: response.data[0].domain
           
         }); 
-        console.log("Send in email" , storeDetails)
+        // console.log("Send in email" , storeDetails)
       }
     })
     .catch(error => console.log(error));

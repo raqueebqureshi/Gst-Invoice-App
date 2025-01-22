@@ -3,7 +3,7 @@
 client_id = "f91cb213006ab6fb5448b00b9a44c33c"
 name = "Indian GST Invoice"
 handle = "gst-invoice-app-2"
-application_url = "https://primary-newspaper-doll-kinds.trycloudflare.com"
+application_url = "https://rider-into-printing-structured.trycloudflare.com"
 embedded = true
 
 [build]
@@ -17,9 +17,9 @@ scopes = "read_orders,read_products,write_products"
 
 [auth]
 redirect_urls = [
-  "https://primary-newspaper-doll-kinds.trycloudflare.com/auth/callback",
-  "https://primary-newspaper-doll-kinds.trycloudflare.com/auth/shopify/callback",
-  "https://primary-newspaper-doll-kinds.trycloudflare.com/api/auth/callback"
+  "https://rider-into-printing-structured.trycloudflare.com/auth/callback",
+  "https://rider-into-printing-structured.trycloudflare.com/auth/shopify/callback",
+  "https://rider-into-printing-structured.trycloudflare.com/api/auth/callback"
 ]
 
 [webhooks]

@@ -266,18 +266,51 @@ const EmailSetting = () => {
        });
 
 
-       const storedResponse = JSON.parse(localStorage.getItem("billingInfo"));
-       const proPlanResponse = JSON.parse(localStorage.getItem("proplan"));
-       const businessPlanResponse = JSON.parse(localStorage.getItem("businessplan"));
-       const currentPlanId = '1';
-       // Compare the numeric part with the plans
-       if (currentPlanId === proPlanResponse || currentPlanId === businessPlanResponse) {
-         setIsSubscribed(true);
-         console.log("Current Plan:", proPlanResponse === currentPlanId ? (`Pro: ${proPlanResponse}`) : `Business: ${businessPlanResponse}`);
-       } else{
-         setIsSubscribed(false);
-       }
+       
  }, []);
+
+ useEffect(() => {
+  if(shopId)
+  {fetch(`/api/fetch-store-profile?shopId=${shopId}`, {
+    method: "GET",
+    headers: { "Content-Type": "application/json" },
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      if (data && data.profile) {
+        const profileData = data.profile;
+        // console.log("profileData", profileData);
+        
+
+  localStorage.setItem("planInfo", JSON.stringify(data.profile.plans));
+  localStorage.setItem("proplan", JSON.stringify('1'));
+  localStorage.setItem("businessplan", JSON.stringify('2'));
+
+  const storedResponse = JSON.parse(localStorage.getItem("planInfo"));
+  const proPlanResponse = JSON.parse(localStorage.getItem("proplan"));
+  const businessPlanResponse = JSON.parse(localStorage.getItem("businessplan"));
+  // console.log('storedResponse',storedResponse); 
+  const currentPlanId = storedResponse.planId;
+  // Compare the numeric part with the plans
+  if (currentPlanId === proPlanResponse || currentPlanId === businessPlanResponse) {
+    setIsSubscribed(true);
+    // console.log(
+    //   "Current Plan:",
+    //   proPlanResponse === currentPlanId ? `Pro: ${proPlanResponse}` : `Business: ${businessPlanResponse}`
+    // );
+  } else {
+    setIsSubscribed(false);
+  }
+      }
+    })
+    .catch((error) => {
+      console.error("Error fetching store profile:", error);
+    });
+  
+  
+  }
+
+}, [shopId]);
 
 
  useEffect(() => {
@@ -531,11 +564,11 @@ let updatedSettings = smtpData
 
  return (
    <Page title="Email Configuration" fullWidth>
-     {isSubscribed && <UpgradeBanner/>}
+     {!isSubscribed && <UpgradeBanner buttonOn={true}/>}
     
-     <div style={{marginTop: '20px'}}>
+     <div style={{marginTop: '20px',}}>
        <AlphaCard>
-         <VerticalStack gap="5">
+         <VerticalStack gap="0">
            <div style={styles.headerContainer}>
              <div style={styles.titleSection}>
                <MdOutlineMailOutline/>
@@ -557,14 +590,14 @@ let updatedSettings = smtpData
            </div>
 
 
-           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+           {/* <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
              <Button onClick={handleTestConfiguration} outline disabled={isEnabledByApp ? false : true}>
                Send Test Email
              </Button>
              <p style={{ color: isEnabledByApp ? "black" : "gray" }}>
                Test email will be sent from <strong> app@domain.com</strong> to <strong> store@email.com</strong>
              </p>
-           </div>
+           </div> */}
          </VerticalStack>
        </AlphaCard>
      </div>
@@ -581,9 +614,9 @@ let updatedSettings = smtpData
        <div style={styles.titleSection}>
        <IoSettingsOutline/>
          <h2 style={styles.titleText}>Send from my own Email</h2>
-         <Button plain icon={<IoIosInformationCircleOutline/>} onClick={toggleModal}>
+         {/* <Button plain icon={<IoIosInformationCircleOutline/>} onClick={toggleModal}>
            How to configure SMTP?
-         </Button>
+         </Button> */}
          {active && (
            <Modal
              open={active}
@@ -719,7 +752,7 @@ let updatedSettings = smtpData
 
 
      <div style={styles.buttonWrapper}>
-       <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
+       {/* <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
          <Button
            onClick={handleTestConfiguration}
            disabled={!isEnabled}
@@ -731,8 +764,10 @@ let updatedSettings = smtpData
            Test email will be sent from <strong> entered@domain.com</strong> to{" "}
            <strong> store@email.com</strong>
          </p>
-       </div>
-
+       </div> */}
+<Button plain icon={<IoIosInformationCircleOutline/>} onClick={toggleModal} >
+           How to configure SMTP?
+         </Button>
 
        <Button primary onClick={handleSave} disabled={!isEnabled}>
          Save Settings
@@ -749,7 +784,7 @@ let updatedSettings = smtpData
 
      <div style={{ marginTop: "20px" , pointerEvents: "none", opacity: 0.5}}>
        <AlphaCard>
-         <VerticalStack gap="5">
+         <VerticalStack gap="0">
            <div style={styles.headerContainer}>
              <div style={styles.titleSection}>
                <MdOutlineMailOutline/>
@@ -774,9 +809,7 @@ let updatedSettings = smtpData
            </div>
 
 
-           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-            
-           </div>
+          
          </VerticalStack>
        </AlphaCard>
      </div>
@@ -793,6 +826,7 @@ let updatedSettings = smtpData
    />
  </div>
 }
+<div style={{ height: "100px" }}></div>
    </Page>
  );
 };
@@ -803,7 +837,7 @@ const styles = {
    display: "flex",
    justifyContent: "space-between",
    alignItems: "center",
-   paddingBottom: "12px",
+   paddingBottom: "0px",
  },
  titleSection: {
    display: "flex",
@@ -829,7 +863,7 @@ const styles = {
  buttonWrapper: {
    display: "flex",
    justifyContent: "space-between",
-   marginTop: "24px",
+   marginTop: "4px",
  },
  toggleWrapper: {
    width: "40px",

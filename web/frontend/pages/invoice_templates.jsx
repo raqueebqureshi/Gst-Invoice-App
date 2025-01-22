@@ -15,6 +15,7 @@ import UpgradeBanner from "../components/UpgradePlanBanner";
 
 export default function Orders() {
  const [storeDomain, setStoreDomain] = useState();
+ const [shopId, setShopId] = useState(null);
  const [loading, setLoading] = useState(true);
  const navigate = useNavigate(); // Initialize useNavigate
  const [showToast, setShowToast] = useState(false);
@@ -47,6 +48,7 @@ export default function Orders() {
        if (data.data.data && data.data.data.length > 0) {
          // Access the domain from the correct property
          setStoreDomain(data.data.data[0].domain);
+         setShopId(data.data.data[0].id);
          // console.log("Store domain set:", data.data.data[0].domain);
        }
        // console.log("store domain:", storeDomain)
@@ -54,21 +56,51 @@ export default function Orders() {
      .catch((error) => {
        // console.log("Error fetching store details:", error)
      });
-   const storedResponse = JSON.parse(localStorage.getItem("billingInfo"));
-   const proPlanResponse = JSON.parse(localStorage.getItem("proplan"));
-   const businessPlanResponse = JSON.parse(localStorage.getItem("businessplan"));
-   const currentPlanId = "1";
-   // Compare the numeric part with the plans
-   if (currentPlanId === "1" || currentPlanId === businessPlanResponse) {
-     setIsSubscribed(true);
-     console.log(
-       "Current Plan:",
-       proPlanResponse === currentPlanId ? `Pro: ${proPlanResponse}` : `Business: ${businessPlanResponse}`
-     );
-   } else {
-     setIsSubscribed(false);
-   }
+   
  }, []);
+
+ useEffect(() => {
+  if(shopId)
+  {fetch(`/api/fetch-store-profile?shopId=${shopId}`, {
+    method: "GET",
+    headers: { "Content-Type": "application/json" },
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      if (data && data.profile) {
+        const profileData = data.profile;
+        // console.log("profileData", profileData);
+        
+
+  localStorage.setItem("planInfo", JSON.stringify(data.profile.plans));
+  localStorage.setItem("proplan", JSON.stringify('1'));
+  localStorage.setItem("businessplan", JSON.stringify('2'));
+
+  const storedResponse = JSON.parse(localStorage.getItem("planInfo"));
+  const proPlanResponse = JSON.parse(localStorage.getItem("proplan"));
+  const businessPlanResponse = JSON.parse(localStorage.getItem("businessplan"));
+  // console.log('storedResponse',storedResponse); 
+  const currentPlanId = storedResponse.planId;
+  // Compare the numeric part with the plans
+  if (currentPlanId === proPlanResponse || currentPlanId === businessPlanResponse) {
+    setIsSubscribed(true);
+    // console.log(
+    //   "Current Plan:",
+    //   proPlanResponse === currentPlanId ? `Pro: ${proPlanResponse}` : `Business: ${businessPlanResponse}`
+    // );
+  } else {
+    setIsSubscribed(false);
+  }
+      }
+    })
+    .catch((error) => {
+      console.error("Error fetching store profile:", error);
+    });
+  
+  
+  }
+
+}, [shopId]);
 
 
  useEffect(() => {
@@ -126,7 +158,7 @@ export default function Orders() {
 
          <Layout>
            <div style={{ paddingTop: "20px", display: "flex", flexDirection: "column", gap: "10px", width: "90%" }}>
-             {isSubscribed && <UpgradeBanner msg={"Upgrade your plan to access and customized multiple templates."} buttonOn={true} />}
+             {!isSubscribed && <UpgradeBanner msg={"Upgrade your plan to access and customized multiple templates."} buttonOn={true} />}
            </div>
            <p style={{ paddingTop: "20px", textAlign: "start", width: "90%", fontWeight: "600" }}>
              Available Invoice Templates

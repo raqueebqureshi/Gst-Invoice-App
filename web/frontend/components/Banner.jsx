@@ -8,7 +8,7 @@ export function BannerEx() {
 
   const handleDismiss = () => {
     setIsVisible(false); // Hide the banner by setting display to none
-    console.log("Banner dismissed");
+    // console.log("Banner dismissed");
   };
 
   return (
