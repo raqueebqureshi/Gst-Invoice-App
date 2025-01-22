@@ -1,15 +1,16 @@
-import Product from '../Models/productHSN.js';
+import Product from "../Models/productHSN.js";
 
 /**
  * Insert or update products in the database for a specific store.
  */
 export const insertProductIntoDB = async (req, res) => {
   const { storeDomain, email, products } = req.body;
-  console.log("body", req.body)
+  console.log("body", req.body);
 
   if (!storeDomain || !email || !products || !Array.isArray(products)) {
     return res.status(400).json({
-      message: 'Invalid request. Please provide storeDomain, email, and products.',
+      message:
+        "Invalid request. Please provide storeDomain, email, and products.",
     });
   }
 
@@ -17,33 +18,56 @@ export const insertProductIntoDB = async (req, res) => {
     let existingStore = await Product.findOne({ storeDomain });
 
     if (existingStore) {
-      existingStore.products = products;
+      // Merge new products with existing ones, ensuring no duplicates
+      const existingProductIds = new Set(
+        existingStore.products.map((product) => {
+          // console.log("product.id", product.productId);
+          return product.productId;
+        } 
+      ),
+        
+      );
+      const uniqueNewProducts = products.filter(
+        (product) => {
+          // console.log('!existingProductIds.has(product.productId)', !existingProductIds.has(product.productId.toString()));
+          // console.log('product', product);
+          // console.log('existingProductIds',existingProductIds);
+          // console.log('product.productId.toString()', typeof product.productId.toString());
+          return !existingProductIds.has(product.productId.toString());
+        }
+      );
+
+      // Add unique new products to the existing products array
+      existingStore.products.push(...uniqueNewProducts);
+
       await existingStore.save();
+
       return res.status(200).json({
-        message: 'Products updated successfully.',
+        message: "Products updated successfully with unique new products.",
         store: existingStore,
       });
     } else {
+      // Create a new store with the provided data
       const newStore = new Product({
         storeDomain,
         email,
         products,
       });
       await newStore.save();
+
       return res.status(201).json({
-        message: 'Products saved successfully.',
+        message: "Products saved successfully.",
         store: newStore,
       });
     }
   } catch (error) {
-    console.error('Error saving products:', error);
+    console.error("Error saving products:", error);
     return res.status(500).json({
-      message: 'Internal server error.',
+      message: "Internal server error.",
       error: error.message,
     });
   }
 };
-
 
 
 /**
@@ -57,7 +81,8 @@ export const updateProductsInDB = async (req, res) => {
   // Validate the input
   if (!storeDomain || !email || !products || !Array.isArray(products)) {
     return res.status(400).json({
-      message: 'Invalid request. Please provide storeDomain, email, and products.',
+      message:
+        "Invalid request. Please provide storeDomain, email, and products.",
     });
   }
 
@@ -67,7 +92,7 @@ export const updateProductsInDB = async (req, res) => {
 
     if (!store) {
       return res.status(404).json({
-        message: 'Store not found or invalid email.',
+        message: "Store not found or invalid email.",
       });
     }
 
@@ -92,19 +117,17 @@ export const updateProductsInDB = async (req, res) => {
 
     console.log("Updated Store:", store); // Debug log
     return res.status(200).json({
-      message: 'Products updated successfully.',
+      message: "Products updated successfully.",
       store,
     });
   } catch (error) {
-    console.error('Error updating products:', error);
+    console.error("Error updating products:", error);
     return res.status(500).json({
-      message: 'Internal server error.',
+      message: "Internal server error.",
       error: error.message,
     });
   }
 };
-
-
 
 /**
  * Fetch GST values for all products of a specific store.
@@ -152,4 +175,3 @@ export const getAndHSNValuesFromDB = async (req, res) => {
     });
   }
 };
-

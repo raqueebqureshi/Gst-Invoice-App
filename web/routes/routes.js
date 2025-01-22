@@ -37,6 +37,8 @@ import {
   sendTestEmailFromAppSMTP,
 } from "../controllers/sendTestEmail.js";
 
+import { handleBillingConfirmation } from '../controllers/Plans_billing.js'
+
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
 
@@ -122,5 +124,7 @@ router.post("/api/send-test-email-app-smtp", sendTestEmailFromAppSMTP);
 
 
 
+//get billing 
+router.get('/api/billing/confirm', handleBillingConfirmation);
 
 export default router;

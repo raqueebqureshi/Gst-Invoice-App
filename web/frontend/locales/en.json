@@ -14,6 +14,7 @@
     "settings": "Settings",
     "contactus": "ContactUs",
     "email-settings" : "Email Settings",
+    "plans_and_billings" : "Plans and Billings",
     "notfound": "Not Found"
   },
   "NotFound": {
@@ -48,5 +49,13 @@
     "primaryAction": "Primary action",
     "secondaryAction": "Secondary action",
     "title": "Email Settings"
+  },
+
+  "PlansAndBillings": {
+    "body": "Body",
+    "heading": "Heading",
+    "primaryAction": "Primary action",
+    "secondaryAction": "Secondary action",
+    "title": "Plans and Billings"
   }
 }
