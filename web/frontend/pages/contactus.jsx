@@ -10,10 +10,67 @@ export default function ContactUs() {
   const [isSubmitting, setIsSubmitting] = useState(false); // Track loading state
   const [storeName, setStoreName] = useState("");
   const [storeDetails, setStoreDetails] = useState({});
+  const [lastMonthOrders, setLastMonthOrders] = useState([]);
+  
 
+  async function fetchLastMonthOrders() {
+    const currentDate = new Date();
+  
+    // Calculate the first and last day of the previous month in UTC
+    const firstDayLastMonth = new Date(Date.UTC(currentDate.getUTCFullYear(), currentDate.getUTCMonth() - 1, 1));
+    const lastDayLastMonth = new Date(Date.UTC(currentDate.getUTCFullYear(), currentDate.getUTCMonth(), 0));
+  
+    // Format the dates for the query
+    const startDate = firstDayLastMonth.toISOString().split("T")[0] + "T00:00:00Z";
+    const endDate = lastDayLastMonth.toISOString().split("T")[0] + "T23:59:59Z";
+  
+    console.log("Fetching orders from:", startDate, "to", endDate);
+  
+    try {
+      // Fetch orders from Shopify API
+      const response = await fetch(
+        `/api/2024-10/orders.json?created_at_min=${startDate}&created_at_max=${endDate}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+  
+      if (!response.ok) {
+        console.error("Failed to fetch orders:", response.statusText);
+        return [];
+      }
+  
+      const data = await response.json();
+  
+      console.log("Fetched orders:", data);
+  
+      // Assuming the API returns orders in `data.orders`
+      return data.data || [];
+    } catch (error) {
+      console.error("Error fetching orders:", error);
+      return [];
+    }
+  }
+  
+  // Example Usage
+  (async () => {
+    const orders = await fetchLastMonthOrders();
+    console.log("Orders from last month:", orders);
+  })();
   
 
 
+    useEffect(() => {
+      const getOrders = async () => {
+        const orders = await fetchLastMonthOrders();
+        setLastMonthOrders(orders);
+      };
+  
+      getOrders();
+    }, []);
 //Fetch store details and send with email
   useEffect(() => { 
     fetch("/api/shop/all", {
@@ -126,6 +183,9 @@ export default function ContactUs() {
           </AlphaCard>
         </Layout.Section>
       </Layout>
+
+       <h2>Last Month Orders</h2>
+                        <p>Total Orders: {lastMonthOrders.length}</p>
     </Page>
   );
 }

@@ -27,6 +27,13 @@ export default function HomePage() {
   const navigate = useNavigate(); // Initialize useNavigate
   const [shopDetails, setShopDetails] = useState([]);
 
+
+
+
+  
+
+
+
   // Fetch all products
   useEffect(() => {
     fetch("/api/2024-10/products.json", {
@@ -120,16 +127,11 @@ export default function HomePage() {
                   image="https://cdn.shopify.com/s/files/1/0262/4071/2726/files/emptystate-files.png"
                 >
                   <p>Manage your all invoicing in one place</p>
+                 
                 </EmptyState>
               </LegacyCard>
             </VerticalStack>
 
-            {/* <FooterHelp>
-            Need Help{' '}
-            <Link url="" removeUnderline>
-              please click here
-            </Link>
-          </FooterHelp> */}
           </Page>
         )}
       </div>

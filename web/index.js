@@ -683,6 +683,7 @@ app.get("/api/2024-10/orders.json", async (req, res) => {
 });
 
 
+
 app.get("/api/2024-10/shop.json", async (req, res) => {
   try {
     const shopDetails = await shopify.api.rest.Shop.all({
