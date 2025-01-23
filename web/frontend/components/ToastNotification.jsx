@@ -15,6 +15,7 @@ const ToastNotification = ({ message, duration = 4000 }) => {
           content={message}
           onDismiss={handleDismiss}
           duration={duration} // Default duration is 4000ms, can be customized
+  
         />
       )}
     </Frame>

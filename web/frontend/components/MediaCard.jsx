@@ -10,6 +10,8 @@ export function MediaCardExample2({
   description,
   isSelected,
   onSelect,
+  
+  
 }) {
   return (
     <AlphaCard

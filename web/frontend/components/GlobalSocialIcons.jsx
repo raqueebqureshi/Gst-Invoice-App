@@ -1,12 +1,18 @@
 import { Icon } from "@shopify/polaris";
 import React, { useEffect, useState, useCallback, use } from "react";
-import {
-  LogoYoutubeIcon,
-  LogoFacebookIcon,
-  LogoInstagramIcon,
-  LogoXIcon,
-  LogoPinterestIcon,
-} from "@shopify/polaris-icons";
+// import {
+//   LogoYoutubeIcon,
+//   LogoFacebookIcon,
+//   LogoInstagramIcon,
+//   LogoXIcon,
+//   LogoPinterestIcon,
+// } from "@shopify/polaris-icons";
+import { FaFacebook , FaYoutube , FaPinterestP} from "react-icons/fa";
+import { FaXTwitter } from "react-icons/fa6";
+
+
+import { AiFillInstagram } from "react-icons/ai";
+
 
 const MediaIcons = ({ socialLink, invoiceSetting }) => {
   const [socialLinks, setSocialLinks] = useState({
@@ -16,6 +22,7 @@ const MediaIcons = ({ socialLink, invoiceSetting }) => {
     pinterestURL: "",
     youtubeURL: "",
   });
+
 
 //   useEffect(() => {
 //     fetch(`/api/fetch-store-profile?shopId=${shopId}`, {
@@ -35,9 +42,11 @@ const MediaIcons = ({ socialLink, invoiceSetting }) => {
 //       });
 //   }, [shopId]);
 
+
 useEffect(() => {
   setSocialLinks(socialLink);
 }, [socialLink]);
+
 
   return (
     <>
@@ -58,14 +67,18 @@ useEffect(() => {
             rel="noopener noreferrer"
             style={{
               textDecoration: "none",
+              color:"black"
             }}
           >
-            <Icon source={LogoYoutubeIcon} />
+          <FaYoutube />
+
+
           </a>
         </>
       ) : (
         <></>
       )}
+
 
       {invoiceSetting.footer.socialNetworks.showFacebook? (
         <>
@@ -76,9 +89,12 @@ useEffect(() => {
             rel="noopener noreferrer"
             style={{
               textDecoration: "none",
+              color:"black"
             }}
           >
-            <Icon source={LogoFacebookIcon} />
+           <FaFacebook />
+
+
           </a>
         </>
       ) : (
@@ -93,9 +109,12 @@ useEffect(() => {
             rel="noopener noreferrer"
             style={{
               textDecoration: "none",
+              color:"black"
             }}
           >
-            <Icon source={LogoInstagramIcon} />
+           <AiFillInstagram />
+
+
           </a>
         </>
       ) : (
@@ -110,9 +129,10 @@ useEffect(() => {
             rel="noopener noreferrer"
             style={{
               textDecoration: "none",
+              color:"black"
             }}
           >
-            <Icon source={LogoXIcon} />
+            <FaXTwitter />
           </a>
         </>
       ) : (
@@ -127,18 +147,27 @@ useEffect(() => {
             rel="noopener noreferrer"
             style={{
               textDecoration: "none",
+              color:"black"
             }}
           >
-            <Icon source={LogoPinterestIcon} />
+           <FaPinterestP />
+
+
           </a>
         </>
       ) : (
         <></>
       )}
     </div>)}
-    
+   
     </>
   );
 };
 
+
 export default MediaIcons;
+
+
+
+
+

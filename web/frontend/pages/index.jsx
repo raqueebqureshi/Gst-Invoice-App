@@ -13,7 +13,7 @@ import { BannerEx } from "../components/Banner";
 import { OrderTableEx } from "../components/IndexTable.jsx";
 import "@shopify/polaris/build/esm/styles.css";
 import "../styles.css";
-import { useEffect, useState } from "react";
+import { use, useEffect, useState } from "react";
 import { InvoiceTemplate2 } from "../invoiceTemplates/invoice-template2.jsx";
 import { LegacyCard, EmptyState } from "@shopify/polaris";
 import React from "react";
@@ -67,8 +67,58 @@ export default function HomePage() {
         }
       })
       .catch((error) => console.log(error));
+
+      
+
   }, []);
 
+
+  useEffect(() => {
+    fetch("/api/2024-10/shop.json", {
+      method: "GET",
+      headers: { "Content-Type": "application/json" },
+    })
+      .then((request) => request.json())
+      .then((response) => {
+        if (response.data.length > 0) {
+          // console.log("Store Details ", response.data);
+          setShopDetails(response.data[0]);
+          setStoreName(response.data.data[0].name);
+          // console.log("store name : ", storeName);
+        }
+      })
+      .catch((error) => console.log(error));
+
+      
+    const demiResponse = {
+      data: {
+        planId: "gid://shopify/AppSubscription/29724770533",
+        planStartDate: "2025-01-21T08:02:40Z",
+      },
+      message: "Billing confirmed and plan updated.",
+      success: true,
+    };
+
+    // Store the object in local storage
+    localStorage.setItem("billingInfo", JSON.stringify(demiResponse));
+    localStorage.setItem("proplan", JSON.stringify('29724770533'));
+    localStorage.setItem("businessplan", JSON.stringify('29724803301'));
+
+    // Retrieve and log it to confirm
+    const storedResponse = JSON.parse(localStorage.getItem("billingInfo"));
+    const proPlanResponse = JSON.parse(localStorage.getItem("proplan"));
+    const businessPlanResponse = JSON.parse(localStorage.getItem("businessplan"));
+    const currentPlanId = storedResponse.data.planId.split("/").pop();
+
+    // Compare the numeric part with the plans
+    if (currentPlanId === proPlanResponse) {
+      console.log("Current Plan: Pro", proPlanResponse);
+    } else{
+      console.log("Current Plan: Business", businessPlanResponse);
+    } 
+    }
+
+  );
   return (
     <>
       <div>

@@ -2,7 +2,6 @@ import React, { useEffect, useState, useCallback } from "react";
 import { MdOutlineFileDownload, MdPrint } from "react-icons/md";
 import { FaArrowAltCircleDown } from "react-icons/fa";
 import ReactDOMServer from "react-dom/server";
-import { useSimpleToast } from "./Toast";
 import ToastNotification from "../components/ToastNotification";
 import {
   Pagination,
@@ -34,7 +33,6 @@ import { InvoiceTemplate1 } from "../invoiceTemplates/invoice-template1";
 import { InvoiceTemplate2 } from "../invoiceTemplates/invoice-template2";
 import { InvoiceTemplate3 } from "../invoiceTemplates/invoice-template3";
 import { useIndexResourceState } from "@shopify/polaris";
-import { MenuHorizontalIcon } from "@shopify/polaris-icons";
 
 const filterOrders = (orders, query) => {
   return orders.filter((order) => {
@@ -72,6 +70,7 @@ export function OrderTableEx({ value, shopdetails }) {
   const [printingRowId, setPrintingRowId] = useState(null);
   const [isEmailEnabled, setIsEmailEnabled] = useState(false);
   const [shopId, setShopId] = useState(null);
+  const [isSubscribed, setIsSubscribed] = useState(false);
   const itemsPerPage = 20;
   // const [showToast, setShowToast] = useState({
   //   active: false,
@@ -193,12 +192,26 @@ export function OrderTableEx({ value, shopdetails }) {
     })
       .then((response) => response.json())
       .then((data) => {
-        //console.log("Store Details---!", data.data);
+        console.log("Store Details---!", data.data);
         setShopId(data.data.data[0].id);
         if (data.data.data && data.data.data.length > 0) {
           setStoreDomain(data.data.data[0].domain);
           setEmail(data.data.data[0].email);
           setShopId(data.data.data[0].id);
+
+          fetch(`/api/billing/confirm?shop=${response.data.data[0].domain}`, {
+            method: "GET",
+            headers: { "Content-Type": "application/json" },
+          })
+            .then((request) => request.json())
+            .then((response) => {
+              console.log("plan---!", response);
+              // const tempID = response.data.planId.split('/').pop();
+              // console.log("tempID" ,tempID);
+              const fetchedPlanId = response.updatedStore.plans.planId;
+              setplanId(fetchedPlanId);
+            })
+            .catch((error) => console.log(error));
         }
       })
       .catch((error) => {
@@ -206,6 +219,21 @@ export function OrderTableEx({ value, shopdetails }) {
         setToastMessage("Internal Server Error 500");
         // handleShowToast("Internal Server Error 500", true)
       });
+
+    const storedResponse = JSON.parse(localStorage.getItem("billingInfo"));
+    const proPlanResponse = JSON.parse(localStorage.getItem("proplan"));
+    const businessPlanResponse = JSON.parse(localStorage.getItem("businessplan"));
+    const currentPlanId = "1";
+    // Compare the numeric part with the plans
+    if (currentPlanId === proPlanResponse || currentPlanId === businessPlanResponse) {
+      setIsSubscribed(true);
+      console.log(
+        "Current Plan:",
+        proPlanResponse === currentPlanId ? `Pro: ${proPlanResponse}` : `Business: ${businessPlanResponse}`
+      );
+    } else {
+      setIsSubscribed(false);
+    }
   }, []);
 
   useEffect(() => {
@@ -235,7 +263,7 @@ export function OrderTableEx({ value, shopdetails }) {
           setLoading(false);
           // handleShowToast("Orders Synced Complete");
           setShowToast(true);
-          setToastMessage("Orders Synced Complete");
+          setToastMessage("Orders Synced");
         }
       })
       .catch((error) => {
@@ -252,7 +280,8 @@ export function OrderTableEx({ value, shopdetails }) {
   );
 
   useEffect(() => {
-    fetch(`/api/fetch-store-profile?shopId=${shopId}`, {
+    if(shopId)
+    {fetch(`/api/fetch-store-profile?shopId=${shopId}`, {
       method: "GET",
       headers: { "Content-Type": "application/json" },
     })
@@ -266,7 +295,7 @@ export function OrderTableEx({ value, shopdetails }) {
       })
       .catch((error) => {
         console.error("Error fetching store profile:", error);
-      });
+      });}
   }, [shopId]);
 
   useEffect(() => {
@@ -348,6 +377,7 @@ export function OrderTableEx({ value, shopdetails }) {
   };
 
   useEffect(() => {
+    if(shopId){
     fetch(`/api/smtp/get?shopId=${shopId}`, {
       method: "GET",
       headers: { "Content-Type": "application/json" },
@@ -356,7 +386,7 @@ export function OrderTableEx({ value, shopdetails }) {
       .then((data) => {
         if (data) {
           // console.log("Shop Profile Data", data);
-          if (data.smtpData.sendByOwnEmail || data.smtpData.sendByAppEmail) {
+          if (data?.smtpData?.sendByOwnEmail || data?.smtpData?.sendByAppEmail) {
             setIsEmailEnabled(true);
           } else {
             setIsEmailEnabled(false);
@@ -365,7 +395,7 @@ export function OrderTableEx({ value, shopdetails }) {
       })
       .catch((error) => {
         console.error("Error fetching store profile:", error);
-      });
+      });}
   }, [shopId]);
 
   // Helper function to generate PDF as Blob
@@ -1067,7 +1097,7 @@ export function OrderTableEx({ value, shopdetails }) {
         pdf.save(`Invoice-${order.order_number}.pdf`);
         setIsPDFGenerating(false);
         setPdfGeneratingRowId(null);
-        console.log("PDF generated successfully.");
+        console.log("PDF generated");
       } catch (error) {
         setIsPDFGenerating(false);
         setPdfGeneratingRowId(null);
@@ -1174,7 +1204,7 @@ export function OrderTableEx({ value, shopdetails }) {
         }
   
         pdf.save(`Invoices-Bulk.pdf`);
-        console.log("Bulk PDF generated successfully.");
+        console.log("Bulk PDF generated");
       } catch (error) {
         console.error("Error generating bulk PDF:", error);
       }
@@ -1560,33 +1590,40 @@ export function OrderTableEx({ value, shopdetails }) {
                 transition: "all 0.3s ease",
                 backgroundColor: "white",
                 height: "30px", // Set consistent height
-                opacity: selectedResources.length > 1 ? "0.5" : "1",
-                pointerEvents: selectedResources.length > 1 ? "none" : "auto",
+                opacity: selectedResources.length > 1 && orders.length > 50 ? "0.5" : "1",
+                pointerEvents: selectedResources.length > 1 && orders.length > 50 ? "none" : "auto",
               }}
+              disabled={orders.length > 50 ? true: false}
               onClick={(e) => {
                 e.stopPropagation();
-                if (!isPDFGenerating) {
-                  setIsPDFGenerating(true);
-                  handlePdfDownload(
-                    paginatedOrders[index],
-                    shopdetails,
-                    currentTemplateId,
-                    InvoiceSetting2,
-                    GSTHSNCodes,
-                    shopProfile
-                  )
-                    .then(() => {
-                      setIsPDFGenerating(false);
-                      setPdfGeneratingRowId(null);
-                      setShowToast(true);
-                      setToastMessage("PDF generated successfully");
-                    })
-                    .catch(() => {
-                      setIsPDFGenerating(false);
-                      setPdfGeneratingRowId(null);
-                    });
-                  setPdfGeneratingRowId(id);
+                if(orders.length > 50){
+                  setShowToast(true);
+                  setToastMessage("You have exceed maximum invoice limit of 50 orders, please subscribe to premium plan to generate more invoices");
+                }else{
+                  if (!isPDFGenerating) {
+                    setIsPDFGenerating(true);
+                    handlePdfDownload(
+                      paginatedOrders[index],
+                      shopdetails,
+                      currentTemplateId,
+                      InvoiceSetting2,
+                      GSTHSNCodes,
+                      shopProfile
+                    )
+                      .then(() => {
+                        setIsPDFGenerating(false);
+                        setPdfGeneratingRowId(null);
+                        setShowToast(true);
+                        setToastMessage("PDF generated");
+                      })
+                      .catch(() => {
+                        setIsPDFGenerating(false);
+                        setPdfGeneratingRowId(null);
+                      });
+                    setPdfGeneratingRowId(id);
+                  }
                 }
+                
               }}
               className="btn-actions"
             >
@@ -1627,33 +1664,39 @@ export function OrderTableEx({ value, shopdetails }) {
                 transition: "all 0.3s ease",
                 backgroundColor: "white",
                 height: "30px",
-                opacity: selectedResources.length > 1 ? "0.5" : "1",
-                pointerEvents: selectedResources.length > 1 ? "none" : "auto",
+                opacity: selectedResources.length > 1 && orders.length > 50 ? "0.5" : "1",
+                pointerEvents: selectedResources.length > 1 && orders.length > 50 ? "none" : "auto",
               }}
               onClick={(e) => {
                 e.stopPropagation();
-                if (!isPDFPrinting) {
-                  setIsPDFPrinting(true);
-                  handlePrint(
-                    paginatedOrders[index],
-                    shopdetails,
-                    currentTemplateId,
-                    InvoiceSetting2,
-                    GSTHSNCodes,
-                    shopProfile
-                  )
-                    .then(() => {
-                      setIsPDFPrinting(false);
-                      setPrintingRowId(null);
-                      setShowToast(true);
-                      setToastMessage("PDF printed successfully");
-                    })
-                    .catch(() => {
-                      setIsPDFPrinting(false);
-                      setPrintingRowId(null);
-                    });
-                  setPrintingRowId(id);
+                if(orders.length > 50){
+                  setShowToast(true);
+                  setToastMessage("You have exceed maximum invoice limit of 50 orders, please subscribe to premium plan to print more invoices");
+                }else{
+                  if (!isPDFPrinting) {
+                    setIsPDFPrinting(true);
+                    handlePrint(
+                      paginatedOrders[index],
+                      shopdetails,
+                      currentTemplateId,
+                      InvoiceSetting2,
+                      GSTHSNCodes,
+                      shopProfile
+                    )
+                      .then(() => {
+                        setIsPDFPrinting(false);
+                        setPrintingRowId(null);
+                        setShowToast(true);
+                        setToastMessage("PDF printed");
+                      })
+                      .catch(() => {
+                        setIsPDFPrinting(false);
+                        setPrintingRowId(null);
+                      });
+                    setPrintingRowId(id);
+                  }
                 }
+               
               }}
               className="btn-actions"
             >
@@ -1698,30 +1741,38 @@ export function OrderTableEx({ value, shopdetails }) {
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
+                    opacity: selectedResources.length > 1 && orders.length > 50 ? "0.5" : "1",
+                pointerEvents: selectedResources.length > 1 && orders.length > 50 ? "none" : "auto",
                   }}
                   onClick={() => {
-                    if (!isSending) {
-                      setSendingRowId(id);
-                      setIsSending(true);
-                      quickSendInvoice({
-                        orderDetails: paginatedOrders[index],
-                        shopDetails: shopdetails,
-                        invoiceSettings: InvoiceSetting2,
-                        customerEmail: paginatedOrders[index].customer.email,
-                        gstcodes: GSTHSNCodes,
-                        currentTemplate: currentTemplateId,
-                      })
-                        .then(() => {
-                          setIsSending(false);
-                          setSendingRowId(null);
-                          setShowToast(true);
-                          setToastMessage("Invoice sent successfully");
+                    if(orders.length > 50){
+                      setShowToast(true);
+                      setToastMessage("You have exceed maximum invoice limit of 50 orders, please subscribe to premium plan to send more invoices");
+                    }else{
+                      if (!isSending) {
+                        setSendingRowId(id);
+                        setIsSending(true);
+                        quickSendInvoice({
+                          orderDetails: paginatedOrders[index],
+                          shopDetails: shopdetails,
+                          invoiceSettings: InvoiceSetting2,
+                          customerEmail: paginatedOrders[index].customer.email,
+                          gstcodes: GSTHSNCodes,
+                          currentTemplate: currentTemplateId,
                         })
-                        .catch(() => {
-                          setIsSending(false);
-                          setSendingRowId(null);
-                        });
+                          .then(() => {
+                            setIsSending(false);
+                            setSendingRowId(null);
+                            setShowToast(true);
+                            setToastMessage("Invoice sent");
+                          })
+                          .catch(() => {
+                            setIsSending(false);
+                            setSendingRowId(null);
+                          });
+                      }
                     }
+                    
                   }}
                 />
               )}
@@ -1754,6 +1805,7 @@ export function OrderTableEx({ value, shopdetails }) {
                 justifyContent: "space-between",
                 marginBottom: "10px",
                 gap: "10px",
+
               }}
             >
               <input
@@ -1768,9 +1820,19 @@ export function OrderTableEx({ value, shopdetails }) {
                   border: "1px solid black",
                 }}
               />
+              <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",       
+                gap: "10px",
+                opacity: isSubscribed ? "1" : "0.5", // Reduce opacity when disabled
+                pointerEvents: isSubscribed ? "auto" : "none", // Disable interaction when not subscribed
+              }}
+            >
               <Button
                 primary
-                disabled={isPDFGeneratingBulk ? true : false}                onClick={() => {
+                disabled={isPDFGeneratingBulk ? true : false}                
+                onClick={() => {
                   // handleBulkPrintDownload(
                   //   orders.filter((order) =>
                   //     selectedResources.includes(order.id)
@@ -1779,25 +1841,37 @@ export function OrderTableEx({ value, shopdetails }) {
                   //   currentTemplateId
                   // )
                   setIsPDFGeneratingBulk(true);
-                  if(!isPDFGeneratingBulk){
-                  handleBulkPdfDownload(
-                    paginatedOrders.slice(0, 10), // Get first 10 orders
-                    shopdetails,
-                    currentTemplateId,
-                    InvoiceSetting2,
-                    GSTHSNCodes,
-                    shopProfile
-                  ).then(() => {
-                    setIsPDFGeneratingBulk(false);
+                  if(selectedResources.length === 0){
                     setShowToast(true);
-                    setToastMessage("PDF generated successfully");
-                  })
-                  .catch(() => {
+                    setToastMessage("Please select orders");
                     setIsPDFGeneratingBulk(false);
+                  }
+                  else if(selectedResources.length >= 10){
                     setShowToast(true);
-                    setToastMessage("Error while generating PDF");
-                  });
-                }
+                    setToastMessage("Please select upto 10 orders");
+                    setIsPDFGeneratingBulk(false);
+                  }else{
+                    if(!isPDFGeneratingBulk){
+                      handleBulkPdfDownload(
+                        paginatedOrders.slice(0, 10), // Get first 10 orders
+                        shopdetails,
+                        currentTemplateId,
+                        InvoiceSetting2,
+                        GSTHSNCodes,
+                        shopProfile
+                      ).then(() => {
+                        setIsPDFGeneratingBulk(false);
+                        setShowToast(true);
+                        setToastMessage("PDF generated");
+                      })
+                      .catch(() => {
+                        setIsPDFGeneratingBulk(false);
+                        setShowToast(true);
+                        setToastMessage("Error while generating PDF");
+                      });
+                    }
+                  }
+                  
                 }}
                 // disabled={selectedResources.length < 1 || selectedResources.length > 10}
               >
@@ -1828,6 +1902,17 @@ export function OrderTableEx({ value, shopdetails }) {
                   //   currentTemplateId
                   // )
                   setIsPDFPrintingBulk(true);
+                  if(selectedResources.length === 0){
+                    setShowToast(true);
+                    setToastMessage("Please select orders");
+                    setIsPDFPrintingBulk(false);
+                  }
+                  else if(selectedResources.length >= 10){
+                    setShowToast(true);
+                    setToastMessage("Please select upto 10 orders");
+                    setIsPDFPrintingBulk(false);
+                  }
+                  else{
                   if(!isPDFPrintingBulk){
                     handleBulkPrint(
                       paginatedOrders.slice(0, 10), // Get first 10 orders
@@ -1839,14 +1924,14 @@ export function OrderTableEx({ value, shopdetails }) {
                     ).then(() => {
                       setIsPDFPrintingBulk(false);
                       setShowToast(true);
-                      setToastMessage("PDF printed successfully");
+                      setToastMessage("PDF printed");
                     })
                     .catch(() => {
                       setIsPDFPrintingBulk(false);
                       setShowToast(true);
                       setToastMessage("Error while printing PDF");
                     });
-                  }
+                  }}
                   
                 }}
                 // disabled={selectedResources.length < 1 || selectedResources.length > 10}
@@ -1867,6 +1952,8 @@ export function OrderTableEx({ value, shopdetails }) {
     <MdPrint style={{ height: "20px", width: "20px" }} />
   )}
               </Button>
+            </div>
+              
             </div>
 
             <AlphaCard>

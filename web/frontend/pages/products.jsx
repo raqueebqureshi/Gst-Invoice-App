@@ -16,7 +16,6 @@ import {
   Modal,
 } from "@shopify/polaris";
 import ToastNotification from "../components/ToastNotification"; // Import the ToastNotification component
-import { set } from "mongoose";
 
 
 export default function ProductIndexTable() {
