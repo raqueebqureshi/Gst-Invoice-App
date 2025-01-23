@@ -17,18 +17,20 @@ import {
   LegacyStack,
   Text,
 } from "@shopify/polaris";
-import {
-  CheckCircleIcon,
-  SettingsIcon,
-  InfoIcon,
-  ChevronUpIcon,
-  ChevronDownIcon,
-  EmailFollowUpIcon,
-} from "@shopify/polaris-icons";
+
+import { MdOutlineMailOutline } from "react-icons/md";
+
+
+import { IoSettingsOutline } from "react-icons/io5";
+import { IoIosInformationCircleOutline } from "react-icons/io";
+import { FaAngleUp , FaAngleDown} from "react-icons/fa6";
+
+
+
+
 import { CustomPasswordInput } from "../components/CustomPasswordInput";
-import { set } from "mongoose";
 import ToastNotification from "../components/ToastNotification"; // Import the ToastNotification component
-import e from "cors";
+import UpgradeBanner from "../components/UpgradePlanBanner";
 
 
 const EmailSetting = () => {
@@ -52,7 +54,7 @@ const EmailSetting = () => {
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
   const [sendEmailOnOrderPlaced, setsendEmailOnOrderPlaced] = useState();
-
+  const [isSubscribed, setIsSubscribed] = useState(false);
   const [shopId, setShopId] = useState("");
 
   const handleButtonToggle = () => {
@@ -232,7 +234,7 @@ const EmailSetting = () => {
     })
       .then((request) => request.json())
       .then((response) => {
-        // console.log("Store Details---!", response.data);
+        console.log("Store Details---!", response.data);
         if (response.data.data.length > 0) {
           // console.log("Store Details---", response.data.data[0]);
           setShopId(response.data.data[0].id);
@@ -241,6 +243,18 @@ const EmailSetting = () => {
       .catch((error) =>{
         //  console.log(error)
         });
+
+        const storedResponse = JSON.parse(localStorage.getItem("billingInfo"));
+        const proPlanResponse = JSON.parse(localStorage.getItem("proplan"));
+        const businessPlanResponse = JSON.parse(localStorage.getItem("businessplan"));
+        const currentPlanId = '1';
+        // Compare the numeric part with the plans
+        if (currentPlanId === proPlanResponse || currentPlanId === businessPlanResponse) {
+          setIsSubscribed(true);
+          console.log("Current Plan:", proPlanResponse === currentPlanId ? (`Pro: ${proPlanResponse}`) : `Business: ${businessPlanResponse}`);
+        } else{
+          setIsSubscribed(false);
+        } 
   }, []);
 
   useEffect(() => {
@@ -466,166 +480,14 @@ let updatedSettings = smtpData
 
   return (
     <Page title="Email Configuration" fullWidth>
-      <div>
+      {isSubscribed && <UpgradeBanner/>}
+      
+      <div style={{marginTop: '20px'}}>
         <AlphaCard>
           <VerticalStack gap="5">
             <div style={styles.headerContainer}>
               <div style={styles.titleSection}>
-                <Icon source={SettingsIcon} color="highlight" />
-                <h2 style={styles.titleText}>Send from my own Email</h2>
-                <Button plain icon={InfoIcon} onClick={toggleModal}>
-                  How to configure SMTP?
-                </Button>
-                {active && (
-                  <Modal
-                    open={active}
-                    onClose={toggleModal}
-                    title="How to set up SMTP"
-                    primaryAction={{
-                      content: "Got it!",
-                      onAction: toggleModal,
-                    }}
-                    large
-                  >
-                    <Modal.Section>
-                      <Tabs
-                        tabs={tabs.map((tab, index) => ({
-                          id: tab.id,
-                          content: tab.content,
-                          panelID: tab.panelID,
-                        }))}
-                        selected={selectedTab}
-                        onSelect={handleTabChange}
-                      >
-                        <div>{tabs[selectedTab].contentDetails}</div>
-                      </Tabs>
-                    </Modal.Section>
-                  </Modal>
-                )}
-              </div>
-              <LegacyStack alignment="center" spacing="tight">
-                <Badge status={isEnabled ? "success" : "critical"}>{isEnabled ? "Enabled" : "Disabled"}</Badge>
-                <div onClick={handleButtonToggle} style={styles.toggleWrapper}>
-                  <div
-                    style={{
-                      ...styles.toggleCircle,
-                      ...(isEnabled ? styles.on : styles.off),
-                    }}
-                  ></div>
-                </div>
-              </LegacyStack>
-            </div>
-
-            <div style={styles.collapsibleContainer} onClick={isEnabled ? handleToggle : null}>
-              <div style={styles.collapsibleHeader}>
-                <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                  <h3 style={{ margin: 0 }}>{open ? "Hide SMTP Configuration" : "Show SMTP Configuration"}</h3>
-                  <Badge status={isEnabled ? "success" : "danger"}>{isEnabled ? "Connected" : "Not connected"}</Badge>
-                </div>
-                <div style={{ marginLeft: "auto" }}>
-                  <Icon source={open ? ChevronUpIcon : ChevronDownIcon} />
-                </div>
-              </div>
-            </div>
-
-            <Collapsible
-              open={open}
-              id="smtp-collapsible"
-              transition={{ duration: "500ms", timingFunction: "ease-in-out" }}
-            >
-              <Box paddingBlockStart="4">
-                <FormLayout>
-                  <FormLayout.Group>
-                    <TextField
-                      label="Host"
-                      value={emailSettings.host}
-                      onChange={handleChange("host")}
-                      autoComplete="off"
-                      placeholder="e.g., smtp.mailtrap.io"
-                    />
-                    <TextField
-                      label="Port"
-                      type="number"
-                      value={emailSettings.port}
-                      onChange={handleChange("port")}
-                      autoComplete="off"
-                      placeholder="e.g., 587"
-                    />
-                  </FormLayout.Group>
-
-                  <FormLayout.Group>
-                    <TextField
-                      label="Username"
-                      value={emailSettings.username}
-                      placeholder="Enter your username"
-                      onChange={handleChange("username")}
-                      autoComplete="off"
-                    />
-                    {/* <TextField
-                    label="Password"
-                    type="password"
-                    value={emailSettings.password}
-                    onChange={handleChange("password")}
-                    autoComplete="off"
-                  /> */}
-
-                    <CustomPasswordInput
-                      label="Password"
-                      value={emailSettings.password}
-                      onChange={handleChange("password")}
-                      placeholder="Enter your password"
-                    />
-                  </FormLayout.Group>
-
-                  {/* <TextField
-                  label="Store Name"
-                  value={emailSettings.storeName}
-                  onChange={handleChange("storeName")}
-                  autoComplete="off"
-                  placeholder="Your Store Name"
-                /> */}
-                  <TextField
-                    label="From Email"
-                    type="email"
-                    value={emailSettings.fromEmail}
-                    onChange={handleChange("fromEmail")}
-                    autoComplete="email"
-                    placeholder="example@domain.com"
-                  />
-                  <TextField
-                    label="From Name"
-                    value={emailSettings.fromName}
-                    onChange={handleChange("fromName")}
-                    autoComplete="off"
-                    placeholder="e.g., Support Team"
-                  />
-                </FormLayout>
-              </Box>
-            </Collapsible>
-
-            <div style={styles.buttonWrapper}>
-              <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
-                <Button onClick={handleTestConfiguration} disabled={isEnabled ? false : true} outline>
-                  Send Test Email
-                </Button>
-                <p style={{ color: isEnabled ? "black" : "gray" }}>
-                  Test email will be sent from <strong> entered@domain.com</strong> to <strong> store@email.com</strong>
-                </p>
-              </div>
-
-              <Button primary onClick={handleSave} disabled={isEnabled ? false : true}>
-                Save Settings
-              </Button>
-            </div>
-          </VerticalStack>
-        </AlphaCard>
-      </div>
-      <div style={{ marginTop: "20px" }}>
-        <AlphaCard>
-          <VerticalStack gap="5">
-            <div style={styles.headerContainer}>
-              <div style={styles.titleSection}>
-                <Icon source={EmailFollowUpIcon} color="highlight" />
+                <MdOutlineMailOutline/>
                 <h2 style={styles.titleText}>Send from Indian GST Invoice App</h2>
               </div>
               <LegacyStack alignment="center" spacing="tight">
@@ -654,14 +516,184 @@ let updatedSettings = smtpData
           </VerticalStack>
         </AlphaCard>
       </div>
+     <div
+  style={{
+    opacity: isSubscribed ? 1 : 0.5, // Fades the component when isSubscribed is false
+    pointerEvents: isSubscribed ? "auto" : "none", // Disables interaction when isSubscribed is false
+    marginTop: "20px",
+  }}
+>
+  <AlphaCard>
+    <VerticalStack gap="5">
+      <div style={styles.headerContainer}>
+        <div style={styles.titleSection}>
+        <IoSettingsOutline/>
+          <h2 style={styles.titleText}>Send from my own Email</h2>
+          <Button plain icon={<IoIosInformationCircleOutline/>} onClick={toggleModal}>
+            How to configure SMTP?
+          </Button>
+          {active && (
+            <Modal
+              open={active}
+              onClose={toggleModal}
+              title="How to set up SMTP"
+              primaryAction={{
+                content: "Got it!",
+                onAction: toggleModal,
+              }}
+              large
+            >
+              <Modal.Section>
+                <Tabs
+                  tabs={tabs.map((tab, index) => ({
+                    id: tab.id,
+                    content: tab.content,
+                    panelID: tab.panelID,
+                  }))}
+                  selected={selectedTab}
+                  onSelect={handleTabChange}
+                >
+                  <div>{tabs[selectedTab].contentDetails}</div>
+                </Tabs>
+              </Modal.Section>
+            </Modal>
+          )}
+        </div>
+        <LegacyStack alignment="center" spacing="tight">
+          <Badge status={isEnabled ? "success" : "critical"}>
+            {isEnabled ? "Enabled" : "Disabled"}
+          </Badge>
+          <div onClick={handleButtonToggle} style={styles.toggleWrapper}>
+            <div
+              style={{
+                ...styles.toggleCircle,
+                ...(isEnabled ? styles.on : styles.off),
+              }}
+            ></div>
+          </div>
+        </LegacyStack>
+      </div>
 
-      <div style={{ marginTop: "20px" }}>
+      <div
+        style={styles.collapsibleContainer}
+        onClick={isEnabled ? handleToggle : null}
+      >
+        <div style={styles.collapsibleHeader}>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "10px",
+            }}
+          >
+            <h3 style={{ margin: 0 }}>
+              {open ? "Hide SMTP Configuration" : "Show SMTP Configuration"}
+            </h3>
+            <Badge status={isEnabled ? "success" : "danger"}>
+              {isEnabled ? "Connected" : "Not connected"}
+            </Badge>
+          </div>
+          <div style={{ marginLeft: "auto" }}>
+          {open ? <FaAngleUp/> : <FaAngleDown/>}
+          </div>
+        </div>
+      </div>
+
+      <Collapsible
+        open={open}
+        id="smtp-collapsible"
+        transition={{ duration: "500ms", timingFunction: "ease-in-out" }}
+      >
+        <Box paddingBlockStart="4">
+          <FormLayout>
+            <FormLayout.Group>
+              <TextField
+                label="Host"
+                value={emailSettings.host}
+                onChange={handleChange("host")}
+                autoComplete="off"
+                placeholder="e.g., smtp.mailtrap.io"
+              />
+              <TextField
+                label="Port"
+                type="number"
+                value={emailSettings.port}
+                onChange={handleChange("port")}
+                autoComplete="off"
+                placeholder="e.g., 587"
+              />
+            </FormLayout.Group>
+
+            <FormLayout.Group>
+              <TextField
+                label="Username"
+                value={emailSettings.username}
+                placeholder="Enter your username"
+                onChange={handleChange("username")}
+                autoComplete="off"
+              />
+
+              <CustomPasswordInput
+                label="Password"
+                value={emailSettings.password}
+                onChange={handleChange("password")}
+                placeholder="Enter your password"
+              />
+            </FormLayout.Group>
+
+            <TextField
+              label="From Email"
+              type="email"
+              value={emailSettings.fromEmail}
+              onChange={handleChange("fromEmail")}
+              autoComplete="email"
+              placeholder="example@domain.com"
+            />
+            <TextField
+              label="From Name"
+              value={emailSettings.fromName}
+              onChange={handleChange("fromName")}
+              autoComplete="off"
+              placeholder="e.g., Support Team"
+            />
+          </FormLayout>
+        </Box>
+      </Collapsible>
+
+      <div style={styles.buttonWrapper}>
+        <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
+          <Button
+            onClick={handleTestConfiguration}
+            disabled={!isEnabled}
+            outline
+          >
+            Send Test Email
+          </Button>
+          <p style={{ color: isEnabled ? "black" : "gray" }}>
+            Test email will be sent from <strong> entered@domain.com</strong> to{" "}
+            <strong> store@email.com</strong>
+          </p>
+        </div>
+
+        <Button primary onClick={handleSave} disabled={!isEnabled}>
+          Save Settings
+        </Button>
+      </div>
+    </VerticalStack>
+  </AlphaCard>
+</div>
+
+      
+      
+
+      <div style={{ marginTop: "20px" , pointerEvents: "none", opacity: 0.5}}>
         <AlphaCard>
           <VerticalStack gap="5">
             <div style={styles.headerContainer}>
               <div style={styles.titleSection}>
-                <Icon source={EmailFollowUpIcon} color="highlight" />
+                <MdOutlineMailOutline/>
                 <p>Automatically send invoice to customer on order placed!</p>
+                <Badge>Upcoming</Badge>
               </div>
               <LegacyStack alignment="center" spacing="tight">
                 <Badge status={sendEmailOnOrderPlaced ? "success" : "critical"}>
@@ -680,7 +712,9 @@ let updatedSettings = smtpData
               </LegacyStack>
             </div>
 
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}></div>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              
+            </div>
           </VerticalStack>
         </AlphaCard>
       </div>

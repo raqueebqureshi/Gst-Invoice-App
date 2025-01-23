@@ -133,6 +133,7 @@ export default function Settings() {
   }, []);
 
   useEffect(() => {
+    if(shopId){
     fetch(`/api/fetch-store-profile?shopId=${shopId}`, {
       method: "GET",
       headers: { "Content-Type": "application/json" },
@@ -159,7 +160,7 @@ export default function Settings() {
       })
       .catch((error) => {
         console.error("Error fetching store profile:", error);
-      });
+      });}
   }, [shopId]);
 
   useEffect(() => {

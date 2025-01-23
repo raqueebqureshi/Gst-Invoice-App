@@ -11,18 +11,31 @@ import {
   TextField,
   Spinner,
 } from "@shopify/polaris";
-import {
-  ImageIcon,
-  HomeIcon,
-  StoreIcon,
-  OrderIcon,
-  ClipboardChecklistIcon,
-  TaxIcon,
-  LayoutFooterIcon,
-  ArrowLeftIcon,
-} from "@shopify/polaris-icons";
+
+
 import { useLocation } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
+
+import { RiAlignItemLeftLine } from "react-icons/ri";
+import { FaInbox } from "react-icons/fa";
+
+
+import { FaArrowLeft } from "react-icons/fa";
+
+
+import { FaMoneyBills } from "react-icons/fa6";
+import { HiOutlineReceiptTax } from "react-icons/hi";
+
+
+import { BiStore } from "react-icons/bi";
+import { LiaShippingFastSolid } from "react-icons/lia";
+
+
+import { CiImageOn, CiHome  } from "react-icons/ci";
+
+
+
+
 
 import { InvoiceTemplate1 } from "../invoiceTemplates/invoice-template1";
 import { InvoiceTemplate2 } from "../invoiceTemplates/invoice-template2";
@@ -815,46 +828,54 @@ export default function CustomizeTemplate() {
     // { label: "Custom", value: "Custom", color: "#0f0" },
   ];
 
-  const menuItems = [
-    {
-      icon: ImageIcon,
-      label: "Branding and Style",
-      onClick: () => setShowBrandingAndStyle(true),
-    },
-    {
-      icon: HomeIcon,
-      label: "Overview",
-      onClick: () => setShowOverview(true),
-    },
 
-    {
-      icon: StoreIcon,
-      label: "Supplier",
-      onClick: () => setShowSupplier(true),
-    },
-    {
-      icon: OrderIcon,
-      label: "Shipping",
-      onClick: () => setShowShipping(true),
-    },
-    {
-      icon: OrderIcon,
-      label: "Billing",
-      onClick: () => setShowBilling(true),
-    },
-    {
-      icon: ClipboardChecklistIcon,
-      label: "Line items",
-      onClick: () => setShowLineItems(true),
-    },
-    // {
-    //   icon: TextMajor,
-    //   label: "Additional text",
-    //   onClick: () => setShowAdditionalText(true),
-    // },
-    { icon: TaxIcon, label: "Total", onClick: () => setShowTotal(true) },
-    { icon: LayoutFooterIcon, label: "Other", onClick: () => setShowFooter(true) },
-  ];
+
+const menuItems = [
+  {
+    icon: <CiImageOn />,
+    label: "Branding and Style",
+    onClick: () => setShowBrandingAndStyle(true),
+  },
+  {
+    icon: <CiHome />,
+    label: "Overview",
+    onClick: () => setShowOverview(true),
+  },
+
+
+  {
+    icon: <BiStore/>,
+    label: "Supplier",
+    onClick: () => setShowSupplier(true),
+  },
+  {
+    icon: <LiaShippingFastSolid/>,
+    label: "Shipping",
+    onClick: () => setShowShipping(true),
+  },
+  {
+    icon: <FaMoneyBills/>,
+    label: "Billing",
+    onClick: () => setShowBilling(true),
+  },
+  {
+    icon: <RiAlignItemLeftLine />
+    ,
+    label: "Line items",
+    onClick: () => setShowLineItems(true),
+  },
+  // {
+  //   icon: TextMajor,
+  //   label: "Additional text",
+  //   onClick: () => setShowAdditionalText(true),
+  // },
+  { icon: <HiOutlineReceiptTax/>, 
+    label: "Total", onClick: () => setShowTotal(true) },
+  { icon: <FaInbox />
+    , label: "Other", onClick: () => setShowFooter(true) },
+];
+
+
 
   const handleColorSelect = (value) => {
     updateInvoiceSetting2("branding", "primaryColor", value);
@@ -923,11 +944,7 @@ export default function CustomizeTemplate() {
               navigate(-1);
             }}
           >
-            <Icon
-              source={ArrowLeftIcon}
-              color="base" // Optional: Adjust the color for better visibility
-              style={{ width: "16px", height: "16px" }}
-            />
+            <FaArrowLeft/>
           </div>
           <span>Customize template</span>
         </div>
@@ -972,11 +989,7 @@ export default function CustomizeTemplate() {
                       setShowBrandingAndStyle(false);
                     }}
                   >
-                    <Icon
-                      source={ArrowLeftIcon}
-                      color="base" // Optional: Adjust the color for better visibility
-                      style={{ width: "16px", height: "16px" }}
-                    />
+                    <FaArrowLeft/>
                   </div>
 
                   <span>Branding and Style</span>
@@ -1104,11 +1117,7 @@ export default function CustomizeTemplate() {
                       setShowOverview(false);
                     }}
                   >
-                    <Icon
-                      source={ArrowLeftIcon}
-                      color="base" // Optional: Adjust the color for better visibility
-                      style={{ width: "16px", height: "16px" }}
-                    />
+                    <FaArrowLeft/>
                   </div>
 
                   <span>Overview</span>
@@ -1176,11 +1185,7 @@ export default function CustomizeTemplate() {
                       setShowSupplier(false);
                     }}
                   >
-                    <Icon
-                      source={ArrowLeftIcon}
-                      color="base" // Adjust visibility
-                      style={{ width: "16px", height: "16px" }}
-                    />
+                    <FaArrowLeft/>
                   </div>
                   <span>Supplier</span>
                 </div>
@@ -1244,11 +1249,7 @@ export default function CustomizeTemplate() {
                       setShowShipping(false);
                     }}
                   >
-                    <Icon
-                      source={ArrowLeftIcon}
-                      color="base" // Adjust visibility
-                      style={{ width: "16px", height: "16px" }}
-                    />
+                    <FaArrowLeft/>
                   </div>
                   <span>Shipping</span>
                 </div>
@@ -1303,11 +1304,7 @@ export default function CustomizeTemplate() {
                       setShowBilling(false);
                     }}
                   >
-                    <Icon
-                      source={ArrowLeftIcon}
-                      color="base" // Adjust visibility
-                      style={{ width: "16px", height: "16px" }}
-                    />
+                    <FaArrowLeft/>
                   </div>
                   <span>Billing</span>
                 </div>
@@ -1362,7 +1359,7 @@ export default function CustomizeTemplate() {
                       setShowLineItems(false);
                     }}
                   >
-                    <Icon source={ArrowLeftIcon} color="base" style={{ width: "16px", height: "16px" }} />
+                    <FaArrowLeft/>
                   </div>
                   <span>Line items</span>
                 </div>
@@ -1423,7 +1420,7 @@ export default function CustomizeTemplate() {
                       setShowTotal(false);
                     }}
                   >
-                    <Icon source={ArrowLeftIcon} color="base" style={{ width: "16px", height: "16px" }} />
+                    <FaArrowLeft/>
                   </div>
                   <span>Total</span>
                 </div>
@@ -1492,7 +1489,7 @@ export default function CustomizeTemplate() {
                     }}
                     onClick={() => setShowFooter(false)}
                   >
-                    <Icon source={ArrowLeftIcon} color="base" style={{ width: "16px", height: "16px" }} />
+                    <FaArrowLeft/>
                   </div>
                   <span>Others</span>
                 </div>
@@ -1582,7 +1579,7 @@ export default function CustomizeTemplate() {
                     >
                       <div style={styles.menuText}>
                         {/* Render the icon */}
-                        <Icon source={item.icon} />
+                        {item.icon}
                         {item.label}
                       </div>
                       <span>›</span>

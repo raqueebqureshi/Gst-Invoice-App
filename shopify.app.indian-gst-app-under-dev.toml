@@ -1,7 +1,7 @@
 # Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
 
 client_id = "78fbc68547f4cc8682944642dc9284c8"
-application_url = "https://skip-grab-steering-valuable.trycloudflare.com"
+application_url = "https://jeans-lisa-brighton-owners.trycloudflare.com"
 embedded = true
 name = "Indian GST App under dev"
 handle = "indian-gst-app-under-dev-1"
@@ -49,9 +49,9 @@ scopes = "read_orders,read_products,write_orders,write_products"
 
 [auth]
 redirect_urls = [
-  "https://skip-grab-steering-valuable.trycloudflare.com/auth/callback",
-  "https://skip-grab-steering-valuable.trycloudflare.com/auth/shopify/callback",
-  "https://skip-grab-steering-valuable.trycloudflare.com/api/auth/callback"
+  "https://jeans-lisa-brighton-owners.trycloudflare.com/auth/callback",
+  "https://jeans-lisa-brighton-owners.trycloudflare.com/auth/shopify/callback",
+  "https://jeans-lisa-brighton-owners.trycloudflare.com/api/auth/callback"
 ]
 
 [pos]
