@@ -5,82 +5,66 @@ import { DeliveryMethod } from "@shopify/shopify-api";
  */
 export default {
   /**
-   * Customers can request their data from a store owner. When this happens,
-   * Shopify invokes this privacy webhook.
-   *
-   * https://shopify.dev/docs/apps/webhooks/configuration/mandatory-webhooks#customers-data_request
+   * Customers can request their data from a store owner.
    */
   CUSTOMERS_DATA_REQUEST: {
     deliveryMethod: DeliveryMethod.Http,
-    callbackUrl: "/api/webhooks",
+    callbackUrl: "/api/webhooks/customers/data_request",
     callback: async (topic, shop, body, webhookId) => {
       const payload = JSON.parse(body);
-      // Payload has the following shape:
-      // {
-      //   "shop_id": 954889,
-      //   "shop_domain": "{shop}.myshopify.com",
-      //   "orders_requested": [
-      //     299938,
-      //     280263,
-      //     220458
-      //   ],
-      //   "customer": {
-      //     "id": 191167,
-      //     "email": "john@example.com",
-      //     "phone": "555-625-1199"
-      //   },
-      //   "data_request": {
-      //     "id": 9999
-      //   }
-      // }
+      console.log("CUSTOMERS_DATA_REQUEST payload:", payload);
     },
   },
 
   /**
-   * Store owners can request that data is deleted on behalf of a customer. When
-   * this happens, Shopify invokes this privacy webhook.
-   *
-   * https://shopify.dev/docs/apps/webhooks/configuration/mandatory-webhooks#customers-redact
+   * Store owners can request that customer data is deleted.
    */
   CUSTOMERS_REDACT: {
     deliveryMethod: DeliveryMethod.Http,
-    callbackUrl: "/api/webhooks",
+    callbackUrl: "/api/webhooks/customers/redact",
     callback: async (topic, shop, body, webhookId) => {
       const payload = JSON.parse(body);
-      // Payload has the following shape:
-      // {
-      //   "shop_id": 954889,
-      //   "shop_domain": "{shop}.myshopify.com",
-      //   "customer": {
-      //     "id": 191167,
-      //     "email": "john@example.com",
-      //     "phone": "555-625-1199"
-      //   },
-      //   "orders_to_redact": [
-      //     299938,
-      //     280263,
-      //     220458
-      //   ]
-      // }
+      console.log("CUSTOMERS_REDACT payload:", payload);
     },
   },
 
   /**
-   * 48 hours after a store owner uninstalls your app, Shopify invokes this
-   * privacy webhook.
-   *
-   * https://shopify.dev/docs/apps/webhooks/configuration/mandatory-webhooks#shop-redact
+   * Triggered 48 hours after app uninstallation.
    */
   SHOP_REDACT: {
     deliveryMethod: DeliveryMethod.Http,
-    callbackUrl: "/api/webhooks",
+    callbackUrl: "/api/webhooks/shop/redact",
     callback: async (topic, shop, body, webhookId) => {
       const payload = JSON.parse(body);
-      // Payload has the following shape:
-      // {
-      //   "shop_id": 954889,
-      //   "shop_domain": "{shop}.myshopify.com"
-      // }
+      console.log("SHOP_REDACT payload:", payload);
+    },
+  },
+
+  /**
+   * Custom webhook for order creation.
+   */
+  "ORDERS_CREATE": {
+    deliveryMethod: DeliveryMethod.Http,
+    callbackUrl: "/api/webhooks/orders/create",
+    callback: async (topic, shop, body, webhookId) => {
+      const payload = JSON.parse(body);
+      console.log("ORDERS_CREATE payload:", payload);
+
+      // Add your order creation logic here
+    },
+  },
+
+  /**
+   * Custom webhook for app uninstallation.
+   */
+  "APP_UNINSTALLED": {
+    deliveryMethod: DeliveryMethod.Http,
+    callbackUrl: "/api/webhooks/app/uninstalled",
+    callback: async (topic, shop, body, webhookId) => {
+      const payload = JSON.parse(body);
+      console.log("APP_UNINSTALLED payload:", payload);
+
+      // Cleanup logic, e.g., delete shop data from your database
     },
   },
 };

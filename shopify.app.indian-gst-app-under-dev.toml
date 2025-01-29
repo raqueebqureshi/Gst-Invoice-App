@@ -1,11 +1,7 @@
 # Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
 
 client_id = "78fbc68547f4cc8682944642dc9284c8"
-<<<<<<< HEAD
-application_url = "https://crossword-networking-wa-legendary.trycloudflare.com"
-=======
-application_url = "https://jeans-lisa-brighton-owners.trycloudflare.com"
->>>>>>> dd1fe5ec1b690cbe6d85c49907e17bf7521ef744
+application_url = "https://subsequent-gif-alumni-subscribers.trycloudflare.com"
 embedded = true
 name = "Indian GST App under dev"
 handle = "indian-gst-app-under-dev-1"
@@ -20,32 +16,19 @@ api_version = "2024-10"
 
   [[webhooks.subscriptions]]
   topics = [ "orders/create" ]
-  delivery_method = "http"
-  uri = "/webhooks/app/orders-create"
+  uri = "/api/webhooks/orders/create"
 
   [[webhooks.subscriptions]]
   topics = [ "app/uninstalled" ]
-  delivery_method = "http"
-  uri = "/webhooks/app/uninstalled"
+  uri = "/api/webhooks/app/uninstalled"
 
   [[webhooks.subscriptions]]
-  topics = [ "customers/data_request" ]
-  delivery_method = "http"
-  uri = "/webhooks/customers/data_request"
+  uri = "/api/webhooks/customer_redact"
+  compliance_topics = [ "customers/data_request", "customers/redact" ]
 
   [[webhooks.subscriptions]]
-  topics = [ "customers/redact" ]
-  delivery_method = "http"
-  uri = "/webhooks/customers/redact"
-
-  [[webhooks.subscriptions]]
-  topics = [ "shop/redact" ]
-  delivery_method = "http"
-  uri = "/webhooks/shop/redact"
-
-  [[webhooks.subscriptions]]
-  compliance_topics = [ "customers/data_request", "customers/redact", "shop/redact" ]
-  uri = "https://ceremony-consent-ideas-yo.trycloudflare.com/webhooks"
+  uri = "/api/webhooks/shop_redact"
+  compliance_topics = [ "shop/redact" ]
 
 [access_scopes]
 # Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
@@ -53,15 +36,9 @@ scopes = "read_orders,read_products,write_orders,write_products"
 
 [auth]
 redirect_urls = [
-<<<<<<< HEAD
-  "https://crossword-networking-wa-legendary.trycloudflare.com/auth/callback",
-  "https://crossword-networking-wa-legendary.trycloudflare.com/auth/shopify/callback",
-  "https://crossword-networking-wa-legendary.trycloudflare.com/api/auth/callback"
-=======
-  "https://jeans-lisa-brighton-owners.trycloudflare.com/auth/callback",
-  "https://jeans-lisa-brighton-owners.trycloudflare.com/auth/shopify/callback",
-  "https://jeans-lisa-brighton-owners.trycloudflare.com/api/auth/callback"
->>>>>>> dd1fe5ec1b690cbe6d85c49907e17bf7521ef744
+  "https://subsequent-gif-alumni-subscribers.trycloudflare.com/auth/callback",
+  "https://subsequent-gif-alumni-subscribers.trycloudflare.com/auth/shopify/callback",
+  "https://subsequent-gif-alumni-subscribers.trycloudflare.com/api/auth/callback"
 ]
 
 [pos]

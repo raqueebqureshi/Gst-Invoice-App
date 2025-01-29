@@ -400,7 +400,7 @@ export default function ProductIndexTable() {
         key={id}
         selected={selectedItems.includes(id)}
         position={index}
-        onClick={() => handleRowSelection(id)}
+        onClick={(e) => handleRowSelection(e.target.value)}
       >
         <IndexTable.Cell>
           <img

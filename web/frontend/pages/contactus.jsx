@@ -14,22 +14,12 @@ export default function ContactUs() {
   
 
   async function fetchLastMonthOrders() {
-    const currentDate = new Date();
-  
-    // Calculate the first and last day of the previous month in UTC
-    const firstDayLastMonth = new Date(Date.UTC(currentDate.getUTCFullYear(), currentDate.getUTCMonth() - 1, 1));
-    const lastDayLastMonth = new Date(Date.UTC(currentDate.getUTCFullYear(), currentDate.getUTCMonth(), 0));
-  
-    // Format the dates for the query
-    const startDate = firstDayLastMonth.toISOString().split("T")[0] + "T00:00:00Z";
-    const endDate = lastDayLastMonth.toISOString().split("T")[0] + "T23:59:59Z";
-  
-    console.log("Fetching orders from:", startDate, "to", endDate);
-  
+    
+
     try {
       // Fetch orders from Shopify API
       const response = await fetch(
-        `/api/2024-10/orders.json?created_at_min=${startDate}&created_at_max=${endDate}`,
+        `/api/2024-10/fetch-orders`,
         {
           method: "GET",
           headers: {
@@ -58,7 +48,7 @@ export default function ContactUs() {
   // Example Usage
   (async () => {
     const orders = await fetchLastMonthOrders();
-    console.log("Orders from last month:", orders);
+    
   })();
   
 

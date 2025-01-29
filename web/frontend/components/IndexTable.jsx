@@ -32,7 +32,7 @@ import "jspdf-autotable";
 import { InvoiceTemplate1 } from "../invoiceTemplates/invoice-template1";
 import { InvoiceTemplate2 } from "../invoiceTemplates/invoice-template2";
 import { InvoiceTemplate3 } from "../invoiceTemplates/invoice-template3";
-import { useIndexResourceState } from "@shopify/polaris";
+import { useIndexResourceState , Tooltip} from "@shopify/polaris";
 
 const filterOrders = (orders, query) => {
   return orders.filter((order) => {
@@ -1727,7 +1727,6 @@ export function OrderTableEx({ value, shopdetails }) {
               ) : (
                 <VscSend
                   style={{
-                    height: "22px",
                     width: "25px",
                     cursor: "pointer",
                     padding: "4px",
@@ -1820,6 +1819,8 @@ export function OrderTableEx({ value, shopdetails }) {
                   border: "1px solid black",
                 }}
               />
+
+            <Tooltip active={!isSubscribed} content="Upgrade to premium plan.">
               <div
               style={{
                 display: "flex",
@@ -1953,6 +1954,9 @@ export function OrderTableEx({ value, shopdetails }) {
   )}
               </Button>
             </div>
+            </Tooltip>
+
+
               
             </div>
 
