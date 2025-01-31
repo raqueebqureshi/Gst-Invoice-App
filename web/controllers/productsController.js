@@ -5,7 +5,7 @@ import Product from "../Models/productHSN.js";
  */
 export const insertProductIntoDB = async (req, res) => {
   const { storeDomain, email, products } = req.body;
-  console.log("body", req.body);
+  // console.log("body", req.body);
 
   if (!storeDomain || !email || !products || !Array.isArray(products)) {
     return res.status(400).json({
@@ -76,7 +76,7 @@ export const insertProductIntoDB = async (req, res) => {
 export const updateProductsInDB = async (req, res) => {
   const { storeDomain, email, products } = req.body;
 
-  console.log("Request Body:", req.body);
+  // console.log("Request Body:", req.body);
 
   // Validate the input
   if (!storeDomain || !email || !products || !Array.isArray(products)) {
@@ -103,7 +103,7 @@ export const updateProductsInDB = async (req, res) => {
       );
 
       if (product) {
-        console.log("Matched Product:", product); // Debug log
+        // console.log("Matched Product:", product); // Debug log
         // Update fields and mark as modified
         product.set("hsn", updateData.HSN || product.hsn);
         product.set("gst", updateData.GST || product.gst);
@@ -135,7 +135,7 @@ export const updateProductsInDB = async (req, res) => {
 export const getAndHSNValuesFromDB = async (req, res) => {
   const { storeDomain, email } = req.query;
 
-  console.log("Fetch GST Request Query:", req.query);
+  // console.log("Fetch GST Request Query:", req.query);
 
   // Validate input
   if (!storeDomain || !email) {

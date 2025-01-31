@@ -23,69 +23,8 @@ export default function HomePage() {
   const [shopProfile, setShopProfile] = useState({});
 
 
-  useEffect(() => {
-    fetch("/api/2024-10/shop.json", {
-      method: "GET",
-      headers: { "Content-Type": "application/json" },
-    })
-      .then((request) => request.json())
-      .then((response) => {
-        if (response.data.length > 0) {
-          // console.log("Store Details ", response.data);
-          setShopDetails(response.data[0]);
-          setStoreName(response.data.data[0].name);
-          setshopId(response.data.data[0].id);
-          // console.log("store name : ", storeName);
-        }
-      })
-      .catch((error) => console.log(error));
-  }, []);
-  // Fetch all products
-  useEffect(() => {
-    fetch("/api/2024-10/products.json", {
-      method: "GET",
-      headers: { "Content-Type": "application/json" },
-    })
-      .then((request) => request.json())
-      .then((response) => {
-        // console.log("all products", response);
-        setLoading(false); // Stop loading when data is fetched
-        setTotalProducts(response.count);
-      })
-      .catch((error) => {
-        console.log(error);
-        setLoading(false); // Stop loading on error
-      });
-
-    
-  }, []);
-
   
-
   useEffect(() => {
-    // Fetch total orders from the API
-    const fetchOrders = async () => {
-      try {
-        const response = await fetch("/api/2024-10/orders.json", {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
-        if (response.ok) {
-          const data = await response.json();
-          // Assuming data.orders contains the list of orders
-          // console.log("data", data);
-          const ordersCount = data.data ? data.data.length : 0;
-          setTotalOrders(ordersCount);
-        } else {
-          console.error("Failed to fetch orders:", response.statusText);
-        }
-      } catch (error) {
-        console.error("Error fetching orders:", error);
-      }
-    };
-
 
     const fetchShop = async () => {
       try {
@@ -97,7 +36,7 @@ export default function HomePage() {
           const data = await response.json();
           // Assuming data.orders contains the list of orders
           // console.log("shop data", data);
-          
+          setLoading(false);
           setshopId(data.data.data[0].id);
           setStoreName(data.data.data[0].name);
 
@@ -110,10 +49,7 @@ export default function HomePage() {
       }
     };
 
-    fetchShop();
-    fetchOrders();
-
-   
+    fetchShop();   
   }, []);
 
   
@@ -127,23 +63,26 @@ export default function HomePage() {
         .then((response) => response.json())
         .then((data) => {
           if (data && data.profile) {
-            if (data && data.profile) {
-              const profileData = data.profile;
-              // console.log("profileData", profileData);
-              setShopProfile(profileData || {});
-
-              localStorage.setItem("planInfo", JSON.stringify(data.profile.plans));
-    localStorage.setItem("proplan", JSON.stringify('1'));
-    localStorage.setItem("businessplan", JSON.stringify('2'));
-            }
+            setLoading(false);
+            const profileData = data.profile;
+            setShopProfile(profileData || {});
+  
+            // Fetch current plan ID and store as a string
+            const currentPlanId = profileData.plans?.planId?.toString() || "";
+  
+            // Store plan details in localStorage
+            // localStorage.setItem("planInfo", JSON.stringify(profileData.plans));
+            localStorage.setItem("currentPlan", currentPlanId); // Store only the plan ID as string
+            // localStorage.setItem("proplan", "1"); // Hardcoded Pro Plan
+            // localStorage.setItem("businessplan", "2"); // Hardcoded Business Plan
           }
         })
         .catch((error) => {
           console.error("Error fetching store profile:", error);
         });
     }
-    // Fetch the store profile
   }, [shopId]);
+  
 
   return (
     <>
@@ -196,7 +135,7 @@ export default function HomePage() {
                   </p>
                 </Layout.Section>
               </Layout>
-              <div style={{ display: "flex", gap: "20px", width: "100%" }}>
+              {/* <div style={{ display: "flex", gap: "20px", width: "100%" }}>
                 <div style={{ flex: 1 }}>
                   <AlphaCard>
                     <p style={{ fontSize: "25px", fontWeight: "600", textAlign: "center", marginBottom: "25px" }}>
@@ -219,7 +158,7 @@ export default function HomePage() {
                     </p>
                   </AlphaCard>
                 </div>
-              </div>
+              </div> */}
 
               {/* <BannerEx /> */}
               {/* <Divider /> */}

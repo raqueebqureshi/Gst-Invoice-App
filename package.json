@@ -25,6 +25,7 @@
     "@shopify/react-i18n": "^7.14.0",
     "@shopify/shopify-api": "^11.7.0",
     "aws-sdk": "^2.1692.0",
+    "axios": "^1.7.9",
     "body-parser": "^1.20.3",
     "cors": "^2.8.5",
     "crypto": "^1.0.1",

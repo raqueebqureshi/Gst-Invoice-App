@@ -38,6 +38,8 @@ import {
 } from "../controllers/sendTestEmail.js";
 
 import { handleBillingConfirmation } from '../controllers/Plans_billing.js'
+import { getOrders } from "../controllers/ordersController.js";
+
 
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
@@ -126,5 +128,8 @@ router.post("/api/send-test-email-app-smtp", sendTestEmailFromAppSMTP);
 
 //get billing 
 router.get('/api/billing/confirm', handleBillingConfirmation);
+
+//paginated request 
+router.get("/api/fetch-orders", getOrders);
 
 export default router;

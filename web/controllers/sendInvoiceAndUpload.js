@@ -152,20 +152,50 @@ export const sendInvoiceAndUpload = async (req, res) => {
 
     const emailSubject = `Invoice for Order #${orderId}`;
     const emailBody = `
-      Dear Customer,
+  <!DOCTYPE html>
+  <html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invoice Email</title>
+  </head>
+  <body style="font-family: Arial, sans-serif; background-color: #f4f4f4; margin: 0; padding: 0; text-align: center;">
 
-      Thank you for shopping with us! Please find your invoice attached.
+    <!-- Main Container -->
+    <div style="max-width: 600px; margin: 40px auto; background: #fff; border: 1px solid #000;  overflow: hidden; box-shadow: 0px 4px 10px rgba(0,0,0,0.1);">
 
-      Best regards,
-      Team ${shopDetails.name}
-    `;
+      <!-- Header -->
+      <div style="background:#0bacb3; padding: 15px; text-align: center; font-size: 18px; font-weight: bold; color: #fff;">
+        Invoice Received From ${shopDetails.name}
+      </div>
+
+      <!-- Body Content -->
+      <div style="padding: 30px; background:#e6feff; text-align: left;">
+        <p>Dear Customer,</p>
+        <p>Thank you for shopping with us! Please find your invoice attached.</p>
+        <p>Best regards,</p>
+        <p><strong>Team ${shopDetails.name}</strong></p>
+      </div>
+
+      <!-- Footer -->
+      <div style="background: #0bacb3; padding: 15px; color: white; font-weight: bold;">
+        Powered By: Delhi Digital Co.
+      </div>
+
+    </div>
+
+  </body>
+  </html>
+`;
+
+  
 
     // Send Email with PDF Attachment
     await transporter.sendMail({
       from: `"${shopDetails.name}" <${smtpConfig.auth.user}>`,
       to: customerEmail,
       subject: emailSubject,
-      text: emailBody,
+      html: emailBody,
       attachments: [
         {
           filename: `Invoice-${orderId}.pdf`,

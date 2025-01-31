@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-
+//use this varibale to get myshopify_domain from the url and extract store name from domain name 
 const PricingPlans = ({currentPlanId}) => {
   const [isYearly, setIsYearly] = useState(false);
 const [storeName, setStoreName] = useState(""); // State to hold the store name
@@ -20,18 +20,19 @@ const maxOrders = typeof milestones[milestones.length - 1] === "number"
       .then((response) => {
         // console.log("Store Details---!", response.data);
         if (response.data && response.data.data.length > 0) {
-          const fetchedStoreName = response.data.data[0].name;
+          const fetchedStoreName = response.data.data[0].myshopify_domain;
+            const storeName = fetchedStoreName.split(".")[0];//extract store name from domain name
           // console.log("Store Name:", fetchedStoreName);
-          setStoreName(fetchedStoreName); // Set the store name
+          setStoreName(storeName); // Set the store name
         }
       })
       .catch((error) => console.log("Error fetching store details:", error));
   }, []);
 
+  const appName = "indiangstinvoice";
   // Redirect to the pricing plans page
   const handleChangePlanButton = () => {
     if (storeName) {
-      const appName = "gst-invoice-app-2";
       const pricingPlanUrl = `https://admin.shopify.com/store/${storeName}/charges/${appName}/pricing_plans`;
       window.location.href = pricingPlanUrl; // Redirects to the Shopify admin URL
     } else {
@@ -162,7 +163,7 @@ const maxOrders = typeof milestones[milestones.length - 1] === "number"
               {console.log('currentPlanId',currentPlanId )}
                 </>
               )} */}
-              {plan.planId === currentPlanId && (
+              {(plan?.planId?.toString() || "") === (currentPlanId?.toString() || "") && (
                 <>             
                <span style={{display:"flex", alignItems:"center",
                  background:"#d5ebff", paddingRight:"5px", paddingLeft:"5px", 
@@ -196,7 +197,7 @@ const maxOrders = typeof milestones[milestones.length - 1] === "number"
                 width:"100%",
                
         }}>
-              <a style={{ textDecoration:"none"}} href={`https://admin.shopify.com/store/${storeName}/charges/gst-invoice-app-2/pricing_plans`} target="_blank" rel="noopener noreferrer">
+              <a style={{ textDecoration:"none"}} href={`https://admin.shopify.com/store/${storeName}/charges/${appName}/pricing_plans`} target="_blank" rel="noopener noreferrer">
             <button 
             style={{
                 display:"flex",
