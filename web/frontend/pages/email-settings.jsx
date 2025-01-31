@@ -290,7 +290,7 @@ const EmailSetting = () => {
   const proPlanResponse = JSON.parse(localStorage.getItem("proplan"));
   const businessPlanResponse = JSON.parse(localStorage.getItem("businessplan"));
   // console.log('storedResponse',storedResponse); 
-  const currentPlanId = storedResponse.planId;
+  const currentPlanId = storedResponse.planId.toString();
   // Compare the numeric part with the plans
   if (currentPlanId === proPlanResponse || currentPlanId === businessPlanResponse) {
     setIsSubscribed(true);
