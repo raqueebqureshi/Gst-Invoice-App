@@ -5,10 +5,16 @@ import convertAmountToWords from "../components/ConvertAmount";
 import { hexToRgba } from "../components/hex";
 import { Shop } from "@mui/icons-material";
 
-export function InvoiceTemplate1({ shopdetails, orders, invoiceSettings, GSTHSNCodes , shopProfile}) {
-  // console.log("orders - InvoiceTemplate1", orders);
-  // console.log("invoiceSettings - InvoiceTemplate1", invoiceSettings);
-  // console.log("GSTHSNCodes - InvoiceTemplate1", GSTHSNCodes.gstcodes);
+export function InvoiceTemplate1({
+  shopdetails,
+  orders,
+  invoiceSettings,
+  GSTHSNCodes,
+  shopProfile,
+}) {
+  console.log("orders - InvoiceTemplate1", orders);
+  console.log("invoiceSettings - InvoiceTemplate1", invoiceSettings);
+  console.log("GSTHSNCodes - InvoiceTemplate1", GSTHSNCodes.gstcodes);
   // console.log('shopProfile',shopProfile);
 
   const [storeDomain, setStoreDomain] = useState(null);
@@ -20,7 +26,6 @@ export function InvoiceTemplate1({ shopdetails, orders, invoiceSettings, GSTHSNC
   const [BillHeading, setBillHeading] = useState("BILL TO");
   const [ShipHeading, setShipHeading] = useState("SHIP To");
   const [selectedFont, setSelectedFont] = useState("Roboto, sans-serif");
-  
 
   const formatDateTime = (dateString) => {
     const date = new Date(dateString);
@@ -46,11 +51,9 @@ export function InvoiceTemplate1({ shopdetails, orders, invoiceSettings, GSTHSNC
           setEmail(response.data.data[0].email);
         }
       })
-      .catch((error) => 
-      {
+      .catch((error) => {
         // console.log(error);
-      }
-    );
+      });
   }, []);
 
   // useEffect(() => {
@@ -102,7 +105,9 @@ export function InvoiceTemplate1({ shopdetails, orders, invoiceSettings, GSTHSNC
       >
         <div
           style={{
-            visibility: invoiceSettings.supplier.showSupplier ? "visible" : "hidden",
+            visibility: invoiceSettings.supplier.showSupplier
+              ? "visible"
+              : "hidden",
           }}
         >
           <div>
@@ -155,7 +160,7 @@ export function InvoiceTemplate1({ shopdetails, orders, invoiceSettings, GSTHSNC
               shopdetails[0].address1 !== null ? (
                 shopdetails[0].address1
               ) : (
-                "N/A"
+                "Not Available"
               )
             ) : (
               <></>
@@ -166,7 +171,7 @@ export function InvoiceTemplate1({ shopdetails, orders, invoiceSettings, GSTHSNC
               shopdetails[0].city !== null ? (
                 shopdetails[0].city + " "
               ) : (
-                "N/A"
+                "Not Available"
               )
             ) : (
               <></>
@@ -175,7 +180,7 @@ export function InvoiceTemplate1({ shopdetails, orders, invoiceSettings, GSTHSNC
               shopdetails[0].zip !== null ? (
                 shopdetails[0].zip + ", "
               ) : (
-                "N/A"
+                "Not Available"
               )
             ) : (
               <></>
@@ -185,7 +190,7 @@ export function InvoiceTemplate1({ shopdetails, orders, invoiceSettings, GSTHSNC
             {invoiceSettings.supplier.showPhone ? (
               <>
                 <strong>Phone: </strong>
-                {shopdetails[0]?.phone ? shopdetails[0].phone : "N/A"}
+                {shopdetails[0]?.phone ? shopdetails[0].phone : "Not Available"}
               </>
             ) : (
               <></>
@@ -196,7 +201,9 @@ export function InvoiceTemplate1({ shopdetails, orders, invoiceSettings, GSTHSNC
             {invoiceSettings.supplier.showEmail ? (
               <>
                 <strong>Email: </strong>
-                {shopdetails[0].email !== null ? shopdetails[0].email : "N/A"}
+                {shopdetails[0].email !== null
+                  ? shopdetails[0].email
+                  : "Not Available"}
               </>
             ) : (
               <></>
@@ -206,7 +213,7 @@ export function InvoiceTemplate1({ shopdetails, orders, invoiceSettings, GSTHSNC
             {invoiceSettings.supplier.showGSTIN ? (
               <>
                 <strong>GSTIN: </strong>
-                {shopProfile?.storeProfile?.gstNumber || "N/A"}
+                {shopProfile?.storeProfile?.gstNumber || "Not Available"}
               </>
             ) : (
               <></>
@@ -214,10 +221,17 @@ export function InvoiceTemplate1({ shopdetails, orders, invoiceSettings, GSTHSNC
           </p>
         </div>
 
-        <div style={{ textAlign: "right", marginTop: `${invoiceSettings.branding.showLogo ? "60px" : "0px"} ` }}>
+        <div
+          style={{
+            textAlign: "right",
+            marginTop: `${invoiceSettings.branding.showLogo ? "60px" : "0px"} `,
+          }}
+        >
           <h2
             style={{
-              color: hexToRgba(invoiceSettings.branding.primaryColor, 0.7) || "#4299e1",
+              color:
+                hexToRgba(invoiceSettings.branding.primaryColor, 0.7) ||
+                "#4299e1",
               fontSize: "2.5em",
               marginBottom: "20px",
             }}
@@ -231,8 +245,17 @@ export function InvoiceTemplate1({ shopdetails, orders, invoiceSettings, GSTHSNC
                   <td
                     style={{
                       padding: "5px 10px",
-                      border: `1px solid ${hexToRgba(invoiceSettings.branding.primaryColor, 0.07) || "#e2e8f0"}`,
-                      backgroundColor: hexToRgba(invoiceSettings.branding.primaryColor, 0.07) || "#edf2f7",
+                      border: `1px solid ${
+                        hexToRgba(
+                          invoiceSettings.branding.primaryColor,
+                          0.07
+                        ) || "#e2e8f0"
+                      }`,
+                      backgroundColor:
+                        hexToRgba(
+                          invoiceSettings.branding.primaryColor,
+                          0.07
+                        ) || "#edf2f7",
                     }}
                   >
                     DATE
@@ -240,7 +263,12 @@ export function InvoiceTemplate1({ shopdetails, orders, invoiceSettings, GSTHSNC
                   <td
                     style={{
                       padding: "5px 10px",
-                      border: `1px solid ${hexToRgba(invoiceSettings.branding.primaryColor, 0.07) || "#e2e8f0"}`,
+                      border: `1px solid ${
+                        hexToRgba(
+                          invoiceSettings.branding.primaryColor,
+                          0.07
+                        ) || "#e2e8f0"
+                      }`,
                     }}
                   >
                     {/* {formatDateTime(orders[0].processed_at)} */}
@@ -256,8 +284,17 @@ export function InvoiceTemplate1({ shopdetails, orders, invoiceSettings, GSTHSNC
                   <td
                     style={{
                       padding: "5px 10px",
-                      border: `1px solid ${hexToRgba(invoiceSettings.branding.primaryColor, 0.07) || "#e2e8f0"}`,
-                      backgroundColor: hexToRgba(invoiceSettings.branding.primaryColor, 0.07) || "#edf2f7",
+                      border: `1px solid ${
+                        hexToRgba(
+                          invoiceSettings.branding.primaryColor,
+                          0.07
+                        ) || "#e2e8f0"
+                      }`,
+                      backgroundColor:
+                        hexToRgba(
+                          invoiceSettings.branding.primaryColor,
+                          0.07
+                        ) || "#edf2f7",
                     }}
                   >
                     INVOICE #
@@ -265,10 +302,17 @@ export function InvoiceTemplate1({ shopdetails, orders, invoiceSettings, GSTHSNC
                   <td
                     style={{
                       padding: "5px 10px",
-                      border: `1px solid ${hexToRgba(invoiceSettings.branding.primaryColor, 0.07) || "#e2e8f0"}`,
+                      border: `1px solid ${
+                        hexToRgba(
+                          invoiceSettings.branding.primaryColor,
+                          0.07
+                        ) || "#e2e8f0"
+                      }`,
                     }}
                   >
-                    {orders[0].order_number !== null ? orders[0].order_number : "N/A"}
+                    {orders[0].order_number !== null
+                      ? orders[0].order_number
+                      : "Not Available"}
                   </td>
                 </tr>
               ) : (
@@ -288,14 +332,22 @@ export function InvoiceTemplate1({ shopdetails, orders, invoiceSettings, GSTHSNC
         }}
       >
         <thead>
-          <tr style={{ backgroundColor: invoiceSettings.branding.primaryColor || "#4a5568", color: "white" }}>
+          <tr
+            style={{
+              backgroundColor:
+                invoiceSettings.branding.primaryColor || "#4a5568",
+              color: "white",
+            }}
+          >
             {invoiceSettings.billing.showBilling ? (
               <th
                 style={{
                   padding: "10px",
                   textAlign: "left",
                   width: "50%",
-                  visibility: invoiceSettings.billing.showHeading ? "visible" : "hidden",
+                  visibility: invoiceSettings.billing.showHeading
+                    ? "visible"
+                    : "hidden",
                 }}
               >
                 {BillHeading.toUpperCase()}
@@ -310,7 +362,9 @@ export function InvoiceTemplate1({ shopdetails, orders, invoiceSettings, GSTHSNC
                   padding: "10px",
                   textAlign: "left",
                   width: "50%",
-                  visibility: invoiceSettings.shipping.showHeading ? "visible" : "hidden",
+                  visibility: invoiceSettings.shipping.showHeading
+                    ? "visible"
+                    : "hidden",
                 }}
               >
                 {ShipHeading.toUpperCase()}
@@ -326,7 +380,10 @@ export function InvoiceTemplate1({ shopdetails, orders, invoiceSettings, GSTHSNC
               <td
                 style={{
                   padding: "10px",
-                  border: `1px solid ${hexToRgba(invoiceSettings.branding.primaryColor, 0.07) || "#e2e8f0"}`,
+                  border: `1px solid ${
+                    hexToRgba(invoiceSettings.branding.primaryColor, 0.07) ||
+                    "#e2e8f0"
+                  }`,
                   width: "50%",
                 }}
               >
@@ -336,13 +393,17 @@ export function InvoiceTemplate1({ shopdetails, orders, invoiceSettings, GSTHSNC
                       orders[0].billing_address.name !== null ? (
                         orders[0].billing_address.name
                       ) : (
-                        "N/A"
+                        "Not Available"
                       )
                     ) : (
                       <></>
                     )}{" "}
                     {invoiceSettings.billing.showCompany ? (
-                      `(${orders[0].billing_address.company !== null ? orders[0].billing_address.company : "N/A"})`
+                      `(${
+                        orders[0].billing_address.company !== null
+                          ? orders[0].billing_address.company
+                          : "Not Available"
+                      })`
                     ) : (
                       <></>
                     )}
@@ -351,7 +412,7 @@ export function InvoiceTemplate1({ shopdetails, orders, invoiceSettings, GSTHSNC
                       orders[0].billing_address.address1 !== null ? (
                         orders[0].billing_address.address1 + ", "
                       ) : (
-                        "N/A"
+                        "Not Available"
                       )
                     ) : (
                       <></>
@@ -399,14 +460,16 @@ export function InvoiceTemplate1({ shopdetails, orders, invoiceSettings, GSTHSNC
                     <br />
                     {invoiceSettings.billing.showEmail ? (
                       <p>
-                        <strong>Email:</strong> {orders[0].email || "N/A"}
+                        <strong>Email:</strong>{" "}
+                        {orders[0].email || "Not Available"}
                       </p>
                     ) : (
                       <></>
                     )}
                     {invoiceSettings.billing.showPhone ? (
                       <p>
-                        <strong>Tel:</strong> {orders[0].billing_address.phone || "N/A"}
+                        <strong>Tel:</strong>{" "}
+                        {orders[0].billing_address.phone || "Not Available"}
                       </p>
                     ) : (
                       <></>
@@ -424,7 +487,10 @@ export function InvoiceTemplate1({ shopdetails, orders, invoiceSettings, GSTHSNC
               <td
                 style={{
                   padding: "10px",
-                  border: `1px solid ${hexToRgba(invoiceSettings.branding.primaryColor, 0.07) || "#e2e8f0"}`,
+                  border: `1px solid ${
+                    hexToRgba(invoiceSettings.branding.primaryColor, 0.07) ||
+                    "#e2e8f0"
+                  }`,
                   width: "50%",
                 }}
               >
@@ -434,13 +500,17 @@ export function InvoiceTemplate1({ shopdetails, orders, invoiceSettings, GSTHSNC
                       orders[0].shipping_address.name !== null ? (
                         orders[0].shipping_address.name
                       ) : (
-                        "N/A"
+                        "Not Available"
                       )
                     ) : (
                       <></>
                     )}{" "}
                     {invoiceSettings.shipping.showCompany ? (
-                      `(${orders[0].billing_address.company !== null ? orders[0].billing_address.company : "N/A"})`
+                      `(${
+                        orders[0].billing_address.company !== null
+                          ? orders[0].billing_address.company
+                          : "Not Available"
+                      })`
                     ) : (
                       <></>
                     )}
@@ -449,7 +519,7 @@ export function InvoiceTemplate1({ shopdetails, orders, invoiceSettings, GSTHSNC
                       orders[0].shipping_address.address1 !== null ? (
                         orders[0].shipping_address.address1 + ", "
                       ) : (
-                        "N/A"
+                        "Not Available"
                       )
                     ) : (
                       <></>
@@ -497,14 +567,16 @@ export function InvoiceTemplate1({ shopdetails, orders, invoiceSettings, GSTHSNC
                     <br />
                     {invoiceSettings.shipping.showEmail ? (
                       <p>
-                        <strong>Email:</strong> {orders[0].email || "N/A"}
+                        <strong>Email:</strong>{" "}
+                        {orders[0].email || "Not Available"}
                       </p>
                     ) : (
                       <></>
                     )}
                     {invoiceSettings.shipping.showPhone ? (
                       <p>
-                        <strong>Tel:</strong> {orders[0].shipping_address.phone || "N/A"}
+                        <strong>Tel:</strong>{" "}
+                        {orders[0].shipping_address.phone || "Not Available"}
                       </p>
                     ) : (
                       <></>
@@ -532,7 +604,8 @@ export function InvoiceTemplate1({ shopdetails, orders, invoiceSettings, GSTHSNC
         <thead>
           <tr
             style={{
-              backgroundColor: invoiceSettings.branding.primaryColor || "#4a5568",
+              backgroundColor:
+                invoiceSettings.branding.primaryColor || "#4a5568",
               color: "white",
               textAlign: "center",
             }}
@@ -541,7 +614,10 @@ export function InvoiceTemplate1({ shopdetails, orders, invoiceSettings, GSTHSNC
               <th
                 style={{
                   padding: "10px",
-                  border: `1px solid ${hexToRgba(invoiceSettings.branding.primaryColor, 0.07) || "#e2e8f0"}`,
+                  border: `1px solid ${
+                    hexToRgba(invoiceSettings.branding.primaryColor, 0.07) ||
+                    "#e2e8f0"
+                  }`,
                 }}
               >
                 ITEMS
@@ -553,7 +629,10 @@ export function InvoiceTemplate1({ shopdetails, orders, invoiceSettings, GSTHSNC
               <th
                 style={{
                   padding: "10px",
-                  border: `1px solid ${hexToRgba(invoiceSettings.branding.primaryColor, 0.07) || "#e2e8f0"}`,
+                  border: `1px solid ${
+                    hexToRgba(invoiceSettings.branding.primaryColor, 0.07) ||
+                    "#e2e8f0"
+                  }`,
                 }}
               >
                 QTY
@@ -565,7 +644,10 @@ export function InvoiceTemplate1({ shopdetails, orders, invoiceSettings, GSTHSNC
               <th
                 style={{
                   padding: "10px",
-                  border: `1px solid ${hexToRgba(invoiceSettings.branding.primaryColor, 0.07) || "#e2e8f0"}`,
+                  border: `1px solid ${
+                    hexToRgba(invoiceSettings.branding.primaryColor, 0.07) ||
+                    "#e2e8f0"
+                  }`,
                 }}
               >
                 RATE
@@ -577,7 +659,10 @@ export function InvoiceTemplate1({ shopdetails, orders, invoiceSettings, GSTHSNC
               <th
                 style={{
                   padding: "10px",
-                  border: `1px solid ${hexToRgba(invoiceSettings.branding.primaryColor, 0.07) || "#e2e8f0"}`,
+                  border: `1px solid ${
+                    hexToRgba(invoiceSettings.branding.primaryColor, 0.07) ||
+                    "#e2e8f0"
+                  }`,
                 }}
               >
                 HSN
@@ -589,7 +674,10 @@ export function InvoiceTemplate1({ shopdetails, orders, invoiceSettings, GSTHSNC
               <th
                 style={{
                   padding: "10px",
-                  border: `1px solid ${hexToRgba(invoiceSettings.branding.primaryColor, 0.07) || "#e2e8f0"}`,
+                  border: `1px solid ${
+                    hexToRgba(invoiceSettings.branding.primaryColor, 0.07) ||
+                    "#e2e8f0"
+                  }`,
                 }}
               >
                 GST
@@ -601,7 +689,10 @@ export function InvoiceTemplate1({ shopdetails, orders, invoiceSettings, GSTHSNC
               <th
                 style={{
                   padding: "10px",
-                  border: `1px solid ${hexToRgba(invoiceSettings.branding.primaryColor, 0.07) || "#e2e8f0"}`,
+                  border: `1px solid ${
+                    hexToRgba(invoiceSettings.branding.primaryColor, 0.07) ||
+                    "#e2e8f0"
+                  }`,
                 }}
               >
                 TAX
@@ -613,7 +704,10 @@ export function InvoiceTemplate1({ shopdetails, orders, invoiceSettings, GSTHSNC
               <th
                 style={{
                   padding: "10px",
-                  border: `1px solid ${hexToRgba(invoiceSettings.branding.primaryColor, 0.07) || "#e2e8f0"}`,
+                  border: `1px solid ${
+                    hexToRgba(invoiceSettings.branding.primaryColor, 0.07) ||
+                    "#e2e8f0"
+                  }`,
                 }}
               >
                 AMOUNT
@@ -627,23 +721,32 @@ export function InvoiceTemplate1({ shopdetails, orders, invoiceSettings, GSTHSNC
           {orders[0].line_items?.map((item, index) => {
             // console.log('GSTHSNCodes-------',GSTHSNCodes[0].productId);
             // console.log('item-------',item.product_id);
-            
-            const matchedGSTItem = GSTHSNCodes.gstcodes ? GSTHSNCodes.gstcodes.find(
-              (gstItem) => Number(gstItem.productId) === item.product_id
-              ) : GSTHSNCodes.find(
-                (gstItem) => Number(gstItem.productId) === item.product_id
+
+            const matchedGSTItem = GSTHSNCodes.gstcodes
+              ? GSTHSNCodes.gstcodes.find(
+                  (gstItem) => Number(gstItem.productId) === item.product_id
+                )
+              : GSTHSNCodes.find(
+                  (gstItem) => Number(gstItem.productId) === item.product_id
                 );
-                console.log('matchedGSTItem', matchedGSTItem);
-            
+            console.log("matchedGSTItem", matchedGSTItem);
+
             const price = parseFloat(item.price) || 0; // Convert to a number and default to 0 if NaN
-            const lineAmount = item.quantity * price + (Number(item?.tax_lines[0]?.price) || 0) || 0;
+            const lineAmount =
+              item.quantity * price +
+                (Number(item?.tax_lines[0]?.price) || 0) || 0;
             return (
               <tr key={item.id}>
                 {invoiceSettings.lineItems.showVariantTitle ? (
                   <td
                     style={{
                       padding: "10px",
-                      border: `1px solid ${hexToRgba(invoiceSettings.branding.primaryColor, 0.07) || "#e2e8f0"}`,
+                      border: `1px solid ${
+                        hexToRgba(
+                          invoiceSettings.branding.primaryColor,
+                          0.07
+                        ) || "#e2e8f0"
+                      }`,
                     }}
                   >
                     {item.name}
@@ -655,11 +758,16 @@ export function InvoiceTemplate1({ shopdetails, orders, invoiceSettings, GSTHSNC
                   <td
                     style={{
                       padding: "10px",
-                      border: `1px solid ${hexToRgba(invoiceSettings.branding.primaryColor, 0.07) || "#e2e8f0"}`,
+                      border: `1px solid ${
+                        hexToRgba(
+                          invoiceSettings.branding.primaryColor,
+                          0.07
+                        ) || "#e2e8f0"
+                      }`,
                       textAlign: "center",
                     }}
                   >
-                    {item.quantity || "N/A"}
+                    {item.quantity || "Not Available"}
                   </td>
                 ) : (
                   <></>
@@ -669,11 +777,16 @@ export function InvoiceTemplate1({ shopdetails, orders, invoiceSettings, GSTHSNC
                   <td
                     style={{
                       padding: "10px",
-                      border: `1px solid ${hexToRgba(invoiceSettings.branding.primaryColor, 0.07) || "#e2e8f0"}`,
+                      border: `1px solid ${
+                        hexToRgba(
+                          invoiceSettings.branding.primaryColor,
+                          0.07
+                        ) || "#e2e8f0"
+                      }`,
                       textAlign: "center",
                     }}
                   >
-                    ₹{price || "N/A"}
+                    ₹{price.toFixed(2) || "0"}
                   </td>
                 ) : (
                   <></>
@@ -683,7 +796,12 @@ export function InvoiceTemplate1({ shopdetails, orders, invoiceSettings, GSTHSNC
                   <td
                     style={{
                       padding: "10px",
-                      border: `1px solid ${hexToRgba(invoiceSettings.branding.primaryColor, 0.07) || "#e2e8f0"}`,
+                      border: `1px solid ${
+                        hexToRgba(
+                          invoiceSettings.branding.primaryColor,
+                          0.07
+                        ) || "#e2e8f0"
+                      }`,
                     }}
                   >
                     {matchedGSTItem?.hsn || "-"}
@@ -695,7 +813,12 @@ export function InvoiceTemplate1({ shopdetails, orders, invoiceSettings, GSTHSNC
                   <td
                     style={{
                       padding: "10px",
-                      border: `1px solid ${hexToRgba(invoiceSettings.branding.primaryColor, 0.07) || "#e2e8f0"}`,
+                      border: `1px solid ${
+                        hexToRgba(
+                          invoiceSettings.branding.primaryColor,
+                          0.07
+                        ) || "#e2e8f0"
+                      }`,
                     }}
                   >
                     {matchedGSTItem?.gst || "-"}
@@ -707,11 +830,16 @@ export function InvoiceTemplate1({ shopdetails, orders, invoiceSettings, GSTHSNC
                   <td
                     style={{
                       padding: "10px",
-                      border: `1px solid ${hexToRgba(invoiceSettings.branding.primaryColor, 0.07) || "#e2e8f0"}`,
+                      border: `1px solid ${
+                        hexToRgba(
+                          invoiceSettings.branding.primaryColor,
+                          0.07
+                        ) || "#e2e8f0"
+                      }`,
                       textAlign: "center",
                     }}
                   >
-                    ₹{item?.tax_lines[0]?.price|| "0"}
+                    ₹{item?.tax_lines[0]?.price || "0"}
                   </td>
                 ) : (
                   <></>
@@ -720,11 +848,16 @@ export function InvoiceTemplate1({ shopdetails, orders, invoiceSettings, GSTHSNC
                   <td
                     style={{
                       padding: "10px",
-                      border: `1px solid ${hexToRgba(invoiceSettings.branding.primaryColor, 0.07) || "#e2e8f0"}`,
+                      border: `1px solid ${
+                        hexToRgba(
+                          invoiceSettings.branding.primaryColor,
+                          0.07
+                        ) || "#e2e8f0"
+                      }`,
                       textAlign: "center",
                     }}
                   >
-                    ₹{lineAmount}
+                    ₹{lineAmount.toFixed(2) || "0"}
                   </td>
                 ) : (
                   <></>
@@ -739,7 +872,8 @@ export function InvoiceTemplate1({ shopdetails, orders, invoiceSettings, GSTHSNC
         <div style={{ width: "50%" }}>
           <h3
             style={{
-              backgroundColor: invoiceSettings.branding.primaryColor || "#4a5568",
+              backgroundColor:
+                invoiceSettings.branding.primaryColor || "#4a5568",
               color: "white",
               padding: "5px 10px",
             }}
@@ -753,7 +887,9 @@ export function InvoiceTemplate1({ shopdetails, orders, invoiceSettings, GSTHSNC
           </ul>
           {invoiceSettings.total.showTotal ? (
             <div style={{ marginTop: "20px", marginLeft: "10px" }}>
-              <p style={{ margin: "0", fontWeight: "bold" }}>Total Amount (₹ - In Words):</p>
+              <p style={{ margin: "0", fontWeight: "bold" }}>
+                Total Amount (₹ - In Words):
+              </p>
               <p style={{ fontStyle: "italic", color: "#4a5568" }}>
                 {convertAmountToWords(orders[0].total_price || 0)}
               </p>
@@ -765,7 +901,9 @@ export function InvoiceTemplate1({ shopdetails, orders, invoiceSettings, GSTHSNC
                 marginTop: "10px",
                 fontSize: "0.9em",
                 padding: "10px",
-                backgroundColor: hexToRgba(invoiceSettings.branding.primaryColor, 0.07) || "#f7fafc",
+                backgroundColor:
+                  hexToRgba(invoiceSettings.branding.primaryColor, 0.07) ||
+                  "#f7fafc",
                 // borderRadius: "4px",
               }}
             >
@@ -780,7 +918,8 @@ export function InvoiceTemplate1({ shopdetails, orders, invoiceSettings, GSTHSNC
         <div style={{ width: "40%" }}>
           <h3
             style={{
-              backgroundColor: invoiceSettings.branding.primaryColor || "#4a5568",
+              backgroundColor:
+                invoiceSettings.branding.primaryColor || "#4a5568",
               color: "white",
               padding: "6px 10px",
               marginBottom: "0px",
@@ -804,8 +943,17 @@ export function InvoiceTemplate1({ shopdetails, orders, invoiceSettings, GSTHSNC
                     style={{
                       padding: "10px",
                       fontWeight: "bold",
-                      backgroundColor: hexToRgba(invoiceSettings.branding.primaryColor, 0.07) || "#edf2f7",
-                      borderBottom: `1px solid ${hexToRgba(invoiceSettings.branding.primaryColor, 0.07) || "#e2e8f0"}`,
+                      backgroundColor:
+                        hexToRgba(
+                          invoiceSettings.branding.primaryColor,
+                          0.07
+                        ) || "#edf2f7",
+                      borderBottom: `1px solid ${
+                        hexToRgba(
+                          invoiceSettings.branding.primaryColor,
+                          0.07
+                        ) || "#e2e8f0"
+                      }`,
                     }}
                   >
                     Subtotal
@@ -814,21 +962,81 @@ export function InvoiceTemplate1({ shopdetails, orders, invoiceSettings, GSTHSNC
                     style={{
                       padding: "10px",
                       textAlign: "right",
-                      borderBottom: `1px solid ${hexToRgba(invoiceSettings.branding.primaryColor, 0.07) || "#e2e8f0"}`,
+                      borderBottom: `1px solid ${
+                        hexToRgba(
+                          invoiceSettings.branding.primaryColor,
+                          0.07
+                        ) || "#e2e8f0"
+                      }`,
                     }}
                   >
-                    ₹ {orders[0].subtotal_price !== null ? Number(orders[0].subtotal_price).toFixed(2) : "0.00"}
+                    ₹{" "}
+                    {orders[0].subtotal_price !== null
+                      ? Number(orders[0].subtotal_price).toFixed(2)
+                      : "0"}
                   </td>
                 </tr>
               ) : null}
+              {invoiceSettings.total.showDiscount ? (
+                <tr>
+                  <td
+                    style={{
+                      padding: "10px",
+                      fontWeight: "bold",
+                      backgroundColor:
+                        hexToRgba(
+                          invoiceSettings.branding.primaryColor,
+                          0.07
+                        ) || "#edf2f7",
+                      borderBottom: `1px solid ${
+                        hexToRgba(
+                          invoiceSettings.branding.primaryColor,
+                          0.07
+                        ) || "#e2e8f0"
+                      }`,
+                    }}
+                  >
+                    Discount
+                  </td>
+                  <td
+                    style={{
+                      padding: "10px",
+                      textAlign: "right",
+                      borderBottom: `1px solid ${
+                        hexToRgba(
+                          invoiceSettings.branding.primaryColor,
+                          0.07
+                        ) || "#e2e8f0"
+                      }`,
+                    }}
+                  >
+                    ₹ (-{" "}
+                    {orders[0]?.discount_codes  ?
+                    orders[0]?.discount_codes[0]?.amount 
+                      ? Number(orders[0]?.discount_codes[0]?.amount).toFixed(2)
+                      : "0" :"0"}
+                    )
+                  </td>
+                </tr>
+              ) : null}
+
               {invoiceSettings.total.showTax ? (
                 <tr>
                   <td
                     style={{
                       padding: "10px",
                       fontWeight: "bold",
-                      backgroundColor: hexToRgba(invoiceSettings.branding.primaryColor, 0.07) || "#edf2f7",
-                      borderBottom: `1px solid ${hexToRgba(invoiceSettings.branding.primaryColor, 0.07) || "#e2e8f0"}`,
+                      backgroundColor:
+                        hexToRgba(
+                          invoiceSettings.branding.primaryColor,
+                          0.07
+                        ) || "#edf2f7",
+                      borderBottom: `1px solid ${
+                        hexToRgba(
+                          invoiceSettings.branding.primaryColor,
+                          0.07
+                        ) || "#e2e8f0"
+                      }`,
                     }}
                   >
                     Taxable
@@ -837,10 +1045,60 @@ export function InvoiceTemplate1({ shopdetails, orders, invoiceSettings, GSTHSNC
                     style={{
                       padding: "10px",
                       textAlign: "right",
-                      borderBottom: `1px solid ${hexToRgba(invoiceSettings.branding.primaryColor, 0.07) || "#e2e8f0"}`,
+                      borderBottom: `1px solid ${
+                        hexToRgba(
+                          invoiceSettings.branding.primaryColor,
+                          0.07
+                        ) || "#e2e8f0"
+                      }`,
                     }}
                   >
-                    ₹ {orders[0].total_tax !== null ? Number(orders[0].total_tax).toFixed(2) : "0.00"}
+                    ₹{" "}
+                    {orders[0].total_tax !== null
+                      ? Number(orders[0].total_tax).toFixed(2)
+                      : "0"}
+                  </td>
+                </tr>
+              ) : null}
+
+              {invoiceSettings.total.showShipping ? (
+                <tr>
+                  <td
+                    style={{
+                      padding: "10px",
+                      fontWeight: "bold",
+                      backgroundColor:
+                        hexToRgba(
+                          invoiceSettings.branding.primaryColor,
+                          0.07
+                        ) || "#edf2f7",
+                      borderBottom: `1px solid ${
+                        hexToRgba(
+                          invoiceSettings.branding.primaryColor,
+                          0.07
+                        ) || "#e2e8f0"
+                      }`,
+                    }}
+                  >
+                    Shipping
+                  </td>
+                  <td
+                    style={{
+                      padding: "10px",
+                      textAlign: "right",
+                      borderBottom: `1px solid ${
+                        hexToRgba(
+                          invoiceSettings.branding.primaryColor,
+                          0.07
+                        ) || "#e2e8f0"
+                      }`,
+                    }}
+                  >
+                    ₹{" "}
+                    {orders[0]?.shipping_lines ?
+                    orders[0]?.shipping_lines[0]?.price 
+                      ? Number(orders[0]?.shipping_lines[0]?.price).toFixed(2)
+                      : "0" :"0"}
                   </td>
                 </tr>
               ) : null}
@@ -850,9 +1108,15 @@ export function InvoiceTemplate1({ shopdetails, orders, invoiceSettings, GSTHSNC
                     style={{
                       padding: "10px",
                       fontWeight: "bold",
-                      backgroundColor: invoiceSettings.branding.primaryColor || "#4a5568",
+                      backgroundColor:
+                        invoiceSettings.branding.primaryColor || "#4a5568",
                       color: "white",
-                      borderTop: `1px solid ${hexToRgba(invoiceSettings.branding.primaryColor, 0.07) || "#e2e8f0"}`,
+                      borderTop: `1px solid ${
+                        hexToRgba(
+                          invoiceSettings.branding.primaryColor,
+                          0.07
+                        ) || "#e2e8f0"
+                      }`,
                     }}
                   >
                     TOTAL
@@ -862,11 +1126,15 @@ export function InvoiceTemplate1({ shopdetails, orders, invoiceSettings, GSTHSNC
                       padding: "10px",
                       textAlign: "right",
                       fontWeight: "bold",
-                      backgroundColor: invoiceSettings.branding.primaryColor || "#4a5568",
+                      backgroundColor:
+                        invoiceSettings.branding.primaryColor || "#4a5568",
                       color: "white",
                     }}
                   >
-                    ₹ {orders[0].total_price !== null ? Number(orders[0].total_price).toFixed(2) : "0.00"}
+                    ₹{" "}
+                    {orders[0].total_price !== null
+                      ? Number(orders[0].total_price).toFixed(2)
+                      : "0.00"}
                   </td>
                 </tr>
               ) : null}
@@ -883,7 +1151,7 @@ export function InvoiceTemplate1({ shopdetails, orders, invoiceSettings, GSTHSNC
               style={{
                 display: "flex",
                 justifyContent: "flex-end", // Aligns the content to the right
-                marginTop: "150px",
+                marginTop: "40px",
               }}
             >
               <div
@@ -920,9 +1188,7 @@ export function InvoiceTemplate1({ shopdetails, orders, invoiceSettings, GSTHSNC
           )}
         </>
       ) : (
-        <>
-          
-        </>
+        <></>
       )}
       {!shopProfile?.images?.signatureURL && (
         <>
@@ -936,12 +1202,22 @@ export function InvoiceTemplate1({ shopdetails, orders, invoiceSettings, GSTHSNC
         </>
       )}
 
-      <p style={{ textAlign: "center", marginTop: "10px", fontSize: "0.9em", borderTop: "1px solid #e2e8f0" }}>
+      <p
+        style={{
+          textAlign: "center",
+          marginTop: "10px",
+          fontSize: "0.9em",
+          borderTop: "1px solid #e2e8f0",
+        }}
+      >
         If you have any questions about this invoice, please contact
         <br />
         {invoiceSettings.supplier.showPhone ? (
           <>
-            <strong>Phone:</strong> {shopdetails[0].phone !== null ? shopdetails[0].phone : "N/A"}{" "}
+            <strong>Phone:</strong>{" "}
+            {shopdetails[0].phone !== null
+              ? shopdetails[0].phone
+              : "Not Available"}{" "}
           </>
         ) : (
           <></>
@@ -949,7 +1225,10 @@ export function InvoiceTemplate1({ shopdetails, orders, invoiceSettings, GSTHSNC
         {" | "}
         {invoiceSettings.supplier.showEmail ? (
           <>
-            <strong>E-mail:</strong> {shopdetails[0].email !== null ? shopdetails[0].email : "N/A"}
+            <strong>E-mail:</strong>{" "}
+            {shopdetails[0].email !== null
+              ? shopdetails[0].email
+              : "Not Available"}
           </>
         ) : (
           <></>
@@ -960,7 +1239,10 @@ export function InvoiceTemplate1({ shopdetails, orders, invoiceSettings, GSTHSNC
       </p>
       <div style={{ marginBottom: "20px" }}>
         {shopProfile.socialLinks && (
-          <SocialMediaIcons socialLink={shopProfile.socialLinks} invoiceSetting={invoiceSettings} />
+          <SocialMediaIcons
+            socialLink={shopProfile.socialLinks}
+            invoiceSetting={invoiceSettings}
+          />
         )}
         {/* <SocialMediaIcons socialLink={shopProfile.socialLinks} invoiceSetting={invoiceSettings} /> */}
       </div>

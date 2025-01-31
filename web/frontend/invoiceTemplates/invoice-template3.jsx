@@ -186,7 +186,7 @@ export function InvoiceTemplate3({ shopdetails, orders, invoiceSettings, GSTHSNC
           <div style={{ padding: "8px" }}>
             {invoiceSettings.overview.showInvoiceNumber && (
               <p style={{ margin: "4px 0" }}>
-                <strong>Invoice No:</strong> {orders[0].order_number || "N/A"}
+                <strong>Invoice No:</strong> {orders[0].order_number || "Not Available"}
               </p>
             )}
             {invoiceSettings.overview.issueDate && (
@@ -198,10 +198,10 @@ export function InvoiceTemplate3({ shopdetails, orders, invoiceSettings, GSTHSNC
           {invoiceSettings.supplier.showAddress ? (
             <div style={{ padding: "8px" }}>
               <p style={{ margin: "4px 0" }}>
-                <strong>Place of Supply:</strong> {shopdetails[0].city || "N/A"}, {shopdetails[0].province || "N/A"}
+                <strong>Place of Supply:</strong> {shopdetails[0].city || "Not Available"}, {shopdetails[0].province || "Not Available"}
               </p>
               <p style={{ margin: "4px 0" }}>
-                <strong>State Code:</strong> {shopdetails[0].province_code || "N/A"}
+                <strong>State Code:</strong> {shopdetails[0].province_code || "Not Available"}
               </p>
             </div>
           ) : (
@@ -233,13 +233,13 @@ export function InvoiceTemplate3({ shopdetails, orders, invoiceSettings, GSTHSNC
                       orders[0].billing_address.name !== null ? (
                         orders[0].billing_address.name
                       ) : (
-                        "N/A"
+                        "Not Available"
                       )
                     ) : (
                       <></>
                     )}{" "}
                     {invoiceSettings.billing.showCompany ? (
-                      `(${orders[0].billing_address.company !== null ? orders[0].billing_address.company : "N/A"})`
+                      `(${orders[0].billing_address.company !== null ? orders[0].billing_address.company : "Not Available"})`
                     ) : (
                       <></>
                     )}
@@ -249,7 +249,7 @@ export function InvoiceTemplate3({ shopdetails, orders, invoiceSettings, GSTHSNC
                       orders[0].billing_address.address1 !== null ? (
                         orders[0].billing_address.address1 + ", "
                       ) : (
-                        "N/A"
+                        "Not Available"
                       )
                     ) : (
                       <></>
@@ -296,14 +296,14 @@ export function InvoiceTemplate3({ shopdetails, orders, invoiceSettings, GSTHSNC
                   </p>
                   {invoiceSettings.billing.showEmail ? (
                     <p>
-                      <strong>Email:</strong> {orders[0].email || "N/A"}
+                      <strong>Email:</strong> {orders[0].email || "Not Available"}
                     </p>
                   ) : (
                     <></>
                   )}
                   {invoiceSettings.billing.showPhone ? (
                     <p>
-                      <strong>Tel:</strong> {orders[0].billing_address.phone || "N/A"}
+                      <strong>Tel:</strong> {orders[0].billing_address.phone || "Not Available"}
                     </p>
                   ) : (
                     <></>
@@ -330,13 +330,13 @@ export function InvoiceTemplate3({ shopdetails, orders, invoiceSettings, GSTHSNC
                       orders[0].shipping_address.name !== null ? (
                         orders[0].shipping_address.name
                       ) : (
-                        "N/A"
+                        "Not Available"
                       )
                     ) : (
                       <></>
                     )}{" "}
                     {invoiceSettings.shipping.showCompany ? (
-                      `(${orders[0].shipping_address.company !== null ? orders[0].shipping_address.company : "N/A"})`
+                      `(${orders[0].shipping_address.company !== null ? orders[0].shipping_address.company : "Not Available"})`
                     ) : (
                       <></>
                     )}
@@ -346,7 +346,7 @@ export function InvoiceTemplate3({ shopdetails, orders, invoiceSettings, GSTHSNC
                       orders[0].shipping_address.address1 !== null ? (
                         orders[0].shipping_address.address1 + ", "
                       ) : (
-                        "N/A"
+                        "Not Available"
                       )
                     ) : (
                       <></>
@@ -394,14 +394,14 @@ export function InvoiceTemplate3({ shopdetails, orders, invoiceSettings, GSTHSNC
 
                   {invoiceSettings.shipping.showEmail ? (
                     <p>
-                      <strong>Email:</strong> {orders[0].email || "N/A"}
+                      <strong>Email:</strong> {orders[0].email || "Not Available"}
                     </p>
                   ) : (
                     <></>
                   )}
                   {invoiceSettings.shipping.showPhone ? (
                     <p>
-                      <strong>Tel:</strong> {orders[0].shipping_address.phone || "N/A"}
+                      <strong>Tel:</strong> {orders[0].shipping_address.phone || "Not Available"}
                     </p>
                   ) : (
                     <></>
@@ -434,18 +434,18 @@ export function InvoiceTemplate3({ shopdetails, orders, invoiceSettings, GSTHSNC
                   shopdetails[0].address1 !== null ? (
                     shopdetails[0].address1 + ", "
                   ) : (
-                    "N/A"
+                    "Not Available"
                   )
                 ) : (
                   <></>
                 )}{" "}
-                {invoiceSettings.supplier.showCity ? shopdetails[0].city !== null ? shopdetails[0].city : "N/A" : <></>}
+                {invoiceSettings.supplier.showCity ? shopdetails[0].city !== null ? shopdetails[0].city : "Not Available" : <></>}
               </p>
               <p>
                 {invoiceSettings.supplier.showEmail ? (
                   <>
                     <strong>Email: </strong>
-                    {shopdetails[0].email !== null ? shopdetails[0].email : "N/A"}
+                    {shopdetails[0].email !== null ? shopdetails[0].email : "Not Available"}
                   </>
                 ) : (
                   <></>
@@ -455,7 +455,7 @@ export function InvoiceTemplate3({ shopdetails, orders, invoiceSettings, GSTHSNC
                 {invoiceSettings.supplier.showPhone ? (
                   <>
                     <strong>Phone: </strong>
-                    {shopdetails[0]?.phone ? shopdetails[0].phone : "N/A"}
+                    {shopdetails[0]?.phone ? shopdetails[0].phone : "Not Available"}
                   </>
                 ) : (
                   <></>
@@ -466,7 +466,7 @@ export function InvoiceTemplate3({ shopdetails, orders, invoiceSettings, GSTHSNC
                 {invoiceSettings.supplier.showGSTIN ? (
                   <>
                     <strong>GST: </strong>
-                    {shopProfile?.storeProfile?.gstNumber || "N/A"}
+                    {shopProfile?.storeProfile?.gstNumber || "Not Available"}
                   </>
                 ) : (
                   <></>
@@ -587,98 +587,133 @@ export function InvoiceTemplate3({ shopdetails, orders, invoiceSettings, GSTHSNC
               const price = parseFloat(item.price) || 0; // Convert to a number and default to 0 if NaN
               const lineAmount = item.quantity * price + (Number(item?.tax_lines[0]?.price) || 0) || 0;
               return (
-                <tr key={item.id}>
-                  {invoiceSettings.lineItems.showVariantTitle ? (
-                    <td
-                      style={{
-                        padding: "10px",
-                        border: `1px solid ${hexToRgba(invoiceSettings.branding.primaryColor, 0.07) || "#e2e8f0"}`,
-                      }}
-                    >
-                      {item.name}
-                    </td>
-                  ) : (
-                    <></>
-                  )}
-                  {invoiceSettings.lineItems.showQuantity ? (
-                    <td
-                      style={{
-                        padding: "10px",
-                        border: `1px solid ${hexToRgba(invoiceSettings.branding.primaryColor, 0.07) || "#e2e8f0"}`,
-                        textAlign: "center",
-                      }}
-                    >
-                      {item.quantity || "N/A"}
-                    </td>
-                  ) : (
-                    <></>
-                  )}
-
-                  {invoiceSettings.lineItems.showUnitRate ? (
-                    <td
-                      style={{
-                        padding: "10px",
-                        border: `1px solid ${hexToRgba(invoiceSettings.branding.primaryColor, 0.07) || "#e2e8f0"}`,
-                        textAlign: "center",
-                      }}
-                    >
-                      ₹{price || "N/A"}
-                    </td>
-                  ) : (
-                    <></>
-                  )}
-
-                  {invoiceSettings.lineItems.showHSN ? (
-                    <td
-                      style={{
-                        padding: "10px",
-                        border: `1px solid ${hexToRgba(invoiceSettings.branding.primaryColor, 0.07) || "#e2e8f0"}`,
-                      }}
-                    >
-                      {matchedGSTItem?.hsn || "-"}
-                    </td>
-                  ) : (
-                    <></>
-                  )}
-                  {invoiceSettings.lineItems.showTaxAmount ? (
-                    <td
-                      style={{
-                        padding: "10px",
-                        border: `1px solid ${hexToRgba(invoiceSettings.branding.primaryColor, 0.07) || "#e2e8f0"}`,
-                      }}
-                    >
-                      {matchedGSTItem?.gst || "-"}
-                    </td>
-                  ) : (
-                    <></>
-                  )}
-                  {invoiceSettings.lineItems.showTaxAmount ? (
-                    <td
-                      style={{
-                        padding: "10px",
-                        border: `1px solid ${hexToRgba(invoiceSettings.branding.primaryColor, 0.07) || "#e2e8f0"}`,
-                        textAlign: "center",
-                      }}
-                    >
-                      ₹{item?.tax_lines[0]?.price || "0"}
-                    </td>
-                  ) : (
-                    <></>
-                  )}
-                  {invoiceSettings.lineItems.showTotalPrice ? (
-                    <td
-                      style={{
-                        padding: "10px",
-                        border: `1px solid ${hexToRgba(invoiceSettings.branding.primaryColor, 0.07) || "#e2e8f0"}`,
-                        textAlign: "center",
-                      }}
-                    >
-                      ₹{lineAmount}
-                    </td>
-                  ) : (
-                    <></>
-                  )}
-                </tr>
+                 <tr key={item.id}>
+                                {invoiceSettings.lineItems.showVariantTitle ? (
+                                  <td
+                                    style={{
+                                      padding: "10px",
+                                      border: `1px solid ${
+                                        hexToRgba(
+                                          invoiceSettings.branding.primaryColor,
+                                          0.07
+                                        ) || "#e2e8f0"
+                                      }`,
+                                    }}
+                                  >
+                                    {item.name}
+                                  </td>
+                                ) : (
+                                  <></>
+                                )}
+                                {invoiceSettings.lineItems.showQuantity ? (
+                                  <td
+                                    style={{
+                                      padding: "10px",
+                                      border: `1px solid ${
+                                        hexToRgba(
+                                          invoiceSettings.branding.primaryColor,
+                                          0.07
+                                        ) || "#e2e8f0"
+                                      }`,
+                                      textAlign: "center",
+                                    }}
+                                  >
+                                    {item.quantity || "Not Available"}
+                                  </td>
+                                ) : (
+                                  <></>
+                                )}
+                
+                                {invoiceSettings.lineItems.showUnitRate ? (
+                                  <td
+                                    style={{
+                                      padding: "10px",
+                                      border: `1px solid ${
+                                        hexToRgba(
+                                          invoiceSettings.branding.primaryColor,
+                                          0.07
+                                        ) || "#e2e8f0"
+                                      }`,
+                                      textAlign: "center",
+                                    }}
+                                  >
+                                    ₹{price.toFixed(2) || "0"}
+                                  </td>
+                                ) : (
+                                  <></>
+                                )}
+                
+                                {invoiceSettings.lineItems.showHSN ? (
+                                  <td
+                                    style={{
+                                      padding: "10px",
+                                      border: `1px solid ${
+                                        hexToRgba(
+                                          invoiceSettings.branding.primaryColor,
+                                          0.07
+                                        ) || "#e2e8f0"
+                                      }`,
+                                    }}
+                                  >
+                                    {matchedGSTItem?.hsn || "-"}
+                                  </td>
+                                ) : (
+                                  <></>
+                                )}
+                                {invoiceSettings.lineItems.showTaxAmount ? (
+                                  <td
+                                    style={{
+                                      padding: "10px",
+                                      border: `1px solid ${
+                                        hexToRgba(
+                                          invoiceSettings.branding.primaryColor,
+                                          0.07
+                                        ) || "#e2e8f0"
+                                      }`,
+                                    }}
+                                  >
+                                    {matchedGSTItem?.gst || "-"}
+                                  </td>
+                                ) : (
+                                  <></>
+                                )}
+                                {invoiceSettings.lineItems.showTaxAmount ? (
+                                  <td
+                                    style={{
+                                      padding: "10px",
+                                      border: `1px solid ${
+                                        hexToRgba(
+                                          invoiceSettings.branding.primaryColor,
+                                          0.07
+                                        ) || "#e2e8f0"
+                                      }`,
+                                      textAlign: "center",
+                                    }}
+                                  >
+                                    ₹{item?.tax_lines[0]?.price || "0"}
+                                  </td>
+                                ) : (
+                                  <></>
+                                )}
+                                {invoiceSettings.lineItems.showTotalPrice ? (
+                                  <td
+                                    style={{
+                                      padding: "10px",
+                                      border: `1px solid ${
+                                        hexToRgba(
+                                          invoiceSettings.branding.primaryColor,
+                                          0.07
+                                        ) || "#e2e8f0"
+                                      }`,
+                                      textAlign: "center",
+                                    }}
+                                  >
+                                    ₹{lineAmount.toFixed(2) || "0"}
+                                  </td>
+                                ) : (
+                                  <></>
+                                )}
+                              </tr>
               );
             })}
           </tbody>
@@ -774,33 +809,131 @@ export function InvoiceTemplate3({ shopdetails, orders, invoiceSettings, GSTHSNC
                     </td>
                   </tr>
                 ) : null}
-                {invoiceSettings.total.showTax ? (
-                  <tr>
-                    <td
-                      style={{
-                        padding: "10px",
-                        fontWeight: "bold",
-                        backgroundColor: hexToRgba(invoiceSettings.branding.primaryColor, 0.07) || "#edf2f7",
-                        borderBottom: `1px solid ${
-                          hexToRgba(invoiceSettings.branding.primaryColor, 0.07) || "#e2e8f0"
-                        }`,
-                      }}
-                    >
-                      Taxable
-                    </td>
-                    <td
-                      style={{
-                        padding: "10px",
-                        textAlign: "right",
-                        borderBottom: `1px solid ${
-                          hexToRgba(invoiceSettings.branding.primaryColor, 0.07) || "#e2e8f0"
-                        }`,
-                      }}
-                    >
-                      ₹ {orders[0].total_tax !== null ? Number(orders[0].total_tax).toFixed(2) : "0.00"}
-                    </td>
-                  </tr>
-                ) : null}
+                 {invoiceSettings.total.showDiscount ? (
+                                <tr>
+                                  <td
+                                    style={{
+                                      padding: "10px",
+                                      fontWeight: "bold",
+                                      backgroundColor:
+                                        hexToRgba(
+                                          invoiceSettings.branding.primaryColor,
+                                          0.07
+                                        ) || "#edf2f7",
+                                      borderBottom: `1px solid ${
+                                        hexToRgba(
+                                          invoiceSettings.branding.primaryColor,
+                                          0.07
+                                        ) || "#e2e8f0"
+                                      }`,
+                                    }}
+                                  >
+                                    Discount
+                                  </td>
+                                  <td
+                                    style={{
+                                      padding: "10px",
+                                      textAlign: "right",
+                                      borderBottom: `1px solid ${
+                                        hexToRgba(
+                                          invoiceSettings.branding.primaryColor,
+                                          0.07
+                                        ) || "#e2e8f0"
+                                      }`,
+                                    }}
+                                  >
+                                    ₹ (-{" "}
+                                    {orders[0]?.discount_codes  ?
+                                    orders[0]?.discount_codes[0]?.amount 
+                                      ? Number(orders[0]?.discount_codes[0]?.amount).toFixed(2)
+                                      : "0" :"0"}
+                                    )
+                                  </td>
+                                </tr>
+                              ) : null}
+                
+                              {invoiceSettings.total.showTax ? (
+                                <tr>
+                                  <td
+                                    style={{
+                                      padding: "10px",
+                                      fontWeight: "bold",
+                                      backgroundColor:
+                                        hexToRgba(
+                                          invoiceSettings.branding.primaryColor,
+                                          0.07
+                                        ) || "#edf2f7",
+                                      borderBottom: `1px solid ${
+                                        hexToRgba(
+                                          invoiceSettings.branding.primaryColor,
+                                          0.07
+                                        ) || "#e2e8f0"
+                                      }`,
+                                    }}
+                                  >
+                                    Taxable
+                                  </td>
+                                  <td
+                                    style={{
+                                      padding: "10px",
+                                      textAlign: "right",
+                                      borderBottom: `1px solid ${
+                                        hexToRgba(
+                                          invoiceSettings.branding.primaryColor,
+                                          0.07
+                                        ) || "#e2e8f0"
+                                      }`,
+                                    }}
+                                  >
+                                    ₹{" "}
+                                    {orders[0].total_tax !== null
+                                      ? Number(orders[0].total_tax).toFixed(2)
+                                      : "0"}
+                                  </td>
+                                </tr>
+                              ) : null}
+                
+                              {invoiceSettings.total.showShipping ? (
+                                <tr>
+                                  <td
+                                    style={{
+                                      padding: "10px",
+                                      fontWeight: "bold",
+                                      backgroundColor:
+                                        hexToRgba(
+                                          invoiceSettings.branding.primaryColor,
+                                          0.07
+                                        ) || "#edf2f7",
+                                      borderBottom: `1px solid ${
+                                        hexToRgba(
+                                          invoiceSettings.branding.primaryColor,
+                                          0.07
+                                        ) || "#e2e8f0"
+                                      }`,
+                                    }}
+                                  >
+                                    Shipping
+                                  </td>
+                                  <td
+                                    style={{
+                                      padding: "10px",
+                                      textAlign: "right",
+                                      borderBottom: `1px solid ${
+                                        hexToRgba(
+                                          invoiceSettings.branding.primaryColor,
+                                          0.07
+                                        ) || "#e2e8f0"
+                                      }`,
+                                    }}
+                                  >
+                                    ₹{" "}
+                                    {orders[0]?.shipping_lines ?
+                                    orders[0]?.shipping_lines[0]?.price 
+                                      ? Number(orders[0]?.shipping_lines[0]?.price).toFixed(2)
+                                      : "0" :"0"}
+                                  </td>
+                                </tr>
+                              ) : null}
                 {invoiceSettings.total.showTotal ? (
                   <tr>
                     <td
@@ -836,7 +969,7 @@ export function InvoiceTemplate3({ shopdetails, orders, invoiceSettings, GSTHSNC
           style={{
             display: "flex",
             justifyContent: "flex-end", // Aligns the content to the right
-            marginTop: "150px",
+            marginTop: orders[0].line_items.length > 3 ?  "40px" : '120px',
             borderBottom: "1px solid #e2e8f0",
           }}
         ></div>

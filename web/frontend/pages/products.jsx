@@ -16,7 +16,7 @@ import {
   Modal,
 } from "@shopify/polaris";
 import ToastNotification from "../components/ToastNotification"; // Import the ToastNotification component
-
+import UpgradeBanner from "../components/UpgradePlanBanner";
 
 export default function ProductIndexTable() {
   const [products, setProducts] = useState([]);
@@ -64,7 +64,7 @@ export default function ProductIndexTable() {
     setIsLoading(true);
 
     try {
-      const response = await fetch("/api/products/all", {
+      const response = await fetch("/api/2025-01/products.json", {
         method: "GET",
         headers: { "Content-Type": "application/json" },
       });
@@ -94,8 +94,8 @@ export default function ProductIndexTable() {
 
         setActiveProductCount(activeCount);
         setDraftProductCount(draftCount);
-        setShowToast(true);
-        setToastMessage("Products fetched successfully.");
+        //  setShowToast(true);
+        //  setToastMessage("Products fetched successfully.");
         // console.log("storeDomain && email:", storeDomain, email);
         if (storeDomain && email) {
           // console.log("products--:", productsWithEditableFields);
@@ -119,15 +119,17 @@ export default function ProductIndexTable() {
         throw new Error("Invalid storeDomain or email.");
       }
 
-      const url = `/api/products/gsthsn?storeDomain=${encodeURIComponent(storeDomain)}&email=${encodeURIComponent(
-        email
-      )}`;
+      const url = `/api/products/gsthsn?storeDomain=${encodeURIComponent(
+        storeDomain
+      )}&email=${encodeURIComponent(email)}`;
       // console.log("Fetching GST HSN Values with URL:", url);
 
       const response = await fetch(url);
 
       if (!response.ok) {
-        throw new Error(`Failed to fetch GST values. Status: ${response.status}`);
+        throw new Error(
+          `Failed to fetch GST values. Status: ${response.status}`
+        );
       }
 
       const data = await response.json();
@@ -153,8 +155,8 @@ export default function ProductIndexTable() {
 
         return {
           ...product,
-          hsn: matchedGSTHSN ? matchedGSTHSN.hsn : "N/A",
-          gst: matchedGSTHSN ? matchedGSTHSN.gst : "N/A",
+          hsn: matchedGSTHSN ? matchedGSTHSN.hsn : "",
+          gst: matchedGSTHSN ? matchedGSTHSN.gst : "",
         };
       });
 
@@ -162,13 +164,16 @@ export default function ProductIndexTable() {
       setFilteredProducts(updatedProducts);
       setProductCount(updatedProducts.length);
 
-      const activeCount = updatedProducts.filter((product) => product.status.toLowerCase() === "active").length;
-      const draftCount = updatedProducts.filter((product) => product.status.toLowerCase() === "draft").length;
+      const activeCount = updatedProducts.filter(
+        (product) => product.status.toLowerCase() === "active"
+      ).length;
+      const draftCount = updatedProducts.filter(
+        (product) => product.status.toLowerCase() === "draft"
+      ).length;
 
       setActiveProductCount(activeCount);
       setDraftProductCount(draftCount);
       // console.log("Updated Products with GST/HSN:", updatedProducts);
-      
     } else {
       updateProductsWithGSTHSN(gstValues);
     }
@@ -192,8 +197,6 @@ export default function ProductIndexTable() {
 
     fetchData(); // Call the fetchData function
   }, [storeDomain, email]); // Run when storeDomain or storeEmail changes
-
-  
 
   const syncProducts = async () => {
     setIsLoading(true);
@@ -266,7 +269,8 @@ export default function ProductIndexTable() {
       return;
     }
     const taggedProducts = products.filter(
-      (product) => product.tags && product.tags.includes(tagSearchTerm.toLowerCase())
+      (product) =>
+        product.tags && product.tags.includes(tagSearchTerm.toLowerCase())
     );
     setFilteredProducts(taggedProducts);
     setSelectedTag(tagSearchTerm);
@@ -278,33 +282,34 @@ export default function ProductIndexTable() {
     setFilteredProducts(products);
   };
 
-  const handleSelectAll = () => {
-    const currentPageIds = paginatedProducts.map(({ id }) => id);
-    if (isAllSelected) {
-      setSelectedItems((prevSelectedItems) => prevSelectedItems.filter((id) => !currentPageIds.includes(id)));
-    } else {
-      setSelectedItems((prevSelectedItems) => [
-        ...prevSelectedItems,
-        ...currentPageIds.filter((id) => !prevSelectedItems.includes(id)),
-      ]);
-    }
-  };
+  // const handleSelectAll = () => {
+  //   const currentPageIds = paginatedProducts.map(({ id }) => id);
+  //   if (isAllSelected) {
+  //     setSelectedItems((prevSelectedItems) =>
+  //       prevSelectedItems.filter((id) => !currentPageIds.includes(id))
+  //     );
+  //   } else {
+  //     setSelectedItems((prevSelectedItems) => [
+  //       ...prevSelectedItems,
+  //       ...currentPageIds.filter((id) => !prevSelectedItems.includes(id)),
+  //     ]);
+  //   }
+  // };
 
-  const handleRowSelection = (id) => {
-    // console.log('handleRowSelection - id:', id);
-    setSelectedItems((prevSelectedItems) => {
-      
-      if (prevSelectedItems.includes(id)) {
-        // console.log('prevSelectedItems', prevSelectedItems);
-        // If the row is already selected, remove it from the selection
-        return prevSelectedItems.filter((itemId) => itemId !== id);
-      } else {
-        // Otherwise, add it to the selection
-        // console.log('prevSelectedItems', prevSelectedItems);
-        return [...prevSelectedItems, id];
-      }
-    });
-  };
+  // const handleRowSelection = (id) => {
+  //   // console.log('handleRowSelection - id:', id);
+  //   setSelectedItems((prevSelectedItems) => {
+  //     if (prevSelectedItems.includes(id)) {
+  //       // console.log('prevSelectedItems', prevSelectedItems);
+  //       // If the row is already selected, remove it from the selection
+  //       return prevSelectedItems.filter((itemId) => itemId !== id);
+  //     } else {
+  //       // Otherwise, add it to the selection
+  //       // console.log('prevSelectedItems', prevSelectedItems);
+  //       return [...prevSelectedItems, id];
+  //     }
+  //   });
+  // };
 
   const filteredByTab = filteredProducts.filter((product) => {
     const status = product.status.toLowerCase();
@@ -315,9 +320,14 @@ export default function ProductIndexTable() {
     return false;
   });
 
-  const paginatedProducts = filteredByTab.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+  const paginatedProducts = filteredByTab.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
 
-  const isAllSelected = paginatedProducts.length > 0 && paginatedProducts.every(({ id }) => selectedItems.includes(id));
+  const isAllSelected =
+    paginatedProducts.length > 0 &&
+    paginatedProducts.every(({ id }) => selectedItems.includes(id));
 
   const [editableValues, setEditableValues] = useState(
     paginatedProducts.reduce((acc, product) => {
@@ -388,24 +398,50 @@ export default function ProductIndexTable() {
       return updatedValues; // Return the updated editable values
     });
   };
+
+
+  const allSelected = selectedItems.length === paginatedProducts.length && paginatedProducts.length > 0;
+
+  // Handle selecting/deselecting a row
+  const handleRowSelection = (id) => {
+    setSelectedItems((prevSelected) =>
+      prevSelected.includes(id) ? prevSelected.filter((productId) => productId !== id) : [...prevSelected, id]
+    );
+  };
+
+  // Handle selecting/deselecting all rows
+  const handleSelectAll = () => {
+    setSelectedItems(allSelected ? [] : paginatedProducts.map((product) => product.id));
+  };
+
+
   const rowMarkup = paginatedProducts.map(({ id, title, images, status, hsn, gst }, index) => {
     const { HSN, GST } = editableValues[id] || {
       HSN: hsn || "",
       GST: gst || "",
-    }; // Get current editable values
+    };
 
     return (
-      <IndexTable.Row
-        id={id}
-        key={id}
-        selected={selectedItems.includes(id)}
-        position={index}
-        onClick={(e) => handleRowSelection(e.target.value)}
-      >
+      <IndexTable.Row id={id} key={id} position={index}>
+        {/* Custom Checkbox for Individual Selection */}
+        <IndexTable.Cell>
+          <input
+            type="checkbox"
+            checked={selectedItems.includes(id)}
+            onChange={() => handleRowSelection(id)}
+            style={{
+              cursor: "pointer",
+              width: "16px",
+              height: "16px",
+              accentColor: "#2463bc", // Checkbox color
+            }}
+          />
+        </IndexTable.Cell>
+
         <IndexTable.Cell>
           <img
             src={images[0]?.src}
-            alt={images[0]?.alt}
+            alt={images[0]?.alt || "Product Image"}
             style={{
               border: "0.1px solid black",
               borderRadius: "5px",
@@ -413,7 +449,7 @@ export default function ProductIndexTable() {
               maxWidth: "50px",
               height: "50px",
             }}
-            onClick={(e) => e.stopPropagation()} // Prevent event propagation
+            onClick={(e) => e.stopPropagation()} // Prevent row selection on image click
           />
         </IndexTable.Cell>
         <IndexTable.Cell>
@@ -426,7 +462,7 @@ export default function ProductIndexTable() {
             value={HSN}
             onChange={(value) => handleHSNChange(id, value)}
             autoComplete="off"
-            onClick={(e) => e.stopPropagation()} // Prevent event propagation
+            onClick={(e) => e.stopPropagation()} // Prevent row selection
           />
         </IndexTable.Cell>
         <IndexTable.Cell>
@@ -435,12 +471,68 @@ export default function ProductIndexTable() {
             value={GST}
             onChange={(value) => handleGSTChange(id, value)}
             autoComplete="off"
-            onClick={(e) => e.stopPropagation()} // Prevent event propagation
+            onClick={(e) => e.stopPropagation()} // Prevent row selection
           />
         </IndexTable.Cell>
       </IndexTable.Row>
     );
   });
+
+  // const rowMarkup = paginatedProducts.map(
+  //   ({ id, title, images, status, hsn, gst }, index) => {
+  //     const { HSN, GST } = editableValues[id] || {
+  //       HSN: hsn || "",
+  //       GST: gst || "",
+  //     }; // Get current editable values
+
+  //     return (
+  //       <IndexTable.Row
+  //         id={id}
+  //         key={id}
+  //         selected={selectedItems.includes(id)}
+  //         position={index}
+  //         onClick={() => handleRowSelection(id)}
+  //       >
+  //         <IndexTable.Cell>
+  //           <img
+  //             src={images[0]?.src}
+  //             alt={images[0]?.alt}
+  //             style={{
+  //               border: "0.1px solid black",
+  //               borderRadius: "5px",
+  //               width: "100%",
+  //               maxWidth: "50px",
+  //               height: "50px",
+  //             }}
+  //             onClick={(e) => e.stopPropagation()} // Prevent event propagation
+  //           />
+  //         </IndexTable.Cell>
+  //         <IndexTable.Cell>
+  //           <span style={{ fontWeight: "bold" }}>{title}</span>
+  //         </IndexTable.Cell>
+  //         <IndexTable.Cell>{status}</IndexTable.Cell>
+  //         <IndexTable.Cell>
+  //           <TextField
+  //             placeholder="Enter HSN"
+  //             value={HSN}
+  //             onChange={(value) => handleHSNChange(id, value)}
+  //             autoComplete="off"
+  //             onClick={(e) => e.stopPropagation()} // Prevent event propagation
+  //           />
+  //         </IndexTable.Cell>
+  //         <IndexTable.Cell>
+  //           <TextField
+  //             placeholder="Enter GST"
+  //             value={GST}
+  //             onChange={(value) => handleGSTChange(id, value)}
+  //             autoComplete="off"
+  //             onClick={(e) => e.stopPropagation()} // Prevent event propagation
+  //           />
+  //         </IndexTable.Cell>
+  //       </IndexTable.Row>
+  //     );
+  //   }
+  // );
 
   // const rowMarkup = paginatedProducts.map(
   //   ({ id, title, images, status, hsn, gst }, index) => (
@@ -534,6 +626,14 @@ export default function ProductIndexTable() {
   //     </IndexTable.Row>
   //   );
   // });
+// Handle bulk action trigger manually
+const handleBulkAction = () => {
+  if (selectedItems.length === 0) {
+    alert("No items selected!");
+    return;
+  }
+  setShowModal(true);
+};
 
   const saveChanges = async () => {
     setIsSaving(true);
@@ -566,7 +666,7 @@ export default function ProductIndexTable() {
       products: updates,
     };
 
-    console.log("Payload to API:", payload);
+    //  console.log("Payload to API:", payload);
 
     try {
       const response = await fetch("/api/products/update", {
@@ -586,14 +686,14 @@ export default function ProductIndexTable() {
       }
 
       const responseData = await response.json();
-      console.log("API Response:", responseData);
+      //  console.log("API Response:", responseData);
       // alert("Changes saved successfully!");
       // Reset editable values to blank after successful save
 
       setIsSaving(false);
 
       // Fetch updated products
-      const updatedResponse = await fetch("/api/products/all");
+      const updatedResponse = await fetch("/api/2025-01/products.json");
       const updatedData = await updatedResponse.json();
 
       const productsWithEditableFields = updatedData.data.map((product) => ({
@@ -693,108 +793,124 @@ export default function ProductIndexTable() {
               Total: {filteredByTab.length}
             </Badge>
             <Badge status="success" style={{ margin: "4px" }}>
-              Active: {filteredByTab.filter((product) => product.status.toLowerCase() === "active").length}
+              Active:{" "}
+              {
+                filteredByTab.filter(
+                  (product) => product.status.toLowerCase() === "active"
+                ).length
+              }
             </Badge>
             <Badge status="warning" style={{ margin: "4px" }}>
-              Draft: {filteredByTab.filter((product) => product.status.toLowerCase() === "draft").length}
+              Draft:{" "}
+              {
+                filteredByTab.filter(
+                  (product) => product.status.toLowerCase() === "draft"
+                ).length
+              }
             </Badge>
           </div>
         </div>
+
+        <UpgradeBanner
+          title={<></>}
+          buttonTitle={<></>}
+          buttonOn={false}
+          msg={
+            "If you have added new products, please click the sync button to update them."
+          }
+        />
+        <br />
         <LegacyCard sectioned style={{ margin: "16px", maxWidth: "1600px" }}>
-        <div
-  style={{
-    display: "grid",
-    gridTemplateColumns: "3fr 3fr 3fr", // Three columns layout: 3 parts search fields, 1 part buttons
-    gap: "6px", // Space between columns
-    marginBottom: "26px",
-    alignItems: "center",
-    width: "100%",
-  }}
->
-  {/* Search Products Field */}
-  <div
-    style={{
-      display: "flex",
-      gap: "8px", // Space between TextField and Button
-      width: "100%",
-    }}
-  >
-    <TextField
-      placeholder="Search products"
-      value={searchTerm}
-      onChange={(value) => setSearchTerm(value)}
-      autoComplete="off"
-      style={{ width: "100%" }}
-    />
-    <Button primary onClick={handleSearch}>
-      Search
-    </Button>
-  </div>
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "3fr 3fr 3fr", // Three columns layout: 3 parts search fields, 1 part buttons
+              gap: "6px", // Space between columns
+              marginBottom: "26px",
+              alignItems: "center",
+              width: "100%",
+            }}
+          >
+            {/* Search Products Field */}
+            <div
+              style={{
+                display: "flex",
+                gap: "8px", // Space between TextField and Button
+                width: "100%",
+              }}
+            >
+              <TextField
+                placeholder="Search products"
+                value={searchTerm}
+                onChange={(value) => setSearchTerm(value)}
+                autoComplete="off"
+                style={{ width: "100%" }}
+              />
+              <Button primary onClick={handleSearch}>
+                Search
+              </Button>
+            </div>
 
-  {/* Search by Tag Field */}
-  <div
-    style={{
-      display: "flex",
-      gap: "8px",
-      width: "100%",
-    }}
-  >
-    <TextField
-      placeholder="Search by tag"
-      value={tagSearchTerm}
-      onChange={(value) => setTagSearchTerm(value)}
-      autoComplete="off"
-      style={{ width: "100%" }}
-    />
-    <Button primary onClick={handleTagSearch}>
-      Find
-    </Button>
-  </div>
+            {/* Search by Tag Field */}
+            <div
+              style={{
+                display: "flex",
+                gap: "8px",
+                width: "100%",
+              }}
+            >
+              <TextField
+                placeholder="Search by tag"
+                value={tagSearchTerm}
+                onChange={(value) => setTagSearchTerm(value)}
+                autoComplete="off"
+                style={{ width: "100%" }}
+              />
+              <Button primary onClick={handleTagSearch}>
+                Find
+              </Button>
+            </div>
 
-  {/* Buttons aligned right */}
-  <div
-    style={{
-      display: "flex",
-      justifyContent: "flex-end", // Align buttons to the right
-      gap: "8px",
-    }}
-  >
-    <Button
-      primary
-      onClick={() => {
-        if (selectedItems.length === 0) {
-          alert("Please select a product to save changes");
-          return;
-        } else {
-          saveChanges();
-        }
-      }}
-      disabled={isSaving}
-    >
-      {isSaving ? "Saving..." : "Save Changes"}
-    </Button>
-    <Button primary onClick={syncProducts}>
-      Sync Products
-    </Button>
-  </div>
-</div>
-
+            {/* Buttons aligned right */}
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "flex-end", // Align buttons to the right
+                gap: "8px",
+              }}
+            >
+              <Button
+                primary
+                onClick={() => {
+                  if (selectedItems.length === 0) {
+                    alert("Please select a product to save changes");
+                    return;
+                  } else {
+                    saveChanges();
+                  }
+                }}
+                disabled={isSaving}
+              >
+                {isSaving ? "Saving..." : "Save Changes"}
+              </Button>
+              <Button primary onClick={syncProducts}>
+                Sync Products
+              </Button>
+            </div>
+          </div>
 
           {/* Tag Display */}
-{selectedTag && (
-  <div
-    style={{
-      marginTop: "16px",
-      display: "flex",
-      justifyContent: "flex-start", // Align to the left
-    }}
-  >
-    <Tag onRemove={handleRemoveTag}>{selectedTag}</Tag>
-  </div>
-)}
-
-
-          
+          {selectedTag && (
+            <div
+              style={{
+                marginTop: "16px",
+                display: "flex",
+                justifyContent: "flex-start", // Align to the left
+              }}
+            >
+              <Tag onRemove={handleRemoveTag}>{selectedTag}</Tag>
+            </div>
+          )}
 
           {isLoading ? (
             <SkeletonPage>
@@ -803,44 +919,66 @@ export default function ProductIndexTable() {
           ) : (
             <div
               style={{
-                overflowX: "auto",
+                overflowX: "hidden",
+                overflowY: "hidden",
               }}
             >
               <Tabs
                 tabs={[
                   { id: "all", content: "All", panelID: "all-products" },
-                  { id: "active", content: "Active", panelID: "active-products" },
+                  {
+                    id: "active",
+                    content: "Active",
+                    panelID: "active-products",
+                  },
                   { id: "draft", content: "Draft", panelID: "draft-products" },
-                  { id: "archived", content: "Archived", panelID: "archived-products" },
+                  {
+                    id: "archived",
+                    content: "Archived",
+                    panelID: "archived-products",
+                  },
                 ]}
                 selected={activeTab}
                 onSelect={(index) => {
                   setActiveTab(index);
                   setCurrentPage(1);
                 }}
-              >
-                <IndexTable
-                  resourceName={{ singular: "product", plural: "products" }}
-                  itemCount={filteredByTab.length}
-                  headings={[
-                    { title: "Product Image" },
-                    { title: "Product Title" },
-                    { title: "Status" },
-                    { title: "HSN" },
-                    { title: "GST" },
-                  ]}
-                  selectedItems={selectedItems}
-                  selectedItemsCount={selectedItems.length}
-                  onSelectionChange={handleSelectAll}
-                  bulkActions={[
-                    {
-                      content: "Bulk Edit",
-                      onAction: () => setShowModal(true),
-                    },
-                  ]}
-                >
-                  {rowMarkup}
-                </IndexTable>
+              > 
+                 <IndexTable
+          resourceName={{ singular: "product", plural: "products" }}
+          itemCount={paginatedProducts.length}
+          selectable={false} // Disable Shopify's selection behavior
+          headings={[
+            {
+              title: (
+                <input
+                  type="checkbox"
+                  checked={allSelected}
+                  onChange={handleSelectAll}
+                  style={{
+                    cursor: "pointer",
+                    width: "16px",
+                    height: "16px",
+                    accentColor: "#2463bc", // Checkbox color
+                  }}
+                />
+              ),
+            },
+            { title: "Product Image" },
+            { title: "Product Title" },
+            { title: "Status" },
+            { title: "HSN" },
+            { title: "GST" },
+          ]}
+          // bulkActions={[
+          //   {
+          //     content: "Bulk Edit",
+          //     onAction: () => setShowModal(true),
+          //   },
+          // ]}
+        >
+          {rowMarkup}
+        </IndexTable>
                 <div
                   style={{
                     marginTop: "16px",
@@ -850,7 +988,9 @@ export default function ProductIndexTable() {
                 >
                   <Pagination
                     hasPrevious={currentPage > 1}
-                    onPrevious={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                    onPrevious={() =>
+                      setCurrentPage((prev) => Math.max(prev - 1, 1))
+                    }
                     hasNext={currentPage * itemsPerPage < filteredByTab.length}
                     onNext={() => setCurrentPage((prev) => prev + 1)}
                   />
@@ -893,11 +1033,42 @@ export default function ProductIndexTable() {
           />
         </Modal.Section>
       </Modal>
-      {showToast && 
-      <ToastNotification
-      message={toastMessage}
-      duration={3000} // Optional, can be customized
-    />}
+      
+      
+      {selectedItems.length > 1 && (
+  <>
+  {!showModal && (
+    <div
+    style={{
+      position: "fixed", // Ensures it overlays everything
+      bottom: "30px", // Positioned 20px from the bottom
+      left: "50%", // Centered horizontally
+      transform: "translateX(-50%)", // Ensures exact centering
+      zIndex: 9999, // Higher than other elements
+      backgroundColor: "white", // Ensures visibility
+      padding: "10px 10px",
+      borderRadius: "8px",
+      boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.2)", // Adds depth
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+    }}
+  >
+    <Button onClick={handleBulkAction}>
+      Bulk Edit ({selectedItems.length})
+    </Button>
+  </div>
+  )}
+  </>
+)}
+
+     
+      {showToast && (
+        <ToastNotification
+          message={toastMessage}
+          duration={3000} // Optional, can be customized
+        />
+      )}
     </Frame>
   );
 }

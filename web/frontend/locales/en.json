@@ -15,6 +15,7 @@
     "contactus": "ContactUs",
     "email-settings" : "Email Settings",
     "plans_and_billings" : "Plans and billing",
+    "paginated_orders": "Paginated Orders",
     "notfound": "Not Found"
   },
   "NotFound": {
@@ -57,5 +58,12 @@
     "primaryAction": "Primary action",
     "secondaryAction": "Secondary action",
     "title": "Plans and billing"
+  },
+  "Paginated Orders": {
+    "body": "Body",
+    "heading": "Heading",
+    "primaryAction": "Primary action",
+    "secondaryAction": "Secondary action",
+    "title": "Paginated Orders"
   }
 }

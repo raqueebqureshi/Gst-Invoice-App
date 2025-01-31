@@ -27,13 +27,6 @@ export default function HomePage() {
   const navigate = useNavigate(); // Initialize useNavigate
   const [shopDetails, setShopDetails] = useState([]);
 
-
-
-
-  
-
-
-
   // Fetch all products
   useEffect(() => {
     fetch("/api/2024-10/products.json", {
@@ -61,9 +54,11 @@ export default function HomePage() {
       .then((response) => {
         if (response.data.length > 0) {
           // console.log("Store Details ", response.data);
+          setLoading(false);
           setShopDetails(response.data[0]);
           setStoreName(response.data.data[0].name);
           // console.log("store name : ", storeName);
+           // Stop loading when data is fetched
         }
       })
       .catch((error) => console.log(error));

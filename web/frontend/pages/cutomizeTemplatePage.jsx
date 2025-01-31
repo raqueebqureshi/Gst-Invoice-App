@@ -1,4 +1,10 @@
-import React, { useEffect, useState, useCallback, use,useReducer } from "react";
+import React, {
+  useEffect,
+  useState,
+  useCallback,
+  use,
+  useReducer,
+} from "react";
 import {
   Button,
   Icon,
@@ -12,30 +18,21 @@ import {
   Spinner,
 } from "@shopify/polaris";
 
-
 import { useLocation } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 
 import { RiAlignItemLeftLine } from "react-icons/ri";
 import { FaInbox } from "react-icons/fa";
 
-
 import { FaArrowLeft } from "react-icons/fa";
-
 
 import { FaMoneyBills } from "react-icons/fa6";
 import { HiOutlineReceiptTax } from "react-icons/hi";
 
-
 import { BiStore } from "react-icons/bi";
 import { LiaShippingFastSolid } from "react-icons/lia";
 
-
-import { CiImageOn, CiHome  } from "react-icons/ci";
-
-
-
-
+import { CiImageOn, CiHome } from "react-icons/ci";
 
 import { InvoiceTemplate1 } from "../invoiceTemplates/invoice-template1";
 import { InvoiceTemplate2 } from "../invoiceTemplates/invoice-template2";
@@ -50,10 +47,8 @@ export default function CustomizeTemplate() {
   const location = useLocation();
   const { state } = location;
   const [shopDetails, setShopDetails] = useState([]);
-  const {templateId} = state ||{};
+  const { templateId } = state || {};
   const [CurrentTemplate, setCurrentTemplate] = useState();
-
-  
 
   const [showBrandingAndStyle, setShowBrandingAndStyle] = useState(false);
   const [showOverview, setShowOverview] = useState(false);
@@ -69,10 +64,6 @@ export default function CustomizeTemplate() {
   const [isSaving, setIsSaving] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
-  
-
-
-  
 
   const [InvoiceSetting2, setInvoiceSetting2] = useState({
     branding: {
@@ -174,17 +165,105 @@ export default function CustomizeTemplate() {
         showYoutube: false,
       },
       thankYouNote: "Thanks for your purchase",
-      footerNote: "This is an electronically generated invoice, no signature is required",
+      footerNote:
+        "This is an electronically generated invoice, no signature is required",
     },
   });
 
   const demoOrder = [
     {
+      id: 6159782150373,
+      admin_graphql_api_id: "gid://shopify/Order/6159782150373",
+      app_id: 1354745,
+      browser_ip: "106.219.120.26",
+      buyer_accepts_marketing: false,
+      cancel_reason: null,
+      cancelled_at: null,
+      cart_token: null,
+      checkout_token: "e5c129c3241946a5bdd938b6d576668b",
+      client_details: {
+        accept_language: null,
+        browser_height: null,
+        browser_ip: "106.219.120.26",
+        browser_width: null,
+        session_hash: null,
+        user_agent:
+          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
+      },
+      closed_at: null,
+      confirmation_number: "E54GREIXR",
+      created_at: "2025-01-30T04:59:22-05:00",
+      currency: "INR",
+      current_subtotal_price: "664.95",
+      current_total_discounts: "35.00",
+      current_total_price: "934.64",
+      current_total_tax: "119.69",
+      discount_codes: [
+        {
+          code: "ABC321",
+          amount: "35.00",
+          type: "percentage",
+        },
+      ],
+      email: "demo@gmail.co",
+      financial_status: "paid",
+      fulfillment_status: null,
+      name: "#1041",
+      order_number: 1041,
+      processed_at: "2025-01-30T04:59:22-05:00",
+      subtotal_price: "664.95",
+      total_discounts: "35.00",
+      total_line_items_price: "699.95",
+      total_price: "934.64",
+      total_tax: "119.69",
+      total_weight: 4536,
+      updated_at: "2025-01-30T04:59:24-05:00",
+      customer: {
+        id: 8197615878373,
+        email: "customerdemo@gmail.co",
+        first_name: "John",
+        last_name: "Doe",
+        phone: "+916788888888",
+        verified_email: true,
+        default_address: {
+          address1: "Shalimar Garden",
+          address2: "876",
+          city: "Ghaziabad",
+          province: "Uttar Pradesh",
+          zip: "201005",
+          country: "India",
+          phone: "+916788888888",
+          name: "John Doe",
+        },
+      },
+      billing_address: {
+        first_name: "John",
+        last_name: "Doe",
+        address1: " Garden",
+        address2: "888",
+        city: "New Delhi",
+        province: "Delhi",
+        zip: "110030",
+        country: "India",
+        phone: "+916788888888",
+        company: "Delhi Digital Co",
+      },
+      shipping_address: {
+        first_name: "John",
+        last_name: "Doe",
+        address1: " Garden",
+        address2: "888",
+        city: "New Delhi",
+        province: "Delhi",
+        zip: "110030",
+        country: "India",
+        phone: "+916788888888",
+        company: "Delhi Digital Co",
+      },
       line_items: [
         {
-          id: 14846286201061,
-          admin_graphql_api_id: "gid://shopify/LineItem/14846286201061",
-          attributed_staffs: [],
+          id: 14892000837861,
+          admin_graphql_api_id: "gid://shopify/LineItem/14892000837861",
           current_quantity: 1,
           fulfillable_quantity: 1,
           fulfillment_service: "manual",
@@ -199,16 +278,15 @@ export default function CustomizeTemplate() {
           },
           product_exists: true,
           product_id: 8961257668837,
-          properties: [],
           quantity: 1,
           requires_shipping: true,
           sku: null,
           taxable: true,
           title: "The Complete Snowboard",
-          total_discount: "0.00",
+          total_discount: "35.00",
           total_discount_set: {
-            shop_money: { amount: "0.00", currency_code: "INR" },
-            presentment_money: { amount: "0.00", currency_code: "INR" },
+            shop_money: { amount: "35.00", currency_code: "INR" },
+            presentment_money: { amount: "35.00", currency_code: "INR" },
           },
           variant_id: 46199772774629,
           variant_inventory_management: "shopify",
@@ -217,140 +295,219 @@ export default function CustomizeTemplate() {
           tax_lines: [
             {
               channel_liable: false,
-              price: "125.99",
+              price: "119.69",
               price_set: {
-                shop_money: { amount: "125.99", currency_code: "INR" },
-                presentment_money: { amount: "125.99", currency_code: "INR" },
+                shop_money: { amount: "119.69", currency_code: "INR" },
+                presentment_money: { amount: "119.69", currency_code: "INR" },
               },
               rate: 0.18,
               title: "IGST",
             },
           ],
           duties: [],
-          discount_allocations: [],
+          discount_allocations: [
+            {
+              amount: "35.00",
+              amount_set: {
+                shop_money: { amount: "35.00", currency_code: "INR" },
+                presentment_money: { amount: "35.00", currency_code: "INR" },
+              },
+            },
+          ],
         },
       ],
-      app_id: 1354745,
-      billing_address: {
-        first_name: "Soyal",
-        address1: "Shalimar Garden",
-        phone: "+917535964612",
-        city: "Ghaziabad",
-        zip: "201005",
-        province: "Uttar Pradesh",
-        country: "India",
-        last_name: "KHan",
-        address2: "876",
-        company: "Delhi Digital co",
-        latitude: 28.6904801,
-        longitude: 77.3360364,
-        name: "Soyal KHan",
-        country_code: "IN",
-        province_code: "UP",
-      },
-      browser_ip: "49.36.183.197",
-      buyer_accepts_marketing: false,
-      cancel_reason: null,
-      cancelled_at: null,
-      cart_token: null,
-      checkout_token: "240ebd377238b76b9958cd5cbb270dba",
-      client_details: {
-        accept_language: null,
-        browser_height: null,
-        browser_ip: "49.36.183.197",
-        browser_width: null,
-        session_hash: null,
-        user_agent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
-      },
-      closed_at: null,
-      confirmation_number: "WNNRARG2U",
-      created_at: "2025-01-14T14:28:45-05:00",
-      currency: "INR",
-      current_subtotal_price: "699.95",
-      current_total_discounts: "0.00",
-      current_total_price: "825.94",
-      current_total_tax: "125.99",
-      customer: {
-        first_name: "Soyal",
-        last_name: "Khan",
-        email: "soyal@delhidigital.co",
-        phone: "+917535964612",
-        verified_email: true,
-        default_address: {
-          address1: "Shalimar Garden",
-          city: "Ghaziabad",
-          province: "Uttar Pradesh",
-          zip: "201005",
-          country: "India",
-          phone: "+917535964612",
-          name: "Soyal KHan",
+      shipping_lines: [
+        {
+          id: 5002126721253,
+          code: "Standard",
+          discounted_price: "150.00",
+          discounted_price_set: {
+            shop_money: { amount: "150.00", currency_code: "INR" },
+            presentment_money: { amount: "150.00", currency_code: "INR" },
+          },
+          price: "150.00",
+          price_set: {
+            shop_money: { amount: "150.00", currency_code: "INR" },
+            presentment_money: { amount: "150.00", currency_code: "INR" },
+          },
+          title: "Standard",
         },
-      },
-      email: "soyal@delhidigital.co",
-      financial_status: "paid",
-      id: 6137511936229,
-      name: "#1031",
-      order_number: 1031,
-      processed_at: "2025-01-14T14:28:44-05:00",
-      shipping_address: {
-        first_name: "Soyal",
-        address1: "Shalimar Garden",
-        phone: "+917535964612",
-        city: "Ghaziabad",
-        zip: "201005",
-        province: "Uttar Pradesh",
-        country: "India",
-        last_name: "KHan",
-        address2: "876",
-        company: "Delhi Digital co",
-      },
-      subtotal_price: "699.95",
-      tags: "",
-      total_discounts: "0.00",
-      total_line_items_price: "699.95",
-      total_price: "825.94",
-      total_tax: "125.99",
-      total_weight: 4536,
-      updated_at: "2025-01-14T14:28:46-05:00",
+      ],
     },
   ];
+  
   
 
   const demoGST = [
     { productId: "123456789", productName: "bottle", gst: "12", hsn: "456789" },
-    { productId: "234567890", productName: "Gift Card", gst: "12", hsn: "8961257668837" },
-    { productId: "345678901", productName: "Gift Card (Copy)", gst: "18", hsn: "8961257668837" },
-    { productId: "456789012", productName: "lalal", gst: "76", hsn: "8961257668837" },
-    { productId: "567890123", productName: "lalal (Copy)", gst: "56", hsn: "8961257668837" },
-    { productId: "678901234", productName: "new products", gst: "676", hsn: "8961257668837" },
-    { productId: "789012345", productName: "Random", gst: "76", hsn: "8961257668837" },
-    { productId: "890123456", productName: "rq", gst: "56", hsn: "8961257668837" },
-    { productId: "901234567", productName: "Selling Plans Ski Wax (Copy)", gst: "65", hsn: "8961257668837" },
-    { productId: "1012345678", productName: "Selling Plans Ski Wax (Copy) (Copy)", gst: "45", hsn: "8961257668837" },
-    { productId: "1123456789", productName: "Selling Plans Ski Wax (Copy) (Copy) (Copy)", gst: "8", hsn: "78765" },
+    {
+      productId: "234567890",
+      productName: "Gift Card",
+      gst: "12",
+      hsn: "8961257668837",
+    },
+    {
+      productId: "345678901",
+      productName: "Gift Card (Copy)",
+      gst: "18",
+      hsn: "8961257668837",
+    },
+    {
+      productId: "456789012",
+      productName: "lalal",
+      gst: "76",
+      hsn: "8961257668837",
+    },
+    {
+      productId: "567890123",
+      productName: "lalal (Copy)",
+      gst: "56",
+      hsn: "8961257668837",
+    },
+    {
+      productId: "678901234",
+      productName: "new products",
+      gst: "676",
+      hsn: "8961257668837",
+    },
+    {
+      productId: "789012345",
+      productName: "Random",
+      gst: "76",
+      hsn: "8961257668837",
+    },
+    {
+      productId: "890123456",
+      productName: "rq",
+      gst: "56",
+      hsn: "8961257668837",
+    },
+    {
+      productId: "901234567",
+      productName: "Selling Plans Ski Wax (Copy)",
+      gst: "65",
+      hsn: "8961257668837",
+    },
+    {
+      productId: "1012345678",
+      productName: "Selling Plans Ski Wax (Copy) (Copy)",
+      gst: "45",
+      hsn: "8961257668837",
+    },
+    {
+      productId: "1123456789",
+      productName: "Selling Plans Ski Wax (Copy) (Copy) (Copy)",
+      gst: "8",
+      hsn: "78765",
+    },
     {
       productId: "1223456789",
       productName: "Selling Plans Ski Wax (Copy) (Copy) (Copy) (Copy)",
       gst: "7",
       hsn: "45678",
     },
-    { productId: "1323456789", productName: "The 3ajsdhfb", gst: "6", hsn: "9876" },
-    { productId: "1423456789", productName: "The 3p Fulfilled Snowboard", gst: "5", hsn: "9876" },
-    { productId: "1523456789", productName: "The 3p Fulfilled Snowboard (Copy)", gst: "4", hsn: "9876" },
-    { productId: "1623456789", productName: "The Archived Snowboard", gst: "6", hsn: "456" },
-    { productId: "1723456789", productName: "The Collection Snowboard: Hydrogen", gst: "5", hsn: "345678" },
-    { productId: "1823456789", productName: "The Collection Snowboard: Liquid", gst: "8", hsn: "6666666" },
-    { productId: "1923456789", productName: "The Collection Snowboard: Oxygen", gst: "5", hsn: "987654" },
-    { productId: "2023456789", productName: "The Compare at Price Snowboard", gst: "8", hsn: "65432" },
-    { productId: "2123456789", productName: "The Complete Snowboard", gst: "8", hsn: "5432" },
-    { productId: "2223456789", productName: "The Draft Snowboard", gst: "5", hsn: "876543" },
-    { productId: "2323456789", productName: "The Hidden Snowboard", gst: "4", hsn: "i765432" },
-    { productId: "2423456789", productName: "The Inventory Not Tracked Snowboard", gst: "8", hsn: "23456789" },
-    { productId: "2523456789", productName: "The Multi-location Snowboard", gst: "4", hsn: "345678" },
-    { productId: "2623456789", productName: "The Multi-managed Snowboard", gst: "8", hsn: "87878" },
-    { productId: "2723456789", productName: "The Out of Stock Snowboard", gst: "8", hsn: "565655" },
-    { productId: "2823456789", productName: "The Videographer Snowboard", gst: "8", hsn: "34343" },
-    { productId: "2923456789", productName: "very new", gst: "8", hsn: "878787" },
+    {
+      productId: "1323456789",
+      productName: "The 3ajsdhfb",
+      gst: "6",
+      hsn: "9876",
+    },
+    {
+      productId: "1423456789",
+      productName: "The 3p Fulfilled Snowboard",
+      gst: "5",
+      hsn: "9876",
+    },
+    {
+      productId: "1523456789",
+      productName: "The 3p Fulfilled Snowboard (Copy)",
+      gst: "4",
+      hsn: "9876",
+    },
+    {
+      productId: "1623456789",
+      productName: "The Archived Snowboard",
+      gst: "6",
+      hsn: "456",
+    },
+    {
+      productId: "1723456789",
+      productName: "The Collection Snowboard: Hydrogen",
+      gst: "5",
+      hsn: "345678",
+    },
+    {
+      productId: "1823456789",
+      productName: "The Collection Snowboard: Liquid",
+      gst: "8",
+      hsn: "6666666",
+    },
+    {
+      productId: "1923456789",
+      productName: "The Collection Snowboard: Oxygen",
+      gst: "5",
+      hsn: "987654",
+    },
+    {
+      productId: "2023456789",
+      productName: "The Compare at Price Snowboard",
+      gst: "8",
+      hsn: "65432",
+    },
+    {
+      productId: "2123456789",
+      productName: "The Complete Snowboard",
+      gst: "8",
+      hsn: "5432",
+    },
+    {
+      productId: "2223456789",
+      productName: "The Draft Snowboard",
+      gst: "5",
+      hsn: "876543",
+    },
+    {
+      productId: "2323456789",
+      productName: "The Hidden Snowboard",
+      gst: "4",
+      hsn: "i765432",
+    },
+    {
+      productId: "2423456789",
+      productName: "The Inventory Not Tracked Snowboard",
+      gst: "8",
+      hsn: "23456789",
+    },
+    {
+      productId: "2523456789",
+      productName: "The Multi-location Snowboard",
+      gst: "4",
+      hsn: "345678",
+    },
+    {
+      productId: "2623456789",
+      productName: "The Multi-managed Snowboard",
+      gst: "8",
+      hsn: "87878",
+    },
+    {
+      productId: "2723456789",
+      productName: "The Out of Stock Snowboard",
+      gst: "8",
+      hsn: "565655",
+    },
+    {
+      productId: "2823456789",
+      productName: "The Videographer Snowboard",
+      gst: "8",
+      hsn: "34343",
+    },
+    {
+      productId: "2923456789",
+      productName: "very new",
+      gst: "8",
+      hsn: "878787",
+    },
   ];
 
   const styles = {
@@ -604,23 +761,21 @@ export default function CustomizeTemplate() {
           }
           // console.log("Shop Profile Data",data.profile );
 
-      //     const newCustomColor = data?.profile?.storeProfile?.brandColor || "#ff6600"; // Example custom color from API
+          //     const newCustomColor = data?.profile?.storeProfile?.brandColor || "#ff6600"; // Example custom color from API
 
-      //     console.log('newCustomColor', newCustomColor);  
-      // // Update the Custom color directly
-      // const customOption = colorOptions.find((option) => option.value === "Custom");
-      // console.log('customOption', customOption);  
-      // if (customOption) customOption.color = newCustomColor;
-      
+          //     console.log('newCustomColor', newCustomColor);
+          // // Update the Custom color directly
+          // const customOption = colorOptions.find((option) => option.value === "Custom");
+          // console.log('customOption', customOption);
+          // if (customOption) customOption.color = newCustomColor;
 
-      // forceUpdate(); // Force re-render after updating color
+          // forceUpdate(); // Force re-render after updating color
         }
       })
       .catch((error) => {
         console.error("Error fetching store profile:", error);
       });
   }, [shopId]);
-
 
   useEffect(() => {
     if (storeDomain) {
@@ -630,21 +785,17 @@ export default function CustomizeTemplate() {
           if (data.storeInvoiceTemplate) {
             // setCurrentTemplate(data.storeInvoiceTemplate);
             //console.log("Current Template ID:", currentTemplateId);
-            if(templateId){
+            if (templateId) {
               setCurrentTemplate(templateId);
-            }else{
+            } else {
               setCurrentTemplate(data.storeInvoiceTemplate);
-              
             }
           }
         })
         .catch((error) => console.error("Error fetching template ID:", error));
     }
-
-    
   }, [storeDomain]);
   // console.log("templateId", templateId);
- 
 
   const fetchInvoiceSettings = async () => {
     // console.log("Sending request to fetch invoice settings");
@@ -657,7 +808,9 @@ export default function CustomizeTemplate() {
       .then(async (response) => {
         if (!response.ok) {
           return response.text().then((errorText) => {
-            throw new Error(errorText || `HTTP error! Status: ${response.status}`);
+            throw new Error(
+              errorText || `HTTP error! Status: ${response.status}`
+            );
           });
         }
         return response.json();
@@ -673,7 +826,10 @@ export default function CustomizeTemplate() {
             ...settings,
           }));
 
-          console.log('settings.branding.fontFamily', settings.branding.fontFamily);
+          console.log(
+            "settings.branding.fontFamily",
+            settings.branding.fontFamily
+          );
           const matchedFont = fontOptions.find(
             (font) => font.fontFamily === settings.branding.fontFamily
           );
@@ -689,8 +845,6 @@ export default function CustomizeTemplate() {
         console.error("Error fetching invoice settings:", error.message);
       });
   };
-
-  
 
   useEffect(() => {
     if (storeDomain && email) {
@@ -758,7 +912,9 @@ export default function CustomizeTemplate() {
       .then(async (response) => {
         if (!response.ok) {
           return response.text().then((errorText) => {
-            throw new Error(errorText || `HTTP error! Status: ${response.status}`);
+            throw new Error(
+              errorText || `HTTP error! Status: ${response.status}`
+            );
           });
         }
         return response.json();
@@ -779,7 +935,13 @@ export default function CustomizeTemplate() {
       });
   };
 
-  const renderInvoiceTemplate = (currentTemplate, shopdetails, order, gstcodes, shopProfile) => {
+  const renderInvoiceTemplate = (
+    currentTemplate,
+    shopdetails,
+    order,
+    gstcodes,
+    shopProfile
+  ) => {
     switch (currentTemplate) {
       case 1:
         return (
@@ -817,7 +979,6 @@ export default function CustomizeTemplate() {
     }
   };
 
-  
   const colorOptions = [
     { label: "Gray", value: "Gray", color: "#535151" },
     { label: "Black", value: "Black", color: "#000000" },
@@ -828,54 +989,50 @@ export default function CustomizeTemplate() {
     // { label: "Custom", value: "Custom", color: "#0f0" },
   ];
 
+  const menuItems = [
+    {
+      icon: <CiImageOn />,
+      label: "Branding and Style",
+      onClick: () => setShowBrandingAndStyle(true),
+    },
+    {
+      icon: <CiHome />,
+      label: "Overview",
+      onClick: () => setShowOverview(true),
+    },
 
-
-const menuItems = [
-  {
-    icon: <CiImageOn />,
-    label: "Branding and Style",
-    onClick: () => setShowBrandingAndStyle(true),
-  },
-  {
-    icon: <CiHome />,
-    label: "Overview",
-    onClick: () => setShowOverview(true),
-  },
-
-
-  {
-    icon: <BiStore/>,
-    label: "Supplier",
-    onClick: () => setShowSupplier(true),
-  },
-  {
-    icon: <LiaShippingFastSolid/>,
-    label: "Shipping",
-    onClick: () => setShowShipping(true),
-  },
-  {
-    icon: <FaMoneyBills/>,
-    label: "Billing",
-    onClick: () => setShowBilling(true),
-  },
-  {
-    icon: <RiAlignItemLeftLine />
-    ,
-    label: "Line items",
-    onClick: () => setShowLineItems(true),
-  },
-  // {
-  //   icon: TextMajor,
-  //   label: "Additional text",
-  //   onClick: () => setShowAdditionalText(true),
-  // },
-  { icon: <HiOutlineReceiptTax/>, 
-    label: "Total", onClick: () => setShowTotal(true) },
-  { icon: <FaInbox />
-    , label: "Other", onClick: () => setShowFooter(true) },
-];
-
-
+    {
+      icon: <BiStore />,
+      label: "Supplier",
+      onClick: () => setShowSupplier(true),
+    },
+    {
+      icon: <LiaShippingFastSolid />,
+      label: "Shipping",
+      onClick: () => setShowShipping(true),
+    },
+    {
+      icon: <FaMoneyBills />,
+      label: "Billing",
+      onClick: () => setShowBilling(true),
+    },
+    {
+      icon: <RiAlignItemLeftLine />,
+      label: "Line items",
+      onClick: () => setShowLineItems(true),
+    },
+    // {
+    //   icon: TextMajor,
+    //   label: "Additional text",
+    //   onClick: () => setShowAdditionalText(true),
+    // },
+    {
+      icon: <HiOutlineReceiptTax />,
+      label: "Total",
+      onClick: () => setShowTotal(true),
+    },
+    { icon: <FaInbox />, label: "Other", onClick: () => setShowFooter(true) },
+  ];
 
   const handleColorSelect = (value) => {
     updateInvoiceSetting2("branding", "primaryColor", value);
@@ -907,8 +1064,7 @@ const menuItems = [
       label: "Montserrat",
       preview: "Almost before we knew it.",
       fontFamily: "Montserrat, sans-serif", // Clean and modern styling
-    }
-    
+    },
   ];
 
   const handleFontSelect = (font) => {
@@ -944,7 +1100,7 @@ const menuItems = [
               navigate(-1);
             }}
           >
-            <FaArrowLeft/>
+            <FaArrowLeft />
           </div>
           <span>Customize template</span>
         </div>
@@ -964,7 +1120,11 @@ const menuItems = [
               ]}
             />
           </Popover> */}
-          <Button primary onClick={() => updateInvoiceSettingAPI()} disabled={isSaving}>
+          <Button
+            primary
+            onClick={() => updateInvoiceSettingAPI()}
+            disabled={isSaving}
+          >
             {isSaving ? "Saving..." : "Save Template"}
           </Button>
         </div>
@@ -989,7 +1149,7 @@ const menuItems = [
                       setShowBrandingAndStyle(false);
                     }}
                   >
-                    <FaArrowLeft/>
+                    <FaArrowLeft />
                   </div>
 
                   <span>Branding and Style</span>
@@ -1005,14 +1165,20 @@ const menuItems = [
                         key={font.label}
                         style={{
                           fontFamily: font.fontFamily,
-                          backgroundColor: selectedFont === font ? "#ddd" : "#fff",
+                          backgroundColor:
+                            selectedFont === font ? "#ddd" : "#fff",
                           padding: "8px 12px",
                           // border: "1px solid #ccc",
                           marginBottom: "5px",
                           cursor: "pointer",
                         }}
-                        onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#f6f6f7")}
-                        onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
+                        onMouseEnter={(e) =>
+                          (e.currentTarget.style.backgroundColor = "#f6f6f7")
+                        }
+                        onMouseLeave={(e) =>
+                          (e.currentTarget.style.backgroundColor =
+                            "transparent")
+                        }
                         onClick={() => handleFontSelect(font)}
                       >
                         <div>
@@ -1033,18 +1199,37 @@ const menuItems = [
                   </div>
                 )}
                 <div>
-                <div style={{ display: "flex", flexDirection: "column", justifyContent: "space-between",  gap: "10px"}}>
-  <Checkbox
-    label="Show logo"
-    checked={InvoiceSetting2.branding.showLogo} // Bind the state to the checkbox
-    onChange={(newChecked) => updateInvoiceSetting2("branding", "showLogo", newChecked)} // Update state on change
-  />
-  <Checkbox
-    label="Show Signature"
-    checked={InvoiceSetting2.branding.showSignature} // Bind the state to the checkbox
-    onChange={(newChecked) => updateInvoiceSetting2("branding", "showSignature", newChecked)} // Update state on change
-  />
-</div>
+                  <div
+                    style={{
+                      display: "flex",
+                      flexDirection: "column",
+                      justifyContent: "space-between",
+                      gap: "10px",
+                    }}
+                  >
+                    <Checkbox
+                      label="Show logo"
+                      checked={InvoiceSetting2.branding.showLogo} // Bind the state to the checkbox
+                      onChange={(newChecked) =>
+                        updateInvoiceSetting2(
+                          "branding",
+                          "showLogo",
+                          newChecked
+                        )
+                      } // Update state on change
+                    />
+                    <Checkbox
+                      label="Show Signature"
+                      checked={InvoiceSetting2.branding.showSignature} // Bind the state to the checkbox
+                      onChange={(newChecked) =>
+                        updateInvoiceSetting2(
+                          "branding",
+                          "showSignature",
+                          newChecked
+                        )
+                      } // Update state on change
+                    />
+                  </div>
 
                   {/* <p style={{ margin: "10px 0", fontWeight: "bold" }}>
                     Logo size
@@ -1057,7 +1242,9 @@ const menuItems = [
                   />
                   <p style={{ marginTop: "10px" }}>{logoSize}px</p> */}
 
-                  <p style={{ margin: "10px 0", fontWeight: "bold" }}>Primary color</p>
+                  <p style={{ margin: "10px 0", fontWeight: "bold" }}>
+                    Primary color
+                  </p>
                   <hr />
                   <div>
                     {colorOptions.map((option) => (
@@ -1065,7 +1252,10 @@ const menuItems = [
                         key={option.value}
                         style={{
                           ...styles.colorOption,
-                          ...(InvoiceSetting2.branding.primaryColor === option.color ? styles.colorOptionSelected : {}),
+                          ...(InvoiceSetting2.branding.primaryColor ===
+                          option.color
+                            ? styles.colorOptionSelected
+                            : {}),
                         }}
                         onClick={() => handleColorSelect(option.color)}
                       >
@@ -1084,7 +1274,10 @@ const menuItems = [
                   <hr />
                   <p style={{ margin: "10px 0" }}>Font Family</p>
                   <div style={styles.dropdownContainer}>
-                    <div style={styles.dropdownButton} onClick={() => setShowDropdown((prev) => !prev)}>
+                    <div
+                      style={styles.dropdownButton}
+                      onClick={() => setShowDropdown((prev) => !prev)}
+                    >
                       {selectedFont.label}
                       <span>▼</span>
                     </div>
@@ -1117,13 +1310,15 @@ const menuItems = [
                       setShowOverview(false);
                     }}
                   >
-                    <FaArrowLeft/>
+                    <FaArrowLeft />
                   </div>
 
                   <span>Overview</span>
                 </div>
                 <div>
-                  <strong style={{ marginBottom: "10px" }}>Document title</strong>
+                  <strong style={{ marginBottom: "10px" }}>
+                    Document title
+                  </strong>
 
                   <div
                     style={{
@@ -1154,14 +1349,24 @@ const menuItems = [
                             key={key}
                             label={key.replace(/([A-Z])/g, " $1").toLowerCase()}
                             checked={InvoiceSetting2.overview[key]}
-                            onChange={() => updateInvoiceSetting2("overview", key, !InvoiceSetting2.overview[key])}
+                            onChange={() =>
+                              updateInvoiceSetting2(
+                                "overview",
+                                key,
+                                !InvoiceSetting2.overview[key]
+                              )
+                            }
                           />
                         ) : (
                           <TextField
                             key={key}
                             value={InvoiceSetting2.overview[key]}
-                            onChange={(value) => updateInvoiceSetting2("overview", key, value)}
-                            placeholder={`Enter ${key.replace(/([A-Z])/g, " $1").toLowerCase()}`}
+                            onChange={(value) =>
+                              updateInvoiceSetting2("overview", key, value)
+                            }
+                            placeholder={`Enter ${key
+                              .replace(/([A-Z])/g, " $1")
+                              .toLowerCase()}`}
                           />
                         )
                       )}
@@ -1185,7 +1390,7 @@ const menuItems = [
                       setShowSupplier(false);
                     }}
                   >
-                    <FaArrowLeft/>
+                    <FaArrowLeft />
                   </div>
                   <span>Supplier</span>
                 </div>
@@ -1215,16 +1420,28 @@ const menuItems = [
                             key={key}
                             label={key.replace(/([A-Z])/g, " $1").toLowerCase()}
                             checked={InvoiceSetting2.supplier[key]}
-                            onChange={() => updateInvoiceSetting2("supplier", key, !InvoiceSetting2.supplier[key])}
+                            onChange={() =>
+                              updateInvoiceSetting2(
+                                "supplier",
+                                key,
+                                !InvoiceSetting2.supplier[key]
+                              )
+                            }
                           />
                         ) : (
                           <>
-                            <strong style={{ marginBottom: "0px" }}>Heading</strong>
+                            <strong style={{ marginBottom: "0px" }}>
+                              Heading
+                            </strong>
                             <TextField
                               key={key}
                               value={InvoiceSetting2.supplier[key]}
-                              onChange={(value) => updateInvoiceSetting2("supplier", key, value)}
-                              placeholder={`Enter ${key.replace(/([A-Z])/g, " $1").toLowerCase()}`}
+                              onChange={(value) =>
+                                updateInvoiceSetting2("supplier", key, value)
+                              }
+                              placeholder={`Enter ${key
+                                .replace(/([A-Z])/g, " $1")
+                                .toLowerCase()}`}
                             />
                           </>
                         )
@@ -1249,7 +1466,7 @@ const menuItems = [
                       setShowShipping(false);
                     }}
                   >
-                    <FaArrowLeft/>
+                    <FaArrowLeft />
                   </div>
                   <span>Shipping</span>
                 </div>
@@ -1263,23 +1480,37 @@ const menuItems = [
                     }}
                   >
                     {Object.keys(InvoiceSetting2.shipping)
-                      .filter((key) => !["showAddress2", "showGSTIN"].includes(key)) // Filter out unwanted fields
+                      .filter(
+                        (key) => !["showAddress2", "showGSTIN"].includes(key)
+                      ) // Filter out unwanted fields
                       .map((key) =>
                         typeof InvoiceSetting2.shipping[key] === "boolean" ? (
                           <Checkbox
                             key={key}
                             label={key.replace(/([A-Z])/g, " $1").toLowerCase()}
                             checked={InvoiceSetting2.shipping[key]}
-                            onChange={() => updateInvoiceSetting2("shipping", key, !InvoiceSetting2.shipping[key])}
+                            onChange={() =>
+                              updateInvoiceSetting2(
+                                "shipping",
+                                key,
+                                !InvoiceSetting2.shipping[key]
+                              )
+                            }
                           />
                         ) : (
                           <>
-                            <strong style={{ marginBottom: "0px" }}>Heading</strong>
+                            <strong style={{ marginBottom: "0px" }}>
+                              Heading
+                            </strong>
                             <TextField
                               key={key}
                               value={InvoiceSetting2.shipping[key]}
-                              onChange={(value) => updateInvoiceSetting2("shipping", key, value)}
-                              placeholder={`Enter ${key.replace(/([A-Z])/g, " $1").toLowerCase()}`}
+                              onChange={(value) =>
+                                updateInvoiceSetting2("shipping", key, value)
+                              }
+                              placeholder={`Enter ${key
+                                .replace(/([A-Z])/g, " $1")
+                                .toLowerCase()}`}
                             />
                           </>
                         )
@@ -1304,7 +1535,7 @@ const menuItems = [
                       setShowBilling(false);
                     }}
                   >
-                    <FaArrowLeft/>
+                    <FaArrowLeft />
                   </div>
                   <span>Billing</span>
                 </div>
@@ -1318,23 +1549,37 @@ const menuItems = [
                     }}
                   >
                     {Object.keys(InvoiceSetting2.billing)
-                      .filter((key) => !["showAddress2", "showGSTIN"].includes(key)) // Filter out unwanted fields
+                      .filter(
+                        (key) => !["showAddress2", "showGSTIN"].includes(key)
+                      ) // Filter out unwanted fields
                       .map((key) =>
                         typeof InvoiceSetting2.billing[key] === "boolean" ? (
                           <Checkbox
                             key={key}
                             label={key.replace(/([A-Z])/g, " $1").toLowerCase()}
                             checked={InvoiceSetting2.billing[key]}
-                            onChange={() => updateInvoiceSetting2("billing", key, !InvoiceSetting2.billing[key])}
+                            onChange={() =>
+                              updateInvoiceSetting2(
+                                "billing",
+                                key,
+                                !InvoiceSetting2.billing[key]
+                              )
+                            }
                           />
                         ) : (
                           <>
-                            <strong style={{ marginBottom: "0px" }}>Heading</strong>
+                            <strong style={{ marginBottom: "0px" }}>
+                              Heading
+                            </strong>
                             <TextField
                               key={key}
                               value={InvoiceSetting2.billing[key]}
-                              onChange={(value) => updateInvoiceSetting2("billing", key, value)}
-                              placeholder={`Enter ${key.replace(/([A-Z])/g, " $1").toLowerCase()}`}
+                              onChange={(value) =>
+                                updateInvoiceSetting2("billing", key, value)
+                              }
+                              placeholder={`Enter ${key
+                                .replace(/([A-Z])/g, " $1")
+                                .toLowerCase()}`}
                             />
                           </>
                         )
@@ -1359,12 +1604,14 @@ const menuItems = [
                       setShowLineItems(false);
                     }}
                   >
-                    <FaArrowLeft/>
+                    <FaArrowLeft />
                   </div>
                   <span>Line items</span>
                 </div>
                 <div>
-                  <p style={{ marginBottom: "10px", fontWeight: "bold" }}>General</p>
+                  <p style={{ marginBottom: "10px", fontWeight: "bold" }}>
+                    General
+                  </p>
                   <div
                     style={{
                       marginTop: "10px",
@@ -1376,9 +1623,12 @@ const menuItems = [
                     {Object.keys(InvoiceSetting2.lineItems)
                       .filter(
                         (key) =>
-                          !["showProductImage", "showRateAsDiscountedPrice", "showSKU", "showTotalDiscount"].includes(
-                            key
-                          )
+                          ![
+                            "showProductImage",
+                            "showRateAsDiscountedPrice",
+                            "showSKU",
+                            "showTotalDiscount",
+                          ].includes(key)
                       ) // Filter out unwanted fields
                       .map((key) =>
                         typeof InvoiceSetting2.lineItems[key] === "boolean" ? (
@@ -1386,16 +1636,28 @@ const menuItems = [
                             key={key}
                             label={key.replace(/([A-Z])/g, " $1").toLowerCase()}
                             checked={InvoiceSetting2.lineItems[key]}
-                            onChange={() => updateInvoiceSetting2("lineItems", key, !InvoiceSetting2.lineItems[key])}
+                            onChange={() =>
+                              updateInvoiceSetting2(
+                                "lineItems",
+                                key,
+                                !InvoiceSetting2.lineItems[key]
+                              )
+                            }
                           />
                         ) : (
                           <>
-                            <strong style={{ marginBottom: "0px" }}>Heading</strong>
+                            <strong style={{ marginBottom: "0px" }}>
+                              Heading
+                            </strong>
                             <TextField
                               key={key}
                               value={InvoiceSetting2.lineItems[key]}
-                              onChange={(value) => updateInvoiceSetting2("lineItems", key, value)}
-                              placeholder={`Enter ${key.replace(/([A-Z])/g, " $1").toLowerCase()}`}
+                              onChange={(value) =>
+                                updateInvoiceSetting2("lineItems", key, value)
+                              }
+                              placeholder={`Enter ${key
+                                .replace(/([A-Z])/g, " $1")
+                                .toLowerCase()}`}
                             />
                           </>
                         )
@@ -1420,7 +1682,7 @@ const menuItems = [
                       setShowTotal(false);
                     }}
                   >
-                    <FaArrowLeft/>
+                    <FaArrowLeft />
                   </div>
                   <span>Total</span>
                 </div>
@@ -1438,10 +1700,10 @@ const menuItems = [
                         (key) =>
                           ![
                             "showShippingGSTSplit",
-                            "showShipping",
+                            // "showShipping",
                             "showRefunded",
                             "showOutstanding",
-                            "showDiscount",
+                            // "showDiscount",
                           ].includes(key)
                       ) // Filter out unwanted fields
                       .map((key) =>
@@ -1450,16 +1712,28 @@ const menuItems = [
                             key={key}
                             label={key.replace(/([A-Z])/g, " $1").toLowerCase()}
                             checked={InvoiceSetting2.total[key]}
-                            onChange={() => updateInvoiceSetting2("total", key, !InvoiceSetting2.total[key])}
+                            onChange={() =>
+                              updateInvoiceSetting2(
+                                "total",
+                                key,
+                                !InvoiceSetting2.total[key]
+                              )
+                            }
                           />
                         ) : (
                           <>
-                            <strong style={{ marginBottom: "0px" }}>Heading</strong>
+                            <strong style={{ marginBottom: "0px" }}>
+                              Heading
+                            </strong>
                             <TextField
                               key={key}
                               value={InvoiceSetting2.total[key]}
-                              onChange={(value) => updateInvoiceSetting2("total", key, value)}
-                              placeholder={`Enter ${key.replace(/([A-Z])/g, " $1").toLowerCase()}`}
+                              onChange={(value) =>
+                                updateInvoiceSetting2("total", key, value)
+                              }
+                              placeholder={`Enter ${key
+                                .replace(/([A-Z])/g, " $1")
+                                .toLowerCase()}`}
                             />
                           </>
                         )
@@ -1489,18 +1763,21 @@ const menuItems = [
                     }}
                     onClick={() => setShowFooter(false)}
                   >
-                    <FaArrowLeft/>
+                    <FaArrowLeft />
                   </div>
                   <span>Others</span>
                 </div>
                 <div>
                   <p style={{ marginBottom: "10px" }}>
-                  To display your signature and update social media <strong>links</strong>, please visit the{" "}
-                    <a href="/settings" style={{ color: "#0070f3", textDecoration: "underline" }}>
-                     Profile settings
+                    To display your signature and update social media{" "}
+                    <strong>links</strong>, please visit the{" "}
+                    <a
+                      href="/settings"
+                      style={{ color: "#0070f3", textDecoration: "underline" }}
+                    >
+                      Profile settings
                     </a>
                   </p>
-                  
 
                   <div>
                     <div
@@ -1514,23 +1791,39 @@ const menuItems = [
                       {Object.keys(InvoiceSetting2.footer.socialNetworks)
                         .filter((key) => !["showWebsite"].includes(key)) // Filter out unwanted fields
                         .map((key) =>
-                          typeof InvoiceSetting2.footer.socialNetworks[key] === "boolean" ? (
+                          typeof InvoiceSetting2.footer.socialNetworks[key] ===
+                          "boolean" ? (
                             <Checkbox
                               key={key}
-                              label={key.replace(/([A-Z])/g, " $1").toLowerCase()}
-                              checked={InvoiceSetting2.footer.socialNetworks[key]}
+                              label={key
+                                .replace(/([A-Z])/g, " $1")
+                                .toLowerCase()}
+                              checked={
+                                InvoiceSetting2.footer.socialNetworks[key]
+                              }
                               onChange={() =>
-                                updateSocialNetworkSetting(key, !InvoiceSetting2.footer.socialNetworks[key])
+                                updateSocialNetworkSetting(
+                                  key,
+                                  !InvoiceSetting2.footer.socialNetworks[key]
+                                )
                               }
                             />
                           ) : (
                             <>
-                              <strong style={{ marginBottom: "0px" }}>Heading</strong>
+                              <strong style={{ marginBottom: "0px" }}>
+                                Heading
+                              </strong>
                               <TextField
                                 key={key}
-                                value={InvoiceSetting2.footer.socialNetworks[key]}
-                                onChange={(value) => updateSocialNetworkSetting(key, value)}
-                                placeholder={`Enter ${key.replace(/([A-Z])/g, " $1").toLowerCase()}`}
+                                value={
+                                  InvoiceSetting2.footer.socialNetworks[key]
+                                }
+                                onChange={(value) =>
+                                  updateSocialNetworkSetting(key, value)
+                                }
+                                placeholder={`Enter ${key
+                                  .replace(/([A-Z])/g, " $1")
+                                  .toLowerCase()}`}
                               />
                             </>
                           )
@@ -1546,21 +1839,29 @@ const menuItems = [
                   /> */}
                   </div>
 
-                  <p style={{ marginTop: "20px", fontWeight: "bold" }}>Thank you note</p>
+                  <p style={{ marginTop: "20px", fontWeight: "bold" }}>
+                    Thank you note
+                  </p>
                   <TextField
                     multiline={4}
                     maxLength={1000}
                     value={InvoiceSetting2.footer.thankYouNote}
-                    onChange={(value) => updateInvoiceSetting2("footer", "thankYouNote", value)}
+                    onChange={(value) =>
+                      updateInvoiceSetting2("footer", "thankYouNote", value)
+                    }
                     placeholder="Enter your thank you note"
                   />
 
-                  <p style={{ marginTop: "20px", fontWeight: "bold" }}>Customer note</p>
+                  <p style={{ marginTop: "20px", fontWeight: "bold" }}>
+                    Customer note
+                  </p>
                   <TextField
                     multiline={4}
                     maxLength={1000}
                     value={InvoiceSetting2.footer.footerNote}
-                    onChange={(value) => updateInvoiceSetting2("footer", "footerNote", value)}
+                    onChange={(value) =>
+                      updateInvoiceSetting2("footer", "footerNote", value)
+                    }
                     placeholder="Enter footer note"
                   />
                 </div>
@@ -1573,8 +1874,12 @@ const menuItems = [
                     <div
                       key={index}
                       style={styles.menuItem}
-                      onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#f1f3f5")}
-                      onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
+                      onMouseEnter={(e) =>
+                        (e.currentTarget.style.backgroundColor = "#f1f3f5")
+                      }
+                      onMouseLeave={(e) =>
+                        (e.currentTarget.style.backgroundColor = "transparent")
+                      }
                       onClick={item.onClick}
                     >
                       <div style={styles.menuText}>
@@ -1595,7 +1900,13 @@ const menuItems = [
           <AlphaCard style={styles.alphaCardPreview}>
             <div style={styles.sidebarTitle}>Preview</div>
             {loading ? (
-              <div style={{ display: "flex", justifyContent: "center", marginTop: "150px" }}>
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "center",
+                  marginTop: "150px",
+                }}
+              >
                 <Spinner accessibilityLabel="Loading Spinner" size="large" />
               </div>
             ) : (
@@ -1609,7 +1920,17 @@ const menuItems = [
                     maxHeight: "100%",
                   }}
                 >
-                  {(shopDetails.id && <>{renderInvoiceTemplate(Number(CurrentTemplate), shopDetails, demoOrder[0], demoGST, shopProfile)}</>) ||
+                  {(shopDetails.id && (
+                    <>
+                      {renderInvoiceTemplate(
+                        Number(CurrentTemplate),
+                        shopDetails,
+                        demoOrder[0],
+                        demoGST,
+                        shopProfile
+                      )}
+                    </>
+                  )) ||
                     "No template available"}
                 </div>
               </div>

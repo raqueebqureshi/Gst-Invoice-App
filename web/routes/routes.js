@@ -11,9 +11,6 @@ import {
 import {
   updateStoreProfile,
   fetchShopProfile,
-  updateTotalInvoiceDownload,
-  updateTotalInvoicePrint,
-  updateTotalInvoiceSent,
 } from "../controllers/storeProfileController.js";
 import {
   saveSMTPConfig,
@@ -40,8 +37,8 @@ import {
   sendTestEmailFromAppSMTP,
 } from "../controllers/sendTestEmail.js";
 
-
-
+import { handleBillingConfirmation } from '../controllers/Plans_billing.js'
+import { getOrders } from "../controllers/ordersController.js";
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
 
@@ -71,10 +68,7 @@ router.put("/api/update-store-data", updateStoreProfile);
 //for the fetchstoreprofile
 router.get("/api/fetch-store-profile", fetchShopProfile);
 
-// Update stats routes
-router.post("/api/stats/invoice-download", updateTotalInvoiceDownload);
-router.post("/api/stats/invoice-print", updateTotalInvoicePrint);
-router.post("/api/stats/invoice-sent", updateTotalInvoiceSent);
+
 
 
 
@@ -130,5 +124,9 @@ router.post("/api/send-test-email-app-smtp", sendTestEmailFromAppSMTP);
 
 
 
+//get billing 
+router.get('/api/billing/confirm', handleBillingConfirmation);
 
+//paginated request 
+router.get("/api/fetch-orders", getOrders);
 export default router;

@@ -37,160 +37,6 @@ if (!SHOPIFY_SECRET) {
   process.exit(1); // Stop execution if secret is not available
 }
 
-//api to send shop data to db
-
-
-// app.get(
-//   shopify.config.auth.callbackPath,
-//   shopify.auth.callback(),
-//   async (req, res, next) => {
-//     try {
-//       const session = res.locals.shopify.session;
-
-//       // Fetch shop information
-//       const shopInfo = await shopify.api.rest.Shop.all({
-//         session: session,
-//       });
-
-//       const shopDetails = shopInfo.data[0]; // Handle array or object
-
-//       const {
-//         name: storeName,
-//         domain: storeDomain,
-//         email: storeEmail,
-//         address1: storeAddress1,
-//         city: storeCity,
-//         country_name: storeCountryName,
-
-//       } = shopDetails;
-
-//       // Check if the store already exists in the DB
-//       let storeExists = await Store.findOne({ storeDomain });
-
-//       if (!storeExists) {
-//         // Create new store data
-//         const newStore = new Store({
-//           storeName,
-//           storeDomain,
-//           storeEmail,
-//           storeAddress1,
-//           storeCity,
-//           storeCountryName
-//         });
-
-//         await newStore.save();
-//         console.log("New store data saved to DB after app installation");
-//       } else {
-//         console.log("Store already exists in DB:", storeExists);
-//       }
-
-
-      
-
-//       // Redirect to Shopify or app root
-//       shopify.redirectToShopifyOrAppRoot()(req, res, next);
-//     } catch (error) {
-//       console.error("Error saving store data during app installation", error);
-//       res.status(500).send("Failed to save store data after installation");
-//     }
-//   }
-// );
-
-
-
-
-
-//after app installation
-// app.get(
-//   shopify.config.auth.callbackPath,
-//   shopify.auth.callback(),
-//   async (req, res, next) => {
-//     try {
-//       const session = res.locals.shopify.session;
-
-//       // Fetch shop information
-//       const shopInfo = await shopify.api.rest.Shop.all({
-//         session: session,
-//       });
-
-//       const shopDetails = shopInfo.data[0]; // Handle array or object
-//         console.log(shopDetails)
-
-//       const {
-//         id: shopId,
-//         name: storeName,
-//         domain: storeDomain,
-//         email: storeEmail,
-//         address1: storeAddress1,
-//         city: storeCity,
-//         country_name: storeCountryName,
-//       } = shopDetails;
-
-//       // Check if the store already exists in the DB
-//       let storeExists = await Store.findOne({ storeDomain });
-
-
-//       if (!storeExists) {
-//         // Create new store data
-//         const newStore = new Store({
-//           storeName,
-//           storeDomain,
-//           storeEmail,
-//           storeAddress1,
-//           storeCity,
-//           storeCountryName,
-//         });
-
-
-//         await newStore.save();
-//         console.log("New store data saved to DB after app installation");
-
-
-//           // Create a new store profile on install
-//           let hasShopDetails = await Store.findOne({ shopId });
-
-//           if (!hasShopDetails) {
-//           const newStoreProfile = new StoreProfile({
-//             shopId,
-//             storeDomain,
-//             email: storeEmail
-//             // rest default values will be set from schema
-//           });
-//           await newStoreProfile.save();
-//           console.log("Store profile created for the new store" , newStoreProfile);
-//         }
-
-//         // Create a default invoice template for the new store
-//         const newInvoiceTemplate = new InvoiceTemplate({
-//           email: storeEmail,
-//           storeDomain,
-//           // Optionally set default values here if different from schema defaults
-//         });
-
-//         await newInvoiceTemplate.save();
-//         console.log("Invoice template created for the new store");
-//       } else {
-//         console.log("Store already exists in DB:", storeExists);
-//       }
-
-//       // Redirect to Shopify or app root
-//       shopify.redirectToShopifyOrAppRoot()(req, res, next);
-//     } catch (error) {
-//       console.error("Error saving store data during app installation", error);
-//       res.status(500).send("Failed to save store data after installation");
-//     }
-//   }
-// );
-
-
-
-
-
-//after installation
-// After app installation
-
-
-// After app installation
 
 app.post(
   shopify.config.webhooks.path,
@@ -218,21 +64,16 @@ app.get(
   async (req, res, next) => {
     try {
       const session = res.locals.shopify.session;
-
-      // Fetch shop information
-      const shopInfo = await shopify.api.rest.Shop.all({
-        session: session,
-      });
+      const shopInfo = await shopify.api.rest.Shop.all({ session: session });
 
       const shopDetails = shopInfo.data[0];
       const shop = shopDetails.domain;
-      const accessToken = session.accessToken;
+      const accessToken = session.accessToken; // 
 
-      // Check if the store already exists in the database
+
       let store = await Store.findOne({ storeDomain: shop });
 
       if (!store) {
-        // Create new store data
         store = new Store({
           shopId: shopDetails.id,
           storeName: shopDetails.name,
@@ -241,21 +82,20 @@ app.get(
           storeAddress1: shopDetails.address1,
           storeCity: shopDetails.city,
           storeCountryName: shopDetails.country_name,
+          accessToken: accessToken, // 
         });
 
         await store.save();
-        console.log("New store data saved to DB after app installation.");
+        console.log("Access token stored in DB");
       }
 
-
-      // Redirect to Shopify or app root
       shopify.redirectToShopifyOrAppRoot()(req, res, next);
     } catch (error) {
       console.error("Error during app installation:", error);
       res.status(500).send("Failed to save store data after installation.");
     }
   }
-)
+);
 
 
 
@@ -417,7 +257,7 @@ app.use(routes);
 
 
 //fetch all products
-app.get("/api/products/all", async (_req, res) => {
+app.get("/api/2025-01/products.json", async (_req, res) => {
   const allProducts = await shopify.api.rest.Product.all({
     session: res.locals.shopify.session,
   });

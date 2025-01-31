@@ -117,7 +117,7 @@ export default function Orders() {
 
           <Layout>
             <div style={{ paddingTop: "20px", display: "flex", flexDirection: "column", gap: "10px", width: "90%" }}>
-              {isSubscribed && <UpgradeBanner msg={"Uograde your plan to access and customized multiple templates."} />}
+              {!isSubscribed && <UpgradeBanner msg={"Uograde your plan to access and customized multiple templates."} />}
             </div>
             <p style={{ paddingTop: "20px", textAlign: "start", width: "90%", fontWeight: "600" }}>
               Available Invoice Templates

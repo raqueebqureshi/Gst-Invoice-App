@@ -1,62 +1,53 @@
 import { Page } from "@shopify/polaris";
-
-import { useTranslation } from "react-i18next";
-
-import { OrderTableEx } from "../components/IndexTable.jsx";
+import { Banner, Layout } from "@shopify/polaris";
 import "@shopify/polaris/build/esm/styles.css";
-import { useEffect, useState } from 'react';
+import { useEffect, useState } from "react";
+import PricingPlans from "../components/PricingPlans";
 
-import '../styles.css';
 
 
-export default function Orders() {
-  const { t } = useTranslation();
 
-  const [shopDetails, setShopDetails] = useState([]);
 
+export default function Plans() {
+    const [planId, setplanId] = useState(null);
   // Fetch store details
   useEffect(() => {
     fetch("/api/2024-10/shop.json", {
       method: "GET",
-      headers: { "Content-Type": "application/json" }
+      headers: { "Content-Type": "application/json" },
     })
-    .then(request => request.json())
-    .then(response => {
-      // console.log("Store Details---!",response.data);
-      if (response.data.data.length > 0) {
-        // console.log("Store Details---",response.data.data[0]);
-        setShopDetails(response.data.data[0]);
-    
-      }
-    })
-    .catch(error => console.log(error));
+      .then((request) => request.json())
+      .then((response) => {
+        // console.log("Store Details---!", response.data);
+        if (response.data.data.length > 0) {
+          // console.log("Store Details---", response.data.data[0]);
+          // setShopDetails(response.data.data[0]);
+
+          fetch(`/api/billing/confirm?shop=${response.data.data[0].domain}`, {
+            method: "GET",
+            headers: { "Content-Type": "application/json" },
+          })
+            .then((request) => request.json())
+            .then((response) => {
+              // console.log("plan---!", response);
+              // const tempID = response.data.planId.split('/').pop();
+              // console.log("tempID" ,tempID);
+              const fetchedPlanId = response.updatedStore.plans.planId;
+              setplanId(fetchedPlanId);
+            })
+            .catch((error) => console.log(error));
+        }
+      })
+      .catch((error) => console.log(error));
   }, []);
-
-
-  // useEffect(() => {
-  //   const openPricingPage = () => {
-      
-  //     window.open(
-  //       "https://admin.shopify.com/store/devstore134/charges/gst-invoice-app-2/pricing_plans",
-  //       "_blank"
-  //     );
-  //   };
-  
-  //   openPricingPage();
-  // }, []); // The empty dependency array ensures this runs only once when the component mounts
-  
-  // useEffect(() => {
-    
-  //   window?.top?.location.replace(`https://admin.shopify.com/store/devstore134/charges/gst-invoice-app-2/pricing_plans`);
-    
-  //   }, []);
 
   return (
     <Page fullWidth>
-  
-      
-
-      
+      <Layout>
+        <Layout.Section>
+          <PricingPlans currentPlanId={planId} />
+        </Layout.Section>
+      </Layout>
     </Page>
   );
 }

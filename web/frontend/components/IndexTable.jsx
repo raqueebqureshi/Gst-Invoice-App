@@ -21,6 +21,7 @@ import {
   Frame,
   SkeletonBodyText,
   SkeletonDisplayText,
+  EmptyState,
   SkeletonPage,
 } from "@shopify/polaris";
 import { VscSend } from "react-icons/vsc";
@@ -32,7 +33,8 @@ import "jspdf-autotable";
 import { InvoiceTemplate1 } from "../invoiceTemplates/invoice-template1";
 import { InvoiceTemplate2 } from "../invoiceTemplates/invoice-template2";
 import { InvoiceTemplate3 } from "../invoiceTemplates/invoice-template3";
-import { useIndexResourceState , Tooltip} from "@shopify/polaris";
+import { useIndexResourceState, Tooltip } from "@shopify/polaris";
+import { all } from "axios";
 
 const filterOrders = (orders, query) => {
   return orders.filter((order) => {
@@ -55,6 +57,10 @@ export function OrderTableEx({ value, shopdetails }) {
   const [isPDFPrintingBulk, setIsPDFPrintingBulk] = useState(false);
   const [loading, setLoading] = useState(true);
   const [orders, setOrders] = useState([]);
+  const [planId, setplanId] = useState(null);
+  const [nextPageInfo, setNextPageInfo] = useState(null);
+  const [prevPageInfo, setPrevPageInfo] = useState(null);
+  const [limit, setLimit] = useState(20);
   const [searchQuery, setSearchQuery] = useState("");
   const [currentTemplateId, setCurrentTemplateId] = useState(null);
   const [selectedFont, setSelectedFont] = useState("Roboto, sans-serif");
@@ -72,6 +78,20 @@ export function OrderTableEx({ value, shopdetails }) {
   const [shopId, setShopId] = useState(null);
   const [isSubscribed, setIsSubscribed] = useState(false);
   const itemsPerPage = 20;
+
+  
+
+  // Toggle individual order selection
+  const handleOrderSelection = (id) => {
+    setSelectedOrders((prevSelected) =>
+      prevSelected.includes(id) ? prevSelected.filter((orderId) => orderId !== id) : [...prevSelected, id]
+    );
+  };
+
+  // Toggle all orders selection
+  const handleSelectAll = () => {
+    setSelectedOrders(allSelected ? [] : paginatedOrders.map((order) => order.id));
+  };
   // const [showToast, setShowToast] = useState({
   //   active: false,
   //   message: "",
@@ -177,7 +197,8 @@ export function OrderTableEx({ value, shopdetails }) {
         showYoutube: true,
       },
       thankYouNote: "Thanks for your purchase",
-      footerNote: "This is an electronically generated invoice, no signature is required",
+      footerNote:
+        "This is an electronically generated invoice, no signature is required",
     },
   });
 
@@ -185,56 +206,114 @@ export function OrderTableEx({ value, shopdetails }) {
   //   setShowToast({ active: true, message, error });
   // };
 
-  useEffect(() => {
-    fetch("/api/2024-10/shop.json", {
-      method: "GET",
-      headers: { "Content-Type": "application/json" },
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        console.log("Store Details---!", data.data);
-        setShopId(data.data.data[0].id);
-        if (data.data.data && data.data.data.length > 0) {
-          setStoreDomain(data.data.data[0].domain);
-          setEmail(data.data.data[0].email);
-          setShopId(data.data.data[0].id);
+  // useEffect(() => {
+  //   fetch("/api/2024-10/shop.json", {
+  //     method: "GET",
+  //     headers: { "Content-Type": "application/json" },
+  //   })
+  //     .then((response) => response.json())
+  //     .then((data) => {
+  //       console.log("Store Details---!", data.data);
+  //       setShopId(data.data.data[0].id);
+  //       if (data.data.data && data.data.data.length > 0) {
+  //         setStoreDomain(data.data.data[0].domain);
+  //         setEmail(data.data.data[0].email);
+  //         setShopId(data.data.data[0].id);
 
-          fetch(`/api/billing/confirm?shop=${response.data.data[0].domain}`, {
-            method: "GET",
-            headers: { "Content-Type": "application/json" },
-          })
-            .then((request) => request.json())
-            .then((response) => {
-              console.log("plan---!", response);
-              // const tempID = response.data.planId.split('/').pop();
-              // console.log("tempID" ,tempID);
-              const fetchedPlanId = response.updatedStore.plans.planId;
-              setplanId(fetchedPlanId);
-            })
-            .catch((error) => console.log(error));
+  //        const response =  fetch(`/api/billing/confirm?shop=${data.data.data[0].domain}`, {
+  //           method: "GET",
+  //           headers: { "Content-Type": "application/json" },
+  //         });
+
+  //         if(response.ok){
+  //           console.log('response', response)
+  //       }
+  //   }  })
+  //     .catch((error) => {
+  //       setShowToast(true);
+  //       setToastMessage("Internal Server Error 500");
+  //       console.log('error', error);        // handleShowToast("Internal Server Error 500", true)
+  //     });
+
+  //   const storedResponse = JSON.parse(localStorage.getItem("billingInfo"));
+  //   const proPlanResponse = JSON.parse(localStorage.getItem("proplan"));
+  //   const businessPlanResponse = JSON.parse(localStorage.getItem("businessplan"));
+  //   const currentPlanId = planId?.toString();
+  //   // Compare the numeric part with the plans
+  //   if (currentPlanId === proPlanResponse || currentPlanId === businessPlanResponse) {
+  //     setIsSubscribed(true);
+  //     console.log(
+  //       "Current Plan:",
+  //       proPlanResponse === currentPlanId ? `Pro: ${proPlanResponse}` : `Business: ${businessPlanResponse}`
+  //     );
+  //   } else {
+  //     setIsSubscribed(false);
+  //   }
+  // }, []);
+
+  useEffect(() => {
+    const fetchStoreDetails = async () => {
+      try {
+        const response = await fetch("/api/2024-10/shop.json", {
+          method: "GET",
+          headers: { "Content-Type": "application/json" },
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch store details");
         }
-      })
-      .catch((error) => {
+
+        const data = await response.json();
+        console.log("Store Details---!", data.data);
+
+        if (data.data?.data?.length > 0) {
+          const storeInfo = data.data.data[0];
+          setShopId(storeInfo.id);
+          setStoreDomain(storeInfo.domain);
+          setEmail(storeInfo.email);
+
+          try {
+            const billingResponse = await fetch(
+              `/api/billing/confirm?shop=${storeInfo.domain}`,
+              {
+                method: "GET",
+                headers: { "Content-Type": "application/json" },
+              }
+            );
+
+            if (billingResponse.ok) {
+              console.log("Billing Confirmation Response:", billingResponse);
+            } else {
+              console.error("Billing API error:", billingResponse.statusText);
+            }
+          } catch (error) {
+            console.error("Error fetching billing confirmation:", error);
+          }
+        }
+      } catch (error) {
         setShowToast(true);
         setToastMessage("Internal Server Error 500");
-        // handleShowToast("Internal Server Error 500", true)
-      });
+        console.error("Error fetching store details:", error);
+      }
+    };
 
-    const storedResponse = JSON.parse(localStorage.getItem("billingInfo"));
-    const proPlanResponse = JSON.parse(localStorage.getItem("proplan"));
-    const businessPlanResponse = JSON.parse(localStorage.getItem("businessplan"));
-    const currentPlanId = "1";
-    // Compare the numeric part with the plans
-    if (currentPlanId === proPlanResponse || currentPlanId === businessPlanResponse) {
+    fetchStoreDetails();
+
+    // Retrieve stored plans from localStorage
+    const currentPlan  = localStorage.getItem("currentPlan");
+    const currentPlanId = currentPlan.toString();
+
+      // Compare the numeric part with the plans
+    if (currentPlanId === "1" || currentPlanId === "2") {
       setIsSubscribed(true);
-      console.log(
-        "Current Plan:",
-        proPlanResponse === currentPlanId ? `Pro: ${proPlanResponse}` : `Business: ${businessPlanResponse}`
-      );
+      // console.log(
+      //   "Current Plan:",
+      //   proPlanResponse === currentPlanId ? `Pro: ${proPlanResponse}` : `Business: ${businessPlanResponse}`
+      // );
     } else {
       setIsSubscribed(false);
     }
-  }, []);
+  }, [planId]);
 
   useEffect(() => {
     if (storeDomain) {
@@ -250,52 +329,89 @@ export function OrderTableEx({ value, shopdetails }) {
     }
   }, [storeDomain]);
 
-  useEffect(() => {
-    fetch("/api/2024-10/orders.json", {
-      method: "GET",
-      headers: { "Content-Type": "application/json" },
-    })
-      .then((request) => request.json())
-      .then((response) => {
-        if (response.data) {
-          //console.log('response.data',response.data);
-          setOrders(response.data);
-          setLoading(false);
-          // handleShowToast("Orders Synced Complete");
-          setShowToast(true);
-          setToastMessage("Orders Synced");
-        }
-      })
-      .catch((error) => {
-        //console.error(error);
+  //fetching paginated orders
+  const fetchOrders = async (pageInfo = null) => {
+    setLoading(true);
+    if (!storeDomain) return; // Ensure storeDomain is set before fetching
+
+    setLoading(true);
+    try {
+      let url = `/api/fetch-orders?shop=${storeDomain}`;
+      if (pageInfo) {
+        url += `&page_info=${pageInfo}`;
+      }
+
+      const response = await fetch(url);
+      const data = await response.json();
+
+      if (response.ok) {
+        setOrders(data.orders);
+        setNextPageInfo(data.nextPageInfo);
+        setPrevPageInfo(data.prevPageInfo);
+        // setError(null); // Clear errors on success
         setLoading(false);
         setShowToast(true);
-        setToastMessage("Internal Server Error 500");
-        // handleShowToast("Internal Server Error 500", true);
-      });
-  }, []);
-
-  const { selectedResources, allResourcesSelected, handleSelectionChange } = useIndexResourceState(
-    orders.map((order) => order.id)
-  );
+        setToastMessage("Orders Synced");
+      }
+    } catch (err) {
+      console.error("Error fetching orders:", err);
+      // setError("Failed to fetch orders.");
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    if(shopId)
-    {fetch(`/api/fetch-store-profile?shopId=${shopId}`, {
-      method: "GET",
-      headers: { "Content-Type": "application/json" },
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        if (data && data.profile) {
-          const profileData = data.profile;
-          console.log("profileData", profileData);
-          setShopProfile(profileData || {});
-        }
+    if (storeDomain) {
+      fetchOrders();
+    }
+  }, [storeDomain]);
+
+  // useEffect(() => {
+  //   fetch("/api/2024-10/orders.json", {
+  //     method: "GET",
+  //     headers: { "Content-Type": "application/json" },
+  //   })
+  //     .then((request) => request.json())
+  //     .then((response) => {
+  //       if (response.data) {
+  //         //console.log('response.data',response.data);
+  //         setOrders(response.data);
+  //         setLoading(false);
+  //         // handleShowToast("Orders Synced Complete");
+  //         setShowToast(true);
+  //         setToastMessage("Orders Synced");
+  //       }
+  //     })
+  //     .catch((error) => {
+  //       //console.error(error);
+  //       setLoading(false);
+  //       setShowToast(true);
+  //       setToastMessage("Internal Server Error 500");
+  //       // handleShowToast("Internal Server Error 500", true);
+  //     });
+  // }, []);
+
+  // const { selectedResources, allResourcesSelected, handleSelectionChange } =
+  //   useIndexResourceState(orders.map((order) => order.id));
+
+  useEffect(() => {
+    if (shopId) {
+      fetch(`/api/fetch-store-profile?shopId=${shopId}`, {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
       })
-      .catch((error) => {
-        console.error("Error fetching store profile:", error);
-      });}
+        .then((response) => response.json())
+        .then((data) => {
+          if (data && data.profile) {
+            const profileData = data.profile;
+            console.log("profileData", profileData);
+            setShopProfile(profileData || {});
+          }
+        })
+        .catch((error) => {
+          console.error("Error fetching store profile:", error);
+        });
+    }
   }, [shopId]);
 
   useEffect(() => {
@@ -345,7 +461,11 @@ export function OrderTableEx({ value, shopdetails }) {
 
       // Create a FormData object to include the Blob and additional data
       const formData = new FormData();
-      formData.append("file", pdfBlob, `Invoice-${orderDetails.order_number}.pdf`);
+      formData.append(
+        "file",
+        pdfBlob,
+        `Invoice-${orderDetails.order_number}.pdf`
+      );
       formData.append("customerEmail", customerEmail);
       formData.append("orderId", orderDetails.order_number);
       formData.append("shopDetails", JSON.stringify(shopDetails));
@@ -357,7 +477,7 @@ export function OrderTableEx({ value, shopdetails }) {
         body: formData,
       });
 
-      if (response.ok) {
+      if (!response.ok) {
         // handleShowToast("Invoice sent successfully.");
         setShowToast(true);
         setToastMessage("Internal Server Error 500");
@@ -377,25 +497,29 @@ export function OrderTableEx({ value, shopdetails }) {
   };
 
   useEffect(() => {
-    if(shopId){
-    fetch(`/api/smtp/get?shopId=${shopId}`, {
-      method: "GET",
-      headers: { "Content-Type": "application/json" },
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        if (data) {
-          // console.log("Shop Profile Data", data);
-          if (data?.smtpData?.sendByOwnEmail || data?.smtpData?.sendByAppEmail) {
-            setIsEmailEnabled(true);
-          } else {
-            setIsEmailEnabled(false);
-          }
-        }
+    if (shopId) {
+      fetch(`/api/smtp/get?shopId=${shopId}`, {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
       })
-      .catch((error) => {
-        console.error("Error fetching store profile:", error);
-      });}
+        .then((response) => response.json())
+        .then((data) => {
+          if (data) {
+            // console.log("Shop Profile Data", data);
+            if (
+              data?.smtpData?.sendByOwnEmail ||
+              data?.smtpData?.sendByAppEmail
+            ) {
+              setIsEmailEnabled(true);
+            } else {
+              setIsEmailEnabled(false);
+            }
+          }
+        })
+        .catch((error) => {
+          console.error("Error fetching store profile:", error);
+        });
+    }
   }, [shopId]);
 
   // Helper function to generate PDF as Blob
@@ -481,7 +605,9 @@ export function OrderTableEx({ value, shopdetails }) {
     shopProfile
   ) => {
     if (!orderDetails || !currentTemplateId) {
-      console.error("Order details or template ID not available for PDF generation.");
+      console.error(
+        "Order details or template ID not available for PDF generation."
+      );
       throw new Error("Order details or template ID is missing.");
     }
 
@@ -502,7 +628,8 @@ export function OrderTableEx({ value, shopdetails }) {
         return new Promise((resolve, reject) => {
           const reader = new FileReader();
           reader.onloadend = () => resolve(reader.result);
-          reader.onerror = () => reject(new Error(`Failed to convert image: ${url}`));
+          reader.onerror = () =>
+            reject(new Error(`Failed to convert image: ${url}`));
           reader.readAsDataURL(blob);
         });
       } catch (error) {
@@ -514,10 +641,14 @@ export function OrderTableEx({ value, shopdetails }) {
     // Preload all images (e.g., logo and signature)
     const preloadImages = async () => {
       if (shopProfile?.images?.logoURL) {
-        shopProfile.images.logoURL = await loadImageAsDataURL(shopProfile.images.logoURL);
+        shopProfile.images.logoURL = await loadImageAsDataURL(
+          shopProfile.images.logoURL
+        );
       }
       if (shopProfile?.images?.signatureURL) {
-        shopProfile.images.signatureURL = await loadImageAsDataURL(shopProfile.images.signatureURL);
+        shopProfile.images.signatureURL = await loadImageAsDataURL(
+          shopProfile.images.signatureURL
+        );
       }
     };
 
@@ -651,7 +782,9 @@ export function OrderTableEx({ value, shopdetails }) {
         //console.log('response',response);
         if (!response.ok) {
           return response.text().then((errorText) => {
-            throw new Error(errorText || `HTTP error! Status: ${response.status}`);
+            throw new Error(
+              errorText || `HTTP error! Status: ${response.status}`
+            );
           });
         }
         return response.json();
@@ -667,7 +800,7 @@ export function OrderTableEx({ value, shopdetails }) {
             ...settings,
           }));
           setSelectedFont(settings.branding.fontFamily);
-          setLoading(false);
+          // setLoading(false);
         }
       })
       .catch((error) => {
@@ -685,15 +818,17 @@ export function OrderTableEx({ value, shopdetails }) {
         throw new Error("Invalid storeDomain or email.");
       }
 
-      const url = `/api/products/gsthsn?storeDomain=${encodeURIComponent(storeDomain)}&email=${encodeURIComponent(
-        email
-      )}`;
+      const url = `/api/products/gsthsn?storeDomain=${encodeURIComponent(
+        storeDomain
+      )}&email=${encodeURIComponent(email)}`;
       //console.log("Fetching GST HSN Values with URL:", url);
 
       const response = await fetch(url);
 
       if (!response.ok) {
-        throw new Error(`Failed to fetch GST values. Status: ${response.status}`);
+        throw new Error(
+          `Failed to fetch GST values. Status: ${response.status}`
+        );
       }
 
       const data = await response.json();
@@ -975,7 +1110,14 @@ export function OrderTableEx({ value, shopdetails }) {
   // );
 
   const handlePdfDownload = useCallback(
-    async (order, shopdetails, currentTemplate, invoiceSettings, GSTHSNCodes, shopProfile) => {
+    async (
+      order,
+      shopdetails,
+      currentTemplate,
+      invoiceSettings,
+      GSTHSNCodes,
+      shopProfile
+    ) => {
       if (!order || !currentTemplate) {
         setIsPDFGenerating(false);
         console.error("Order or template not available for PDF generation.");
@@ -999,7 +1141,8 @@ export function OrderTableEx({ value, shopdetails }) {
           return new Promise((resolve, reject) => {
             const reader = new FileReader();
             reader.onloadend = () => resolve(reader.result);
-            reader.onerror = () => reject(new Error(`Failed to convert image: ${url}`));
+            reader.onerror = () =>
+              reject(new Error(`Failed to convert image: ${url}`));
             reader.readAsDataURL(blob);
           });
         } catch (error) {
@@ -1011,10 +1154,14 @@ export function OrderTableEx({ value, shopdetails }) {
       // Preload all images (e.g., logo and signature)
       const preloadImages = async () => {
         if (shopProfile?.images?.logoURL) {
-          shopProfile.images.logoURL = await loadImageAsDataURL(shopProfile.images.logoURL);
+          shopProfile.images.logoURL = await loadImageAsDataURL(
+            shopProfile.images.logoURL
+          );
         }
         if (shopProfile?.images?.signatureURL) {
-          shopProfile.images.signatureURL = await loadImageAsDataURL(shopProfile.images.signatureURL);
+          shopProfile.images.signatureURL = await loadImageAsDataURL(
+            shopProfile.images.signatureURL
+          );
         }
       };
 
@@ -1108,12 +1255,21 @@ export function OrderTableEx({ value, shopdetails }) {
   );
 
   const handleBulkPdfDownload = useCallback(
-    async (orders, shopdetails, currentTemplate, invoiceSettings, GSTHSNCodes, shopProfile) => {
+    async (
+      orders,
+      shopdetails,
+      currentTemplate,
+      invoiceSettings,
+      GSTHSNCodes,
+      shopProfile
+    ) => {
       if (!orders || orders.length === 0 || !currentTemplate) {
-        console.error("No orders or template available for bulk PDF generation.");
+        console.error(
+          "No orders or template available for bulk PDF generation."
+        );
         return;
       }
-  
+
       // console.log("Starting bulk PDF generation with:", {
       //   orders,
       //   shopdetails,
@@ -1122,10 +1278,10 @@ export function OrderTableEx({ value, shopdetails }) {
       //   GSTHSNCodes,
       //   shopProfile,
       // });
-  
+
       try {
         const pdf = new jsPDF("p", "pt", "a4");
-  
+
         for (const order of orders) {
           const invoiceContainer = document.createElement("div");
           invoiceContainer.style.width = "794px";
@@ -1133,7 +1289,7 @@ export function OrderTableEx({ value, shopdetails }) {
           invoiceContainer.style.position = "absolute";
           invoiceContainer.style.top = "-9999px";
           document.body.appendChild(invoiceContainer);
-  
+
           const renderInvoiceTemplate = () => {
             switch (currentTemplate) {
               case "1":
@@ -1176,33 +1332,33 @@ export function OrderTableEx({ value, shopdetails }) {
                 console.error("Invalid template ID:", currentTemplate);
             }
           };
-  
+
           renderInvoiceTemplate();
-  
+
           // Wait for rendering to complete
           await new Promise((resolve) => setTimeout(resolve, 2000));
-  
+
           const canvas = await html2canvas(invoiceContainer, {
             scale: 2,
             useCORS: true,
             allowTaint: false,
           });
-  
+
           const imgData = canvas.toDataURL("image/jpeg");
           const pdfWidth = pdf.internal.pageSize.getWidth();
           const imgWidth = pdfWidth - 20;
           const imgHeight = (canvas.height * imgWidth) / canvas.width;
-  
+
           pdf.addImage(imgData, "PNG", 10, 10, imgWidth, imgHeight);
-  
+
           // Add a new page for the next order, except for the last one
           if (orders.indexOf(order) !== orders.length - 1) {
             pdf.addPage();
           }
-  
+
           document.body.removeChild(invoiceContainer);
         }
-  
+
         pdf.save(`Invoices-Bulk.pdf`);
         console.log("Bulk PDF generated");
       } catch (error) {
@@ -1211,13 +1367,16 @@ export function OrderTableEx({ value, shopdetails }) {
     },
     []
   );
-  
-  
-  
-  
 
   const handlePrint = useCallback(
-    async (order, shopdetails, currentTemplate, invoiceSettings, GSTHSNCodes, shopProfile) => {
+    async (
+      order,
+      shopdetails,
+      currentTemplate,
+      invoiceSettings,
+      GSTHSNCodes,
+      shopProfile
+    ) => {
       if (!order || !currentTemplate) {
         setIsPDFPrinting(false);
         console.error("Missing order or template data for printing.");
@@ -1242,7 +1401,12 @@ export function OrderTableEx({ value, shopdetails }) {
         return new Promise((resolve, reject) => {
           const interval = setInterval(() => {
             const isDataReady =
-              shopdetails && invoiceSettings && GSTHSNCodes && currentTemplate && order && shopProfile;
+              shopdetails &&
+              invoiceSettings &&
+              GSTHSNCodes &&
+              currentTemplate &&
+              order &&
+              shopProfile;
 
             if (isDataReady) {
               clearInterval(interval);
@@ -1382,21 +1546,28 @@ export function OrderTableEx({ value, shopdetails }) {
   );
 
   const handleBulkPrint = useCallback(
-    async (orders, shopdetails, currentTemplate, invoiceSettings, GSTHSNCodes, shopProfile) => {
+    async (
+      orders,
+      shopdetails,
+      currentTemplate,
+      invoiceSettings,
+      GSTHSNCodes,
+      shopProfile
+    ) => {
       if (!orders || orders.length === 0 || !currentTemplate) {
         console.error("No orders or template available for bulk printing.");
         return;
       }
-  
-      // console.log("Starting bulk printing with:", {
-      //   orders,
-      //   shopdetails,
-      //   currentTemplate,
-      //   invoiceSettings,
-      //   GSTHSNCodes,
-      //   shopProfile,
-      // });
-  
+
+      console.log("Starting bulk printing with:", {
+        orders,
+        shopdetails,
+        currentTemplate,
+        invoiceSettings,
+        GSTHSNCodes,
+        shopProfile,
+      });
+
       try {
         const printWindow = window.open("", "_blank", "width=800,height=1123");
         if (printWindow) {
@@ -1443,11 +1614,11 @@ export function OrderTableEx({ value, shopdetails }) {
               return `<div style="page-break-after: always;">${renderInvoiceTemplate()}</div>`;
             })
             .join("");
-  
+
           const tailwindStylesheet = `
             <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" />
           `;
-  
+
           const customStyles = `
             <style>
               @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap');
@@ -1484,7 +1655,7 @@ export function OrderTableEx({ value, shopdetails }) {
               }
             </style>
           `;
-  
+
           printWindow.document.open();
           printWindow.document.write(`
             <!DOCTYPE html>
@@ -1502,7 +1673,7 @@ export function OrderTableEx({ value, shopdetails }) {
             </html>
           `);
           printWindow.document.close();
-  
+
           // Ensure the print triggers only after the content loads
           printWindow.onload = () => {
             printWindow.print();
@@ -1517,23 +1688,27 @@ export function OrderTableEx({ value, shopdetails }) {
     },
     []
   );
-  
-  
-  
 
   //-------------------------------------------------------------------
 
   const filteredOrders = filterOrders(orders, searchQuery);
-  const paginatedOrders = filteredOrders.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+  const paginatedOrders = filteredOrders.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
 
-  
+  const [selectedOrders, setSelectedOrders] = useState([]);
+  const allSelected = selectedOrders.length === paginatedOrders.length && paginatedOrders.length > 0;
 
   const rowMarkup = paginatedOrders.map(
-    ({ id, order_number, created_at, customer, total_price, financial_status }, index) => (
+    (
+      { id, order_number, created_at, customer, total_price, financial_status },
+      index
+    ) => (
       <IndexTable.Row
         id={id}
         key={id}
-        selected={selectedResources.includes(id)}
+        // selected={selectedResources.includes(id)}
         position={index}
         // onClick={(event) => {
         //   const clickedElement = event.target.closest(".btn-actions, .btn-popover");
@@ -1542,29 +1717,25 @@ export function OrderTableEx({ value, shopdetails }) {
         //   }
         // }}
       >
-        <IndexTable.Cell>
-          {loading ? <SkeletonBodyText lines={1} /> : <Text variation="strong">{order_number}</Text>}
-        </IndexTable.Cell>
-        <IndexTable.Cell>
-          {loading ? <SkeletonBodyText lines={1} /> : new Date(created_at).toLocaleString()}
-        </IndexTable.Cell>
-        <IndexTable.Cell>
-          {loading ? (
-            <SkeletonBodyText lines={1} />
-          ) : (
-            `${customer?.first_name || "Unknown"} ${customer?.last_name || ""}`
-          )}
-        </IndexTable.Cell>
-        <IndexTable.Cell>{loading ? <SkeletonBodyText lines={1} /> : total_price}</IndexTable.Cell>
-        <IndexTable.Cell>
-          {loading ? (
-            <SkeletonBodyText lines={1} />
-          ) : (
-            <Badge status={financial_status === "paid" ? "success" : "attention"}>
-              {financial_status.charAt(0).toUpperCase() + financial_status.slice(1)}
-            </Badge>
-          )}
-        </IndexTable.Cell>
+         <IndexTable.Cell>
+        <input
+          type="checkbox"
+          checked={selectedOrders.includes(id)}
+          onChange={() => handleOrderSelection(id)}
+          style={{ 
+            cursor: "pointer", 
+            width: "16px", 
+            height: "16px", 
+            accentColor: "#2463bc"  /* This changes the checkbox color */
+          }}
+        />
+      </IndexTable.Cell>
+      <IndexTable.Cell>{order_number}</IndexTable.Cell>
+      <IndexTable.Cell>{new Date(created_at).toLocaleString()}</IndexTable.Cell>
+      <IndexTable.Cell>{`${customer?.first_name || "Unknown"} ${customer?.last_name || ""}`}</IndexTable.Cell>
+      <IndexTable.Cell>{total_price}</IndexTable.Cell>
+      <IndexTable.Cell>{financial_status.charAt(0).toUpperCase() + financial_status.slice(1)}</IndexTable.Cell>
+  
         <IndexTable.Cell>
           <ButtonGroup
             style={{
@@ -1590,16 +1761,24 @@ export function OrderTableEx({ value, shopdetails }) {
                 transition: "all 0.3s ease",
                 backgroundColor: "white",
                 height: "30px", // Set consistent height
-                opacity: selectedResources.length > 1 && orders.length > 50 ? "0.5" : "1",
-                pointerEvents: selectedResources.length > 1 && orders.length > 50 ? "none" : "auto",
+                opacity:
+                selectedOrders.length > 1 
+                    ? "0.5"
+                    : "1",
+                pointerEvents:
+                selectedOrders.length > 1
+                    ? "none"
+                    : "auto",
               }}
-              disabled={orders.length > 50 ? true: false}
+              disabled={orders.length > 50 ? true : false}
               onClick={(e) => {
                 e.stopPropagation();
-                if(orders.length > 50){
+                if (orders.length > 50) {
                   setShowToast(true);
-                  setToastMessage("You have exceed maximum invoice limit of 50 orders, please subscribe to premium plan to generate more invoices");
-                }else{
+                  setToastMessage(
+                    "You have exceed maximum invoice limit of 50 orders, please subscribe to premium plan to generate more invoices"
+                  );
+                } else {
                   if (!isPDFGenerating) {
                     setIsPDFGenerating(true);
                     handlePdfDownload(
@@ -1623,7 +1802,6 @@ export function OrderTableEx({ value, shopdetails }) {
                     setPdfGeneratingRowId(id);
                   }
                 }
-                
               }}
               className="btn-actions"
             >
@@ -1651,6 +1829,7 @@ export function OrderTableEx({ value, shopdetails }) {
     <Spinner accessibilityLabel="Printing" size="small" />
   ) : ( */}
             <button
+            // disabled={allSelected }
               style={{
                 cursor: "pointer",
                 padding: "8px 12px",
@@ -1664,15 +1843,24 @@ export function OrderTableEx({ value, shopdetails }) {
                 transition: "all 0.3s ease",
                 backgroundColor: "white",
                 height: "30px",
-                opacity: selectedResources.length > 1 && orders.length > 50 ? "0.5" : "1",
-                pointerEvents: selectedResources.length > 1 && orders.length > 50 ? "none" : "auto",
+                opacity:
+                  selectedOrders.length > 1 
+                    ? "0.5"
+                    : "1",
+                pointerEvents:
+                selectedOrders.length > 1 
+                    ? "none"
+                    : "auto",
               }}
               onClick={(e) => {
                 e.stopPropagation();
-                if(orders.length > 50){
+                console.log(selectedOrders,selectedOrders)
+                if (orders.length > 50) {
                   setShowToast(true);
-                  setToastMessage("You have exceed maximum invoice limit of 50 orders, please subscribe to premium plan to print more invoices");
-                }else{
+                  setToastMessage(
+                    "You have exceed maximum invoice limit of 50 orders, please subscribe to premium plan to print more invoices"
+                  );
+                } else {
                   if (!isPDFPrinting) {
                     setIsPDFPrinting(true);
                     handlePrint(
@@ -1696,7 +1884,6 @@ export function OrderTableEx({ value, shopdetails }) {
                     setPrintingRowId(id);
                   }
                 }
-               
               }}
               className="btn-actions"
             >
@@ -1723,58 +1910,65 @@ export function OrderTableEx({ value, shopdetails }) {
             {/* )} */}
 
             {sendingRowId === id ? (
-                <Spinner accessibilityLabel="Sending invoice" size="small" />
-              ) : (
-                <VscSend
-                  style={{
-                    width: "25px",
-                    cursor: "pointer",
-                    padding: "4px",
-                    border: "1px solid black",
-                    borderRadius: "6px",
-                    boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)",
-                    color: "black",
-                    transition: "all 0.3s ease",
-                    backgroundColor: "white",
-                    height: "30px",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    opacity: selectedResources.length > 1 && orders.length > 50 ? "0.5" : "1",
-                pointerEvents: selectedResources.length > 1 && orders.length > 50 ? "none" : "auto",
-                  }}
-                  onClick={() => {
-                    if(orders.length > 50){
-                      setShowToast(true);
-                      setToastMessage("You have exceed maximum invoice limit of 50 orders, please subscribe to premium plan to send more invoices");
-                    }else{
-                      if (!isSending) {
-                        setSendingRowId(id);
-                        setIsSending(true);
-                        quickSendInvoice({
-                          orderDetails: paginatedOrders[index],
-                          shopDetails: shopdetails,
-                          invoiceSettings: InvoiceSetting2,
-                          customerEmail: paginatedOrders[index].customer.email,
-                          gstcodes: GSTHSNCodes,
-                          currentTemplate: currentTemplateId,
+              <Spinner accessibilityLabel="Sending invoice" size="small" />
+            ) : (
+              <VscSend
+                style={{
+                  width: "25px",
+                  cursor: "pointer",
+                  padding: "4px",
+                  border: "1px solid black",
+                  borderRadius: "6px",
+                  boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)",
+                  color: "black",
+                  transition: "all 0.3s ease",
+                  backgroundColor: "white",
+                  height: "30px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  opacity:
+                  selectedOrders.length > 1 
+                      ? "0.5"
+                      : "1",
+                  pointerEvents:
+                  selectedOrders.length > 1 
+                      ? "none"
+                      : "auto",
+                }}
+                onClick={() => {
+                  if (orders.length > 50) {
+                    setShowToast(true);
+                    setToastMessage(
+                      "You have exceed maximum invoice limit of 50 orders, please subscribe to premium plan to send more invoices"
+                    );
+                  } else {
+                    if (!isSending) {
+                      setSendingRowId(id);
+                      setIsSending(true);
+                      quickSendInvoice({
+                        orderDetails: paginatedOrders[index],
+                        shopDetails: shopdetails,
+                        invoiceSettings: InvoiceSetting2,
+                        customerEmail: paginatedOrders[index].customer.email,
+                        gstcodes: GSTHSNCodes,
+                        currentTemplate: currentTemplateId,
+                      })
+                        .then(() => {
+                          setIsSending(false);
+                          setSendingRowId(null);
+                          setShowToast(true);
+                          setToastMessage("Invoice sent");
                         })
-                          .then(() => {
-                            setIsSending(false);
-                            setSendingRowId(null);
-                            setShowToast(true);
-                            setToastMessage("Invoice sent");
-                          })
-                          .catch(() => {
-                            setIsSending(false);
-                            setSendingRowId(null);
-                          });
-                      }
+                        .catch(() => {
+                          setIsSending(false);
+                          setSendingRowId(null);
+                        });
                     }
-                    
-                  }}
-                />
-              )}
+                  }
+                }}
+              />
+            )}
           </ButtonGroup>
         </IndexTable.Cell>
       </IndexTable.Row>
@@ -1804,7 +1998,6 @@ export function OrderTableEx({ value, shopdetails }) {
                 justifyContent: "space-between",
                 marginBottom: "10px",
                 gap: "10px",
-
               }}
             >
               <input
@@ -1820,152 +2013,177 @@ export function OrderTableEx({ value, shopdetails }) {
                 }}
               />
 
-            <Tooltip active={!isSubscribed} content="Upgrade to premium plan.">
-              <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",       
-                gap: "10px",
-                opacity: isSubscribed ? "1" : "0.5", // Reduce opacity when disabled
-                pointerEvents: isSubscribed ? "auto" : "none", // Disable interaction when not subscribed
-              }}
-            >
-              <Button
-                primary
-                disabled={isPDFGeneratingBulk ? true : false}                
-                onClick={() => {
-                  // handleBulkPrintDownload(
-                  //   orders.filter((order) =>
-                  //     selectedResources.includes(order.id)
-                  //   ),
-                  //   shopdetails,
-                  //   currentTemplateId
-                  // )
-                  setIsPDFGeneratingBulk(true);
-                  if(selectedResources.length === 0){
-                    setShowToast(true);
-                    setToastMessage("Please select orders");
-                    setIsPDFGeneratingBulk(false);
-                  }
-                  else if(selectedResources.length >= 10){
-                    setShowToast(true);
-                    setToastMessage("Please select upto 10 orders");
-                    setIsPDFGeneratingBulk(false);
-                  }else{
-                    if(!isPDFGeneratingBulk){
-                      handleBulkPdfDownload(
-                        paginatedOrders.slice(0, 10), // Get first 10 orders
-                        shopdetails,
-                        currentTemplateId,
-                        InvoiceSetting2,
-                        GSTHSNCodes,
-                        shopProfile
-                      ).then(() => {
-                        setIsPDFGeneratingBulk(false);
-                        setShowToast(true);
-                        setToastMessage("PDF generated");
-                      })
-                      .catch(() => {
-                        setIsPDFGeneratingBulk(false);
-                        setShowToast(true);
-                        setToastMessage("Error while generating PDF");
-                      });
-                    }
-                  }
-                  
-                }}
-                // disabled={selectedResources.length < 1 || selectedResources.length > 10}
+              <Tooltip
+                active={!isSubscribed}
+                content="Upgrade to premium plan."
               >
-                {isPDFGeneratingBulk ? (
-    <div style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
-      <Spinner
-        size="small"
-        accessibilityLabel="Loading"
-        style={{
-          "--p-spinner-color": "white",
-          height: "20px",
-          width: "20px",
-        }}
-      />
-    </div>
-  ) : (
-                <FaArrowAltCircleDown style={{ height: "20px", width: "20px" }} />)}
-              </Button>
-              <Button
-                primary
-                disabled={isPDFPrintingBulk ? true : false}
-                onClick={() => {
-                  // handleBulkPrintDownload(
-                  //   orders.filter((order) =>
-                  //     selectedResources.includes(order.id)
-                  //   ),
-                  //   shopdetails,
-                  //   currentTemplateId
-                  // )
-                  setIsPDFPrintingBulk(true);
-                  if(selectedResources.length === 0){
-                    setShowToast(true);
-                    setToastMessage("Please select orders");
-                    setIsPDFPrintingBulk(false);
-                  }
-                  else if(selectedResources.length >= 10){
-                    setShowToast(true);
-                    setToastMessage("Please select upto 10 orders");
-                    setIsPDFPrintingBulk(false);
-                  }
-                  else{
-                  if(!isPDFPrintingBulk){
-                    handleBulkPrint(
-                      paginatedOrders.slice(0, 10), // Get first 10 orders
-                      shopdetails,
-                      currentTemplateId,
-                      InvoiceSetting2,
-                      GSTHSNCodes,
-                      shopProfile
-                    ).then(() => {
-                      setIsPDFPrintingBulk(false);
-                      setShowToast(true);
-                      setToastMessage("PDF printed");
-                    })
-                    .catch(() => {
-                      setIsPDFPrintingBulk(false);
-                      setShowToast(true);
-                      setToastMessage("Error while printing PDF");
-                    });
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    gap: "10px",
+                    opacity: isSubscribed ? "1" : "0.5", // Reduce opacity when disabled
+                    pointerEvents: isSubscribed ? "auto" : "none", // Disable interaction when not subscribed
                   }}
-                  
-                }}
-                // disabled={selectedResources.length < 1 || selectedResources.length > 10}
-              >
-                {isPDFPrintingBulk ? (
-    <div style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
-      <Spinner
-        size="small"
-        accessibilityLabel="Loading"
-        style={{
-          "--p-spinner-color": "white",
-          height: "20px",
-          width: "20px",
-        }}
-      />
-    </div>
-  ) : (
-    <MdPrint style={{ height: "20px", width: "20px" }} />
-  )}
-              </Button>
-            </div>
-            </Tooltip>
-
-
-              
+                >
+                  <Button
+                    primary
+                    disabled={isPDFGeneratingBulk ? true : false}
+                    onClick={() => {
+                      // handleBulkPrintDownload(
+                      //   orders.filter((order) =>
+                      //     selectedResources.includes(order.id)
+                      //   ),
+                      //   shopdetails,
+                      //   currentTemplateId
+                      // )
+                      setIsPDFGeneratingBulk(true);
+                      if (selectedOrders.length === 0) {
+                        setShowToast(true);
+                        setToastMessage("Please select orders");
+                        setIsPDFGeneratingBulk(false);
+                      } else if (selectedOrders.length > 11) {
+                        setShowToast(true);
+                        setToastMessage("Please select upto 10 orders");
+                        setIsPDFGeneratingBulk(false);
+                      } else {
+                        if (!isPDFGeneratingBulk) {
+                          handleBulkPdfDownload(
+                            // paginatedOrders.slice(0, 10), // Get first 10 orders
+                              orders.filter((order) =>
+                                selectedOrders.includes(order.id)
+                        ),
+                            shopdetails,
+                            currentTemplateId,
+                            InvoiceSetting2,
+                            GSTHSNCodes,
+                            shopProfile
+                          )
+                            .then(() => {
+                              setIsPDFGeneratingBulk(false);
+                              setShowToast(true);
+                              setToastMessage("PDF generated");
+                            })
+                            .catch(() => {
+                              setIsPDFGeneratingBulk(false);
+                              setShowToast(true);
+                              setToastMessage("Error while generating PDF");
+                            });
+                        }
+                      }
+                    }}
+                    // disabled={selectedResources.length < 1 || selectedResources.length > 10}
+                  >
+                    {isPDFGeneratingBulk ? (
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                        }}
+                      >
+                        <Spinner
+                          size="small"
+                          accessibilityLabel="Loading"
+                          style={{
+                            "--p-spinner-color": "white",
+                            height: "20px",
+                            width: "20px",
+                          }}
+                        />
+                      </div>
+                    ) : (
+                      <FaArrowAltCircleDown
+                        style={{ height: "20px", width: "20px" }}
+                      />
+                    )}
+                  </Button>
+                  <Button
+                    primary
+                    disabled={isPDFPrintingBulk ? true : false}
+                    onClick={() => {
+                      // handleBulkPrintDownload(
+                      //   orders.filter((order) =>
+                      //     selectedResources.includes(order.id)
+                      //   ),
+                      //   shopdetails,
+                      //   currentTemplateId
+                      // )
+                      // console.log('allSelected',allSelected)
+                      // console.log('selectedOrders',selectedOrders)
+                      setIsPDFPrintingBulk(true);
+                      if (selectedOrders.length === 0) {
+                        setShowToast(true);
+                        setToastMessage("Please select orders");
+                        setIsPDFPrintingBulk(false);
+                      } else if (selectedOrders.length > 11) {
+                        setShowToast(true);
+                        setToastMessage("Please select upto 10 orders");
+                        setIsPDFPrintingBulk(false);
+                      } else {
+                        if (!isPDFPrintingBulk) {
+                          handleBulkPrint(
+                            // paginatedOrders.slice(0, 10), // Get first 10 orders
+                            orders.filter((order) =>
+                              selectedOrders.includes(order.id)
+                            ),
+                            shopdetails,
+                            currentTemplateId,
+                            InvoiceSetting2,
+                            GSTHSNCodes,
+                            shopProfile
+                          )
+                            .then(() => {
+                              setIsPDFPrintingBulk(false);
+                              setShowToast(true);
+                              setToastMessage("PDF printed");
+                            })
+                            .catch(() => {
+                              setIsPDFPrintingBulk(false);
+                              setShowToast(true);
+                              setToastMessage("Error while printing PDF");
+                            });
+                        }
+                      }
+                    }}
+                    // disabled={selectedResources.length < 1 || selectedResources.length > 10}
+                  >
+                    {isPDFPrintingBulk ? (
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                        }}
+                      >
+                        <Spinner
+                          size="small"
+                          accessibilityLabel="Loading"
+                          style={{
+                            "--p-spinner-color": "white",
+                            height: "20px",
+                            width: "20px",
+                          }}
+                        />
+                      </div>
+                    ) : (
+                      <MdPrint style={{ height: "20px", width: "20px" }} />
+                    )}
+                  </Button>
+                </div>
+              </Tooltip>
             </div>
 
             <AlphaCard>
-              <IndexTable
+              {/* <IndexTable
                 resourceName={{ singular: "order", plural: "orders" }}
                 itemCount={filteredOrders.length}
-                selectedItemsCount={allResourcesSelected ? "All" : selectedResources.length}
-                onSelectionChange={handleSelectionChange}
+                // selectedItemsCount={
+                //   allResourcesSelected ? "All" : selectedResources.length
+                // }
+                // onSelectionChange={handleSelectionChange}
+                selectable={false}
+
                 headings={[
                   { title: "Order" },
                   { title: "Date" },
@@ -1974,7 +2192,35 @@ export function OrderTableEx({ value, shopdetails }) {
                   { title: "Payment Status" },
                   { title: "Actions" },
                 ]}
-              >
+              > */}
+              <IndexTable
+          resourceName={{ singular: "order", plural: "orders" }}
+          itemCount={paginatedOrders.length}
+          selectable={false} // Disabling Shopify's default selection system
+          headings={[
+            {
+              title: (
+                <input
+                  type="checkbox"
+                  checked={allSelected}
+                  onChange={handleSelectAll}
+                  style={{ 
+                    cursor: "pointer", 
+                    width: "16px", 
+                    height: "16px", 
+                    accentColor: "#2463bc"  /* This changes the checkbox color */
+                  }}
+                />
+              ),
+            },
+            { title: "Order" },
+            { title: "Date" },
+            { title: "Customer" },
+            { title: "Total" },
+            { title: "Payment Status" },
+            { title: "Actions" },
+          ]}
+        >
                 {rowMarkup}
               </IndexTable>
               <div
@@ -1985,10 +2231,10 @@ export function OrderTableEx({ value, shopdetails }) {
                 }}
               >
                 <Pagination
-                  hasPrevious={currentPage > 1}
-                  onPrevious={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-                  hasNext={currentPage * itemsPerPage < filteredOrders.length}
-                  onNext={() => setCurrentPage((prev) => prev + 1)}
+                  hasPrevious={prevPageInfo}
+                  onPrevious={() => fetchOrders(prevPageInfo)}
+                  hasNext={nextPageInfo}
+                  onNext={() => fetchOrders(nextPageInfo)}
                 />
                 {showToast && (
                   <div
