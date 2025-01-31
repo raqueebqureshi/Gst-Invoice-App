@@ -264,7 +264,7 @@ export function OrderTableEx({ value, shopdetails }) {
         }
 
         const data = await response.json();
-        console.log("Store Details---!", data.data);
+        // console.log("Store Details---!", data.data);
 
         if (data.data?.data?.length > 0) {
           const storeInfo = data.data.data[0];
@@ -282,26 +282,32 @@ export function OrderTableEx({ value, shopdetails }) {
             );
 
             if (billingResponse.ok) {
-              console.log("Billing Confirmation Response:", billingResponse);
+              // console.log("Billing Confirmation Response:", billingResponse);
             } else {
-              console.error("Billing API error:", billingResponse.statusText);
+              // console.error("Billing API error:", billingResponse.statusText);
             }
           } catch (error) {
-            console.error("Error fetching billing confirmation:", error);
+            // console.error("Error fetching billing confirmation:", error);
           }
         }
       } catch (error) {
         setShowToast(true);
         setToastMessage("Internal Server Error 500");
-        console.error("Error fetching store details:", error);
+        // console.error("Error fetching store details:", error);
       }
     };
 
     fetchStoreDetails();
 
     // Retrieve stored plans from localStorage
+    const storedResponse = JSON.parse(localStorage.getItem("billingInfo"));
+    const proPlanResponse = JSON.parse(localStorage.getItem("proplan"));
+    const businessPlanResponse = JSON.parse(
+      localStorage.getItem("businessplan")
+    );
+    // Retrieve stored plans from localStorage
     const currentPlan  = localStorage.getItem("currentPlan");
-    const currentPlanId = currentPlan.toString();
+    const currentPlanId = "currentPlan.toString()";
 
       // Compare the numeric part with the plans
     if (currentPlanId === "1" || currentPlanId === "2") {
@@ -329,6 +335,82 @@ export function OrderTableEx({ value, shopdetails }) {
     }
   }, [storeDomain]);
 
+  const countInvoiceDownloads = async (shopId, incrementBy) => {
+    try {
+      const response = await fetch(`/api/update-total-invoice-downaload`,
+
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ 
+            shopId: shopId, 
+            incrementBy: incrementBy }),
+        }
+      );
+      
+      if (!response.ok) {
+        throw new Error(`HTTP Error! Status: ${response.status}`);
+      }
+  
+      const data = await response.json();
+      // console.log("Invoice Downloads:", data);
+  
+    } catch (error) {
+      console.error("Error fetching invoice downloads:", error);
+    }
+  };
+
+
+  const countInvoicePrint = async (shopId, incrementBy) => {
+    try {
+      const response = await fetch(`/api/update-total-invoice-print`,
+
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ 
+            shopId: shopId, 
+            incrementBy: incrementBy }),
+        }
+      );
+      
+      if (!response.ok) {
+        throw new Error(`HTTP Error! Status: ${response.status}`);
+      }
+  
+      const data = await response.json();
+      // console.log("Invoice Print:", data);
+  
+    } catch (error) {
+      console.error("Error fetching invoice downloads:", error);
+    }
+  };
+
+  const countInvoiceSent = async (shopId, incrementBy) => {
+    try {
+      const response = await fetch(`/api/update-total-invoice-sent`,
+
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ 
+            shopId: shopId, 
+            incrementBy: incrementBy }),
+        }
+      );
+      
+      if (!response.ok) {
+        throw new Error(`HTTP Error! Status: ${response.status}`);
+      }
+  
+      const data = await response.json();
+      // console.log("Invoice Sent:", data);
+  
+    } catch (error) {
+      console.error("Error fetching invoice downloads:", error);
+    }
+  };
+
   //fetching paginated orders
   const fetchOrders = async (pageInfo = null) => {
     setLoading(true);
@@ -346,6 +428,7 @@ export function OrderTableEx({ value, shopdetails }) {
 
       if (response.ok) {
         setOrders(data.orders);
+        // console.log('data:',data);
         setNextPageInfo(data.nextPageInfo);
         setPrevPageInfo(data.prevPageInfo);
         // setError(null); // Clear errors on success
@@ -360,39 +443,39 @@ export function OrderTableEx({ value, shopdetails }) {
     }
   };
 
+  const fetchLastMonthOrders = async () => {
+    try {
+      const response = await fetch(`/api/last-month-order-count?shop=${storeDomain
+      }`, {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+      });
+  
+      const data = await response.json();
+      
+      if (data.success) {
+        console.log("📦 Last month's order count:", data);
+        return data.lastMonthOrderCount;
+      } else {
+        throw new Error("Failed to fetch order count");
+      }
+    } catch (error) {
+      console.error("❌ Error fetching last month's order count:", error);
+      return null;
+    }
+  };
+
   useEffect(() => {
     if (storeDomain) {
       fetchOrders();
+      
     }
   }, [storeDomain]);
 
-  // useEffect(() => {
-  //   fetch("/api/2024-10/orders.json", {
-  //     method: "GET",
-  //     headers: { "Content-Type": "application/json" },
-  //   })
-  //     .then((request) => request.json())
-  //     .then((response) => {
-  //       if (response.data) {
-  //         //console.log('response.data',response.data);
-  //         setOrders(response.data);
-  //         setLoading(false);
-  //         // handleShowToast("Orders Synced Complete");
-  //         setShowToast(true);
-  //         setToastMessage("Orders Synced");
-  //       }
-  //     })
-  //     .catch((error) => {
-  //       //console.error(error);
-  //       setLoading(false);
-  //       setShowToast(true);
-  //       setToastMessage("Internal Server Error 500");
-  //       // handleShowToast("Internal Server Error 500", true);
-  //     });
-  // }, []);
-
-  // const { selectedResources, allResourcesSelected, handleSelectionChange } =
-  //   useIndexResourceState(orders.map((order) => order.id));
+  useEffect(() => { 
+    fetchLastMonthOrders();
+  });
+  
 
   useEffect(() => {
     if (shopId) {
@@ -404,7 +487,7 @@ export function OrderTableEx({ value, shopdetails }) {
         .then((data) => {
           if (data && data.profile) {
             const profileData = data.profile;
-            console.log("profileData", profileData);
+            // console.log("profileData", profileData);
             setShopProfile(profileData || {});
           }
         })
@@ -422,22 +505,22 @@ export function OrderTableEx({ value, shopdetails }) {
     }, 3000);
   }, [showToast]);
 
-  const handleSendClick = (index) => {
-    if (!sendingStatus[index]) {
-      setSendingStatus((prev) => ({ ...prev, [index]: true })); // Set this row to "sending"
-      quickSendInvoice({
-        orderDetails: paginatedOrders[index],
-        shopDetails: shopdetails,
-        invoiceSettings: InvoiceSetting2,
-        customerEmail: paginatedOrders[index].customer.email,
-        gstcodes: GSTHSNCodes,
-        currentTemplate: currentTemplateId,
-        shopProfile,
-      })
-        .then(() => setSendingStatus((prev) => ({ ...prev, [index]: false }))) // Reset on success
-        .catch(() => setSendingStatus((prev) => ({ ...prev, [index]: false }))); // Reset on failure
-    }
-  };
+  // const handleSendClick = (index) => {
+  //   if (!sendingStatus[index]) {
+  //     setSendingStatus((prev) => ({ ...prev, [index]: true })); // Set this row to "sending"
+  //     quickSendInvoice({
+  //       orderDetails: paginatedOrders[index],
+  //       shopDetails: shopdetails,
+  //       invoiceSettings: InvoiceSetting2,
+  //       customerEmail: paginatedOrders[index].customer.email,
+  //       gstcodes: GSTHSNCodes,
+  //       currentTemplate: currentTemplateId,
+  //       shopProfile,
+  //     })
+  //       .then(() => setSendingStatus((prev) => ({ ...prev, [index]: false }))) // Reset on success
+  //       .catch(() => setSendingStatus((prev) => ({ ...prev, [index]: false }))); // Reset on failure
+  //   }
+  // };
 
   const sendInvoiceToCustomer = async (
     orderDetails,
@@ -1794,6 +1877,9 @@ export function OrderTableEx({ value, shopdetails }) {
                         setPdfGeneratingRowId(null);
                         setShowToast(true);
                         setToastMessage("PDF generated");
+                        if(shopId) {  
+                        countInvoiceDownloads(shopId,1);
+                        }
                       })
                       .catch(() => {
                         setIsPDFGenerating(false);
@@ -1876,6 +1962,9 @@ export function OrderTableEx({ value, shopdetails }) {
                         setPrintingRowId(null);
                         setShowToast(true);
                         setToastMessage("PDF printed");
+                        if(shopId) {  
+                          countInvoicePrint(shopId,1);
+                          }
                       })
                       .catch(() => {
                         setIsPDFPrinting(false);
@@ -1959,6 +2048,9 @@ export function OrderTableEx({ value, shopdetails }) {
                           setSendingRowId(null);
                           setShowToast(true);
                           setToastMessage("Invoice sent");
+                          if(shopId) {  
+                            countInvoiceSent(shopId,1);
+                            }
                         })
                         .catch(() => {
                           setIsSending(false);
@@ -2063,6 +2155,9 @@ export function OrderTableEx({ value, shopdetails }) {
                               setIsPDFGeneratingBulk(false);
                               setShowToast(true);
                               setToastMessage("PDF generated");
+                              if(shopId) {
+                                countInvoiceDownloads(shopId,selectedOrders.length);
+                              }
                             })
                             .catch(() => {
                               setIsPDFGeneratingBulk(false);
@@ -2137,6 +2232,9 @@ export function OrderTableEx({ value, shopdetails }) {
                               setIsPDFPrintingBulk(false);
                               setShowToast(true);
                               setToastMessage("PDF printed");
+                              if(shopId) {
+                                countInvoicePrint(shopId,selectedOrders.length);
+                              }
                             })
                             .catch(() => {
                               setIsPDFPrintingBulk(false);

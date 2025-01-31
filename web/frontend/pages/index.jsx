@@ -26,23 +26,25 @@ export default function HomePage() {
   const [storeName, setStoreName] = useState("");
   const navigate = useNavigate(); // Initialize useNavigate
   const [shopDetails, setShopDetails] = useState([]);
+  const [shopId, setshopId] = useState("");
+
 
   // Fetch all products
-  useEffect(() => {
-    fetch("/api/2024-10/products.json", {
-      method: "GET",
-      headers: { "Content-Type": "application/json" },
-    })
-      .then((request) => request.json())
-      .then((response) => {
-        // console.log("all products", response);
-        setLoading(false); // Stop loading when data is fetched
-      })
-      .catch((error) => {
-        // console.log(error);
-        setLoading(false); // Stop loading on error
-      });
-  }, []);
+  // useEffect(() => {
+  //   fetch("/api/2024-10/products.json", {
+  //     method: "GET",
+  //     headers: { "Content-Type": "application/json" },
+  //   })
+  //     .then((request) => request.json())
+  //     .then((response) => {
+  //       // console.log("all products", response);
+  //       setLoading(false); // Stop loading when data is fetched
+  //     })
+  //     .catch((error) => {
+  //       // console.log(error);
+  //       setLoading(false); // Stop loading on error
+  //     });
+  // }, []);
 
   // Fetch store details
   useEffect(() => {
@@ -57,6 +59,7 @@ export default function HomePage() {
           setLoading(false);
           setShopDetails(response.data[0]);
           setStoreName(response.data.data[0].name);
+          setshopId(data.data.data[0].id);
           // console.log("store name : ", storeName);
            // Stop loading when data is fetched
         }
@@ -69,51 +72,36 @@ export default function HomePage() {
 
 
   useEffect(() => {
-    fetch("/api/2024-10/shop.json", {
-      method: "GET",
-      headers: { "Content-Type": "application/json" },
-    })
-      .then((request) => request.json())
-      .then((response) => {
-        if (response.data.length > 0) {
-          // console.log("Store Details ", response.data);
-          setShopDetails(response.data[0]);
-          setStoreName(response.data.data[0].name);
-          // console.log("store name : ", storeName);
-        }
+    if (shopId) {
+      fetch(`/api/fetch-store-profile?shopId=${shopId}`, {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
       })
-      .catch((error) => console.log(error));
-
-      
-    const demiResponse = {
-      data: {
-        planId: "gid://shopify/AppSubscription/29724770533",
-        planStartDate: "2025-01-21T08:02:40Z",
-      },
-      message: "Billing confirmed and plan updated.",
-      success: true,
-    };
-
-    // Store the object in local storage
-    localStorage.setItem("billingInfo", JSON.stringify(demiResponse));
-    localStorage.setItem("proplan", JSON.stringify('29724770533'));
-    localStorage.setItem("businessplan", JSON.stringify('29724803301'));
-
-    // Retrieve and log it to confirm
-    const storedResponse = JSON.parse(localStorage.getItem("billingInfo"));
-    const proPlanResponse = JSON.parse(localStorage.getItem("proplan"));
-    const businessPlanResponse = JSON.parse(localStorage.getItem("businessplan"));
-    const currentPlanId = storedResponse.data.planId.split("/").pop();
-
-    // Compare the numeric part with the plans
-    if (currentPlanId === proPlanResponse) {
-      console.log("Current Plan: Pro", proPlanResponse);
-    } else{
-      console.log("Current Plan: Business", businessPlanResponse);
-    } 
+        .then((response) => response.json())
+        .then((data) => {
+          if (data && data.profile) {
+            setLoading(false);
+            const profileData = data.profile;
+            setShopProfile(profileData || {});
+  
+            // Fetch current plan ID and store as a string
+            const currentPlanId = profileData.plans?.planId?.toString() || "";
+  
+            // Store plan details in localStorage
+            localStorage.setItem("planInfo", JSON.stringify(profileData.plans));
+            localStorage.setItem("currentPlan", currentPlanId); // Store only the plan ID as string
+            // localStorage.setItem("proplan", "1"); // Hardcoded Pro Plan
+            // localStorage.setItem("businessplan", "2"); // Hardcoded Business Plan
+          }
+        })
+        .catch((error) => {
+          console.error("Error fetching store profile:", error);
+        });
     }
+  }, [shopId]);
 
-  );
+
+
   return (
     <>
       <div>

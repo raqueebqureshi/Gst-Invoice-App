@@ -21,7 +21,7 @@ import { DeliveryMethod } from "@shopify/shopify-api";
 import SMTPConfig from "./Models/SMTPConfig.js";
 dotenv.config();
 
-import privacyWebhooks from "./privacy.js";
+
 const app = express();
 app.use(express.json());
 
@@ -37,26 +37,177 @@ if (!SHOPIFY_SECRET) {
   process.exit(1); // Stop execution if secret is not available
 }
 
+// Webhook HMAC Validation Middleware
+const hmacValidation = (req, res, next) => {
+  const hmac = req.headers['x-shopify-hmac-sha256'];
+  const body = JSON.stringify(req.body);
 
-app.post(
-  shopify.config.webhooks.path,
-  shopify.processWebhooks({
-    webhookHandlers: privacyWebhooks,
-  })
-);
+  const hash = crypto
+    .createHmac('sha256', SHOPIFY_SECRET)
+    .update(body, 'utf8') // Only provide the data and the encoding
+    .digest('base64');  // Get the final hash in base64
+
+  if (hash === hmac) {
+    return next(); // HMAC is valid, continue processing the request
+  } else {
+    console.error("Invalid HMAC - Unauthorized request.");
+    return res.status(401).send('Unauthorized');
+  }
+};
 
 
-app.post("/api/webhooks/orders/create", (req, res) => {
-  console.log("Received orders/create webhook:", req.body);
-  res.status(200).send("Webhook received.");
-});
 
-app.post("/api/webhooks/app/uninstalled", (req, res) => {
-  console.log("Received app/uninstalled webhook:", req.body);
-  // Add cleanup logic here
-  res.status(200).send("Webhook received.");
-});
+//api to send shop data to db
 
+
+// app.get(
+//   shopify.config.auth.callbackPath,
+//   shopify.auth.callback(),
+//   async (req, res, next) => {
+//     try {
+//       const session = res.locals.shopify.session;
+
+//       // Fetch shop information
+//       const shopInfo = await shopify.api.rest.Shop.all({
+//         session: session,
+//       });
+
+//       const shopDetails = shopInfo.data[0]; // Handle array or object
+
+//       const {
+//         name: storeName,
+//         domain: storeDomain,
+//         email: storeEmail,
+//         address1: storeAddress1,
+//         city: storeCity,
+//         country_name: storeCountryName,
+
+//       } = shopDetails;
+
+//       // Check if the store already exists in the DB
+//       let storeExists = await Store.findOne({ storeDomain });
+
+//       if (!storeExists) {
+//         // Create new store data
+//         const newStore = new Store({
+//           storeName,
+//           storeDomain,
+//           storeEmail,
+//           storeAddress1,
+//           storeCity,
+//           storeCountryName
+//         });
+
+//         await newStore.save();
+//         console.log("New store data saved to DB after app installation");
+//       } else {
+//         console.log("Store already exists in DB:", storeExists);
+//       }
+
+
+      
+
+//       // Redirect to Shopify or app root
+//       shopify.redirectToShopifyOrAppRoot()(req, res, next);
+//     } catch (error) {
+//       console.error("Error saving store data during app installation", error);
+//       res.status(500).send("Failed to save store data after installation");
+//     }
+//   }
+// );
+
+
+
+
+
+//after app installation
+// app.get(
+//   shopify.config.auth.callbackPath,
+//   shopify.auth.callback(),
+//   async (req, res, next) => {
+//     try {
+//       const session = res.locals.shopify.session;
+
+//       // Fetch shop information
+//       const shopInfo = await shopify.api.rest.Shop.all({
+//         session: session,
+//       });
+
+//       const shopDetails = shopInfo.data[0]; // Handle array or object
+//         console.log(shopDetails)
+
+//       const {
+//         id: shopId,
+//         name: storeName,
+//         domain: storeDomain,
+//         email: storeEmail,
+//         address1: storeAddress1,
+//         city: storeCity,
+//         country_name: storeCountryName,
+//       } = shopDetails;
+
+//       // Check if the store already exists in the DB
+//       let storeExists = await Store.findOne({ storeDomain });
+
+
+//       if (!storeExists) {
+//         // Create new store data
+//         const newStore = new Store({
+//           storeName,
+//           storeDomain,
+//           storeEmail,
+//           storeAddress1,
+//           storeCity,
+//           storeCountryName,
+//         });
+
+
+//         await newStore.save();
+//         console.log("New store data saved to DB after app installation");
+
+
+//           // Create a new store profile on install
+//           let hasShopDetails = await Store.findOne({ shopId });
+
+//           if (!hasShopDetails) {
+//           const newStoreProfile = new StoreProfile({
+//             shopId,
+//             storeDomain,
+//             email: storeEmail
+//             // rest default values will be set from schema
+//           });
+//           await newStoreProfile.save();
+//           console.log("Store profile created for the new store" , newStoreProfile);
+//         }
+
+//         // Create a default invoice template for the new store
+//         const newInvoiceTemplate = new InvoiceTemplate({
+//           email: storeEmail,
+//           storeDomain,
+//           // Optionally set default values here if different from schema defaults
+//         });
+
+//         await newInvoiceTemplate.save();
+//         console.log("Invoice template created for the new store");
+//       } else {
+//         console.log("Store already exists in DB:", storeExists);
+//       }
+
+//       // Redirect to Shopify or app root
+//       shopify.redirectToShopifyOrAppRoot()(req, res, next);
+//     } catch (error) {
+//       console.error("Error saving store data during app installation", error);
+//       res.status(500).send("Failed to save store data after installation");
+//     }
+//   }
+// );
+
+
+
+
+
+//after installation
+// After app installation
 
 app.get(
   shopify.config.auth.callbackPath,
@@ -64,31 +215,102 @@ app.get(
   async (req, res, next) => {
     try {
       const session = res.locals.shopify.session;
-      const shopInfo = await shopify.api.rest.Shop.all({ session: session });
 
-      const shopDetails = shopInfo.data[0];
-      const shop = shopDetails.domain;
-      const accessToken = session.accessToken; // 
+      // Fetch shop information
+      const shopInfo = await shopify.api.rest.Shop.all({
+        session: session,
+      });
 
+      const shopDetails = shopInfo.data[0]; // Handle array or object
+      // console.log("Shop Details:", shopDetails);
 
-      let store = await Store.findOne({ storeDomain: shop });
+      const {
+        id: shopId,
+        name: storeName,
+        domain: storeDomain,
+        email: storeEmail,
+        address1: storeAddress1,
+        city: storeCity,
+        country_name: storeCountryName,
+      } = shopDetails;
+
+      // Check if the store already exists in the database
+      let store = await Store.findOne({ storeDomain });
 
       if (!store) {
+        // Create new store data
         store = new Store({
-          shopId: shopDetails.id,
-          storeName: shopDetails.name,
-          storeDomain: shopDetails.domain,
-          storeEmail: shopDetails.email,
-          storeAddress1: shopDetails.address1,
-          storeCity: shopDetails.city,
-          storeCountryName: shopDetails.country_name,
-          accessToken: accessToken, // 
+          shopId,
+          storeName,
+          storeDomain,
+          storeEmail,
+          storeAddress1,
+          storeCity,
+          storeCountryName,
         });
 
         await store.save();
-        console.log("Access token stored in DB");
+        console.log("New store data saved to DB after app installation.");
+      } else {
+        console.log("Store already exists in DB:", store);
       }
 
+      // Check if the store profile exists
+      let storeProfile = await StoreProfile.findOne({ shopId });
+
+      if (!storeProfile) {
+        // Create a new store profile
+        storeProfile = new StoreProfile({
+          shopId,
+          storeDomain,
+          email: storeEmail,
+          // Default values for the profile will come from the schema
+        });
+
+        await storeProfile.save();
+        // console.log("Store profile created for the store:", storeProfile);
+      } else {
+        // console.log("Store profile already exists:", storeProfile);
+      }
+
+      // Check if the invoice template exists
+      let invoiceTemplate = await InvoiceTemplate.findOne({ storeDomain, email: storeEmail });
+
+      if (!invoiceTemplate) {
+        // Create a default invoice template
+        invoiceTemplate = new InvoiceTemplate({
+          email: storeEmail,
+          storeDomain,
+          shopId,
+          // Optionally set default values here if different from schema defaults
+        });
+
+        await invoiceTemplate.save();
+        // console.log("Invoice template created for the store:", invoiceTemplate);
+      } else {
+        // console.log("Invoice template already exists:", invoiceTemplate);
+      }
+
+
+        // Check if the SMTP configuration exists
+        let smtpConfig = await SMTPConfig.findOne({ shopId });
+
+        if (!smtpConfig) {
+          // Create a default SMTP configuration
+          smtpConfig = new SMTPConfig({
+            shopId,
+            // Optionally set default values here if different from schema defaults
+          });
+
+          await smtpConfig.save();
+          // console.log("SMTP configuration created for the store:", smtpConfig);
+        } else {
+          // console.log("SMTP configuration already exists:", smtpConfig);
+        }
+
+
+
+      // Redirect to Shopify or app root
       shopify.redirectToShopifyOrAppRoot()(req, res, next);
     } catch (error) {
       console.error("Error during app installation:", error);
@@ -218,7 +440,7 @@ app.post('/api/send-email', (req, res) => {
   const mailOptions = {
     from: email,
     to: process.env.SUPPORT_EMAIL,
-    subject: `${subject} from ${name} / Indian GST Invoice`,
+    subject: `${subject} from ${name} / GST Invoice App`,
     text: `${message} \n\nStore Details:\n- Store Name: ${storeDetails.name}\n- Email: ${storeDetails.email}\n- Phone: ${storeDetails.phone}\n- Domain: ${storeDetails.domain}`,
   };
 
@@ -229,6 +451,134 @@ app.post('/api/send-email', (req, res) => {
     res.status(200).json({ status: 'success', message: 'Email sent successfully!' });
   });
 }); 
+
+
+
+
+// webhooks for Compliance webhooks shopify 
+
+// Middleware for Shopify webhooks
+app.use("/api/webhooks", bodyParser.raw({ type: "application/json" }));
+
+// Customer Data Request Endpoint
+app.post('/api/webhooks/customers/data_request', hmacValidation, async (req, res) => {
+  try {
+    const { shop_domain } = req.body;
+    // console.log(`Customer data request received for shop: ${shop_domain}`);
+
+    // Fetch store data based on the storeDomain
+    const storeData = await Store.findOne({ storeDomain: shop_domain });
+
+    if (storeData) {
+      res.status(200).json({
+        message: 'Customer data request fulfilled',
+        data: {
+          storeName: storeData.storeName,
+          storeDomain: storeData.storeDomain,
+          storeEmail: storeData.storeEmail,
+          storeAddress1: storeData.storeAddress1,
+          storeCity: storeData.storeCity,
+          storeCountryName: storeData.storeCountryName,
+          storeInvoiceTemplate: storeData.storeInvoiceTemplate,
+          storeProductCount: storeData.storeProductCount,
+        },
+      });
+    } else {
+      res.status(404).json({ message: 'Store not found' });
+    }
+  } catch (error) {
+    console.error("Error handling customer data request webhook:", error);
+    res.status(500).json({ message: 'Failed to process customer data request' });
+  }
+});
+
+// Customer Data Erasure Endpoint
+app.post('/api/webhooks/customers/redact',hmacValidation, async (req, res) => {
+  try {
+    const { shop_domain } = req.body;
+    // console.log(`Customer data erasure request received for shop: ${shop_domain}`);
+
+    // Fetch store data to acknowledge what is being erased
+    const storeData = await Store.findOne({ storeDomain: shop_domain });
+
+    if (storeData) {
+      res.status(200).json({
+        message: 'Customer data erasure request acknowledged',
+        data: {
+          storeName: storeData.storeName,
+          storeDomain: storeData.storeDomain,
+          storeEmail: storeData.storeEmail,
+          storeAddress1: storeData.storeAddress1,
+          storeCity: storeData.storeCity,
+          storeCountryName: storeData.storeCountryName,
+          storeInvoiceTemplate: storeData.storeInvoiceTemplate,
+          storeProductCount: storeData.storeProductCount,
+        },
+      });
+    } else {
+      res.status(404).json({ message: 'Store not found' });
+    }
+  } catch (error) {
+    console.error("Error handling customer data erasure webhook:", error);
+    res.status(500).json({ message: 'Failed to process customer data erasure request' });
+  }
+});
+
+// Shop Data Erasure Endpoint
+app.post('/api/webhooks/shop/redact', hmacValidation,  async (req, res) => {
+  try {
+    const { shop_domain } = req.body;
+    // console.log(`Shop data erasure request received for shop: ${shop_domain}`);
+
+    // Fetch and delete store data from MongoDB
+    const storeData = await Store.findOneAndDelete({ storeDomain: shop_domain });
+
+    if (storeData) {
+      res.status(200).json({
+        message: 'Shop data erased successfully',
+        data: {
+          storeName: storeData.storeName,
+          storeDomain: storeData.storeDomain,
+          storeEmail: storeData.storeEmail,
+          storeAddress1: storeData.storeAddress1,
+          storeCity: storeData.storeCity,
+          storeCountryName: storeData.storeCountryName,
+          storeInvoiceTemplate: storeData.storeInvoiceTemplate,
+          storeProductCount: storeData.storeProductCount,
+        },
+      });
+      // console.log(`Store data erased for domain: ${shop_domain}`);
+    } else {
+      res.status(404).json({ message: 'Store not found' });
+    }
+  } catch (error) {
+    console.error("Error handling shop data erasure webhook:", error);
+    res.status(500).json({ message: 'Failed to process shop data erasure request' });
+  }
+});
+
+// Webhook route for `app/uninstalled`
+app.post("/api/webhooks/app/uninstalled", async (req, res) => {
+  try {
+    const payload = JSON.parse(req.body.toString()); // Parse raw body
+    const { shop_domain } = payload;
+    // console.log(`App uninstalled webhook received for shop: ${shop_domain}`);
+
+    // Cleanup logic: Delete store data
+    const storeData = await Store.findOneAndDelete({ storeDomain: shop_domain });
+
+    if (storeData) {
+      res.status(200).json({ message: "App uninstalled successfully" });
+      // console.log(`Store data removed for domain: ${shop_domain}`);
+    } else {
+      res.status(404).json({ message: "Store not found" });
+    }
+  } catch (error) {
+    console.error("Error handling app uninstalled webhook:", error);
+    res.status(500).json({ message: "Failed to process app uninstalled webhook" });
+  }
+});
+
 
 
 const PORT = parseInt(
@@ -244,7 +594,62 @@ const STATIC_PATH =
 
 // Set up Shopify authentication and webhook handling
 app.get(shopify.config.auth.path, shopify.auth.begin());
+app.get(
+  shopify.config.auth.callbackPath,
+  shopify.auth.callback(),
+  shopify.redirectToShopifyOrAppRoot()
+);
 
+//configuring webhooks
+app.post(
+  shopify.config.webhooks.path,
+  shopify.processWebhooks({ webhookHandlers:  {
+    CUSTOMERS_DATA_REQUEST: {
+      deliveryMethod: DeliveryMethod.Http,
+      callbackUrl: "/api/webhooks",
+      callback: async (topic, shop, body, webhookId) => {
+        const payload = JSON.parse(body);
+        
+      },
+    },
+  
+    CUSTOMERS_REDACT: {
+      deliveryMethod: DeliveryMethod.Http,
+      callbackUrl: "/api/webhooks",
+      callback: async (topic, shop, body, webhookId) => {
+        const payload = JSON.parse(body);
+       
+      },
+    },
+  
+    SHOP_REDACT: {
+      deliveryMethod: DeliveryMethod.Http,
+      callbackUrl: "/api/webhooks",
+      callback: async (topic, shop, body, webhookId) => {
+        const payload = JSON.parse(body);
+      },
+    },
+    APP_UNINSTALLED: {
+      deliveryMethod: DeliveryMethod.Http,
+      callbackUrl: "/api/webhooks/",
+      callback: async (topic, shop, body) => {
+        const payload = JSON.parse(body);
+        // console.log("App Uninstalled Payload:", payload);
+        // Add logic for cleanup (e.g., delete shop data)
+      },
+    },
+    PRODUCTS_UPDATE: {
+      deliveryMethod: DeliveryMethod.Http,
+      callbackUrl: "/api/webhooks/",
+      callback: async (topic, shop, body) => {
+        const payload = JSON.parse(body);
+        // console.log("App Uninstalled Payload:", payload);
+        // Add logic for cleanup (e.g., delete shop data)
+      },
+    },
+  }
+   })
+);
 
 // If you are adding routes outside of the /api path, remember to
 // also add a proxy rule for them in web/frontend/vite.config.js
@@ -257,7 +662,7 @@ app.use(routes);
 
 
 //fetch all products
-app.get("/api/2025-01/products.json", async (_req, res) => {
+app.get("/api/products/all", async (_req, res) => {
   const allProducts = await shopify.api.rest.Product.all({
     session: res.locals.shopify.session,
   });
@@ -266,8 +671,6 @@ app.get("/api/2025-01/products.json", async (_req, res) => {
 });
 
 app.use(routes);
-// Use the webhooks router
-// app.use("/webhooks", webhooksRouter);
 
 app.get("/api/2024-10/orders.json", async (req, res) => {
   let OrderAll = await shopify.api.rest.Order.all({
@@ -279,7 +682,6 @@ app.get("/api/2024-10/orders.json", async (req, res) => {
   res.status(200).send(OrderAll);
 });
 
-  
 
 app.get("/api/2024-10/shop.json", async (req, res) => {
   try {
@@ -309,57 +711,22 @@ app.get("/api/2024-10/products.json", async (_req, res) => {
 
   res.status(200).send({ count: countData.data.productsCount.count });
 });
-
-// app.get("/api/2025-01/fetch-orders", async (_req, res) => {
-//   try {
-//     const client = new shopify.api.clients.Graphql({
-//       session: res.locals.shopify.session,
-//     });
-
-//     const data = await client.query({
-//       data: `query {
-//         orders(first: 50) {
-//           edges {
-//             node {
-//               id
-//               name
-//               email
-//               totalPriceSet {
-//                 shopMoney {
-//                   amount
-//                   currencyCode
-//                 }
-//               }
-//               createdAt
-//               lineItems(first: 5) {
-//                 edges {
-//                   node {
-//                     title
-//                     quantity
-//                     originalTotalSet {
-//                       shopMoney {
-//                         amount
-//                         currencyCode
-//                       }
-//                     }
-//                   }
-//                 }
-//               }
-//             }
-//           }
-//         }
-//       }`,
-//     });
-
-//     res.status(200).send({ orders: data});
-//   } catch (error) {
-//     console.error("Error fetching orders:", error);
-//     res.status(500).send({ error: "Failed to fetch orders" });
-//   }
-// });
-
-
-
+// count of order
+app.get("/api/2024-10/orders.json", async (_req, res) => {
+  const client = new shopify.api.clients.Graphql({session: res.locals.shopify.session});
+const data = await client.query({
+  data: `query {
+    orders(first: 10) {
+      edges {
+        node {
+          id
+        }
+      }
+    }
+  }`,
+});
+  res.status(200).send({ count: data });
+});
 
 app.post("/api/products", async (_req, res) => {
   let status = 200;

@@ -1,7 +1,7 @@
 # Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
 
 client_id = "78fbc68547f4cc8682944642dc9284c8"
-application_url = "https://mas-meet-hung-voltage.trycloudflare.com"
+application_url = "https://exact-pale-unauthorized-sun.trycloudflare.com"
 embedded = true
 name = "Indian GST App under dev"
 handle = "indian-gst-app-under-dev-1"
@@ -36,9 +36,9 @@ scopes = "read_orders,read_products,write_orders,write_products"
 
 [auth]
 redirect_urls = [
-  "https://mas-meet-hung-voltage.trycloudflare.com/auth/callback",
-  "https://mas-meet-hung-voltage.trycloudflare.com/auth/shopify/callback",
-  "https://mas-meet-hung-voltage.trycloudflare.com/api/auth/callback"
+  "https://exact-pale-unauthorized-sun.trycloudflare.com/auth/callback",
+  "https://exact-pale-unauthorized-sun.trycloudflare.com/auth/shopify/callback",
+  "https://exact-pale-unauthorized-sun.trycloudflare.com/api/auth/callback"
 ]
 
 [pos]

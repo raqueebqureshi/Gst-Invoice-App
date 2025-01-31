@@ -3,6 +3,7 @@ import {
   insertProductIntoDB,
   updateProductsInDB,
   getAndHSNValuesFromDB,
+  getProducts,
 } from "../controllers/productsController.js"; // Import the products controller
 import {
   getTemplateSettings,
@@ -11,6 +12,9 @@ import {
 import {
   updateStoreProfile,
   fetchShopProfile,
+  updateTotalInvoiceSent,
+  updateTotalInvoiceDownload,
+  updateTotalInvoicePrint,
 } from "../controllers/storeProfileController.js";
 import {
   saveSMTPConfig,
@@ -38,7 +42,7 @@ import {
 } from "../controllers/sendTestEmail.js";
 
 import { handleBillingConfirmation } from '../controllers/Plans_billing.js'
-import { getOrders } from "../controllers/ordersController.js";
+import { getLastMonthOrderCount, getOrders } from "../controllers/ordersController.js";
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
 
@@ -51,6 +55,8 @@ router.post("/api/products/update", updateProductsInDB);
 
 // Fetch GST values for products
 router.get("/api/products/gsthsn", getAndHSNValuesFromDB);
+
+router.get("/api/products/getProducts", getProducts);
 
 
 
@@ -129,4 +135,19 @@ router.get('/api/billing/confirm', handleBillingConfirmation);
 
 //paginated request 
 router.get("/api/fetch-orders", getOrders);
+
+// last month order count
+router.get("/api/last-month-order-count", getLastMonthOrderCount);
+
+
+// Update total invoice sent
+router.put("/api/update-total-invoice-sent", updateTotalInvoiceSent);
+
+// Update total invoice download
+router.put("/api/update-total-invoice-downaload", updateTotalInvoiceDownload);
+
+// Update total invoice sent
+router.put("/api/update-total-invoice-print", updateTotalInvoicePrint);
+
+
 export default router;
