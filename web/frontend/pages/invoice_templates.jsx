@@ -18,7 +18,7 @@ export default function Orders() {
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
   const [isSubscribed, setIsSubscribed] = useState(false);
-
+  const [planId, setplanId] = useState(null);
   useEffect(() => {
     if (showToast) {
       setTimeout(() => {
@@ -49,21 +49,22 @@ export default function Orders() {
       .catch((error) => {
         // console.log("Error fetching store details:", error)
       });
-    // const storedResponse = JSON.parse(localStorage.getItem("billingInfo"));
-    const proPlanResponse = JSON.parse(localStorage.getItem("proplan"));
-    const businessPlanResponse = JSON.parse(localStorage.getItem("businessplan"));
-    const currentPlanId = '1'
-    // Compare the numeric part with the plans
-    if (currentPlanId === proPlanResponse || currentPlanId === businessPlanResponse) {
+    // Retrieve stored plans from localStorage
+    const currentPlan  = localStorage.getItem("currentPlan");
+    const currentPlanId = currentPlan.toString();
+
+      // Compare the numeric part with the plans
+    if (currentPlanId === "1" || currentPlanId === "2") {
       setIsSubscribed(true);
-      console.log(
-        "Current Plan:",
-        proPlanResponse === currentPlanId ? `Pro: ${proPlanResponse}` : `Business: ${businessPlanResponse}`
-      );
+      // console.log(
+      //   "Current Plan:",
+      //   proPlanResponse === currentPlanId ? `Pro: ${proPlanResponse}` : `Business: ${businessPlanResponse}`
+      // );
     } else {
       setIsSubscribed(false);
     }
-  }, []);
+  }, [planId]);
+
 
   useEffect(() => {
     if (storeDomain) {

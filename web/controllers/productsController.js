@@ -1,16 +1,17 @@
 import Product from "../Models/productHSN.js";
+import shopify from "../shopify.js";
+import { shopifyApi } from "@shopify/shopify-api";
 
 /**
  * Insert or update products in the database for a specific store.
  */
 export const insertProductIntoDB = async (req, res) => {
   const { storeDomain, email, products } = req.body;
-  // console.log("body", req.body);
+  console.log("body", req.body);
 
   if (!storeDomain || !email || !products || !Array.isArray(products)) {
     return res.status(400).json({
-      message:
-        "Invalid request. Please provide storeDomain, email, and products.",
+      message: "Invalid request. Please provide storeDomain, email, and products.",
     });
   }
 
@@ -23,19 +24,15 @@ export const insertProductIntoDB = async (req, res) => {
         existingStore.products.map((product) => {
           // console.log("product.id", product.productId);
           return product.productId;
-        } 
-      ),
-        
+        })
       );
-      const uniqueNewProducts = products.filter(
-        (product) => {
-          // console.log('!existingProductIds.has(product.productId)', !existingProductIds.has(product.productId.toString()));
-          // console.log('product', product);
-          // console.log('existingProductIds',existingProductIds);
-          // console.log('product.productId.toString()', typeof product.productId.toString());
-          return !existingProductIds.has(product.productId.toString());
-        }
-      );
+      const uniqueNewProducts = products.filter((product) => {
+        // console.log('!existingProductIds.has(product.productId)', !existingProductIds.has(product.productId.toString()));
+        // console.log('product', product);
+        // console.log('existingProductIds',existingProductIds);
+        // console.log('product.productId.toString()', typeof product.productId.toString());
+        return !existingProductIds.has(product.productId.toString());
+      });
 
       // Add unique new products to the existing products array
       existingStore.products.push(...uniqueNewProducts);
@@ -70,19 +67,108 @@ export const insertProductIntoDB = async (req, res) => {
 };
 
 
+export const getProducts = async (req, res) => {
+  try {
+    const session = res.locals.shopify.session;
+
+    if (!session) {
+      return res.status(401).json({ message: "Unauthorized: Session is missing" });
+    }
+
+    const { afterCursor, beforeCursor } = req.query;
+    const limit = 25; // Adjust as needed
+
+    const client = new shopify.api.clients.Graphql({ session });
+
+    // ✅ Updated Query - Keep as is
+    const response = await client.query({
+      data: `{
+        products(${afterCursor ? `first: ${limit}, after: "${afterCursor}"` : beforeCursor ? `last: ${limit}, before: "${beforeCursor}"` : `first: ${limit}`}) {
+          edges {
+            node {
+              id
+              title
+              handle
+              status
+              images(first: 1) {
+                edges {
+                  node {
+                    originalSrc
+                    altText
+                  }
+                }
+              }
+              description
+              createdAt
+            }
+            cursor
+          }
+          pageInfo {
+            hasNextPage
+            hasPreviousPage
+          }
+        }
+      }`,
+    });
+
+    // ✅ Ensure the response structure is correct
+    if (!response || !response.body || !response.body.data || !response.body.data.products) {
+      throw new Error("Invalid API response structure");
+    }
+
+    // ✅ Extract product data & remove "gid://shopify/Product/"
+    const products = response.body.data.products.edges.map((edge) => {
+      const productNode = edge.node;
+      return {
+        id: productNode.id.split("/").pop(), // ✅ Extract only numeric part from ID
+        title: productNode.title,
+        handle: productNode.handle,
+        status: productNode.status,
+        images: productNode.images.edges.map((imgEdge) => imgEdge.node),
+        description: productNode.description,
+        createdAt: productNode.createdAt,
+      };
+    });
+
+    const pageInfo = response.body.data.products.pageInfo;
+
+    const nextCursor = pageInfo.hasNextPage
+      ? response.body.data.products.edges[response.body.data.products.edges.length - 1].cursor
+      : null;
+
+    const previousCursor = pageInfo.hasPreviousPage
+      ? response.body.data.products.edges[0].cursor
+      : null;
+
+    // console.log(`✅ Fetched ${products.length} products`);
+
+    res.json({
+      products,
+      nextCursor,
+      previousCursor,
+      pageInfo,
+    });
+  } catch (error) {
+    console.error("❌ Error fetching products:", error.message || error);
+    res.status(500).json({
+      message: "Failed to fetch products.",
+      error: error.message || error,
+    });
+  }
+};
+
 /**
  * Update HSN and GST for specific products in a store.
  */
 export const updateProductsInDB = async (req, res) => {
   const { storeDomain, email, products } = req.body;
 
-  // console.log("Request Body:", req.body);
+  console.log("Request Body:", req.body);
 
   // Validate the input
   if (!storeDomain || !email || !products || !Array.isArray(products)) {
     return res.status(400).json({
-      message:
-        "Invalid request. Please provide storeDomain, email, and products.",
+      message: "Invalid request. Please provide storeDomain, email, and products.",
     });
   }
 
@@ -103,7 +189,7 @@ export const updateProductsInDB = async (req, res) => {
       );
 
       if (product) {
-        // console.log("Matched Product:", product); // Debug log
+        console.log("Matched Product:", product); // Debug log
         // Update fields and mark as modified
         product.set("hsn", updateData.HSN || product.hsn);
         product.set("gst", updateData.GST || product.gst);
@@ -135,7 +221,7 @@ export const updateProductsInDB = async (req, res) => {
 export const getAndHSNValuesFromDB = async (req, res) => {
   const { storeDomain, email } = req.query;
 
-  // console.log("Fetch GST Request Query:", req.query);
+  console.log("Fetch GST Request Query:", req.query);
 
   // Validate input
   if (!storeDomain || !email) {

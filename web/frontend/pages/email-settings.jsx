@@ -65,7 +65,7 @@ const EmailSetting = () => {
  const [sendEmailOnOrderPlaced, setsendEmailOnOrderPlaced] = useState();
  const [isSubscribed, setIsSubscribed] = useState(false);
  const [shopId, setShopId] = useState("");
-
+  const [planId, setplanId] = useState(null);
 
  const handleButtonToggle = () => {
    setIsEnabled((prev) => !prev);
@@ -282,25 +282,20 @@ const EmailSetting = () => {
         // console.log("profileData", profileData);
         
 
-  localStorage.setItem("planInfo", JSON.stringify(data.profile.plans));
-  localStorage.setItem("proplan", JSON.stringify('1'));
-  localStorage.setItem("businessplan", JSON.stringify('2'));
-
-  const storedResponse = JSON.parse(localStorage.getItem("planInfo"));
-  const proPlanResponse = JSON.parse(localStorage.getItem("proplan"));
-  const businessPlanResponse = JSON.parse(localStorage.getItem("businessplan"));
-  // console.log('storedResponse',storedResponse); 
-  const currentPlanId = storedResponse.planId.toString();
-  // Compare the numeric part with the plans
-  if (currentPlanId === proPlanResponse || currentPlanId === businessPlanResponse) {
-    setIsSubscribed(true);
-    // console.log(
-    //   "Current Plan:",
-    //   proPlanResponse === currentPlanId ? `Pro: ${proPlanResponse}` : `Business: ${businessPlanResponse}`
-    // );
-  } else {
-    setIsSubscribed(false);
-  }
+     // Retrieve stored plans from localStorage
+     const currentPlan  = localStorage.getItem("currentPlan");
+     const currentPlanId = currentPlan.toString();
+ 
+       // Compare the numeric part with the plans
+     if (currentPlanId === "1" || currentPlanId === "2") {
+       setIsSubscribed(true);
+       // console.log(
+       //   "Current Plan:",
+       //   proPlanResponse === currentPlanId ? `Pro: ${proPlanResponse}` : `Business: ${businessPlanResponse}`
+       // );
+     } else {
+       setIsSubscribed(false);
+     }
       }
     })
     .catch((error) => {
@@ -310,7 +305,7 @@ const EmailSetting = () => {
   
   }
 
-}, [shopId]);
+}, [shopId,planId]);
 
 
  useEffect(() => {

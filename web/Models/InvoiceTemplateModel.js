@@ -1,3 +1,4 @@
+
 import mongoose from 'mongoose';
 
 const InvoiceTemplateSchema = new mongoose.Schema({
@@ -37,7 +38,7 @@ const InvoiceTemplateSchema = new mongoose.Schema({
     showRegisteredNumber: { type: Boolean, default: false },
     showEmail: { type: Boolean, default: true },
     showPhone: { type: Boolean, default: true },
-    showGSTIN: { type: Boolean, default: false },
+    showGSTIN: { type: Boolean, default: true },
   },
   shipping: {
     showShipping: { type: Boolean, default: true },

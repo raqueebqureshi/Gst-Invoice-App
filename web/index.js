@@ -38,7 +38,7 @@ if (!SHOPIFY_SECRET) {
 }
 
 
-//webhooks
+  //webhooks working
 app.post(
   shopify.config.webhooks.path,
   shopify.processWebhooks({
@@ -73,6 +73,18 @@ app.post("/api/webhooks/shop/redact", (req, res) => {
   // Add cleanup logic here
   res.status(200).send("Webhook received.");
 });
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 //installing app 
@@ -189,7 +201,7 @@ app.get(
 
 //to update product count into db
 app.put('/api/update-product-count', async (req, res) => {
-  console.log("Received request body:", req.body);
+  // console.log("Received request body:", req.body);
 
   const { storeDomain, productCount } = req.body || {};
 
@@ -341,13 +353,14 @@ app.get(shopify.config.auth.path, shopify.auth.begin());
 app.use("/api/*", shopify.validateAuthenticatedSession());
 
 //fetch all products
-app.get("/api/2025-01/products.json", async (_req, res) => {
-  const allProducts = await shopify.api.rest.Product.all({
-    session: res.locals.shopify.session,
-  });
+// app.get("/api/2025-01/products.json", async (_req, res) => {
+//   const allProducts = await shopify.api.rest.Product.all({
+//     session: res.locals.shopify.session,
+//   });
 
-  res.status(200).send(allProducts);
-});
+//   res.status(200).send(allProducts);
+// });
+
 
 app.use(routes);
 

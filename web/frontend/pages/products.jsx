@@ -12,7 +12,7 @@ import {
   Badge,
   Tag,
   Pagination,
-  Heading,
+
   Modal,
 } from "@shopify/polaris";
 import ToastNotification from "../components/ToastNotification"; // Import the ToastNotification component
@@ -26,6 +26,10 @@ export default function ProductIndexTable() {
   const [productCount, setProductCount] = useState(0);
   const [draftProductCount, setDraftProductCount] = useState(0);
   const [activeProductCount, setActiveProductCount] = useState(0);
+  const [nextPageInfo, setNextPageInfo] = useState(null);
+  const [prevPageInfo, setPrevPageInfo] = useState(null);
+  const [nextCursor, setNextCursor] = useState(null);
+  const [previousCursor, setPreviousCursor] = useState(null);
   const [activeTab, setActiveTab] = useState(0);
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
@@ -60,54 +64,189 @@ export default function ProductIndexTable() {
     }
   };
 
-  const fetchProducts = useCallback(async () => {
+  // const fetchProducts = useCallback(async () => {
+  //   setIsLoading(true);
+
+  //   try {
+  //     const response = await fetch("/api/products/getProducts", {
+  //       method: "GET",
+  //       headers: { "Content-Type": "application/json" },
+  //     });
+  //     const data = await response.json();
+  //     if (data.data.length > 0) {
+  //       const fetchedProducts = data.data;
+  //       // console.log("fetchedProducts  :", fetchedProducts);
+  //       const productsWithEditableFields = data.data.map((product) => ({
+  //         ...product,
+  //         editableHSN: product.HSN || "",
+  //         editableGST: product.GST || "",
+  //       }));
+  //       // console.log("productsWithEditableFields:", productsWithEditableFields);
+  //       setProducts(productsWithEditableFields);
+  //       setFilteredProducts(productsWithEditableFields);
+  //       // setProducts(fetchedProducts);
+  //       // setFilteredProducts(fetchedProducts);
+  //       // setProductCount(fetchedProducts.length);
+  //       setProductCount(productsWithEditableFields.length);
+
+  //       const activeCount = productsWithEditableFields.filter(
+  //         (product) => product.status.toLowerCase() === "active"
+  //       ).length;
+  //       const draftCount = productsWithEditableFields.filter(
+  //         (product) => product.status.toLowerCase() === "draft"
+  //       ).length;
+
+  //       setActiveProductCount(activeCount);
+  //       setDraftProductCount(draftCount);
+  //       //  setShowToast(true);
+  //       //  setToastMessage("Products fetched successfully.");
+  //       // console.log("storeDomain && email:", storeDomain, email);
+  //       if (storeDomain && email) {
+  //         // console.log("products--:", productsWithEditableFields);
+  //         fetchGSTHSNValues(productsWithEditableFields); // Fetch GST HSN values
+  //       }
+  //     }
+  //   } catch (error) {
+  //     console.error("Error fetching products:", error);
+  //   } finally {
+  //     setIsLoading(false);
+  //   }
+  // }, [storeDomain, email]);
+
+  const fetchProducts = useCallback(async (cursorType, cursorValue) => {
     setIsLoading(true);
 
+    let url = "/api/products/getProducts";
+    if (cursorType === "next" && cursorValue) {
+      url += `?afterCursor=${cursorValue}`;
+    } else if (cursorType === "previous" && cursorValue) {
+      url += `?beforeCursor=${cursorValue}`;
+    }
+
+  
     try {
-      const response = await fetch("/api/2025-01/products.json", {
+      const response = await fetch(url, {
         method: "GET",
         headers: { "Content-Type": "application/json" },
       });
+  
       const data = await response.json();
-      if (data.data.length > 0) {
-        const fetchedProducts = data.data;
-        // console.log("fetchedProducts  :", fetchedProducts);
-        const productsWithEditableFields = data.data.map((product) => ({
+  
+      // ✅ Ensure API response structure is valid
+      if (!data || !data.products || !Array.isArray(data.products)) {
+        throw new Error("Invalid response from API");
+      }
+  
+      if (data.products.length > 0) {
+        const fetchedProducts = data.products; // ✅ Use correct API key
+        // console.log("Fetched Products:", fetchedProducts);
+        setNextPageInfo(data.pageInfo.hasNextPage);
+        // console.log('data :', data); 
+        // console.log('data.nextPageInfo:', data.pageInfo.hasNextPage); 
+        setPrevPageInfo(data.pageInfo.hasPreviousPage);
+        // console.log('data.prevPageInfo:', data.pageInfo.hasPreviousPage); 
+        setNextCursor(data.nextCursor); // ✅ Store nextCursor
+        setPreviousCursor(data.previousCursor); // ✅ Store previousCursor
+        // ✅ Map products and add editable fields
+        const productsWithEditableFields = fetchedProducts.map((product) => ({
           ...product,
           editableHSN: product.HSN || "",
           editableGST: product.GST || "",
         }));
-        // console.log("productsWithEditableFields:", productsWithEditableFields);
+  
+        // ✅ Update state with new data
         setProducts(productsWithEditableFields);
         setFilteredProducts(productsWithEditableFields);
-        // setProducts(fetchedProducts);
-        // setFilteredProducts(fetchedProducts);
-        // setProductCount(fetchedProducts.length);
         setProductCount(productsWithEditableFields.length);
-
+  
+        // ✅ Count active & draft products
         const activeCount = productsWithEditableFields.filter(
-          (product) => product.status.toLowerCase() === "active"
+          (product) => product.status?.toLowerCase() === "active"
         ).length;
+  
         const draftCount = productsWithEditableFields.filter(
-          (product) => product.status.toLowerCase() === "draft"
+          (product) => product.status?.toLowerCase() === "draft"
         ).length;
-
+  
         setActiveProductCount(activeCount);
         setDraftProductCount(draftCount);
-        //  setShowToast(true);
-        //  setToastMessage("Products fetched successfully.");
-        // console.log("storeDomain && email:", storeDomain, email);
+  
+        // ✅ Fetch GST HSN values if store info is available
         if (storeDomain && email) {
-          // console.log("products--:", productsWithEditableFields);
-          fetchGSTHSNValues(productsWithEditableFields); // Fetch GST HSN values
+          fetchGSTHSNValues(productsWithEditableFields);
         }
       }
     } catch (error) {
-      console.error("Error fetching products:", error);
+      console.error("❌ Error fetching products:", error.message, error);
     } finally {
       setIsLoading(false);
     }
   }, [storeDomain, email]);
+
+
+  // const fetchProducts = useCallback(async () => {
+  //   setIsLoading(true);
+  
+  //   try {
+  //     const response = await fetch("/api/products/getProducts", {
+  //       method: "GET",
+  //       headers: { "Content-Type": "application/json" },
+  //     });
+  
+  //     const data = await response.json();
+  
+  //     // ✅ Ensure API response structure is valid
+  //     if (!data || !data.products || !Array.isArray(data.products)) {
+  //       throw new Error("Invalid response from API");
+  //     }
+  
+  //     if (data.products.length > 0) {
+  //       const fetchedProducts = data.products; // ✅ Use correct API key
+  //       console.log("Fetched Products:", fetchedProducts);
+  //       setNextPageInfo(data.pageInfo.hasNextPage);
+  //       console.log('data :', data); 
+  //       console.log('data.nextPageInfo:', data.pageInfo.hasNextPage); 
+  //       setPrevPageInfo(data.pageInfo.hasPreviousPage);
+  //       console.log('data.prevPageInfo:', data.pageInfo.hasPreviousPage); 
+  //       // ✅ Map products and add editable fields
+  //       const productsWithEditableFields = fetchedProducts.map((product) => ({
+  //         ...product,
+  //         editableHSN: product.HSN || "",
+  //         editableGST: product.GST || "",
+  //       }));
+  
+  //       // ✅ Update state with new data
+  //       setProducts(productsWithEditableFields);
+  //       setFilteredProducts(productsWithEditableFields);
+  //       setProductCount(productsWithEditableFields.length);
+  
+  //       // ✅ Count active & draft products
+  //       const activeCount = productsWithEditableFields.filter(
+  //         (product) => product.status?.toLowerCase() === "active"
+  //       ).length;
+  
+  //       const draftCount = productsWithEditableFields.filter(
+  //         (product) => product.status?.toLowerCase() === "draft"
+  //       ).length;
+  
+  //       setActiveProductCount(activeCount);
+  //       setDraftProductCount(draftCount);
+  
+  //       // ✅ Fetch GST HSN values if store info is available
+  //       if (storeDomain && email) {
+  //         fetchGSTHSNValues(productsWithEditableFields);
+  //       }
+  //     }
+  //   } catch (error) {
+  //     console.error("❌ Error fetching products:", error.message, error);
+  //   } finally {
+  //     setIsLoading(false);
+  //   }
+  // }, [storeDomain, email]);
+
+
+
+
 
   const fetchGSTHSNValues = async (products) => {
     try {
@@ -150,7 +289,10 @@ export default function ProductIndexTable() {
     if (products.length !== 0) {
       const updatedProducts = products.map((product) => {
         const matchedGSTHSN = gstValues.find((items) => {
-          return Number(items.productId) === product.id;
+          // console.log('items.productId', typeof items.productId);
+          // console.log('product.id', typeof product.id);
+          // console.log('items.productId === product.id', items.productId === product.id);
+          return items.productId === product.id;
         });
 
         return {
@@ -440,8 +582,8 @@ export default function ProductIndexTable() {
 
         <IndexTable.Cell>
           <img
-            src={images[0]?.src}
-            alt={images[0]?.alt || "Product Image"}
+            src={images[0]?.originalSrc}
+            alt={images[0]?.altText || "Product Image"}
             style={{
               border: "0.1px solid black",
               borderRadius: "5px",
@@ -455,7 +597,7 @@ export default function ProductIndexTable() {
         <IndexTable.Cell>
           <span style={{ fontWeight: "bold" }}>{title}</span>
         </IndexTable.Cell>
-        <IndexTable.Cell>{status}</IndexTable.Cell>
+        <IndexTable.Cell>{status.toLowerCase()}</IndexTable.Cell>
         <IndexTable.Cell>
           <TextField
             placeholder="Enter HSN"
@@ -987,12 +1129,10 @@ const handleBulkAction = () => {
                   }}
                 >
                   <Pagination
-                    hasPrevious={currentPage > 1}
-                    onPrevious={() =>
-                      setCurrentPage((prev) => Math.max(prev - 1, 1))
-                    }
-                    hasNext={currentPage * itemsPerPage < filteredByTab.length}
-                    onNext={() => setCurrentPage((prev) => prev + 1)}
+                    hasPrevious={prevPageInfo}
+                    onPrevious={() => prevPageInfo && fetchProducts("previous", previousCursor)}
+                    hasNext={nextPageInfo}
+                    onNext={() => nextPageInfo && fetchProducts("next", nextCursor)}
                   />
                 </div>
               </Tabs>

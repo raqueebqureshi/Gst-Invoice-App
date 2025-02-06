@@ -77,4 +77,104 @@ export const getOrders = async (req, res) => {
   }
 };
 
+
+
+
+
+export const getLastMonthOrderCount = async (req, res) => {
+  try {
+    // ✅ Validate session
+    const session = res.locals.shopify.session;
+    if (!session) {
+      console.error("❌ No session found");
+      return res.status(401).json({ message: "Unauthorized: Session is missing" });
+    }
+
+    // ✅ Shopify GraphQL Client
+    const client = new shopify.api.clients.Graphql({ session });
+
+    // ✅ Get the current date
+const now = new Date();
+
+console.log('✅ now:', now);
+
+// ✅ Get last month's first day (1st of last month)
+const lastMonthStart = new Date(now.getUTCFullYear(), now.getUTCMonth() - 1, 1, 0, 0, 0, 0);
+
+// ✅ Get last month's last day (end of last month)
+const lastMonthEnd = new Date(now.getUTCFullYear(), now.getUTCMonth(), 0, 23, 59, 59, 999);
+
+// ✅ Convert to Shopify's ISO 8601 format (UTC format)
+const formattedStartDate = lastMonthStart.toISOString();
+const formattedEndDate = lastMonthEnd.toISOString();
+
+console.log(`📆 Fetching orders from ${formattedStartDate} to ${formattedEndDate}`);
+
+    // ✅ Shopify GraphQL Query
+    const query = `
+      query OrdersLastMonth($first: Int, $query: String) {
+        orders(first: $first, query: $query) {
+          edges {
+            node {
+              id
+            }
+          }
+          pageInfo {  
+            hasNextPage
+          }
+        }
+      }
+    `;
+
+    let lastMonthOrderCount = 0;
+    let hasNextPage = true;
+    let afterCursor = null;
+
+    // ✅ Loop to fetch all orders (pagination handling)
+    while (hasNextPage) {
+      const response = await client.query({
+        data: {
+          query,
+          variables: {
+            first: 250, // Max allowed orders per request
+            query: `created_at:>=${formattedStartDate} created_at:<=${formattedEndDate}`,
+          },
+        },
+      });
+
+      // ✅ Validate response
+      if (!response.body || !response.body.data || !response.body.data.orders) {
+        throw new Error("Invalid response structure");
+      }
+
+      // ✅ Count orders
+      const ordersBatch = response.body.data.orders.edges;
+      lastMonthOrderCount += ordersBatch.length;
+
+      // ✅ Pagination Handling
+      hasNextPage = response.body.data.orders.pageInfo.hasNextPage;
+      afterCursor = hasNextPage ? ordersBatch[ordersBatch.length - 1].cursor : null;
+    }
+
+    console.log(`✅ Total Orders Last Month: ${lastMonthOrderCount}`);
+    
+    // ✅ Return JSON response
+    res.status(200).json({
+      success: true,
+      lastMonthOrderCount,
+    });
+
+  } catch (error) {
+    console.error("❌ Error fetching last month's order count:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch last month's order count.",
+      error: error.message,
+    });
+  }
+};
+
+
+
+
 export default router;

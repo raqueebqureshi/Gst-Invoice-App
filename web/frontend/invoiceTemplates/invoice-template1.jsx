@@ -12,9 +12,9 @@ export function InvoiceTemplate1({
   GSTHSNCodes,
   shopProfile,
 }) {
-  console.log("orders - InvoiceTemplate1", orders);
-  console.log("invoiceSettings - InvoiceTemplate1", invoiceSettings);
-  console.log("GSTHSNCodes - InvoiceTemplate1", GSTHSNCodes.gstcodes);
+  // console.log("orders - InvoiceTemplate1", orders);
+  // console.log("invoiceSettings - InvoiceTemplate1", invoiceSettings);
+  // console.log("GSTHSNCodes - InvoiceTemplate1", GSTHSNCodes.gstcodes);
   // console.log('shopProfile',shopProfile);
 
   const [storeDomain, setStoreDomain] = useState(null);
@@ -120,8 +120,8 @@ export function InvoiceTemplate1({
                   }
                   alt={""}
                   style={{
-                    maxWidth: "45px",
-                    maxHeight: "45px",
+                    maxWidth: "100px",
+                    maxHeight: "100px",
                     objectFit: "contain",
                     borderRadius: "4px",
                   }}
@@ -729,7 +729,7 @@ export function InvoiceTemplate1({
               : GSTHSNCodes.find(
                   (gstItem) => Number(gstItem.productId) === item.product_id
                 );
-            console.log("matchedGSTItem", matchedGSTItem);
+            // console.log("matchedGSTItem", matchedGSTItem);
 
             const price = parseFloat(item.price) || 0; // Convert to a number and default to 0 if NaN
             const lineAmount =

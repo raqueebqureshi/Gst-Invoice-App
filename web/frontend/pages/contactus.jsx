@@ -16,20 +16,20 @@ export default function ContactUs() {
 
 //Fetch store details and send with email
   useEffect(() => { 
-    fetch("/api/shop/all", {
+    fetch("/api/2024-10/shop.json", {
       method: "GET",
       headers: { "Content-Type": "application/json" }
     })
     .then(request => request.json())
     .then(response => {
-      if (response.data.length > 0) {
+      if (response.data.data.length > 0) {
         // console.log("Store Details ",response.data[0]);
-        setStoreName(response.data[0].name);
+        setStoreName(response.data.data[0].name);
         setStoreDetails({
-          Store_name: response.data[0].name,
-          email: response.data[0].email,
-          phone: response.data[0].phone,
-          domain: response.data[0].domain
+          Store_name: response.data.data[0].name,
+          email: response.data.data[0].email,
+          phone: response.data.data[0].phone,
+          domain: response.data.data[0].domain
           
         }); 
         // console.log("Send in email" , storeDetails)
