@@ -64,8 +64,8 @@ const maxOrders = typeof milestones[milestones.length - 1] === "number"
     },
     {
       title: "Pro",
-      monthlyPrice: "$9.99",
-      yearlyPrice: "$89.99/year (36% off)",
+      monthlyPrice: "$5.99",
+      yearlyPrice: "$65.00/year (10% off)",
       orderLimit: "1000 Orders per month",
       planId: "1",
       features: [
@@ -79,8 +79,8 @@ const maxOrders = typeof milestones[milestones.length - 1] === "number"
     },
     {
       title: "Business",
-      monthlyPrice: "$39.99",
-      yearlyPrice: "$339.99/year ($139 off)",
+      monthlyPrice: "$29.99",
+      yearlyPrice: "$299.99/year (17% off)",
       orderLimit: "Unlimited Orders",
       planId: "2",
       features: [

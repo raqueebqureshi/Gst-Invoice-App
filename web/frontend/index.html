@@ -1,30 +1,71 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-
-    <!-- Ensures that the UI is properly scaled in the Shopify Mobile app -->
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+ <head>
 
 
-    <script type="module">
-      if (!import.meta.env || !import.meta.env.PROD) {
-        // Because the base HTML is rendered in the server side, we need to manually embed the code to enable HMR in our
-        // code, so that the vite server is properly enabled to run HMR
-        const script = document.createElement('script');
-        script.setAttribute('type', "module");
-        script.setAttribute('src', "./dev_embed.js");
-        document.getElementsByTagName('head')[0].append(script);
-      }
-    </script>
+   <meta charset="UTF-8" />
 
-    <meta name="shopify-api-key" content="%VITE_SHOPIFY_API_KEY%" />
-    <script src="https://cdn.shopify.com/shopifycloud/app-bridge.js"></script>
-    <script type="text/javascript">window.$crisp=[];window.CRISP_WEBSITE_ID="ce29e82f-0cfb-45fe-935e-22f3c269e664";(function(){d=document;s=d.createElement("script");s.src="https://client.crisp.chat/l.js";s.async=1;d.getElementsByTagName("head")[0].appendChild(s);})();</script>
-  </head>
-  <body>
-    <div id="app"><!--index.jsx injects App.jsx here--></div>
-    <script type="module" src="/index.jsx"></script>
-  </body>
+
+   <!-- Ensures that the UI is properly scaled in the Shopify Mobile app -->
+   <meta name="viewport" content="width=device-width, initial-scale=1">
+   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
+
+
+   <script type="module">
+     if (!import.meta.env || !import.meta.env.PROD) {
+       // Because the base HTML is rendered in the server side, we need to manually embed the code to enable HMR in our
+       // code, so that the vite server is properly enabled to run HMR
+       const script = document.createElement('script');
+       script.setAttribute('type', "module");
+       script.setAttribute('src', "./dev_embed.js");
+       document.getElementsByTagName('head')[0].append(script);
+     }
+   </script>
+
+
+   <meta name="shopify-api-key" content="%VITE_SHOPIFY_API_KEY%" />
+   <script src="https://cdn.shopify.com/shopifycloud/app-bridge.js"></script>
+   <script type="text/javascript">window.$crisp=[];window.CRISP_WEBSITE_ID="ce29e82f-0cfb-45fe-935e-22f3c269e664";(function(){d=document;s=d.createElement("script");s.src="https://client.crisp.chat/l.js";s.async=1;d.getElementsByTagName("head")[0].appendChild(s);})();</script>
+ </head>
+ <style>
+
+
+   .float-wa{
+     position:fixed;
+     width:60px;
+     height:60px;
+     margin-bottom: 50px;
+     bottom:40px;
+     right:26px;
+     background-color:#25d366;
+     color:#FFF;
+     border-radius:50px;
+     text-align:center;
+     font-size:30px;
+     /* box-shadow: 2px 2px 3px #999; */
+     z-index:100;
+   }
+  
+   .my-float{
+     margin-top:16px;
+   }
+  
+   </style>
+ <body>
+   <div id="app"><!--index.jsx injects App.jsx here-->
+
+
+    
+   </div><a href="https://api.whatsapp.com/send?phone=8527274859&text=Support%20Needed%20on%20*Indian%20GST%20Invoice%20Shopify%20App*"
+   class="float-wa" target="_blank">
+   <i class="fa fa-whatsapp my-float"></i>
+</a>
+   <script type="module" src="/index.jsx"></script>
+  
+ </body>
 </html>
+
+
+
+
