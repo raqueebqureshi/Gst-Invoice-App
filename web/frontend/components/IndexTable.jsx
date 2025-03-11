@@ -931,287 +931,16 @@ export function OrderTableEx({ value, shopdetails }) {
     //console.log('GSTHSNCodes',GSTHSNCodes);
   }, [GSTHSNCodes]);
 
-  // const handlePdfDownload = useCallback(
-  //   async (order, shopdetails, currentTemplate ,invoiceSettings, GSTHSNCodes) => {
-  //     if (!order || !currentTemplate) return;
-
-  //     //console.log(order, shopdetails, currentTemplate, "PDF download");
-  //     // Logic to generate and download PDF for the given order
-  //     const pdf = new jsPDF("p", "pt", "a4");
-  //     const invoiceContainer = document.createElement("div");
-  //     invoiceContainer.style.width = "794px";
-  //     invoiceContainer.style.height = "1123px";
-  //     invoiceContainer.style.position = "absolute";
-  //     invoiceContainer.style.top = "-9999px";
-  //     document.body.appendChild(invoiceContainer);
-
-  //     const renderInvoiceTemplate = (
-  //       currentTemplate,
-  //       shopdetails,
-  //       order,
-  //       invoiceContainer, GSTHSNCodes
-  //     ) => {
-  //       switch (currentTemplate) {
-  //         case "1":
-  //           ReactDOM.render(
-  //             <InvoiceTemplate1 shopdetails={[shopdetails]} orders={[order]} invoiceSettings={invoiceSettings} GSTHSNCodes={GSTHSNCodes}/>,
-  //             invoiceContainer
-  //           );
-  //           break;
-  //         case "2":
-  //           ReactDOM.render(
-  //             <InvoiceTemplate2 shopdetails={[shopdetails]} orders={[order]} invoiceSettings={invoiceSettings} GSTHSNCodes={GSTHSNCodes}/>,
-  //             invoiceContainer
-  //           );
-  //           break;
-  //         case "3":
-  //           ReactDOM.render(
-  //             <InvoiceTemplate3 shopdetails={[shopdetails]} orders={[order]} invoiceSettings={invoiceSettings} GSTHSNCodes={GSTHSNCodes}/>,
-  //             invoiceContainer
-  //           );
-  //           break;
-  //         default:
-  //           //console.error("Invalid template ID:", currentTemplate);
-  //       }
-  //     };
-
-  //     renderInvoiceTemplate(currentTemplate, shopdetails, order, invoiceContainer, GSTHSNCodes);
-
-  //     const canvas = await html2canvas(invoiceContainer, {
-  //       scale: 2,
-  //       useCORS: true,
-  //     });
-  //     const imgData = canvas.toDataURL("image/png");
-
-  //     document.body.removeChild(invoiceContainer);
-
-  //     const pdfWidth = pdf.internal.pageSize.getWidth();
-  //     const imgWidth = pdfWidth - 20;
-  //     const imgHeight = (canvas.height * imgWidth) / canvas.width;
-
-  //     pdf.addImage(imgData, "PNG", 10, 10, imgWidth, imgHeight);
-  //     pdf.save(`Invoice-${order.order_number}.pdf`);
-  //   },
-  //   []
-  // );
-
-  // const handlePrint = useCallback(
-  //   async (order, shopdetails, currentTemplate, invoiceSettings, GSTHSNCodes) => {
-  //     if (!order || !currentTemplate) return;
-
-  //     // Logic to print the given order
-  //     const invoiceContainer = document.createElement("div");
-  //     invoiceContainer.style.width = "794px";
-  //     invoiceContainer.style.height = "1123px";
-  //     invoiceContainer.style.position = "absolute";
-  //     invoiceContainer.style.top = "-9999px";
-  //     document.body.appendChild(invoiceContainer);
-
-  //     const renderInvoiceTemplate = (
-  //       currentTemplate,
-  //       shopdetails,
-  //       order,
-  //       invoiceContainer
-  //     ) => {
-  //       switch (currentTemplate) {
-  //         case "1":
-  //           ReactDOM.render(
-  //             <InvoiceTemplate1 shopdetails={[shopdetails]} orders={[order]} invoiceSettings={invoiceSettings} GSTHSNCodes={GSTHSNCodes}/>,
-  //             invoiceContainer
-  //           );
-  //           break;
-  //         case "2":
-  //           ReactDOM.render(
-  //             <InvoiceTemplate2 shopdetails={[shopdetails]} orders={[order]} invoiceSettings={invoiceSettings} GSTHSNCodes={GSTHSNCodes}/>,
-  //             invoiceContainer
-  //           );
-  //           break;
-  //         case "3":
-  //           ReactDOM.render(
-  //             <InvoiceTemplate3 shopdetails={[shopdetails]} orders={[order]} invoiceSettings={invoiceSettings} GSTHSNCodes={GSTHSNCodes}/>,
-  //             invoiceContainer
-  //           );
-  //           break;
-  //         default:
-  //           //console.error("Invalid template ID:", currentTemplate);
-  //       }
-  //     };
-
-  //     renderInvoiceTemplate(currentTemplate, shopdetails, order, invoiceContainer);
-
-  //     const printWindow = window.open("", "_blank");
-  //     printWindow.document.write(`
-  //     <html>
-  //       <head>
-  //         <title>Print Invoice</title>
-  //       </head>
-  //       <body>${invoiceContainer.innerHTML}</body>
-  //     </html>
-  //     `);
-  //     printWindow.document.close();
-  //     printWindow.onload = () => {
-  //       printWindow.print();
-  //       printWindow.close();
-  //     };
-
-  //     document.body.removeChild(invoiceContainer);
-  //   },
-  //   []
-  // );
-
-  //-------------[previous code]---------------------
-  // const handlePdfDownload = useCallback(
-  //   async (order, shopdetails, currentTemplate, invoiceSettings, GSTHSNCodes, shopProfile) => {
-  //     if (!order || !currentTemplate) {
-  //       console.error("Order or template not available for PDF generation.");
-  //       return;
-  //     }
-
-  //     console.log("Starting PDF generation with:", {
-  //       order,
-  //       shopdetails,
-  //       currentTemplate,
-  //       invoiceSettings,
-  //       GSTHSNCodes,
-  //       shopProfile
-  //     });
-
-  //     // Function to wait for data readiness
-  //     const waitForData = async () => {
-  //       const maxRetries = 20; // Maximum retries
-  //       const delayBetweenRetries = 500; // Delay between retries in ms
-  //       let attempts = 0;
-
-  //       return new Promise((resolve, reject) => {
-  //         const interval = setInterval(() => {
-  //           const isDataReady =
-  //             shopdetails &&
-  //             invoiceSettings &&
-  //             GSTHSNCodes &&
-  //             currentTemplate &&
-  //             order && shopProfile;
-
-  //           if (isDataReady) {
-  //             clearInterval(interval);
-  //             resolve(true);
-  //           }
-
-  //           attempts++;
-  //           if (attempts >= maxRetries) {
-  //             clearInterval(interval);
-  //             console.error("Data readiness timeout for PDF generation.");
-  //             reject(new Error("Data not ready"));
-  //           }
-  //         }, delayBetweenRetries);
-  //       });
-  //     };
-
-  //     try {
-  //       await waitForData();
-
-  //       const pdf = new jsPDF("p", "pt", "a4");
-  //       const invoiceContainer = document.createElement("div");
-  //       invoiceContainer.style.width = "794px";
-  //       invoiceContainer.style.height = "1123px";
-  //       invoiceContainer.style.position = "absolute";
-  //       invoiceContainer.style.top = "-9999px";
-  //       document.body.appendChild(invoiceContainer);
-
-  //       const renderInvoiceTemplate = () => {
-  //         switch (currentTemplate) {
-  //           case "1":
-  //             ReactDOM.render(
-  //               <InvoiceTemplate1
-  //                 shopdetails={[shopdetails]}
-  //                 orders={[order]}
-  //                 invoiceSettings={invoiceSettings}
-  //                 GSTHSNCodes={GSTHSNCodes}
-  //                 shopProfile={shopProfile}
-  //               />,
-  //               invoiceContainer
-  //             );
-  //             break;
-  //           case "2":
-  //             ReactDOM.render(
-  //               <InvoiceTemplate2
-  //                 shopdetails={[shopdetails]}
-  //                 orders={[order]}
-  //                 invoiceSettings={invoiceSettings}
-  //                 GSTHSNCodes={GSTHSNCodes}
-  //               />,
-  //               invoiceContainer
-  //             );
-  //             break;
-  //           case "3":
-  //             ReactDOM.render(
-  //               <InvoiceTemplate3
-  //                 shopdetails={[shopdetails]}
-  //                 orders={[order]}
-  //                 invoiceSettings={invoiceSettings}
-  //                 GSTHSNCodes={GSTHSNCodes}
-  //               />,
-  //               invoiceContainer
-  //             );
-  //             break;
-  //           default:
-  //             console.error("Invalid template ID:", currentTemplate);
-  //         }
-  //       };
-
-  //       renderInvoiceTemplate();
-
-  //       // Add a delay to ensure rendering completion
-  //       await new Promise((resolve) => setTimeout(resolve, 2000));
-
-  //       const canvas = await html2canvas(invoiceContainer, {
-  //         scale: 2,
-  //         useCORS: true,
-  //         allowTaint: false,
-  //       });
-
-  //       const imgData = canvas.toDataURL("image/png");
-  //       document.body.removeChild(invoiceContainer);
-
-  //       const pdfWidth = pdf.internal.pageSize.getWidth();
-  //       const imgWidth = pdfWidth - 20;
-  //       const imgHeight = (canvas.height * imgWidth) / canvas.width;
-
-  //       pdf.addImage(imgData, "PNG", 10, 10, imgWidth, imgHeight);
-  //       pdf.save(`Invoice-${order.order_number}.pdf`);
-
-  //       console.log("PDF generated successfully.");
-  //     } catch (error) {
-  //       console.error("Error generating PDF:", error);
-  //     }
-  //   },
-  //   []
-  // );
+//action to send invoice
 
   const handlePdfDownload = useCallback(
-    async (
-      order,
-      shopdetails,
-      currentTemplate,
-      invoiceSettings,
-      GSTHSNCodes,
-      shopProfile
-    ) => {
+    async (order, shopdetails, currentTemplate, invoiceSettings, GSTHSNCodes, shopProfile) => {
       if (!order || !currentTemplate) {
         setIsPDFGenerating(false);
         console.error("Order or template not available for PDF generation.");
         return;
       }
-
-      // console.log("Starting PDF generation with:", {
-      //   order,
-      //   shopdetails,
-      //   currentTemplate,
-      //   invoiceSettings,
-      //   GSTHSNCodes,
-      //   shopProfile,
-      // });
-
-      // Utility to preload images and resolve CORS issues
+       // Utility to preload images and resolve CORS issues
       const loadImageAsDataURL = async (url) => {
         try {
           const response = await fetch(url, { mode: "cors" });
@@ -1219,42 +948,36 @@ export function OrderTableEx({ value, shopdetails }) {
           return new Promise((resolve, reject) => {
             const reader = new FileReader();
             reader.onloadend = () => resolve(reader.result);
-            reader.onerror = () =>
-              reject(new Error(`Failed to convert image: ${url}`));
+            reader.onerror = () => reject(new Error(`Failed to convert image: ${url}`));
             reader.readAsDataURL(blob);
           });
         } catch (error) {
           console.error(`Failed to load image at ${url}:`, error);
-          return ""; // Fallback to empty string
+          return "";
         }
       };
-
-      // Preload all images (e.g., logo and signature)
+       // Preload images before rendering
       const preloadImages = async () => {
         if (shopProfile?.images?.logoURL) {
-          shopProfile.images.logoURL = await loadImageAsDataURL(
-            shopProfile.images.logoURL
-          );
+          shopProfile.images.logoURL = await loadImageAsDataURL(shopProfile.images.logoURL);
         }
         if (shopProfile?.images?.signatureURL) {
-          shopProfile.images.signatureURL = await loadImageAsDataURL(
-            shopProfile.images.signatureURL
-          );
+          shopProfile.images.signatureURL = await loadImageAsDataURL(shopProfile.images.signatureURL);
         }
       };
-
-      try {
-        // Preload images before rendering
+       try {
         await preloadImages();
-
-        const pdf = new jsPDF("p", "pt", "a4");
+         const pdf = new jsPDF("p", "pt", "a4");
+        const pdfWidth = pdf.internal.pageSize.getWidth();
+        const pdfHeight = pdf.internal.pageSize.getHeight();
+         // Create invoice container
         const invoiceContainer = document.createElement("div");
-        invoiceContainer.style.width = "794px";
-        invoiceContainer.style.height = "1123px";
+        invoiceContainer.style.width = "794px"; // A4 width in pixels
+        invoiceContainer.style.minHeight = "1123px"; // A4 height in pixels
         invoiceContainer.style.position = "absolute";
         invoiceContainer.style.top = "-9999px";
         document.body.appendChild(invoiceContainer);
-
+         // Render invoice template
         const renderInvoiceTemplate = () => {
           switch (currentTemplate) {
             case "1":
@@ -1297,32 +1020,63 @@ export function OrderTableEx({ value, shopdetails }) {
               console.error("Invalid template ID:", currentTemplate);
           }
         };
-
-        renderInvoiceTemplate();
-
-        // Wait for rendering to complete
-        await new Promise((resolve) => setTimeout(resolve, 2000));
-
+         renderInvoiceTemplate();
+         await new Promise((resolve) => setTimeout(resolve, 2000));
+         // Capture full invoice as a canvas
         const canvas = await html2canvas(invoiceContainer, {
-          scale: 2,
+          scale: 2, // Improves quality
           useCORS: true,
           allowTaint: false,
-          logging: true, // Enable logging to debug
+          logging: true,
         });
-
-        const imgData = canvas.toDataURL("image/jpeg");
-        document.body.removeChild(invoiceContainer);
-
-        const pdfWidth = pdf.internal.pageSize.getWidth();
+         document.body.removeChild(invoiceContainer);
+         const imgData = canvas.toDataURL("image/png");
         const imgWidth = pdfWidth - 20;
         const imgHeight = (canvas.height * imgWidth) / canvas.width;
-        setShowToast(true);
-        setToastMessage("");
-        pdf.addImage(imgData, "PNG", 10, 10, imgWidth, imgHeight);
+         let position = 0;
+        let pageHeight = pdfHeight - 40;
+         // **✅ New Logic: Check if content exceeds first page**
+        if (imgHeight > pdfHeight) {
+          while (position < imgHeight) {
+            const sectionCanvas = document.createElement("canvas");
+            sectionCanvas.width = canvas.width;
+            sectionCanvas.height = Math.min(
+              pageHeight * (canvas.width / pdfWidth),
+              canvas.height - position
+            );
+             const sectionCtx = sectionCanvas.getContext("2d");
+            sectionCtx.drawImage(
+              canvas,
+              0,
+              position * (canvas.width / pdfWidth),
+              canvas.width,
+              sectionCanvas.height,
+              0,
+              0,
+              sectionCanvas.width,
+              sectionCanvas.height
+            );
+             const sectionImgData = sectionCanvas.toDataURL("image/png");
+             if (position > 0) pdf.addPage();
+            pdf.addImage(
+              sectionImgData,
+              "PNG",
+              10,
+              10,
+              imgWidth,
+              (sectionCanvas.height * imgWidth) / canvas.width
+            );
+             position += sectionCanvas.height / (canvas.width / pdfWidth);
+          }
+        } else {
+          pdf.addImage(imgData, "PNG", 10, 10, imgWidth, imgHeight);
+        }
+         setShowToast(true);
+        setToastMessage("PDF generated successfully");
         pdf.save(`Invoice-${order.order_number}.pdf`);
         setIsPDFGenerating(false);
         setPdfGeneratingRowId(null);
-        console.log("PDF generated");
+        console.log("PDF generated successfully.");
       } catch (error) {
         setIsPDFGenerating(false);
         setPdfGeneratingRowId(null);
@@ -1331,7 +1085,7 @@ export function OrderTableEx({ value, shopdetails }) {
     },
     []
   );
-
+ 
   const handleBulkPdfDownload = useCallback(
     async (
       orders,
@@ -1347,7 +1101,8 @@ export function OrderTableEx({ value, shopdetails }) {
         );
         return;
       }
-
+ 
+ 
       // console.log("Starting bulk PDF generation with:", {
       //   orders,
       //   shopdetails,
@@ -1356,10 +1111,12 @@ export function OrderTableEx({ value, shopdetails }) {
       //   GSTHSNCodes,
       //   shopProfile,
       // });
-
+ 
+ 
       try {
         const pdf = new jsPDF("p", "pt", "a4");
-
+ 
+ 
         for (const order of orders) {
           const invoiceContainer = document.createElement("div");
           invoiceContainer.style.width = "794px";
@@ -1367,7 +1124,8 @@ export function OrderTableEx({ value, shopdetails }) {
           invoiceContainer.style.position = "absolute";
           invoiceContainer.style.top = "-9999px";
           document.body.appendChild(invoiceContainer);
-
+ 
+ 
           const renderInvoiceTemplate = () => {
             switch (currentTemplate) {
               case "1":
@@ -1410,33 +1168,41 @@ export function OrderTableEx({ value, shopdetails }) {
                 console.error("Invalid template ID:", currentTemplate);
             }
           };
-
+ 
+ 
           renderInvoiceTemplate();
-
+ 
+ 
           // Wait for rendering to complete
           await new Promise((resolve) => setTimeout(resolve, 2000));
-
+ 
+ 
           const canvas = await html2canvas(invoiceContainer, {
             scale: 2,
             useCORS: true,
             allowTaint: false,
           });
-
+ 
+ 
           const imgData = canvas.toDataURL("image/jpeg");
           const pdfWidth = pdf.internal.pageSize.getWidth();
           const imgWidth = pdfWidth - 20;
           const imgHeight = (canvas.height * imgWidth) / canvas.width;
-
+ 
+ 
           pdf.addImage(imgData, "PNG", 10, 10, imgWidth, imgHeight);
-
+ 
+ 
           // Add a new page for the next order, except for the last one
           if (orders.indexOf(order) !== orders.length - 1) {
             pdf.addPage();
           }
-
+ 
+ 
           document.body.removeChild(invoiceContainer);
         }
-
+ 
+ 
         pdf.save(`Invoices-Bulk.pdf`);
         console.log("Bulk PDF generated");
       } catch (error) {
@@ -1445,65 +1211,15 @@ export function OrderTableEx({ value, shopdetails }) {
     },
     []
   );
-
+ 
   const handlePrint = useCallback(
-    async (
-      order,
-      shopdetails,
-      currentTemplate,
-      invoiceSettings,
-      GSTHSNCodes,
-      shopProfile
-    ) => {
+    async (order, shopdetails, currentTemplate, invoiceSettings, GSTHSNCodes, shopProfile) => {
       if (!order || !currentTemplate) {
         setIsPDFPrinting(false);
         console.error("Missing order or template data for printing.");
         return;
       }
-
-      // console.log("Preparing to print with:", {
-      //   order,
-      //   shopdetails,
-      //   currentTemplate,
-      //   invoiceSettings,
-      //   GSTHSNCodes,
-      //   shopProfile,
-      // });
-
-      // Function to wait for all data to load
-      const waitForData = async () => {
-        const maxRetries = 20; // Number of retries
-        const delayBetweenRetries = 500; // Time in ms between retries
-        let attempts = 0;
-
-        return new Promise((resolve, reject) => {
-          const interval = setInterval(() => {
-            const isDataReady =
-              shopdetails &&
-              invoiceSettings &&
-              GSTHSNCodes &&
-              currentTemplate &&
-              order &&
-              shopProfile;
-
-            if (isDataReady) {
-              clearInterval(interval);
-              resolve(true);
-            }
-
-            attempts++;
-            if (attempts >= maxRetries) {
-              clearInterval(interval);
-              console.error("Template data failed to load in time.");
-              reject(new Error("Data not ready"));
-            }
-          }, delayBetweenRetries);
-        });
-      };
-
-      try {
-        await waitForData(); // Ensure all data is loaded before rendering
-
+       try {
         // Render the invoice template
         const renderInvoiceTemplate = () => {
           switch (currentTemplate) {
@@ -1542,51 +1258,42 @@ export function OrderTableEx({ value, shopdetails }) {
               return "";
           }
         };
-
-        const invoiceContent = renderInvoiceTemplate();
-
-        // Open a new window for printing
-        const printWindow = window.open("", "_blank", "width=800,height=1123");
+         const invoiceContent = renderInvoiceTemplate();
+         // Open a new window for printing
+        const printWindow = window.open("", "_blank", "width=794,height=1123");
         if (printWindow) {
-          // Tailwind CSS and custom styles
-          // console.log("invoiceSettings.branding.fontFamily", invoiceSettings.branding.fontFamily);
-          const tailwindStylesheet = `
-            <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" />
-          `;
-
           const customStyles = `
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap');
-
-    body, html {
-      margin: 0;
-      padding: 0;
-      font-family: ${invoiceSettings.branding.fontFamily};
-    }
-
-    @page {
-      size: A4;
-      margin: 0;
-    }
-
-    @media print {
-      body {
-        -webkit-print-color-adjust: exact;
-        overflow: hidden;
-      }
-    }
-
-    .invoice-container {
-      width: 794px;
-      margin: 0 auto;
-      padding: 0px;
-      background-color: #fff;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-    }
-  </style>
-`;
-          printWindow.document.open();
+            <style>
+              @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap');
+               body, html {
+                margin: 0;
+                padding: 0;
+                font-family: ${invoiceSettings.branding.fontFamily || "Montserrat"};
+              }
+               @page {
+                size: A4;
+                margin: 0px;
+              }
+               @media print {
+                body {
+                  -webkit-print-color-adjust: exact;
+                  overflow: hidden;
+                }
+                .page-break {
+                  page-break-before: always;
+                }
+              }
+               .invoice-container {
+                width: 794px;
+                margin: 0 auto;
+                padding: 20px;
+                background-color: #fff;
+                border: 1px solid #ccc;
+                border-radius: 8px;
+              }
+            </style>
+          `;
+           printWindow.document.open();
           printWindow.document.write(`
             <!DOCTYPE html>
             <html lang="en">
@@ -1594,7 +1301,6 @@ export function OrderTableEx({ value, shopdetails }) {
                 <meta charset="UTF-8">
                 <meta name="viewport" content="width=device-width, initial-scale=1.0">
                 <title>Print Invoice</title>
-                ${tailwindStylesheet}
                 ${customStyles}
               </head>
               <body>
@@ -1605,8 +1311,7 @@ export function OrderTableEx({ value, shopdetails }) {
             </html>
           `);
           printWindow.document.close();
-
-          // Ensure the print triggers only after the content loads
+           // Trigger print once content is loaded
           printWindow.onload = () => {
             printWindow.print();
             printWindow.close();
@@ -1621,7 +1326,7 @@ export function OrderTableEx({ value, shopdetails }) {
       }
     },
     []
-  );
+  ); 
 
   const handleBulkPrint = useCallback(
     async (

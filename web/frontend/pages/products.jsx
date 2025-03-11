@@ -448,38 +448,7 @@ export default function ProductIndexTable() {
  };
 
 
- // const handleSelectAll = () => {
- //   const currentPageIds = paginatedProducts.map(({ id }) => id);
- //   if (isAllSelected) {
- //     setSelectedItems((prevSelectedItems) =>
- //       prevSelectedItems.filter((id) => !currentPageIds.includes(id))
- //     );
- //   } else {
- //     setSelectedItems((prevSelectedItems) => [
- //       ...prevSelectedItems,
- //       ...currentPageIds.filter((id) => !prevSelectedItems.includes(id)),
- //     ]);
- //   }
- // };
-
-
- // const handleRowSelection = (id) => {
- //   // console.log('handleRowSelection - id:', id);
- //   setSelectedItems((prevSelectedItems) => {
- //     if (prevSelectedItems.includes(id)) {
- //       // console.log('prevSelectedItems', prevSelectedItems);
- //       // If the row is already selected, remove it from the selection
- //       return prevSelectedItems.filter((itemId) => itemId !== id);
- //     } else {
- //       // Otherwise, add it to the selection
- //       // console.log('prevSelectedItems', prevSelectedItems);
- //       return [...prevSelectedItems, id];
- //     }
- //   });
- // };
-
-
- const filteredByTab = filteredProducts.filter((product) => {
+  const filteredByTab = filteredProducts.filter((product) => {
    const status = product.status.toLowerCase();
    if (activeTab === 0) return true;
    if (activeTab === 1) return status === "active";
@@ -730,8 +699,9 @@ export default function ProductIndexTable() {
  </IndexTable.Cell>
  <IndexTable.Cell>
    <TextField
-     placeholder="Enter GST"
+     placeholder="Enter GST %"
      value={GST}
+     maxLength={2}
      onChange={(value) => handleGSTChange(id, value)}
      autoComplete="off"
      onClick={(e) => e.stopPropagation()} // Prevent row selection
@@ -742,161 +712,6 @@ export default function ProductIndexTable() {
  });
 
 
- // const rowMarkup = paginatedProducts.map(
- //   ({ id, title, images, status, hsn, gst }, index) => {
- //     const { HSN, GST } = editableValues[id] || {
- //       HSN: hsn || "",
- //       GST: gst || "",
- //     }; // Get current editable values
-
-
- //     return (
- //       <IndexTable.Row
- //         id={id}
- //         key={id}
- //         selected={selectedItems.includes(id)}
- //         position={index}
- //         onClick={() => handleRowSelection(id)}
- //       >
- //         <IndexTable.Cell>
- //           <img
- //             src={images[0]?.src}
- //             alt={images[0]?.alt}
- //             style={{
- //               border: "0.1px solid black",
- //               borderRadius: "5px",
- //               width: "100%",
- //               maxWidth: "50px",
- //               height: "50px",
- //             }}
- //             onClick={(e) => e.stopPropagation()} // Prevent event propagation
- //           />
- //         </IndexTable.Cell>
- //         <IndexTable.Cell>
- //           <span style={{ fontWeight: "bold" }}>{title}</span>
- //         </IndexTable.Cell>
- //         <IndexTable.Cell>{status}</IndexTable.Cell>
- //         <IndexTable.Cell>
- //           <TextField
- //             placeholder="Enter HSN"
- //             value={HSN}
- //             onChange={(value) => handleHSNChange(id, value)}
- //             autoComplete="off"
- //             onClick={(e) => e.stopPropagation()} // Prevent event propagation
- //           />
- //         </IndexTable.Cell>
- //         <IndexTable.Cell>
- //           <TextField
- //             placeholder="Enter GST"
- //             value={GST}
- //             onChange={(value) => handleGSTChange(id, value)}
- //             autoComplete="off"
- //             onClick={(e) => e.stopPropagation()} // Prevent event propagation
- //           />
- //         </IndexTable.Cell>
- //       </IndexTable.Row>
- //     );
- //   }
- // );
-
-
- // const rowMarkup = paginatedProducts.map(
- //   ({ id, title, images, status, hsn, gst }, index) => (
- //     <IndexTable.Row
- //       id={id}
- //       key={id}
- //       position={index}
- //       selected={selectedItems.includes(id)}
- //       onClick={() => handleRowSelection(id)}
- //     >
- //       <IndexTable.Cell>
- //         <img
- //           src={images[0]?.src}
- //           alt={images[0]?.alt}
- //           style={styles.responsiveImage}
- //         />
- //       </IndexTable.Cell>
- //       <IndexTable.Cell>
- //         <span style={{ fontWeight: "bold" }}>{title}</span>
- //       </IndexTable.Cell>
- //       <IndexTable.Cell>{status}</IndexTable.Cell>
- //       <IndexTable.Cell>
- //         <TextField
- //           placeholder="Enter HSN"
- //           value={hsn}
- //           onChange={(value) => console.log(`HSN for ${id} changed to ${value}`)}
- //           autoComplete="off"
- //         />
- //       </IndexTable.Cell>
- //       <IndexTable.Cell>
- //         <TextField
- //           placeholder="Enter GST"
- //           value={gst}
- //           onChange={(value) => console.log(`GST for ${id} changed to ${value}`)}
- //           autoComplete="off"
- //         />
- //       </IndexTable.Cell>
- //     </IndexTable.Row>
- //   )
- // );
-
-
- // const rowMarkup = paginatedProducts.map(({ id, title, images, status, editableHSN, editableGST}, index) => {
- //   const [editHSN, setEditeHSN] = useState(editableHSN || ""); // Use current value or default to empty
- //   const [editGST, setEditGST] = useState(editableGST || ""); // Use current value or default to empty
-
-
- //   const handleHSNChange = (value) => {
- //     setEditeHSN(value);
- //     console.log(`HSN for ${id} changed to ${value}`);
- //   };
-
-
- //   const handleGSTChange = (value) => {
- //     setEditGST(value);
- //     console.log(`GST for ${id} changed to ${value}`);
- //   };
-
-
- //   return (
- //     <IndexTable.Row
- //       id={id}
- //       key={id}
- //       position={index}
- //       selected={selectedItems.includes(id)}
- //       onClick={() => handleRowSelection(id)}
- //     >
- //       <IndexTable.Cell>
- //         <img
- //           src={images[0]?.src}
- //           alt={images[0]?.alt}
- //           style={styles.responsiveImage}
- //         />
- //       </IndexTable.Cell>
- //       <IndexTable.Cell>
- //         <span style={{ fontWeight: "bold" }}>{title}</span>
- //       </IndexTable.Cell>
- //       <IndexTable.Cell>{status}</IndexTable.Cell>
- //       <IndexTable.Cell>
- //         <TextField
- //           placeholder="Enter HSN"
- //           value={editHSN}
- //           onChange={(value) => handleHSNChange(value)}
- //           autoComplete="off"
- //         />
- //       </IndexTable.Cell>
- //       <IndexTable.Cell>
- //         <TextField
- //           placeholder="Enter GST"
- //           value={editGST}
- //           onChange={(value) => handleGSTChange(value)}
- //           autoComplete="off"
- //         />
- //       </IndexTable.Cell>
- //     </IndexTable.Row>
- //   );
- // });
-// Handle bulk action trigger manually
 const handleBulkAction = () => {
  if (selectedItems.length === 0) {
    alert("No items selected!");
@@ -912,18 +727,7 @@ const handleBulkAction = () => {
      const product = products.find((product) => product.id === id);
 
 
-     // console.log(
-     //   "id:",
-     //   product.id,
-     //   " HSN:",
-     //   product.editableHSN,
-     //   "GST:",
-     //   product.editableGST,
-     //   "storeDomain:",
-     //   storeDomain,
-     //   "email:",
-     //   email
-     // );
+    
 
 
      return {
@@ -1153,6 +957,7 @@ const handleBulkAction = () => {
              <TextField
                placeholder="Search by tag"
                value={tagSearchTerm}
+              
                onChange={(value) => setTagSearchTerm(value)}
                autoComplete="off"
                style={{ width: "100%" }}
@@ -1261,8 +1066,8 @@ const handleBulkAction = () => {
            { title: "Product Image" },
            { title: "Product Title" },
            { title: "Status" },
-           { title: "HSN" },
-           { title: "GST" },
+           { title: "HSN Code" },
+           { title: "GST (%)" },
          ]}
          // bulkActions={[
          //   {
@@ -1365,6 +1170,9 @@ const handleBulkAction = () => {
    </Frame>
  );
 }
+
+
+
 
 
 

@@ -17,7 +17,7 @@ import {
   TextField,
   Spinner,
 } from "@shopify/polaris";
-
+import ToastNotification from "../components/ToastNotification";
 import { useLocation } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 
@@ -64,7 +64,8 @@ export default function CustomizeTemplate() {
   const [isSaving, setIsSaving] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
-
+  const [showToast, setShowToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState("")
   const [InvoiceSetting2, setInvoiceSetting2] = useState({
     branding: {
       showLogo: true,
@@ -759,7 +760,6 @@ export default function CustomizeTemplate() {
             console.log("profileData", profileData);
             setShopProfile(profileData || {});
           }
-          // console.log("Shop Profile Data",data.profile );
 
           //     const newCustomColor = data?.profile?.storeProfile?.brandColor || "#ff6600"; // Example custom color from API
 
@@ -852,7 +852,7 @@ export default function CustomizeTemplate() {
     }
   }, [storeDomain, email]);
 
-  // const fetchGSTHSNValues = async () => {
+
   //   try {
   //     if (!storeDomain || !email) {
   //       console.error("Missing storeDomain or email:", {
@@ -893,12 +893,7 @@ export default function CustomizeTemplate() {
   }, [InvoiceSetting2]);
 
   const updateInvoiceSettingAPI = async () => {
-    // console.log({
-    //   email: email,
-    //   storeDomain: storeDomain,
-    //   updatedSettings: invoiceSettings,
-    // });
-    // const updatedSettings = invoiceSettings;
+
     setIsSaving(true);
     return fetch("/api/update-invoice-settings", {
       method: "PUT",
@@ -928,10 +923,14 @@ export default function CustomizeTemplate() {
           fetchInvoiceSettings();
         }
         setIsSaving(false);
+        setShowToast(true);
+        setToastMessage("Invoice settings updated successfully");
       })
       .catch((error) => {
         console.error("Error updating invoice settings:", error.message);
         setIsSaving(false);
+        setShowToast(true);
+        setToastMessage("Error updating invoice settings");
       });
   };
 
@@ -1938,6 +1937,12 @@ export default function CustomizeTemplate() {
           </AlphaCard>
         </div>
       </div>
+      {showToast && (
+        <ToastNotification
+          message={toastMessage}
+          duration={3000} // Optional, can be customized
+   />
+)}
     </div>
   );
 }
