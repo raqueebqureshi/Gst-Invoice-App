@@ -6,13 +6,8 @@ import { hexToRgba } from "../components/hex";
 import { Shop } from "@mui/icons-material";
 
 
-export function InvoiceTemplate1({
- shopdetails,
- orders,
- invoiceSettings,
- GSTHSNCodes,
- shopProfile,
-}) {
+export function InvoiceTemplate1({ shopdetails, orders, invoiceSettings, GSTHSNCodes, shopProfile }) {
+ console.log("shopdetails - InvoiceTemplate1", shopdetails);
  console.log("orders - InvoiceTemplate1", orders);
  console.log("invoiceSettings - InvoiceTemplate1", invoiceSettings);
  console.log("GSTHSNCodes - InvoiceTemplate1", GSTHSNCodes.gstcodes);
@@ -80,35 +75,46 @@ export function InvoiceTemplate1({
  // }, [shopId]);
 
 
-   // Compute total tax across all line items
-const totalTaxAmount = orders[0].line_items?.reduce((acc, item) => {
+ // Compute total tax across all line items
+ const totalTaxAmount = orders[0].line_items
+   ?.reduce((acc, item) => {
+     const matchedGSTItem = GSTHSNCodes.gstcodes
+       ? GSTHSNCodes.gstcodes.find((gstItem) => Number(gstItem.productId) === item.product_id)
+       : GSTHSNCodes.find((gstItem) => Number(gstItem.productId) === item.product_id);
+     console.log("matchedGSTItem", matchedGSTItem);
 
 
- const matchedGSTItem = GSTHSNCodes.gstcodes
-   ? GSTHSNCodes.gstcodes.find(
-       (gstItem) => Number(gstItem.productId) === item.product_id
-     )
-   : GSTHSNCodes.find(
-       (gstItem) => Number(gstItem.productId) === item.product_id
-     );
- console.log("matchedGSTItem", matchedGSTItem);
+     const taxPrice = matchedGSTItem?.gst
+     ? (parseFloat(item.price) * parseFloat(matchedGSTItem.gst)) / 100
+     : item?.tax_lines[0]?.price
+       ? parseFloat(item.tax_lines[0].price)
+       : 0;
+     // const taxPrice = item?.tax_lines[0]?.price
+     //   ? parseFloat(item.tax_lines[0].price)
+     //   : matchedGSTItem?.gst
+     //   ? (parseFloat(item.price) * parseFloat(matchedGSTItem.gst)) / 100
+     //   : 0;
 
 
- const taxPrice = item?.tax_lines[0]?.price
-   ? parseFloat(item.tax_lines[0].price)
-   : (matchedGSTItem?.gst ? (parseFloat(item.price) * parseFloat(matchedGSTItem.gst) / 100) : 0);
+     return acc + taxPrice;
+   }, 0)
+   ; // Convert to 2 decimal places
 
 
- return acc + taxPrice;
-}, 0).toFixed(2); // Convert to 2 decimal places
+  let totalPrice = orders[0].total_price !== null ? Number(orders[0].total_price - orders[0].total_tax) : 0;
+ let subTotal = 0;
+ let grandTotal = 0;
 
 
-// Convert total_price to a number and ensure it's valid
-const totalPrice = orders[0].total_price !== null ? Number(orders[0].total_price) : 0;
+ if (shopdetails[0].taxes_included === true) {
+    subTotal = totalPrice - totalTaxAmount;
+   grandTotal = subTotal + Number(totalTaxAmount);
+ } else {
+    subTotal = totalPrice;
+   grandTotal = subTotal + Number(totalTaxAmount);
+ }
 
 
-// Calculate the grand total (Total Price + Total Tax)
-const grandTotal = (totalPrice + Number(totalTaxAmount)).toFixed(2);
 
 
  useEffect(() => {
@@ -143,9 +149,7 @@ const grandTotal = (totalPrice + Number(totalTaxAmount)).toFixed(2);
      >
        <div
          style={{
-           visibility: invoiceSettings.supplier.showSupplier
-             ? "visible"
-             : "hidden",
+           visibility: invoiceSettings.supplier.showSupplier ? "visible" : "hidden",
          }}
        >
          <div>
@@ -240,9 +244,7 @@ const grandTotal = (totalPrice + Number(totalTaxAmount)).toFixed(2);
            {invoiceSettings.supplier.showEmail ? (
              <>
                <strong>Email: </strong>
-               {shopdetails[0]?.email !== null
-                 ? shopdetails[0]?.email
-                 : "Not Available"}
+               {shopdetails[0]?.email !== null ? shopdetails[0]?.email : "Not Available"}
              </>
            ) : (
              <></>
@@ -269,9 +271,7 @@ const grandTotal = (totalPrice + Number(totalTaxAmount)).toFixed(2);
        >
          <h2
            style={{
-             color:
-               hexToRgba(invoiceSettings.branding.primaryColor, 0.7) ||
-               "#4299e1",
+             color: hexToRgba(invoiceSettings.branding.primaryColor, 0.7) || "#4299e1",
              fontSize: "2.5em",
              marginBottom: "20px",
            }}
@@ -285,17 +285,8 @@ const grandTotal = (totalPrice + Number(totalTaxAmount)).toFixed(2);
                  <td
                    style={{
                      padding: "5px 10px",
-                     border: `1px solid ${
-                       hexToRgba(
-                         invoiceSettings.branding.primaryColor,
-                         0.07
-                       ) || "#e2e8f0"
-                     }`,
-                     backgroundColor:
-                       hexToRgba(
-                         invoiceSettings.branding.primaryColor,
-                         0.07
-                       ) || "#edf2f7",
+                     border: `1px solid ${hexToRgba(invoiceSettings.branding.primaryColor, 0.07) || "#e2e8f0"}`,
+                     backgroundColor: hexToRgba(invoiceSettings.branding.primaryColor, 0.07) || "#edf2f7",
                    }}
                  >
                    DATE
@@ -303,12 +294,7 @@ const grandTotal = (totalPrice + Number(totalTaxAmount)).toFixed(2);
                  <td
                    style={{
                      padding: "5px 10px",
-                     border: `1px solid ${
-                       hexToRgba(
-                         invoiceSettings.branding.primaryColor,
-                         0.07
-                       ) || "#e2e8f0"
-                     }`,
+                     border: `1px solid ${hexToRgba(invoiceSettings.branding.primaryColor, 0.07) || "#e2e8f0"}`,
                    }}
                  >
                    {/* {formatDateTime(orders[0].processed_at)} */}
@@ -325,17 +311,8 @@ const grandTotal = (totalPrice + Number(totalTaxAmount)).toFixed(2);
                  <td
                    style={{
                      padding: "5px 10px",
-                     border: `1px solid ${
-                       hexToRgba(
-                         invoiceSettings.branding.primaryColor,
-                         0.07
-                       ) || "#e2e8f0"
-                     }`,
-                     backgroundColor:
-                       hexToRgba(
-                         invoiceSettings.branding.primaryColor,
-                         0.07
-                       ) || "#edf2f7",
+                     border: `1px solid ${hexToRgba(invoiceSettings.branding.primaryColor, 0.07) || "#e2e8f0"}`,
+                     backgroundColor: hexToRgba(invoiceSettings.branding.primaryColor, 0.07) || "#edf2f7",
                    }}
                  >
                    INVOICE #
@@ -343,17 +320,10 @@ const grandTotal = (totalPrice + Number(totalTaxAmount)).toFixed(2);
                  <td
                    style={{
                      padding: "5px 10px",
-                     border: `1px solid ${
-                       hexToRgba(
-                         invoiceSettings.branding.primaryColor,
-                         0.07
-                       ) || "#e2e8f0"
-                     }`,
+                     border: `1px solid ${hexToRgba(invoiceSettings.branding.primaryColor, 0.07) || "#e2e8f0"}`,
                    }}
                  >
-                   {orders[0]?.order_number !== null
-                     ? orders[0]?.order_number
-                     : "Not Available"}
+                   {orders[0]?.order_number !== null ? orders[0]?.order_number : "Not Available"}
                  </td>
                </tr>
              ) : (
@@ -376,8 +346,7 @@ const grandTotal = (totalPrice + Number(totalTaxAmount)).toFixed(2);
        <thead>
          <tr
            style={{
-             backgroundColor:
-               invoiceSettings.branding.primaryColor || "#4a5568",
+             backgroundColor: invoiceSettings.branding.primaryColor || "#4a5568",
              color: "white",
            }}
          >
@@ -387,9 +356,7 @@ const grandTotal = (totalPrice + Number(totalTaxAmount)).toFixed(2);
                  padding: "10px",
                  textAlign: "left",
                  width: "50%",
-                 visibility: invoiceSettings.billing.showHeading
-                   ? "visible"
-                   : "hidden",
+                 visibility: invoiceSettings.billing.showHeading ? "visible" : "hidden",
                }}
              >
                {BillHeading.toUpperCase()}
@@ -405,9 +372,7 @@ const grandTotal = (totalPrice + Number(totalTaxAmount)).toFixed(2);
                  padding: "10px",
                  textAlign: "left",
                  width: "50%",
-                 visibility: invoiceSettings.shipping.showHeading
-                   ? "visible"
-                   : "hidden",
+                 visibility: invoiceSettings.shipping.showHeading ? "visible" : "hidden",
                }}
              >
                {ShipHeading.toUpperCase()}
@@ -423,10 +388,7 @@ const grandTotal = (totalPrice + Number(totalTaxAmount)).toFixed(2);
              <td
                style={{
                  padding: "10px",
-                 border: `1px solid ${
-                   hexToRgba(invoiceSettings.branding.primaryColor, 0.07) ||
-                   "#e2e8f0"
-                 }`,
+                 border: `1px solid ${hexToRgba(invoiceSettings.branding.primaryColor, 0.07) || "#e2e8f0"}`,
                  width: "50%",
                }}
              >
@@ -503,16 +465,14 @@ const grandTotal = (totalPrice + Number(totalTaxAmount)).toFixed(2);
                    <br />
                    {invoiceSettings.billing.showEmail ? (
                      <p>
-                       <strong>Email:</strong>{" "}
-                       {orders[0]?.email || "Not Available"}
+                       <strong>Email:</strong> {orders[0]?.email || "Not Available"}
                      </p>
                    ) : (
                      <></>
                    )}
                    {invoiceSettings.billing.showPhone ? (
                      <p>
-                       <strong>Tel:</strong>{" "}
-                       {orders[0]?.billing_address?.phone || "Not Available"}
+                       <strong>Tel:</strong> {orders[0]?.billing_address?.phone || "Not Available"}
                      </p>
                    ) : (
                      <></>
@@ -531,10 +491,7 @@ const grandTotal = (totalPrice + Number(totalTaxAmount)).toFixed(2);
              <td
                style={{
                  padding: "10px",
-                 border: `1px solid ${
-                   hexToRgba(invoiceSettings.branding.primaryColor, 0.07) ||
-                   "#e2e8f0"
-                 }`,
+                 border: `1px solid ${hexToRgba(invoiceSettings.branding.primaryColor, 0.07) || "#e2e8f0"}`,
                  width: "50%",
                }}
              >
@@ -611,16 +568,14 @@ const grandTotal = (totalPrice + Number(totalTaxAmount)).toFixed(2);
                    <br />
                    {invoiceSettings.shipping.showEmail ? (
                      <p>
-                       <strong>Email:</strong>{" "}
-                       {orders[0]?.email || "Not Available"}
+                       <strong>Email:</strong> {orders[0]?.email || "Not Available"}
                      </p>
                    ) : (
                      <></>
                    )}
                    {invoiceSettings.shipping.showPhone ? (
                      <p>
-                       <strong>Tel:</strong>{" "}
-                       {orders[0]?.shipping_address?.phone || "Not Available"}
+                       <strong>Tel:</strong> {orders[0]?.shipping_address?.phone || "Not Available"}
                      </p>
                    ) : (
                      <></>
@@ -649,8 +604,7 @@ const grandTotal = (totalPrice + Number(totalTaxAmount)).toFixed(2);
        <thead>
          <tr
            style={{
-             backgroundColor:
-               invoiceSettings.branding.primaryColor || "#4a5568",
+             backgroundColor: invoiceSettings.branding.primaryColor || "#4a5568",
              color: "white",
              textAlign: "center",
            }}
@@ -659,10 +613,7 @@ const grandTotal = (totalPrice + Number(totalTaxAmount)).toFixed(2);
              <th
                style={{
                  padding: "10px",
-                 border: `1px solid ${
-                   hexToRgba(invoiceSettings.branding.primaryColor, 0.07) ||
-                   "#e2e8f0"
-                 }`,
+                 border: `1px solid ${hexToRgba(invoiceSettings.branding.primaryColor, 0.07) || "#e2e8f0"}`,
                }}
              >
                ITEMS
@@ -674,10 +625,7 @@ const grandTotal = (totalPrice + Number(totalTaxAmount)).toFixed(2);
              <th
                style={{
                  padding: "10px",
-                 border: `1px solid ${
-                   hexToRgba(invoiceSettings.branding.primaryColor, 0.07) ||
-                   "#e2e8f0"
-                 }`,
+                 border: `1px solid ${hexToRgba(invoiceSettings.branding.primaryColor, 0.07) || "#e2e8f0"}`,
                }}
              >
                QTY
@@ -689,10 +637,7 @@ const grandTotal = (totalPrice + Number(totalTaxAmount)).toFixed(2);
              <th
                style={{
                  padding: "10px",
-                 border: `1px solid ${
-                   hexToRgba(invoiceSettings.branding.primaryColor, 0.07) ||
-                   "#e2e8f0"
-                 }`,
+                 border: `1px solid ${hexToRgba(invoiceSettings.branding.primaryColor, 0.07) || "#e2e8f0"}`,
                }}
              >
                RATE
@@ -704,10 +649,7 @@ const grandTotal = (totalPrice + Number(totalTaxAmount)).toFixed(2);
              <th
                style={{
                  padding: "10px",
-                 border: `1px solid ${
-                   hexToRgba(invoiceSettings.branding.primaryColor, 0.07) ||
-                   "#e2e8f0"
-                 }`,
+                 border: `1px solid ${hexToRgba(invoiceSettings.branding.primaryColor, 0.07) || "#e2e8f0"}`,
                }}
              >
                HSN
@@ -719,10 +661,7 @@ const grandTotal = (totalPrice + Number(totalTaxAmount)).toFixed(2);
              <th
                style={{
                  padding: "10px",
-                 border: `1px solid ${
-                   hexToRgba(invoiceSettings.branding.primaryColor, 0.07) ||
-                   "#e2e8f0"
-                 }`,
+                 border: `1px solid ${hexToRgba(invoiceSettings.branding.primaryColor, 0.07) || "#e2e8f0"}`,
                }}
              >
                GST (%)
@@ -734,10 +673,7 @@ const grandTotal = (totalPrice + Number(totalTaxAmount)).toFixed(2);
              <th
                style={{
                  padding: "10px",
-                 border: `1px solid ${
-                   hexToRgba(invoiceSettings.branding.primaryColor, 0.07) ||
-                   "#e2e8f0"
-                 }`,
+                 border: `1px solid ${hexToRgba(invoiceSettings.branding.primaryColor, 0.07) || "#e2e8f0"}`,
                }}
              >
                TAX
@@ -749,10 +685,7 @@ const grandTotal = (totalPrice + Number(totalTaxAmount)).toFixed(2);
              <th
                style={{
                  padding: "10px",
-                 border: `1px solid ${
-                   hexToRgba(invoiceSettings.branding.primaryColor, 0.07) ||
-                   "#e2e8f0"
-                 }`,
+                 border: `1px solid ${hexToRgba(invoiceSettings.branding.primaryColor, 0.07) || "#e2e8f0"}`,
                }}
              >
                AMOUNT
@@ -769,31 +702,57 @@ const grandTotal = (totalPrice + Number(totalTaxAmount)).toFixed(2);
 
 
            const matchedGSTItem = GSTHSNCodes.gstcodes
-             ? GSTHSNCodes.gstcodes.find(
-                 (gstItem) => Number(gstItem.productId) === item.product_id
-               )
-             : GSTHSNCodes.find(
-                 (gstItem) => Number(gstItem.productId) === item.product_id
-               );
+             ? GSTHSNCodes.gstcodes.find((gstItem) => Number(gstItem.productId) === item.product_id)
+             : GSTHSNCodes.find((gstItem) => Number(gstItem.productId) === item.product_id);
            console.log("matchedGSTItem", matchedGSTItem);
 
 
-           const price = parseFloat(item.price) || 0; // Convert to a number and default to 0 if NaN
-           const taxPrice = price * (matchedGSTItem?.gst / 100) || 0;
-           console.log('taxPrice', taxPrice);
-           const lineAmount = (
-             item.quantity * price +
-             (Number(
-               item?.tax_lines[0]?.price
-                 ? parseFloat(item.tax_lines[0].price)
-                 : taxPrice
-                 ? parseFloat(taxPrice)
-                 : 0
-             ) || 0)
-           ).toFixed(2);  // Ensures final result is in 2 decimal format
+           let taxPrice = 0;
+           let price = 0;
+           let lineAmount = 0;
 
 
-          
+           if (shopdetails[0].taxes_included === true) {
+             console.log("item", item);
+             taxPrice = item.price * (matchedGSTItem?.gst / 100) || 0;
+             price =
+               parseFloat(item.price) -
+                 Number(taxPrice ? taxPrice : item?.tax_lines[0]?.price ? parseFloat(item.tax_lines[0].price) : 0) ||
+               0; // Convert to a number and default to 0 if NaN
+
+
+             console.log("taxPrice", taxPrice);
+             lineAmount = (
+               item.quantity * price +
+               (Number(taxPrice ? taxPrice : item?.tax_lines[0]?.price ? parseFloat(item.tax_lines[0].price) : 0) || 0)
+             )
+               // (Number(
+               //   item?.tax_lines[0]?.price
+               //     ? parseFloat(item.tax_lines[0].price)
+               //     : taxPrice
+               //     ? parseFloat(taxPrice)
+               //     : 0
+               // ) || 0)
+               .toFixed(2); // Ensures final result is in 2 decimal format
+           } else {
+             taxPrice = item.price * (matchedGSTItem?.gst / 100) || 0;
+             price = parseFloat(item.price) || 0; // Convert to a number and default to 0 if NaN
+
+
+             console.log("taxPrice", taxPrice);
+             lineAmount = (
+               item.quantity * price +
+               (Number(taxPrice ? taxPrice : item?.tax_lines[0]?.price ? parseFloat(item.tax_lines[0].price) : 0) || 0)
+             )
+               // (Number(
+               //   item?.tax_lines[0]?.price
+               //     ? parseFloat(item.tax_lines[0].price)
+               //     : taxPrice
+               //     ? parseFloat(taxPrice)
+               //     : 0
+               // ) || 0)
+               .toFixed(2); // Ensures final result is in 2 decimal format
+           }
 
 
            return (
@@ -802,12 +761,7 @@ const grandTotal = (totalPrice + Number(totalTaxAmount)).toFixed(2);
                  <td
                    style={{
                      padding: "10px",
-                     border: `1px solid ${
-                       hexToRgba(
-                         invoiceSettings.branding.primaryColor,
-                         0.07
-                       ) || "#e2e8f0"
-                     }`,
+                     border: `1px solid ${hexToRgba(invoiceSettings.branding.primaryColor, 0.07) || "#e2e8f0"}`,
                    }}
                  >
                    {item.name}
@@ -819,12 +773,7 @@ const grandTotal = (totalPrice + Number(totalTaxAmount)).toFixed(2);
                  <td
                    style={{
                      padding: "10px",
-                     border: `1px solid ${
-                       hexToRgba(
-                         invoiceSettings.branding.primaryColor,
-                         0.07
-                       ) || "#e2e8f0"
-                     }`,
+                     border: `1px solid ${hexToRgba(invoiceSettings.branding.primaryColor, 0.07) || "#e2e8f0"}`,
                      textAlign: "center",
                    }}
                  >
@@ -839,12 +788,7 @@ const grandTotal = (totalPrice + Number(totalTaxAmount)).toFixed(2);
                  <td
                    style={{
                      padding: "10px",
-                     border: `1px solid ${
-                       hexToRgba(
-                         invoiceSettings.branding.primaryColor,
-                         0.07
-                       ) || "#e2e8f0"
-                     }`,
+                     border: `1px solid ${hexToRgba(invoiceSettings.branding.primaryColor, 0.07) || "#e2e8f0"}`,
                      textAlign: "center",
                    }}
                  >
@@ -859,12 +803,7 @@ const grandTotal = (totalPrice + Number(totalTaxAmount)).toFixed(2);
                  <td
                    style={{
                      padding: "10px",
-                     border: `1px solid ${
-                       hexToRgba(
-                         invoiceSettings.branding.primaryColor,
-                         0.07
-                       ) || "#e2e8f0"
-                     }`,
+                     border: `1px solid ${hexToRgba(invoiceSettings.branding.primaryColor, 0.07) || "#e2e8f0"}`,
                    }}
                  >
                    {matchedGSTItem?.hsn || "-"}
@@ -876,12 +815,7 @@ const grandTotal = (totalPrice + Number(totalTaxAmount)).toFixed(2);
                  <td
                    style={{
                      padding: "10px",
-                     border: `1px solid ${
-                       hexToRgba(
-                         invoiceSettings.branding.primaryColor,
-                         0.07
-                       ) || "#e2e8f0"
-                     }`,
+                     border: `1px solid ${hexToRgba(invoiceSettings.branding.primaryColor, 0.07) || "#e2e8f0"}`,
                    }}
                  >
                    {matchedGSTItem?.gst || "-"}
@@ -893,18 +827,19 @@ const grandTotal = (totalPrice + Number(totalTaxAmount)).toFixed(2);
                  <td
                    style={{
                      padding: "10px",
-                     border: `1px solid ${
-                       hexToRgba(
-                         invoiceSettings.branding.primaryColor,
-                         0.07
-                       ) || "#e2e8f0"
-                     }`,
+                     border: `1px solid ${hexToRgba(invoiceSettings.branding.primaryColor, 0.07) || "#e2e8f0"}`,
                      textAlign: "center",
                    }}
                  >
-                   ₹{item?.tax_lines[0]?.price
+                   ₹
+                   {taxPrice
+                     ? parseFloat(taxPrice).toFixed(2) // Converts to 2 decimal places
+                     : item?.tax_lines[0]?.price
+                     ? parseFloat(item.tax_lines[0].price).toFixed(2)
+                     : "0"}
+                   {/* ₹{item?.tax_lines[0]?.price
    ? parseFloat(item.tax_lines[0].price).toFixed(2)  // Converts to 2 decimal places
-   : (taxPrice ? parseFloat(taxPrice).toFixed(2) : "0")}
+   : (taxPrice ? parseFloat(taxPrice).toFixed(2) : "0")} */}
                  </td>
                ) : (
                  <></>
@@ -913,12 +848,7 @@ const grandTotal = (totalPrice + Number(totalTaxAmount)).toFixed(2);
                  <td
                    style={{
                      padding: "10px",
-                     border: `1px solid ${
-                       hexToRgba(
-                         invoiceSettings.branding.primaryColor,
-                         0.07
-                       ) || "#e2e8f0"
-                     }`,
+                     border: `1px solid ${hexToRgba(invoiceSettings.branding.primaryColor, 0.07) || "#e2e8f0"}`,
                      textAlign: "center",
                    }}
                  >
@@ -938,8 +868,7 @@ const grandTotal = (totalPrice + Number(totalTaxAmount)).toFixed(2);
        <div style={{ width: "50%" }}>
          <h3
            style={{
-             backgroundColor:
-               invoiceSettings.branding.primaryColor || "#4a5568",
+             backgroundColor: invoiceSettings.branding.primaryColor || "#4a5568",
              color: "white",
              padding: "5px 10px",
            }}
@@ -953,9 +882,7 @@ const grandTotal = (totalPrice + Number(totalTaxAmount)).toFixed(2);
          </ul>
          {invoiceSettings.total.showTotal ? (
            <div style={{ marginTop: "20px", marginLeft: "10px" }}>
-             <p style={{ margin: "0", fontWeight: "bold" }}>
-               Total Amount (₹ - In Words):
-             </p>
+             <p style={{ margin: "0", fontWeight: "bold" }}>Total Amount (₹ - In Words):</p>
              <p style={{ fontStyle: "italic", color: "#4a5568" }}>
                {convertAmountToWords(orders[0].total_price || 0)}
              </p>
@@ -967,9 +894,7 @@ const grandTotal = (totalPrice + Number(totalTaxAmount)).toFixed(2);
                marginTop: "10px",
                fontSize: "0.9em",
                padding: "10px",
-               backgroundColor:
-                 hexToRgba(invoiceSettings.branding.primaryColor, 0.07) ||
-                 "#f7fafc",
+               backgroundColor: hexToRgba(invoiceSettings.branding.primaryColor, 0.07) || "#f7fafc",
                // borderRadius: "4px",
              }}
            >
@@ -984,8 +909,7 @@ const grandTotal = (totalPrice + Number(totalTaxAmount)).toFixed(2);
        <div style={{ width: "40%" }}>
          <h3
            style={{
-             backgroundColor:
-               invoiceSettings.branding.primaryColor || "#4a5568",
+             backgroundColor: invoiceSettings.branding.primaryColor || "#4a5568",
              color: "white",
              padding: "6px 10px",
              marginBottom: "0px",
@@ -1009,17 +933,8 @@ const grandTotal = (totalPrice + Number(totalTaxAmount)).toFixed(2);
                    style={{
                      padding: "10px",
                      fontWeight: "bold",
-                     backgroundColor:
-                       hexToRgba(
-                         invoiceSettings.branding.primaryColor,
-                         0.07
-                       ) || "#edf2f7",
-                     borderBottom: `1px solid ${
-                       hexToRgba(
-                         invoiceSettings.branding.primaryColor,
-                         0.07
-                       ) || "#e2e8f0"
-                     }`,
+                     backgroundColor: hexToRgba(invoiceSettings.branding.primaryColor, 0.07) || "#edf2f7",
+                     borderBottom: `1px solid ${hexToRgba(invoiceSettings.branding.primaryColor, 0.07) || "#e2e8f0"}`,
                    }}
                  >
                    Subtotal
@@ -1028,18 +943,16 @@ const grandTotal = (totalPrice + Number(totalTaxAmount)).toFixed(2);
                    style={{
                      padding: "10px",
                      textAlign: "right",
-                     borderBottom: `1px solid ${
-                       hexToRgba(
-                         invoiceSettings.branding.primaryColor,
-                         0.07
-                       ) || "#e2e8f0"
-                     }`,
+                     borderBottom: `1px solid ${hexToRgba(invoiceSettings.branding.primaryColor, 0.07) || "#e2e8f0"}`,
                    }}
                  >
                    ₹{" "}
-                   {orders[0].subtotal_price !== null
+                   {subTotal?
+                   subTotal.toFixed(2):
+                   orders[0].subtotal_price !== null
                      ? Number(orders[0].subtotal_price).toFixed(2)
                      : "0"}
+                  
                  </td>
                </tr>
              ) : null}
@@ -1049,17 +962,8 @@ const grandTotal = (totalPrice + Number(totalTaxAmount)).toFixed(2);
                    style={{
                      padding: "10px",
                      fontWeight: "bold",
-                     backgroundColor:
-                       hexToRgba(
-                         invoiceSettings.branding.primaryColor,
-                         0.07
-                       ) || "#edf2f7",
-                     borderBottom: `1px solid ${
-                       hexToRgba(
-                         invoiceSettings.branding.primaryColor,
-                         0.07
-                       ) || "#e2e8f0"
-                     }`,
+                     backgroundColor: hexToRgba(invoiceSettings.branding.primaryColor, 0.07) || "#edf2f7",
+                     borderBottom: `1px solid ${hexToRgba(invoiceSettings.branding.primaryColor, 0.07) || "#e2e8f0"}`,
                    }}
                  >
                    Discount
@@ -1068,19 +972,15 @@ const grandTotal = (totalPrice + Number(totalTaxAmount)).toFixed(2);
                    style={{
                      padding: "10px",
                      textAlign: "right",
-                     borderBottom: `1px solid ${
-                       hexToRgba(
-                         invoiceSettings.branding.primaryColor,
-                         0.07
-                       ) || "#e2e8f0"
-                     }`,
+                     borderBottom: `1px solid ${hexToRgba(invoiceSettings.branding.primaryColor, 0.07) || "#e2e8f0"}`,
                    }}
                  >
                    ₹ (-{" "}
-                   {orders[0]?.discount_codes  ?
-                   orders[0]?.discount_codes[0]?.amount
-                     ? Number(orders[0]?.discount_codes[0]?.amount).toFixed(2)
-                     : "0" :"0"}
+                   {orders[0]?.discount_codes
+                     ? orders[0]?.discount_codes[0]?.amount
+                       ? Number(orders[0]?.discount_codes[0]?.amount).toFixed(2)
+                       : "0"
+                     : "0"}
                    )
                  </td>
                </tr>
@@ -1093,17 +993,8 @@ const grandTotal = (totalPrice + Number(totalTaxAmount)).toFixed(2);
                    style={{
                      padding: "10px",
                      fontWeight: "bold",
-                     backgroundColor:
-                       hexToRgba(
-                         invoiceSettings.branding.primaryColor,
-                         0.07
-                       ) || "#edf2f7",
-                     borderBottom: `1px solid ${
-                       hexToRgba(
-                         invoiceSettings.branding.primaryColor,
-                         0.07
-                       ) || "#e2e8f0"
-                     }`,
+                     backgroundColor: hexToRgba(invoiceSettings.branding.primaryColor, 0.07) || "#edf2f7",
+                     borderBottom: `1px solid ${hexToRgba(invoiceSettings.branding.primaryColor, 0.07) || "#e2e8f0"}`,
                    }}
                  >
                    Total Tax
@@ -1112,19 +1003,14 @@ const grandTotal = (totalPrice + Number(totalTaxAmount)).toFixed(2);
                    style={{
                      padding: "10px",
                      textAlign: "right",
-                     borderBottom: `1px solid ${
-                       hexToRgba(
-                         invoiceSettings.branding.primaryColor,
-                         0.07
-                       ) || "#e2e8f0"
-                     }`,
+                     borderBottom: `1px solid ${hexToRgba(invoiceSettings.branding.primaryColor, 0.07) || "#e2e8f0"}`,
                    }}
                  >
                    ₹{" "}
                    {/* {orders[0].total_tax !== null
                      ? Number(orders[0].total_tax).toFixed(2)
                      : "0"} */}
-                     {totalTaxAmount}
+                   {totalTaxAmount.toFixed(2)}
                  </td>
                </tr>
              ) : null}
@@ -1136,17 +1022,8 @@ const grandTotal = (totalPrice + Number(totalTaxAmount)).toFixed(2);
                    style={{
                      padding: "10px",
                      fontWeight: "bold",
-                     backgroundColor:
-                       hexToRgba(
-                         invoiceSettings.branding.primaryColor,
-                         0.07
-                       ) || "#edf2f7",
-                     borderBottom: `1px solid ${
-                       hexToRgba(
-                         invoiceSettings.branding.primaryColor,
-                         0.07
-                       ) || "#e2e8f0"
-                     }`,
+                     backgroundColor: hexToRgba(invoiceSettings.branding.primaryColor, 0.07) || "#edf2f7",
+                     borderBottom: `1px solid ${hexToRgba(invoiceSettings.branding.primaryColor, 0.07) || "#e2e8f0"}`,
                    }}
                  >
                    Shipping
@@ -1155,19 +1032,15 @@ const grandTotal = (totalPrice + Number(totalTaxAmount)).toFixed(2);
                    style={{
                      padding: "10px",
                      textAlign: "right",
-                     borderBottom: `1px solid ${
-                       hexToRgba(
-                         invoiceSettings.branding.primaryColor,
-                         0.07
-                       ) || "#e2e8f0"
-                     }`,
+                     borderBottom: `1px solid ${hexToRgba(invoiceSettings.branding.primaryColor, 0.07) || "#e2e8f0"}`,
                    }}
                  >
                    ₹{" "}
-                   {orders[0]?.shipping_lines ?
-                   orders[0]?.shipping_lines[0]?.price
-                     ? Number(orders[0]?.shipping_lines[0]?.price).toFixed(2)
-                     : "0" :"0"}
+                   {orders[0]?.shipping_lines
+                     ? orders[0]?.shipping_lines[0]?.price
+                       ? Number(orders[0]?.shipping_lines[0]?.price).toFixed(2)
+                       : "0"
+                     : "0"}
                  </td>
                </tr>
              ) : null}
@@ -1177,15 +1050,9 @@ const grandTotal = (totalPrice + Number(totalTaxAmount)).toFixed(2);
                    style={{
                      padding: "10px",
                      fontWeight: "bold",
-                     backgroundColor:
-                       invoiceSettings.branding.primaryColor || "#4a5568",
+                     backgroundColor: invoiceSettings.branding.primaryColor || "#4a5568",
                      color: "white",
-                     borderTop: `1px solid ${
-                       hexToRgba(
-                         invoiceSettings.branding.primaryColor,
-                         0.07
-                       ) || "#e2e8f0"
-                     }`,
+                     borderTop: `1px solid ${hexToRgba(invoiceSettings.branding.primaryColor, 0.07) || "#e2e8f0"}`,
                    }}
                  >
                    TOTAL
@@ -1195,18 +1062,15 @@ const grandTotal = (totalPrice + Number(totalTaxAmount)).toFixed(2);
                      padding: "10px",
                      textAlign: "right",
                      fontWeight: "bold",
-                     backgroundColor:
-                       invoiceSettings.branding.primaryColor || "#4a5568",
+                     backgroundColor: invoiceSettings.branding.primaryColor || "#4a5568",
                      color: "white",
                    }}
                  >
                    ₹{" "}
-                   {/* {orders[0].total_price !== null
+                   {grandTotal? grandTotal.toFixed(2):orders[0].total_price !== null
                      ? Number(orders[0].total_price).toFixed(2)
-                     : "0.00"} */}
-                     {
-                       grandTotal
-                     }
+                     : "0"}
+                  
                  </td>
                </tr>
              ) : null}
@@ -1236,10 +1100,7 @@ const grandTotal = (totalPrice + Number(totalTaxAmount)).toFixed(2);
                }}
              >
                <img
-                 src={
-                   shopProfile?.images?.signatureURL ||
-                   "./assets/signPlaceholder.png"
-                 }
+                 src={shopProfile?.images?.signatureURL || "./assets/signPlaceholder.png"}
                  alt={""}
                  style={{
                    maxWidth: "55px",
@@ -1288,10 +1149,7 @@ const grandTotal = (totalPrice + Number(totalTaxAmount)).toFixed(2);
        <br />
        {invoiceSettings.supplier.showPhone ? (
          <>
-           <strong>Phone:</strong>{" "}
-           {shopdetails[0].phone !== null
-             ? shopdetails[0].phone
-             : "Not Available"}{" "}
+           <strong>Phone:</strong> {shopdetails[0].phone !== null ? shopdetails[0].phone : "Not Available"}{" "}
          </>
        ) : (
          <></>
@@ -1299,10 +1157,7 @@ const grandTotal = (totalPrice + Number(totalTaxAmount)).toFixed(2);
        {" | "}
        {invoiceSettings.supplier.showEmail ? (
          <>
-           <strong>E-mail:</strong>{" "}
-           {shopdetails[0].email !== null
-             ? shopdetails[0].email
-             : "Not Available"}
+           <strong>E-mail:</strong> {shopdetails[0].email !== null ? shopdetails[0].email : "Not Available"}
          </>
        ) : (
          <></>
@@ -1313,18 +1168,15 @@ const grandTotal = (totalPrice + Number(totalTaxAmount)).toFixed(2);
      </p>
      <div style={{ marginBottom: "10px" }}>
        {shopProfile.socialLinks && (
-         <SocialMediaIcons
-           socialLink={shopProfile.socialLinks}
-           invoiceSetting={invoiceSettings}
-         />
+         <SocialMediaIcons socialLink={shopProfile.socialLinks} invoiceSetting={invoiceSettings} />
        )}
        {/* <SocialMediaIcons socialLink={shopProfile.socialLinks} invoiceSetting={invoiceSettings} /> */}
      </div>
 
 
-     <div style={{ textAlign: "center", margin: '10px' }}>
- <span>Powered by Indian GST Invoice</span>
-</div>
+     <div style={{ textAlign: "center", margin: "10px" }}>
+       <span>Powered by Indian GST Invoice</span>
+     </div>
    </div>
  );
 }

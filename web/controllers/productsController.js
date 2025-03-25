@@ -100,6 +100,7 @@ export const getProducts = async (req, res) => {
               }
               description
               createdAt
+              tags
             }
             cursor
           }
@@ -127,6 +128,7 @@ export const getProducts = async (req, res) => {
         images: productNode.images.edges.map((imgEdge) => imgEdge.node),
         description: productNode.description,
         createdAt: productNode.createdAt,
+        tags: productNode.tags,
       };
     });
 

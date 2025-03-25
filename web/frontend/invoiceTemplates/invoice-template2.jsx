@@ -54,34 +54,45 @@ export function InvoiceTemplate2({ shopdetails, orders, invoiceSettings, GSTHSNC
 
 
   // Compute total tax across all line items
-const totalTaxAmount = orders[0].line_items?.reduce((acc, item) => {
+ const totalTaxAmount = orders[0].line_items
+   ?.reduce((acc, item) => {
+     const matchedGSTItem = GSTHSNCodes.gstcodes
+       ? GSTHSNCodes.gstcodes.find((gstItem) => Number(gstItem.productId) === item.product_id)
+       : GSTHSNCodes.find((gstItem) => Number(gstItem.productId) === item.product_id);
+     console.log("matchedGSTItem", matchedGSTItem);
 
 
- const matchedGSTItem = GSTHSNCodes.gstcodes
-   ? GSTHSNCodes.gstcodes.find(
-       (gstItem) => Number(gstItem.productId) === item.product_id
-     )
-   : GSTHSNCodes.find(
-       (gstItem) => Number(gstItem.productId) === item.product_id
-     );
- console.log("matchedGSTItem", matchedGSTItem);
+     const taxPrice = matchedGSTItem?.gst
+     ? (parseFloat(item.price) * parseFloat(matchedGSTItem.gst)) / 100
+     : item?.tax_lines[0]?.price
+       ? parseFloat(item.tax_lines[0].price)
+       : 0;
+     // const taxPrice = item?.tax_lines[0]?.price
+     //   ? parseFloat(item.tax_lines[0].price)
+     //   : matchedGSTItem?.gst
+     //   ? (parseFloat(item.price) * parseFloat(matchedGSTItem.gst)) / 100
+     //   : 0;
 
 
- const taxPrice = item?.tax_lines[0]?.price
-   ? parseFloat(item.tax_lines[0].price)
-   : (matchedGSTItem?.gst ? (parseFloat(item.price) * parseFloat(matchedGSTItem.gst) / 100) : 0);
+     return acc + taxPrice;
+   }, 0)
+   ; // Convert to 2 decimal places
 
 
- return acc + taxPrice;
-}, 0).toFixed(2); // Convert to 2 decimal places
+  let totalPrice = orders[0].total_price !== null ? Number(orders[0].total_price - orders[0].total_tax) : 0;
+ let subTotal = 0;
+ let grandTotal = 0;
 
 
-// Convert total_price to a number and ensure it's valid
-const totalPrice = orders[0].total_price !== null ? Number(orders[0].total_price) : 0;
+ if (shopdetails[0].taxes_included === true) {
+    subTotal = totalPrice - totalTaxAmount;
+   grandTotal = subTotal + Number(totalTaxAmount);
+ } else {
+    subTotal = totalPrice;
+   grandTotal = subTotal + Number(totalTaxAmount);
+ }
 
 
-// Calculate the grand total (Total Price + Total Tax)
-const grandTotal = (totalPrice + Number(totalTaxAmount)).toFixed(2);
 
 
 
@@ -588,155 +599,158 @@ const grandTotal = (totalPrice + Number(totalTaxAmount)).toFixed(2);
            console.log("matchedGSTItem", matchedGSTItem);
 
 
-           const price = parseFloat(item.price) || 0; // Convert to a number and default to 0 if NaN
-           const taxPrice = price * (matchedGSTItem?.gst / 100) || 0;
-           console.log('taxPrice', taxPrice);
-           const lineAmount = (
-             item.quantity * price +
-             (Number(
-               item?.tax_lines[0]?.price
-                 ? parseFloat(item.tax_lines[0].price)
-                 : taxPrice
-                 ? parseFloat(taxPrice)
-                 : 0
-             ) || 0)
-           ).toFixed(2);  // Ensures final result is in 2 decimal format
+           // const price = parseFloat(item.price) || 0; // Convert to a number and default to 0 if NaN
+           // const taxPrice = price * (matchedGSTItem?.gst / 100) || 0;
+           // console.log('taxPrice', taxPrice);
+           // const lineAmount = (
+           //   item.quantity * price +
+           //   (Number(
+           //     item?.tax_lines[0]?.price
+           //       ? parseFloat(item.tax_lines[0].price)
+           //       : taxPrice
+           //       ? parseFloat(taxPrice)
+           //       : 0
+           //   ) || 0)
+           // ).toFixed(2);  // Ensures final result is in 2 decimal format
+           let taxPrice = 0;
+           let price = 0;
+           let lineAmount = 0;
 
 
+           if (shopdetails[0].taxes_included === true) {
+             console.log("item", item);
+             taxPrice = item.price * (matchedGSTItem?.gst / 100) || 0;
+             price =
+               parseFloat(item.price) -
+                 Number(taxPrice ? taxPrice : item?.tax_lines[0]?.price ? parseFloat(item.tax_lines[0].price) : 0) ||
+               0; // Convert to a number and default to 0 if NaN
+
+
+             console.log("taxPrice", taxPrice);
+             lineAmount = (
+               item.quantity * price +
+               (Number(taxPrice ? taxPrice : item?.tax_lines[0]?.price ? parseFloat(item.tax_lines[0].price) : 0) || 0)
+             )
+           
+               .toFixed(2); // Ensures final result is in 2 decimal format
+           } else {
+             taxPrice = item.price * (matchedGSTItem?.gst / 100) || 0;
+             price = parseFloat(item.price) || 0; // Convert to a number and default to 0 if NaN
+
+
+             console.log("taxPrice", taxPrice);
+             lineAmount = (
+               item.quantity * price +
+               (Number(taxPrice ? taxPrice : item?.tax_lines[0]?.price ? parseFloat(item.tax_lines[0].price) : 0) || 0)
+             )
+            
+               .toFixed(2); // Ensures final result is in 2 decimal format
+           }
 
 
            return (
              <tr key={item.id}>
-                             {invoiceSettings.lineItems.showVariantTitle ? (
-                               <td
-                                 style={{
-                                   padding: "10px",
-                                   border: `1px solid ${
-                                     hexToRgba(
-                                       invoiceSettings.branding.primaryColor,
-                                       0.07
-                                     ) || "#e2e8f0"
-                                   }`,
-                                 }}
-                               >
-                                 {item.name}
-                               </td>
-                             ) : (
-                               <></>
-                             )}
-                             {invoiceSettings.lineItems.showQuantity ? (
-                               <td
-                                 style={{
-                                   padding: "10px",
-                                   border: `1px solid ${
-                                     hexToRgba(
-                                       invoiceSettings.branding.primaryColor,
-                                       0.07
-                                     ) || "#e2e8f0"
-                                   }`,
-                                   textAlign: "center",
-                                 }}
-                               >
-                                 {item.quantity || "Not Available"}
-                               </td>
-                             ) : (
-                               <></>
-                             )}
-            
-                             {invoiceSettings.lineItems.showUnitRate ? (
-                               <td
-                                 style={{
-                                   padding: "10px",
-                                   border: `1px solid ${
-                                     hexToRgba(
-                                       invoiceSettings.branding.primaryColor,
-                                       0.07
-                                     ) || "#e2e8f0"
-                                   }`,
-                                   textAlign: "center",
-                                 }}
-                               >
-                                 ₹{price.toFixed(2) || "0"}
-                               </td>
-                             ) : (
-                               <></>
-                             )}
-            
-                             {invoiceSettings.lineItems.showHSN ? (
-                               <td
-                                 style={{
-                                   padding: "10px",
-                                   textAlign: "center",
-                                   border: `1px solid ${
-                                     hexToRgba(
-                                       invoiceSettings.branding.primaryColor,
-                                       0.07
-                                     ) || "#e2e8f0"
-                                   }`,
-                                 }}
-                               >
-                                 {matchedGSTItem?.hsn || "-"}
-                               </td>
-                             ) : (
-                               <></>
-                             )}
-                             {invoiceSettings.lineItems.showTaxAmount ? (
-                               <td
-                                 style={{
-                                   padding: "10px",
-                                   textAlign: "center",
-                                   border: `1px solid ${
-                                     hexToRgba(
-                                       invoiceSettings.branding.primaryColor,
-                                       0.07
-                                     ) || "#e2e8f0"
-                                   }`,
-                                 }}
-                               >
-                                 {matchedGSTItem?.gst || "-"}
-                               </td>
-                             ) : (
-                               <></>
-                             )}
-                             {invoiceSettings.lineItems.showTaxAmount ? (
-                               <td
-                                 style={{
-                                   padding: "10px",
-                                   border: `1px solid ${
-                                     hexToRgba(
-                                       invoiceSettings.branding.primaryColor,
-                                       0.07
-                                     ) || "#e2e8f0"
-                                   }`,
-                                   textAlign: "center",
-                                 }}
-                               >
-                                ₹{item?.tax_lines[0]?.price
+               {invoiceSettings.lineItems.showVariantTitle ? (
+                 <td
+                   style={{
+                     padding: "10px",
+                     border: `1px solid ${hexToRgba(invoiceSettings.branding.primaryColor, 0.07) || "#e2e8f0"}`,
+                   }}
+                 >
+                   {item.name}
+                 </td>
+               ) : (
+                 <></>
+               )}
+               {invoiceSettings.lineItems.showQuantity ? (
+                 <td
+                   style={{
+                     padding: "10px",
+                     border: `1px solid ${hexToRgba(invoiceSettings.branding.primaryColor, 0.07) || "#e2e8f0"}`,
+                     textAlign: "center",
+                   }}
+                 >
+                   {item.quantity || "Not Available"}
+                 </td>
+               ) : (
+                 <></>
+               )}
+
+
+               {invoiceSettings.lineItems.showUnitRate ? (
+                 <td
+                   style={{
+                     padding: "10px",
+                     border: `1px solid ${hexToRgba(invoiceSettings.branding.primaryColor, 0.07) || "#e2e8f0"}`,
+                     textAlign: "center",
+                   }}
+                 >
+                   ₹{price.toFixed(2) || "0"}
+                 </td>
+               ) : (
+                 <></>
+               )}
+
+
+               {invoiceSettings.lineItems.showHSN ? (
+                 <td
+                   style={{
+                     padding: "10px",
+                     border: `1px solid ${hexToRgba(invoiceSettings.branding.primaryColor, 0.07) || "#e2e8f0"}`,
+                   }}
+                 >
+                   {matchedGSTItem?.hsn || "-"}
+                 </td>
+               ) : (
+                 <></>
+               )}
+               {invoiceSettings.lineItems.showTaxAmount ? (
+                 <td
+                   style={{
+                     padding: "10px",
+                     border: `1px solid ${hexToRgba(invoiceSettings.branding.primaryColor, 0.07) || "#e2e8f0"}`,
+                   }}
+                 >
+                   {matchedGSTItem?.gst || "-"}
+                 </td>
+               ) : (
+                 <></>
+               )}
+               {invoiceSettings.lineItems.showTaxAmount ? (
+                 <td
+                   style={{
+                     padding: "10px",
+                     border: `1px solid ${hexToRgba(invoiceSettings.branding.primaryColor, 0.07) || "#e2e8f0"}`,
+                     textAlign: "center",
+                   }}
+                 >
+                   ₹
+                   {taxPrice
+                     ? parseFloat(taxPrice).toFixed(2) // Converts to 2 decimal places
+                     : item?.tax_lines[0]?.price
+                     ? parseFloat(item.tax_lines[0].price).toFixed(2)
+                     : "0"}
+                   {/* ₹{item?.tax_lines[0]?.price
    ? parseFloat(item.tax_lines[0].price).toFixed(2)  // Converts to 2 decimal places
-   : (taxPrice ? parseFloat(taxPrice).toFixed(2) : "0")}
-                               </td>
-                             ) : (
-                               <></>
-                             )}
-                             {invoiceSettings.lineItems.showTotalPrice ? (
-                               <td
-                                 style={{
-                                   padding: "10px",
-                                   border: `1px solid ${
-                                     hexToRgba(
-                                       invoiceSettings.branding.primaryColor,
-                                       0.07
-                                     ) || "#e2e8f0"
-                                   }`,
-                                   textAlign: "center",
-                                 }}
-                               >
-                                 ₹{lineAmount || "0"}
-                               </td>
-                             ) : (
-                               <></>
-                             )}
-                           </tr>
+   : (taxPrice ? parseFloat(taxPrice).toFixed(2) : "0")} */}
+                 </td>
+               ) : (
+                 <></>
+               )}
+               {invoiceSettings.lineItems.showTotalPrice ? (
+                 <td
+                   style={{
+                     padding: "10px",
+                     border: `1px solid ${hexToRgba(invoiceSettings.branding.primaryColor, 0.07) || "#e2e8f0"}`,
+                     textAlign: "center",
+                   }}
+                 >
+                   ₹{lineAmount || "0"}
+                 </td>
+               ) : (
+                 <></>
+               )}
+             </tr>
            );
          })}
        </tbody>
@@ -799,7 +813,7 @@ const grandTotal = (totalPrice + Number(totalTaxAmount)).toFixed(2);
                    style={{
                      border: `1px solid ${hexToRgba(invoiceSettings.branding.primaryColor, 0.2) || "#e2e8f0"}`,
                      padding: "10px",
-                     backgroundColor: hexToRgba(invoiceSettings.branding.primaryColor, 0.07),
+                     backgroundColor: hexToRgba(invoiceSettings.branding.primaryColor, 0.02),
                      fontWeight: "bold",
                    }}
                  >
@@ -812,7 +826,12 @@ const grandTotal = (totalPrice + Number(totalTaxAmount)).toFixed(2);
                      textAlign: "right",
                    }}
                  >
-                   ₹{orders[0].subtotal_price}
+                   ₹{" "}
+                   {subTotal?
+                   subTotal.toFixed(2):
+                   orders[0].subtotal_price !== null
+                     ? Number(orders[0].subtotal_price).toFixed(2)
+                     : "0"}
                  </td>
                </tr>
              ) : (
@@ -902,7 +921,7 @@ const grandTotal = (totalPrice + Number(totalTaxAmount)).toFixed(2);
                                 {/* {orders[0].total_tax !== null
                                   ? Number(orders[0].total_tax).toFixed(2)
                                   : "0"} */}
-                                  {totalTaxAmount}
+                                  {totalTaxAmount.toFixed(2)}
                               </td>
                             </tr>
                           ) : null}
@@ -970,7 +989,10 @@ const grandTotal = (totalPrice + Number(totalTaxAmount)).toFixed(2);
                    }}
                  >
                    {/* ₹{orders[0].total_price} */}
-                   ₹{grandTotal}
+                   ₹{" "}
+                   {grandTotal? grandTotal.toFixed(2):orders[0].total_price !== null
+                     ? Number(orders[0].total_price).toFixed(2)
+                     : "0"}
                  </td>
                </tr>
              ) : (
