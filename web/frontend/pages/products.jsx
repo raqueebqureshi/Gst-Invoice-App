@@ -872,7 +872,7 @@ const handleBulkAction = () => {
          <strong style={{ fontSize: "20px" }}>Products</strong>
          <strong>Manage HSN & GST rates</strong>
 
-
+{/* 
          <div
            style={{
              display: "flex",
@@ -901,7 +901,7 @@ const handleBulkAction = () => {
                ).length
              }
            </Badge>
-         </div>
+         </div> */}
        </div>
 
 
