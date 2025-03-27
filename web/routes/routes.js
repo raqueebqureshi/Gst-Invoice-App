@@ -4,6 +4,7 @@ import {
   updateProductsInDB,
   getAndHSNValuesFromDB,
   getProducts,
+  getAllProducts,
 } from "../controllers/productsController.js"; // Import the products controller
 import {
   getTemplateSettings,
@@ -57,6 +58,8 @@ router.post("/api/products/update", updateProductsInDB);
 router.get("/api/products/gsthsn", getAndHSNValuesFromDB);
 
 router.get("/api/products/getProducts", getProducts);
+
+router.get("/api/products/getAllProducts", getAllProducts);
 
 
 
