@@ -76,17 +76,6 @@ app.post("/api/webhooks/shop/redact", (req, res) => {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
 //installing app 
 app.get(
   shopify.config.auth.callbackPath,

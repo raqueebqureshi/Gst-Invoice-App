@@ -902,7 +902,8 @@ export function InvoiceTemplate3({ shopdetails, orders, invoiceSettings, GSTHSNC
                    subTotal.toFixed(2):
                    orders[0].subtotal_price !== null
                      ? Number(orders[0].subtotal_price).toFixed(2)
-                     : "0"}
+                     :
+                      "0"}
                    </td>
                  </tr>
                ) : null}
