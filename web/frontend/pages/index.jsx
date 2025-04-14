@@ -10,7 +10,7 @@ import { LegacyCard, EmptyState } from "@shopify/polaris";
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Icon } from '@shopify/polaris';
-import { StoreIcon } from '@shopify/polaris-icons';
+import { FaStore } from "react-icons/fa";
 
 
 
@@ -163,7 +163,7 @@ export default function HomePage() {
      justifyContent: "center",
    }}
  >
-   <Icon source={StoreIcon} color="base" />
+   <FaStore />
  </div>
 )}
 

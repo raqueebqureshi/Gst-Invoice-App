@@ -1705,7 +1705,7 @@ export function OrderTableEx({ value, shopdetails }) {
               <>
               <div
                 style={{
-                  display: "flex",
+                 
                   gap: "4px",
                   cursor: "pointer",
                   padding: "8px",
