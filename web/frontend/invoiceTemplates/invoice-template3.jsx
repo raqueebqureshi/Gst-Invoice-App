@@ -10,6 +10,7 @@ import SocialMediaIcons from "../components/GlobalSocialIcons";
 export function InvoiceTemplate3({ shopdetails, orders, invoiceSettings, GSTHSNCodes,shopProfile }) {
  // console.log("orders - InvoiceTemplate3", orders[0]);
  // console.log("store - details I3", shopdetails[0]);
+ // console.log("store - profile I3", shopProfile);
  // console.log("invoiceSettings - InvoiceTemplate3", invoiceSettings);
  // console.log("GSTHSNCodes - InvoiceTemplate3", GSTHSNCodes);
 
@@ -63,7 +64,7 @@ export function InvoiceTemplate3({ shopdetails, orders, invoiceSettings, GSTHSNC
  //     .then((data) => {
  //       if (data && data.profile) {
  //         const profileData = data.profile;
- //         // console.log("profileData", profileData);
+ //         console.log("profileData", profileData);
  //         setShopProfile(profileData || {});
  //       }
  //     })
@@ -73,43 +74,6 @@ export function InvoiceTemplate3({ shopdetails, orders, invoiceSettings, GSTHSNC
  // }, [shopId]);
 
 
- const fetchInvoiceSettings = async () => {
-   // console.log("Sending request to fetch invoice settings");
-
-
-   return fetch("/api/fetch-invoice-settings", {
-     method: "POST",
-     headers: { "Content-Type": "application/json" },
-     body: JSON.stringify({ email: email, storeDomain: storeDomain }), // Replace with actual data
-   })
-     .then(async (response) => {
-       if (!response.ok) {
-         return response.text().then((errorText) => {
-           throw new Error(errorText || `HTTP error! Status: ${response.status}`);
-         });
-       }
-       return response.json();
-     })
-     .then((data) => {
-       // setInvoiceSettings(data);
-       const settings = data;
-       // console.log("Received response:", settings);
-
-
-       // console.log("Received response:", JSON.stringify(settings));
-     })
-     .catch((error) => {
-       console.error("Error fetching invoice settings:", error.message);
-     });
- };
-
-
- useEffect(() => {
-   if (storeDomain && email) {
-     fetchInvoiceSettings();
-     // fetchGSTHSNValues();
-   }
- }, [storeDomain, email]);
 
 
  // console.log("billing_address - InvoiceTemplate2", orders[0].billing_address);
@@ -128,38 +92,102 @@ export function InvoiceTemplate3({ shopdetails, orders, invoiceSettings, GSTHSNC
      const matchedGSTItem = GSTHSNCodes.gstcodes
        ? GSTHSNCodes.gstcodes.find((gstItem) => Number(gstItem.productId) === item.product_id)
        : GSTHSNCodes.find((gstItem) => Number(gstItem.productId) === item.product_id);
-     console.log("matchedGSTItem", matchedGSTItem);
+     // console.log("matchedGSTItem", matchedGSTItem);
 
 
+     // let taxPrice = 0;
+     // if (shopdetails[0].taxes_included === true) {
+     //   taxPrice = item?.tax_lines[0]?.price
+     //   ? parseFloat(item.tax_lines[0].price)
+     //   : 0;
+     // } else{
+     //    taxPrice = matchedGSTItem?.gst
+     //   ? (parseFloat(item.price) * parseFloat(matchedGSTItem.gst)) / 100
+     //   // : item?.tax_lines[0]?.price
+     //   //   ? parseFloat(item.tax_lines[0].price)
+     //     : 0;
+     // }
      const taxPrice = matchedGSTItem?.gst
-     ? (parseFloat(item.price) * parseFloat(matchedGSTItem.gst)) / 100
-     : item?.tax_lines[0]?.price
-       ? parseFloat(item.tax_lines[0].price)
-       : 0;
+     ? (parseFloat(item.price) * parseFloat(matchedGSTItem.gst)) / 100 * item.quantity
+     // : item?.tax_lines[0]?.price
+     //   ? parseFloat(item.tax_lines[0].price)
+     : 0;
      // const taxPrice = item?.tax_lines[0]?.price
      //   ? parseFloat(item.tax_lines[0].price)
      //   : matchedGSTItem?.gst
      //   ? (parseFloat(item.price) * parseFloat(matchedGSTItem.gst)) / 100
      //   : 0;
-
-
+   
+     // console.log('acc + taxPrice:', acc + taxPrice);
      return acc + taxPrice;
+     // return taxPrice;
    }, 0)
    ; // Convert to 2 decimal places
 
 
-  let totalPrice = orders[0].total_price !== null ? Number(orders[0].total_price - orders[0].total_tax) : 0;
- let subTotal = 0;
- let grandTotal = 0;
 
 
- if (shopdetails[0].taxes_included === true) {
-    subTotal = totalPrice - totalTaxAmount;
-   grandTotal = subTotal + Number(totalTaxAmount);
- } else {
-    subTotal = totalPrice;
-   grandTotal = subTotal + Number(totalTaxAmount);
- }
+   // Compute total tax across all line items
+ const totalTaxAmountForSubtotal = orders[0].line_items
+ ?.reduce((acc, item) => {
+   const matchedGSTItem = GSTHSNCodes.gstcodes
+     ? GSTHSNCodes.gstcodes.find((gstItem) => Number(gstItem.productId) === item.product_id)
+     : GSTHSNCodes.find((gstItem) => Number(gstItem.productId) === item.product_id);
+   // console.log("matchedGSTItem", matchedGSTItem);
+
+
+   let taxPrice = 0;
+   if (shopdetails[0].taxes_included === true) {
+     taxPrice = item?.tax_lines[0]?.price
+     ? parseFloat(item.tax_lines[0].price)
+     : 0;
+   } else{
+      taxPrice = matchedGSTItem?.gst
+     ? (parseFloat(item.price) * parseFloat(matchedGSTItem.gst)) / 100
+     // : item?.tax_lines[0]?.price
+     //   ? parseFloat(item.tax_lines[0].price)
+       : 0;
+   }
+   // const taxPrice = matchedGSTItem?.gst
+   // ? (parseFloat(item.price) * parseFloat(matchedGSTItem.gst)) / 100
+   // : item?.tax_lines[0]?.price
+   //   ? parseFloat(item.tax_lines[0].price)
+   // : 0;
+   // const taxPrice = item?.tax_lines[0]?.price
+   //   ? parseFloat(item.tax_lines[0].price)
+   //   : matchedGSTItem?.gst
+   //   ? (parseFloat(item.price) * parseFloat(matchedGSTItem.gst)) / 100
+   //   : 0;
+ 
+   // console.log('acc + taxPrice:', acc + taxPrice);
+   return acc + taxPrice;
+   // return taxPrice;
+ }, 0)
+ ; // Convert to 2 decimal places
+
+
+  let totalPrice = orders[0].total_price !== null ? Number(orders[0].total_price )
+   // - orders[0].total_tax)
+    : 0;
+    let subTotal = totalPrice - totalTaxAmountForSubtotal;
+    let grandTotal =
+      subTotal +
+      Number(totalTaxAmount) +
+      (orders[0]?.shipping_lines[0]?.price
+        ? Number(orders[0]?.shipping_lines[0]?.price)
+        : 0) -
+      (orders[0]?.discount_codes[0]?.amount
+        ? Number(orders[0]?.discount_codes[0]?.amount)
+        : 0);
+
+
+ // if (shopdetails[0].taxes_included === true) {
+  //   subTotal = totalPrice - totalTaxAmountForSubtotal;
+ //   grandTotal = subTotal + Number(totalTaxAmount);
+ // } else {
+  //   subTotal = totalPrice - totalTaxAmountForSubtotal;
+ //   grandTotal = subTotal + Number(totalTaxAmount);
+ // }
 
 
  useEffect(() => {
@@ -300,11 +328,14 @@ export function InvoiceTemplate3({ shopdetails, orders, invoiceSettings, GSTHSNC
                    ) : (
                      <></>
                    )}{" "}
-                   {invoiceSettings.billing.showCompany ? (
-                     `(${orders[0]?.billing_address?.company !== null ? orders[0]?.billing_address?.company : "Not Available"})`
-                   ) : (
-                     <></>
-                   )}
+                   {invoiceSettings.billing.showCompany && (
+   
+ orders[0]?.billing_address?.company &&
+  <span> ({orders[0].billing_address.company})</span>
+  
+
+
+)}
                  </p>
                  <p>
                    {invoiceSettings.billing.showAddress1 ? (
@@ -397,11 +428,14 @@ export function InvoiceTemplate3({ shopdetails, orders, invoiceSettings, GSTHSNC
                    ) : (
                      <></>
                    )}{" "}
-                   {invoiceSettings.shipping.showCompany ? (
-                     `(${orders[0]?.shipping_address?.company !== null ? orders[0]?.shipping_address?.company : "Not Available"})`
-                   ) : (
-                     <></>
-                   )}
+                   {invoiceSettings.shipping.showCompany && (
+   
+ orders[0]?.shipping_address?.company &&
+  <span> ({orders[0].shipping_address.company})</span>
+  
+
+
+)}
                  </p>
                  <p>
                    {invoiceSettings.shipping.showAddress1 ? (
@@ -663,7 +697,7 @@ export function InvoiceTemplate3({ shopdetails, orders, invoiceSettings, GSTHSNC
              : GSTHSNCodes.find(
                  (gstItem) => Number(gstItem.productId) === item.product_id
                );
-           console.log("matchedGSTItem", matchedGSTItem);
+           // console.log("matchedGSTItem", matchedGSTItem);
 
 
            let taxPrice = 0;
@@ -672,18 +706,20 @@ export function InvoiceTemplate3({ shopdetails, orders, invoiceSettings, GSTHSNC
 
 
            if (shopdetails[0].taxes_included === true) {
-             console.log("item", item);
-             taxPrice = item.price * (matchedGSTItem?.gst / 100) || 0;
+             // console.log("item", item);
+             taxPrice = item.price * (matchedGSTItem?.gst / 100) * item.quantity || 0;
              price =
                parseFloat(item.price) -
-                 Number(taxPrice ? taxPrice : item?.tax_lines[0]?.price ? parseFloat(item.tax_lines[0].price) : 0) ||
+                 // Number(taxPrice ? taxPrice : item?.tax_lines[0]?.price ? parseFloat(item.tax_lines[0].price) : 0) ||
                0; // Convert to a number and default to 0 if NaN
 
 
-             console.log("taxPrice", taxPrice);
+             // console.log("taxPrice", taxPrice);
              lineAmount = (
                item.quantity * price +
-               (Number(taxPrice ? taxPrice : item?.tax_lines[0]?.price ? parseFloat(item.tax_lines[0].price) : 0) || 0)
+               (Number(taxPrice ? taxPrice
+                 // : item?.tax_lines[0]?.price ? parseFloat(item.tax_lines[0].price)
+                 : 0) || 0)
              )
            
                .toFixed(2); // Ensures final result is in 2 decimal format
@@ -692,10 +728,12 @@ export function InvoiceTemplate3({ shopdetails, orders, invoiceSettings, GSTHSNC
              price = parseFloat(item.price) || 0; // Convert to a number and default to 0 if NaN
 
 
-             console.log("taxPrice", taxPrice);
+             // console.log("taxPrice", taxPrice);
              lineAmount = (
                item.quantity * price +
-               (Number(taxPrice ? taxPrice : item?.tax_lines[0]?.price ? parseFloat(item.tax_lines[0].price) : 0) || 0)
+               (Number(taxPrice ? taxPrice
+                 // : item?.tax_lines[0]?.price ? parseFloat(item.tax_lines[0].price)
+                 : 0) || 0)
              )
             
                .toFixed(2); // Ensures final result is in 2 decimal format
@@ -781,8 +819,8 @@ export function InvoiceTemplate3({ shopdetails, orders, invoiceSettings, GSTHSNC
                    ₹
                    {taxPrice
                      ? parseFloat(taxPrice).toFixed(2) // Converts to 2 decimal places
-                     : item?.tax_lines[0]?.price
-                     ? parseFloat(item.tax_lines[0].price).toFixed(2)
+                     // : item?.tax_lines[0]?.price
+                     // ? parseFloat(item.tax_lines[0].price).toFixed(2)
                      : "0"}
                    {/* ₹{item?.tax_lines[0]?.price
    ? parseFloat(item.tax_lines[0].price).toFixed(2)  // Converts to 2 decimal places
@@ -831,7 +869,9 @@ export function InvoiceTemplate3({ shopdetails, orders, invoiceSettings, GSTHSNC
              <div style={{ marginTop: "20px", marginLeft: "10px" }}>
                <p style={{ margin: "0", fontWeight: "bold" }}>Total Amount (₹ - In Words):</p>
                <p style={{ fontStyle: "italic", color: "#4a5568" }}>
-                 {convertAmountToWords(orders[0].total_price || 0)}
+                 {convertAmountToWords(grandTotal
+                   // orders[0].total_price
+                    || 0)}
                </p>
              </div>
            ) : null}
@@ -899,11 +939,10 @@ export function InvoiceTemplate3({ shopdetails, orders, invoiceSettings, GSTHSNC
                    >
                     ₹{" "}
                    {subTotal?
-                   subTotal.toFixed(2):
-                   orders[0].subtotal_price !== null
-                     ? Number(orders[0].subtotal_price).toFixed(2)
-                     :
-                      "0"}
+                   subTotal.toFixed(2)
+                   // :orders[0].subtotal_price !== null
+                   //   ? Number(orders[0].subtotal_price).toFixed(2)
+                     : "0"}
                    </td>
                  </tr>
                ) : null}
@@ -1057,8 +1096,9 @@ export function InvoiceTemplate3({ shopdetails, orders, invoiceSettings, GSTHSNC
                    >
                      {/* ₹ {orders[0].total_price !== null ? Number(orders[0].total_price).toFixed(2) : "0.00"} */}
                      ₹{" "}
-                   {grandTotal? grandTotal.toFixed(2):orders[0].total_price !== null
-                     ? Number(orders[0].total_price).toFixed(2)
+                   {grandTotal? grandTotal.toFixed(2)
+                   // :orders[0].total_price !== null
+                   //   ? Number(orders[0].total_price).toFixed(2)
                      : "0"}
                    </td>
                  </tr>
@@ -1170,6 +1210,8 @@ export function InvoiceTemplate3({ shopdetails, orders, invoiceSettings, GSTHSNC
    </div>
  );
 }
+
+
 
 
 

@@ -24,7 +24,8 @@ import {
   EmptyState,
   SkeletonPage,
 } from "@shopify/polaris";
-import { VscSend } from "react-icons/vsc";
+
+import { TbMailForward } from "react-icons/tb";
 
 import ReactDOM from "react-dom";
 import jsPDF from "jspdf";
@@ -1701,11 +1702,13 @@ export function OrderTableEx({ value, shopdetails }) {
             {sendingRowId === id ? (
               <Spinner accessibilityLabel="Sending invoice" size="small" />
             ) : (
-              <VscSend
+              <>
+              <div
                 style={{
-                  width: "25px",
+                  display: "flex",
+                  gap: "4px",
                   cursor: "pointer",
-                  padding: "4px",
+                  padding: "8px",
                   border: "1px solid black",
                   borderRadius: "6px",
                   boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)",
@@ -1716,14 +1719,8 @@ export function OrderTableEx({ value, shopdetails }) {
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  opacity:
-                  selectedOrders.length > 1 
-                      ? "0.5"
-                      : "1",
-                  pointerEvents:
-                  selectedOrders.length > 1 
-                      ? "none"
-                      : "auto",
+                  opacity: selectedOrders.length > 1 ? "0.5" : "1",
+                  pointerEvents: selectedOrders.length > 1 ? "none" : "auto",
                 }}
                 onClick={() => {
                   if (orders.length > 50) {
@@ -1748,9 +1745,9 @@ export function OrderTableEx({ value, shopdetails }) {
                           setSendingRowId(null);
                           setShowToast(true);
                           setToastMessage("Invoice sent");
-                          if(shopId) {  
-                            countInvoiceSent(shopId,1);
-                            }
+                          if (shopId) {
+                            countInvoiceSent(shopId, 1);
+                          }
                         })
                         .catch(() => {
                           setIsSending(false);
@@ -1759,7 +1756,15 @@ export function OrderTableEx({ value, shopdetails }) {
                     }
                   }
                 }}
-              />
+              >
+                <span style={{ fontSize: "10px" }}>SEND</span>
+                <TbMailForward />
+              </div>
+            </>
+
+
+
+
             )}
           </ButtonGroup>
         </IndexTable.Cell>
