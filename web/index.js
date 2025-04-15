@@ -52,12 +52,41 @@ app.post("/api/webhooks/orders/create", (req, res) => {
   res.status(200).send("Webhook received.");
 });
 
-app.post("/api/webhooks/app/uninstalled", (req, res) => {
-  console.log("Received app/uninstalled webhook:", req.body);
-  // Add cleanup logic here
-  res.status(200).send("Webhook received.");
-});
-
+// on app/uninstalled webhook
+app.post("/api/webhooks/app/uninstalled", async (req, res) => {
+  const bodyData = req.body; // Already parsed by express.json()
+  console.log("Received app/uninstalled webhook:", bodyData);
+ 
+ 
+  const domain = bodyData.domain;
+ 
+ 
+  try {
+    const updatedStore = await StoreProfile.findOneAndUpdate(
+      { storeDomain: domain },
+      {
+        "plans.planId": 0,
+        "plans.planStartDate": null,
+      },
+      { new: true }
+    );
+ 
+ 
+    if (updatedStore) {
+      console.log(`✅ planId reset to 0 for ${domain}`);
+    } else {
+      console.warn(`⚠️ No matching store found for ${domain}`);
+    }
+ 
+ 
+    res.status(200).send("Webhook received.");
+  } catch (err) {
+    console.error("❌ Error in APP_UNINSTALLED webhook:", err);
+    res.status(500).send("Internal Server Error.");
+  }
+ });
+ 
+ 
 app.post("/api/webhooks/customers/data_request", (req, res) => {
   console.log("Received app/customers/data_request.", req.body);
   // Add cleanup logic here
@@ -73,7 +102,12 @@ app.post("/api/webhooks/shop/redact", (req, res) => {
   // Add cleanup logic here
   res.status(200).send("Webhook received.");
 });
-
+app.post("/api/webhooks", (req, res) => {
+  console.log("Faulty Webhook received ----From: /api/webhook", req.body);
+  // Add cleanup logic here
+  res.status(200).send("Webhook received.");
+}
+);
 
 
 //installing app 
@@ -189,44 +223,46 @@ app.get(
 
 
 //to update product count into db
-app.put('/api/update-product-count', async (req, res) => {
-  // console.log("Received request body:", req.body);
 
-  const { storeDomain, productCount } = req.body || {};
+// app.put('/api/update-product-count', async (req, res) => {
+//   // console.log("Received request body:", req.body);
 
-  if (!storeDomain || !productCount) {
-    res.status(400).json({ message: 'Missing storeDomain or productCount' }); 
-    return;
-  }
+//   const { storeDomain, productCount } = req.body || {};
 
-  try {
-    // Retrieve session for the store
-    const session = await shopify.api.session.customAppSession(storeDomain); // Fix: Use customAppSession
+//   if (!storeDomain || !productCount) {
+//     res.status(400).json({ message: 'Missing storeDomain or productCount' }); 
+//     return;
+//   }
 
-    // Update the store's product count in MongoDB
-    let updatedStore = await Store.findOneAndUpdate(
-      { storeDomain },
-      { storeProductCount: productCount.toString() },  // Update with product count as string
-      { new: true }  // Return the updated document
-    );
+//   try {
+//     // Retrieve session for the store
+//     const session = await shopify.api.session.customAppSession(storeDomain); // Fix: Use customAppSession
 
-    if (updatedStore) {
-      res.status(200).json({
-        message: "Product count updated successfully",
-        storeProductCount: updatedStore.storeProductCount  // Send updated count to frontend
-      });
-    } else {
-      res.status(404).json({ message: "Store not found" });
-    }
-  } catch (error) {
-    console.error("Error updating product count", error);
-    res.status(500).json({ message: "Failed to update product count" });
-  }
-});
+//     // Update the store's product count in MongoDB
+//     let updatedStore = await Store.findOneAndUpdate(
+//       { storeDomain },
+//       { storeProductCount: productCount.toString() },  // Update with product count as string
+//       { new: true }  // Return the updated document
+//     );
+
+//     if (updatedStore) {
+//       res.status(200).json({
+//         message: "Product count updated successfully",
+//         storeProductCount: updatedStore.storeProductCount  // Send updated count to frontend
+//       });
+//     } else {
+//       res.status(404).json({ message: "Store not found" });
+//     }
+//   } catch (error) {
+//     console.error("Error updating product count", error);
+//     res.status(500).json({ message: "Failed to update product count" });
+//   }
+// });
 
 
 
 // Update invoice template API
+
 app.post('/api/update-invoice-template', async (req, res) => {
   const { storeDomain, invoiceTemplate } = req.body;
   console.log("Received request body:", req.body);
@@ -397,19 +433,19 @@ app.get("/api/2024-10/shop.json", async (req, res) => {
 //   res.status(200).send({ count: countData.data.productsCount.count });
 // });
 
-app.post("/api/products", async (_req, res) => {
-  let status = 200;
-  let error = null;
+// app.post("/api/products", async (_req, res) => {
+//   let status = 200;
+//   let error = null;
 
-  try {
-    await productCreator(res.locals.shopify.session);
-  } catch (e) {
-    console.log(`Failed to process products/create: ${e.message}`);
-    status = 500;
-    error = e.message;
-  }
-  res.status(status).send({ success: status === 200, error });
-});
+//   try {
+//     await productCreator(res.locals.shopify.session);
+//   } catch (e) {
+//     console.log(`Failed to process products/create: ${e.message}`);
+//     status = 500;
+//     error = e.message;
+//   }
+//   res.status(status).send({ success: status === 200, error });
+// });
 
 app.use(shopify.cspHeaders());
 app.use(serveStatic(STATIC_PATH, { index: false }));

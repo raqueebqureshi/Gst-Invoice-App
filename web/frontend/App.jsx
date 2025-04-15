@@ -133,7 +133,7 @@ function CustomRouter({ pages }) {
      // Step 3: Use the comprehensive validation function to check if all required fields are filled
      if (profileData && profileData.profile && isProfileComplete(profileData.profile)) {
        // Store plan ID in localStorage if needed
-       const currentPlanId = profileData.profile.plans?.planId?.toString() || ""
+       const currentPlanId = profileData.profile.plans?.planId?.toString() || "0"
        localStorage.setItem("currentPlan", currentPlanId)
 
 

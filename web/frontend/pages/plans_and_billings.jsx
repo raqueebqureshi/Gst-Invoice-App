@@ -34,6 +34,7 @@ export default function Plans() {
               // console.log("tempID" ,tempID);
               const fetchedPlanId = response.updatedStore.plans.planId;
               setplanId(fetchedPlanId);
+              localStorage.setItem("currentPlan", fetchedPlanId.toString()); // Store only the plan ID as string
             })
             .catch((error) => console.log(error));
         }
