@@ -60,7 +60,7 @@ export const handleBillingConfirmation = async (req, res) => {
 const subscription = response.body.data.currentAppInstallation.activeSubscriptions[0];
 
 if (!subscription) {
-  return res.status(404).json({ success: false, message: "No active subscription found." });
+  return res.status(404).json({ success: false, message: "No active subscription found.", planId: "0" });
 }
 
 const subscriptionName = subscription.name;

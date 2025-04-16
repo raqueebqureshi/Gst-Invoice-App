@@ -23,6 +23,8 @@ import {
   SkeletonDisplayText,
   EmptyState,
   SkeletonPage,
+  Layout,
+  Banner,
 } from "@shopify/polaris";
 
 import { TbMailForward } from "react-icons/tb";
@@ -80,18 +82,20 @@ export function OrderTableEx({ value, shopdetails }) {
   const [isSubscribed, setIsSubscribed] = useState(false);
   const itemsPerPage = 20;
 
-  
-
   // Toggle individual order selection
   const handleOrderSelection = (id) => {
     setSelectedOrders((prevSelected) =>
-      prevSelected.includes(id) ? prevSelected.filter((orderId) => orderId !== id) : [...prevSelected, id]
+      prevSelected.includes(id)
+        ? prevSelected.filter((orderId) => orderId !== id)
+        : [...prevSelected, id]
     );
   };
 
   // Toggle all orders selection
   const handleSelectAll = () => {
-    setSelectedOrders(allSelected ? [] : paginatedOrders.map((order) => order.id));
+    setSelectedOrders(
+      allSelected ? [] : paginatedOrders.map((order) => order.id)
+    );
   };
   // const [showToast, setShowToast] = useState({
   //   active: false,
@@ -203,55 +207,6 @@ export function OrderTableEx({ value, shopdetails }) {
     },
   });
 
-  // const handleShowToast = (message, error = false) => {
-  //   setShowToast({ active: true, message, error });
-  // };
-
-  // useEffect(() => {
-  //   fetch("/api/2024-10/shop.json", {
-  //     method: "GET",
-  //     headers: { "Content-Type": "application/json" },
-  //   })
-  //     .then((response) => response.json())
-  //     .then((data) => {
-  //       console.log("Store Details---!", data.data);
-  //       setShopId(data.data.data[0].id);
-  //       if (data.data.data && data.data.data.length > 0) {
-  //         setStoreDomain(data.data.data[0].domain);
-  //         setEmail(data.data.data[0].email);
-  //         setShopId(data.data.data[0].id);
-
-  //        const response =  fetch(`/api/billing/confirm?shop=${data.data.data[0].domain}`, {
-  //           method: "GET",
-  //           headers: { "Content-Type": "application/json" },
-  //         });
-
-  //         if(response.ok){
-  //           console.log('response', response)
-  //       }
-  //   }  })
-  //     .catch((error) => {
-  //       setShowToast(true);
-  //       setToastMessage("Internal Server Error 500");
-  //       console.log('error', error);        // handleShowToast("Internal Server Error 500", true)
-  //     });
-
-  //   const storedResponse = JSON.parse(localStorage.getItem("billingInfo"));
-  //   const proPlanResponse = JSON.parse(localStorage.getItem("proplan"));
-  //   const businessPlanResponse = JSON.parse(localStorage.getItem("businessplan"));
-  //   const currentPlanId = planId?.toString();
-  //   // Compare the numeric part with the plans
-  //   if (currentPlanId === proPlanResponse || currentPlanId === businessPlanResponse) {
-  //     setIsSubscribed(true);
-  //     console.log(
-  //       "Current Plan:",
-  //       proPlanResponse === currentPlanId ? `Pro: ${proPlanResponse}` : `Business: ${businessPlanResponse}`
-  //     );
-  //   } else {
-  //     setIsSubscribed(false);
-  //   }
-  // }, []);
-
   useEffect(() => {
     const fetchStoreDetails = async () => {
       try {
@@ -300,12 +255,11 @@ export function OrderTableEx({ value, shopdetails }) {
 
     fetchStoreDetails();
 
-  
     // Retrieve stored plans from localStorage
-    const currentPlan  = localStorage.getItem("currentPlan");
+    const currentPlan = localStorage.getItem("currentPlan");
     const currentPlanId = currentPlan.toString();
 
-      // Compare the numeric part with the plans
+    // Compare the numeric part with the plans
     if (currentPlanId === "1" || currentPlanId === "2") {
       setIsSubscribed(true);
       // console.log(
@@ -333,50 +287,51 @@ export function OrderTableEx({ value, shopdetails }) {
 
   const countInvoiceDownloads = async (shopId, incrementBy) => {
     try {
-      const response = await fetch(`/api/update-total-invoice-downaload`,
+      const response = await fetch(
+        `/api/update-total-invoice-downaload`,
 
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ 
-            shopId: shopId, 
-            incrementBy: incrementBy }),
+          body: JSON.stringify({
+            shopId: shopId,
+            incrementBy: incrementBy,
+          }),
         }
       );
-      
+
       if (!response.ok) {
         throw new Error(`HTTP Error! Status: ${response.status}`);
       }
-  
+
       const data = await response.json();
       // console.log("Invoice Downloads:", data);
-  
     } catch (error) {
       console.error("Error fetching invoice downloads:", error);
     }
   };
 
-
   const countInvoicePrint = async (shopId, incrementBy) => {
     try {
-      const response = await fetch(`/api/update-total-invoice-print`,
+      const response = await fetch(
+        `/api/update-total-invoice-print`,
 
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ 
-            shopId: shopId, 
-            incrementBy: incrementBy }),
+          body: JSON.stringify({
+            shopId: shopId,
+            incrementBy: incrementBy,
+          }),
         }
       );
-      
+
       if (!response.ok) {
         throw new Error(`HTTP Error! Status: ${response.status}`);
       }
-  
+
       const data = await response.json();
       // console.log("Invoice Print:", data);
-  
     } catch (error) {
       console.error("Error fetching invoice downloads:", error);
     }
@@ -384,24 +339,25 @@ export function OrderTableEx({ value, shopdetails }) {
 
   const countInvoiceSent = async (shopId, incrementBy) => {
     try {
-      const response = await fetch(`/api/update-total-invoice-sent`,
+      const response = await fetch(
+        `/api/update-total-invoice-sent`,
 
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ 
-            shopId: shopId, 
-            incrementBy: incrementBy }),
+          body: JSON.stringify({
+            shopId: shopId,
+            incrementBy: incrementBy,
+          }),
         }
       );
-      
+
       if (!response.ok) {
         throw new Error(`HTTP Error! Status: ${response.status}`);
       }
-  
+
       const data = await response.json();
       // console.log("Invoice Sent:", data);
-  
     } catch (error) {
       console.error("Error fetching invoice downloads:", error);
     }
@@ -441,14 +397,16 @@ export function OrderTableEx({ value, shopdetails }) {
 
   const fetchLastMonthOrders = async () => {
     try {
-      const response = await fetch(`/api/last-month-order-count?shop=${storeDomain
-      }`, {
-        method: "GET",
-        headers: { "Content-Type": "application/json" },
-      });
-  
+      const response = await fetch(
+        `/api/last-month-order-count?shop=${storeDomain}`,
+        {
+          method: "GET",
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+
       const data = await response.json();
-      
+
       if (data.success) {
         console.log("📦 Last month's order count:", data);
         return data.lastMonthOrderCount;
@@ -464,14 +422,12 @@ export function OrderTableEx({ value, shopdetails }) {
   useEffect(() => {
     if (storeDomain) {
       fetchOrders();
-      
     }
   }, [storeDomain]);
 
-  // useEffect(() => { 
+  // useEffect(() => {
   //   fetchLastMonthOrders();
   // });
-  
 
   useEffect(() => {
     if (shopId) {
@@ -501,20 +457,60 @@ export function OrderTableEx({ value, shopdetails }) {
     }, 3000);
   }, [showToast]);
 
-  // const handleSendClick = (index) => {
-  //   if (!sendingStatus[index]) {
-  //     setSendingStatus((prev) => ({ ...prev, [index]: true })); // Set this row to "sending"
-  //     quickSendInvoice({
-  //       orderDetails: paginatedOrders[index],
-  //       shopDetails: shopdetails,
-  //       invoiceSettings: InvoiceSetting2,
-  //       customerEmail: paginatedOrders[index].customer.email,
-  //       gstcodes: GSTHSNCodes,
-  //       currentTemplate: currentTemplateId,
-  //       shopProfile,
-  //     })
-  //       .then(() => setSendingStatus((prev) => ({ ...prev, [index]: false }))) // Reset on success
-  //       .catch(() => setSendingStatus((prev) => ({ ...prev, [index]: false }))); // Reset on failure
+  // const sendInvoiceToCustomer = async (
+  //   orderDetails,
+  //   shopDetails,
+  //   invoiceSettings,
+  //   customerEmail,
+  //   gstcodes,
+  //   currentTemplateId
+  // ) => {
+  //   try {
+  //     setIsSending(true);
+  //     // Fetch the generated PDF file as Blob
+  //     const pdfBlob = await generatePDFBlob(
+  //       orderDetails,
+  //       shopDetails,
+  //       invoiceSettings,
+  //       currentTemplateId,
+  //       gstcodes,
+  //       shopProfile
+  //     );
+
+  //     // Create a FormData object to include the Blob and additional data
+  //     const formData = new FormData();
+  //     formData.append(
+  //       "file",
+  //       pdfBlob,
+  //       `Invoice-${orderDetails.order_number}.pdf`
+  //     );
+  //     formData.append("customerEmail", customerEmail);
+  //     formData.append("orderId", orderDetails.order_number);
+  //     formData.append("shopDetails", JSON.stringify(shopDetails));
+
+  //     // console.log("formData",formData);
+  //     // Send request to the backend API
+  //     const response = await fetch("/api/send-invoice", {
+  //       method: "POST",
+  //       body: formData,
+  //     });
+
+  //     if (!response.ok) {
+  //       // handleShowToast("Invoice sent successfully.");
+  //       setShowToast(true);
+  //       setToastMessage("Internal Server Error 500");
+  //     } else {
+  //       const errorData = await response.json();
+  //       console.error("Error sending invoice:", errorData);
+  //       setShowToast(true);
+  //       setToastMessage("Failed to send invoice.");
+  //       // handleShowToast("", true);
+  //     }
+  //   } catch (error) {
+  //     //console.error("Error in sending invoice:", error);
+  //     setShowToast(true);
+  //     setToastMessage("An error occurred while sending the invoice.");
+  //     // handleShowToast("", true);
   //   }
   // };
 
@@ -524,7 +520,8 @@ export function OrderTableEx({ value, shopdetails }) {
     invoiceSettings,
     customerEmail,
     gstcodes,
-    currentTemplateId
+    currentTemplateId,
+    shopifyTax
   ) => {
     try {
       setIsSending(true);
@@ -535,36 +532,38 @@ export function OrderTableEx({ value, shopdetails }) {
         invoiceSettings,
         currentTemplateId,
         gstcodes,
-        shopProfile
+        shopProfile,
+        shopifyTax
       );
-
+ 
+ 
       // Create a FormData object to include the Blob and additional data
       const formData = new FormData();
-      formData.append(
-        "file",
-        pdfBlob,
-        `Invoice-${orderDetails.order_number}.pdf`
-      );
+      formData.append("file", pdfBlob, `Invoice-${orderDetails.order_number}.pdf`);
       formData.append("customerEmail", customerEmail);
       formData.append("orderId", orderDetails.order_number);
       formData.append("shopDetails", JSON.stringify(shopDetails));
-
+ 
+ 
       // console.log("formData",formData);
       // Send request to the backend API
       const response = await fetch("/api/send-invoice", {
         method: "POST",
         body: formData,
       });
-
+ 
+ 
       if (!response.ok) {
         // handleShowToast("Invoice sent successfully.");
-        setShowToast(true);
-        setToastMessage("Internal Server Error 500");
-      } else {
         const errorData = await response.json();
         console.error("Error sending invoice:", errorData);
         setShowToast(true);
-        setToastMessage("Failed to send invoice.");
+        setToastMessage("Internal Server Error 500");
+      } else {
+        const resp = await response.json();
+        console.log("Successfull sending invoice:", resp);
+        setShowToast(true);
+        setToastMessage("Sent invoice.");
         // handleShowToast("", true);
       }
     } catch (error) {
@@ -574,6 +573,12 @@ export function OrderTableEx({ value, shopdetails }) {
       // handleShowToast("", true);
     }
   };
+ 
+ 
+ 
+ 
+
+
 
   useEffect(() => {
     if (shopId) {
@@ -675,21 +680,187 @@ export function OrderTableEx({ value, shopdetails }) {
   //   return pdf.output("blob");
   // };
 
+  // const generatePDFBlob = async (
+  //   orderDetails,
+  //   shopDetails,
+  //   invoiceSettings,
+  //   currentTemplateId,
+  //   gstcodes,
+  //   shopProfile
+  // ) => {
+  //   if (!orderDetails || !currentTemplateId) {
+  //     console.error(
+  //       "Order details or template ID not available for PDF generation."
+  //     );
+  //     throw new Error("Order details or template ID is missing.");
+  //   }
+
+  //   // console.log("Generating PDF Blob with:", {
+  //   //   orderDetails,
+  //   //   shopDetails,
+  //   //   invoiceSettings,
+  //   //   currentTemplateId,
+  //   //   gstcodes,
+  //   //   shopProfile,
+  //   // });
+
+  //   // Utility to preload images and resolve CORS issues
+  //   const loadImageAsDataURL = async (url) => {
+  //     try {
+  //       const response = await fetch(url, { mode: "cors" });
+  //       const blob = await response.blob();
+  //       return new Promise((resolve, reject) => {
+  //         const reader = new FileReader();
+  //         reader.onloadend = () => resolve(reader.result);
+  //         reader.onerror = () =>
+  //           reject(new Error(`Failed to convert image: ${url}`));
+  //         reader.readAsDataURL(blob);
+  //       });
+  //     } catch (error) {
+  //       console.error(`Failed to load image at ${url}:`, error);
+  //       return ""; // Fallback to empty string
+  //     }
+  //   };
+
+  //   // Preload all images (e.g., logo and signature)
+  //   const preloadImages = async () => {
+  //     if (shopProfile?.images?.logoURL) {
+  //       shopProfile.images.logoURL = await loadImageAsDataURL(
+  //         shopProfile.images.logoURL
+  //       );
+  //     }
+  //     if (shopProfile?.images?.signatureURL) {
+  //       shopProfile.images.signatureURL = await loadImageAsDataURL(
+  //         shopProfile.images.signatureURL
+  //       );
+  //     }
+  //   };
+
+  //   try {
+  //     // Preload images before rendering
+  //     await preloadImages();
+
+  //     const pdf = new jsPDF("p", "pt", "a4");
+  //     const invoiceContainer = document.createElement("div");
+  //     invoiceContainer.style.width = "794px";
+  //     invoiceContainer.style.height = "1123px";
+  //     invoiceContainer.style.position = "absolute";
+  //     invoiceContainer.style.top = "-9999px";
+  //     document.body.appendChild(invoiceContainer);
+
+  //     const renderInvoiceTemplate = () => {
+  //       switch (currentTemplateId) {
+  //         case "1":
+  //           ReactDOM.render(
+  //             <InvoiceTemplate1
+  //               shopdetails={[shopDetails]}
+  //               orders={[orderDetails]}
+  //               invoiceSettings={invoiceSettings}
+  //               GSTHSNCodes={gstcodes}
+  //               shopProfile={shopProfile}
+  //             />,
+  //             invoiceContainer
+  //           );
+  //           break;
+  //         case "2":
+  //           ReactDOM.render(
+  //             <InvoiceTemplate2
+  //               shopdetails={[shopDetails]}
+  //               orders={[orderDetails]}
+  //               invoiceSettings={invoiceSettings}
+  //               GSTHSNCodes={gstcodes}
+  //               shopProfile={shopProfile}
+  //             />,
+  //             invoiceContainer
+  //           );
+  //           break;
+  //         case "3":
+  //           ReactDOM.render(
+  //             <InvoiceTemplate3
+  //               shopdetails={[shopDetails]}
+  //               orders={[orderDetails]}
+  //               invoiceSettings={invoiceSettings}
+  //               GSTHSNCodes={gstcodes}
+  //               shopProfile={shopProfile}
+  //             />,
+  //             invoiceContainer
+  //           );
+  //           break;
+  //         default:
+  //           throw new Error("Invalid template ID.");
+  //       }
+  //     };
+
+  //     renderInvoiceTemplate();
+
+  //     // Wait for rendering to complete
+  //     await new Promise((resolve) => setTimeout(resolve, 2000));
+
+  //     const canvas = await html2canvas(invoiceContainer, {
+  //       scale: 2,
+  //       useCORS: true,
+  //       allowTaint: false,
+  //     });
+
+  //     const imgData = canvas.toDataURL("image/jpeg");
+  //     document.body.removeChild(invoiceContainer);
+
+  //     const pdfWidth = pdf.internal.pageSize.getWidth();
+  //     const imgWidth = pdfWidth - 20;
+  //     const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+  //     pdf.addImage(imgData, "PNG", 10, 10, imgWidth, imgHeight);
+
+  //     // Return the PDF as a Blob
+  //     return pdf.output("blob");
+  //   } catch (error) {
+  //     console.error("Error generating PDF Blob:", error);
+  //     throw error; // Ensure the caller knows about the failure
+  //   }
+  // };
+
+  // const quickSendInvoice = async ({
+  //   orderDetails,
+  //   shopDetails,
+  //   invoiceSettings,
+  //   customerEmail,
+  //   gstcodes,
+  //   currentTemplate,
+  //   shopProfile,
+  // }) => {
+  //   //console.log("hhhhhhhhhhhhhhhhhhhhh",orderDetails, shopDetails, invoiceSettings, customerEmail, gstcodes, currentTemplate);
+  //   try {
+  //     await sendInvoiceToCustomer(
+  //       orderDetails,
+  //       shopDetails,
+  //       invoiceSettings,
+  //       customerEmail,
+  //       gstcodes,
+  //       currentTemplate,
+  //       shopProfile
+  //     );
+  //   } catch (error) {
+  //     console.error("Error in Quick Send:", error);
+  //     setShowToast(true);
+  //     setToastMessage("An error occurred while sending the invoice.");
+  //     // handleShowToast("", true);
+  //   }
+  // };
+
   const generatePDFBlob = async (
     orderDetails,
     shopDetails,
     invoiceSettings,
     currentTemplateId,
     gstcodes,
-    shopProfile
+    shopProfile, shopifyTax
   ) => {
     if (!orderDetails || !currentTemplateId) {
-      console.error(
-        "Order details or template ID not available for PDF generation."
-      );
+      console.error("Order details or template ID not available for PDF generation.");
       throw new Error("Order details or template ID is missing.");
     }
-
+ 
+ 
     // console.log("Generating PDF Blob with:", {
     //   orderDetails,
     //   shopDetails,
@@ -698,7 +869,8 @@ export function OrderTableEx({ value, shopdetails }) {
     //   gstcodes,
     //   shopProfile,
     // });
-
+ 
+ 
     // Utility to preload images and resolve CORS issues
     const loadImageAsDataURL = async (url) => {
       try {
@@ -707,8 +879,7 @@ export function OrderTableEx({ value, shopdetails }) {
         return new Promise((resolve, reject) => {
           const reader = new FileReader();
           reader.onloadend = () => resolve(reader.result);
-          reader.onerror = () =>
-            reject(new Error(`Failed to convert image: ${url}`));
+          reader.onerror = () => reject(new Error(`Failed to convert image: ${url}`));
           reader.readAsDataURL(blob);
         });
       } catch (error) {
@@ -716,25 +887,24 @@ export function OrderTableEx({ value, shopdetails }) {
         return ""; // Fallback to empty string
       }
     };
-
+ 
+ 
     // Preload all images (e.g., logo and signature)
     const preloadImages = async () => {
       if (shopProfile?.images?.logoURL) {
-        shopProfile.images.logoURL = await loadImageAsDataURL(
-          shopProfile.images.logoURL
-        );
+        shopProfile.images.logoURL = await loadImageAsDataURL(shopProfile.images.logoURL);
       }
       if (shopProfile?.images?.signatureURL) {
-        shopProfile.images.signatureURL = await loadImageAsDataURL(
-          shopProfile.images.signatureURL
-        );
+        shopProfile.images.signatureURL = await loadImageAsDataURL(shopProfile.images.signatureURL);
       }
     };
-
+ 
+ 
     try {
       // Preload images before rendering
       await preloadImages();
-
+ 
+ 
       const pdf = new jsPDF("p", "pt", "a4");
       const invoiceContainer = document.createElement("div");
       invoiceContainer.style.width = "794px";
@@ -742,7 +912,8 @@ export function OrderTableEx({ value, shopdetails }) {
       invoiceContainer.style.position = "absolute";
       invoiceContainer.style.top = "-9999px";
       document.body.appendChild(invoiceContainer);
-
+ 
+ 
       const renderInvoiceTemplate = () => {
         switch (currentTemplateId) {
           case "1":
@@ -753,6 +924,7 @@ export function OrderTableEx({ value, shopdetails }) {
                 invoiceSettings={invoiceSettings}
                 GSTHSNCodes={gstcodes}
                 shopProfile={shopProfile}
+                isShopifyTax={shopifyTax}
               />,
               invoiceContainer
             );
@@ -765,6 +937,7 @@ export function OrderTableEx({ value, shopdetails }) {
                 invoiceSettings={invoiceSettings}
                 GSTHSNCodes={gstcodes}
                 shopProfile={shopProfile}
+                isShopifyTax={shopifyTax}
               />,
               invoiceContainer
             );
@@ -777,6 +950,7 @@ export function OrderTableEx({ value, shopdetails }) {
                 invoiceSettings={invoiceSettings}
                 GSTHSNCodes={gstcodes}
                 shopProfile={shopProfile}
+                isShopifyTax={shopifyTax}
               />,
               invoiceContainer
             );
@@ -785,27 +959,34 @@ export function OrderTableEx({ value, shopdetails }) {
             throw new Error("Invalid template ID.");
         }
       };
-
+ 
+ 
       renderInvoiceTemplate();
-
+ 
+ 
       // Wait for rendering to complete
       await new Promise((resolve) => setTimeout(resolve, 2000));
-
+ 
+ 
       const canvas = await html2canvas(invoiceContainer, {
         scale: 2,
         useCORS: true,
         allowTaint: false,
       });
-
+ 
+ 
       const imgData = canvas.toDataURL("image/jpeg");
       document.body.removeChild(invoiceContainer);
-
+ 
+ 
       const pdfWidth = pdf.internal.pageSize.getWidth();
       const imgWidth = pdfWidth - 20;
       const imgHeight = (canvas.height * imgWidth) / canvas.width;
-
+ 
+ 
       pdf.addImage(imgData, "PNG", 10, 10, imgWidth, imgHeight);
-
+ 
+ 
       // Return the PDF as a Blob
       return pdf.output("blob");
     } catch (error) {
@@ -813,7 +994,8 @@ export function OrderTableEx({ value, shopdetails }) {
       throw error; // Ensure the caller knows about the failure
     }
   };
-
+ 
+ 
   const quickSendInvoice = async ({
     orderDetails,
     shopDetails,
@@ -822,6 +1004,9 @@ export function OrderTableEx({ value, shopdetails }) {
     gstcodes,
     currentTemplate,
     shopProfile,
+    shopifyTax
+ 
+ 
   }) => {
     //console.log("hhhhhhhhhhhhhhhhhhhhh",orderDetails, shopDetails, invoiceSettings, customerEmail, gstcodes, currentTemplate);
     try {
@@ -832,7 +1017,8 @@ export function OrderTableEx({ value, shopdetails }) {
         customerEmail,
         gstcodes,
         currentTemplate,
-        shopProfile
+        shopProfile,
+        shopifyTax
       );
     } catch (error) {
       console.error("Error in Quick Send:", error);
@@ -841,13 +1027,8 @@ export function OrderTableEx({ value, shopdetails }) {
       // handleShowToast("", true);
     }
   };
-
-  // const togglePopoverActive = (orderId) => {
-  //   setPopoverActive((prevState) => ({
-  //     ...prevState,
-  //     [orderId]: !prevState[orderId],
-  //   }));
-  // };
+ 
+ 
 
   const fetchInvoiceSettings = async () => {
     //console.log("Sending request to fetch invoice settings");
@@ -932,16 +1113,568 @@ export function OrderTableEx({ value, shopdetails }) {
     //console.log('GSTHSNCodes',GSTHSNCodes);
   }, [GSTHSNCodes]);
 
-//action to send invoice
+  //action to send invoice
+
+  // const handlePdfDownload = useCallback(
+  //   async (
+  //     order,
+  //     shopdetails,
+  //     currentTemplate,
+  //     invoiceSettings,
+  //     GSTHSNCodes,
+  //     shopProfile
+  //   ) => {
+  //     if (!order || !currentTemplate) {
+  //       setIsPDFGenerating(false);
+  //       console.error("Order or template not available for PDF generation.");
+  //       return;
+  //     }
+  //     // Utility to preload images and resolve CORS issues
+  //     const loadImageAsDataURL = async (url) => {
+  //       try {
+  //         const response = await fetch(url, { mode: "cors" });
+  //         const blob = await response.blob();
+  //         return new Promise((resolve, reject) => {
+  //           const reader = new FileReader();
+  //           reader.onloadend = () => resolve(reader.result);
+  //           reader.onerror = () =>
+  //             reject(new Error(`Failed to convert image: ${url}`));
+  //           reader.readAsDataURL(blob);
+  //         });
+  //       } catch (error) {
+  //         console.error(`Failed to load image at ${url}:`, error);
+  //         return "";
+  //       }
+  //     };
+  //     // Preload images before rendering
+  //     const preloadImages = async () => {
+  //       if (shopProfile?.images?.logoURL) {
+  //         shopProfile.images.logoURL = await loadImageAsDataURL(
+  //           shopProfile.images.logoURL
+  //         );
+  //       }
+  //       if (shopProfile?.images?.signatureURL) {
+  //         shopProfile.images.signatureURL = await loadImageAsDataURL(
+  //           shopProfile.images.signatureURL
+  //         );
+  //       }
+  //     };
+  //     try {
+  //       await preloadImages();
+  //       const pdf = new jsPDF("p", "pt", "a4");
+  //       const pdfWidth = pdf.internal.pageSize.getWidth();
+  //       const pdfHeight = pdf.internal.pageSize.getHeight();
+  //       // Create invoice container
+  //       const invoiceContainer = document.createElement("div");
+  //       invoiceContainer.style.width = "794px"; // A4 width in pixels
+  //       invoiceContainer.style.minHeight = "1123px"; // A4 height in pixels
+  //       invoiceContainer.style.position = "absolute";
+  //       invoiceContainer.style.top = "-9999px";
+  //       document.body.appendChild(invoiceContainer);
+  //       // Render invoice template
+  //       const renderInvoiceTemplate = () => {
+  //         switch (currentTemplate) {
+  //           case "1":
+  //             ReactDOM.render(
+  //               <InvoiceTemplate1
+  //                 shopdetails={[shopdetails]}
+  //                 orders={[order]}
+  //                 invoiceSettings={invoiceSettings}
+  //                 GSTHSNCodes={GSTHSNCodes}
+  //                 shopProfile={shopProfile}
+  //               />,
+  //               invoiceContainer
+  //             );
+  //             break;
+  //           case "2":
+  //             ReactDOM.render(
+  //               <InvoiceTemplate2
+  //                 shopdetails={[shopdetails]}
+  //                 orders={[order]}
+  //                 invoiceSettings={invoiceSettings}
+  //                 GSTHSNCodes={GSTHSNCodes}
+  //                 shopProfile={shopProfile}
+  //               />,
+  //               invoiceContainer
+  //             );
+  //             break;
+  //           case "3":
+  //             ReactDOM.render(
+  //               <InvoiceTemplate3
+  //                 shopdetails={[shopdetails]}
+  //                 orders={[order]}
+  //                 invoiceSettings={invoiceSettings}
+  //                 GSTHSNCodes={GSTHSNCodes}
+  //                 shopProfile={shopProfile}
+  //               />,
+  //               invoiceContainer
+  //             );
+  //             break;
+  //           default:
+  //             console.error("Invalid template ID:", currentTemplate);
+  //         }
+  //       };
+  //       renderInvoiceTemplate();
+  //       await new Promise((resolve) => setTimeout(resolve, 2000));
+  //       // Capture full invoice as a canvas
+  //       const canvas = await html2canvas(invoiceContainer, {
+  //         scale: 2, // Improves quality
+  //         useCORS: true,
+  //         allowTaint: false,
+  //         logging: true,
+  //       });
+  //       document.body.removeChild(invoiceContainer);
+  //       const imgData = canvas.toDataURL("image/png");
+  //       const imgWidth = pdfWidth - 20;
+  //       const imgHeight = (canvas.height * imgWidth) / canvas.width;
+  //       let position = 0;
+  //       let pageHeight = pdfHeight - 40;
+  //       // **✅ New Logic: Check if content exceeds first page**
+  //       if (imgHeight > pdfHeight) {
+  //         while (position < imgHeight) {
+  //           const sectionCanvas = document.createElement("canvas");
+  //           sectionCanvas.width = canvas.width;
+  //           sectionCanvas.height = Math.min(
+  //             pageHeight * (canvas.width / pdfWidth),
+  //             canvas.height - position
+  //           );
+  //           const sectionCtx = sectionCanvas.getContext("2d");
+  //           sectionCtx.drawImage(
+  //             canvas,
+  //             0,
+  //             position * (canvas.width / pdfWidth),
+  //             canvas.width,
+  //             sectionCanvas.height,
+  //             0,
+  //             0,
+  //             sectionCanvas.width,
+  //             sectionCanvas.height
+  //           );
+  //           const sectionImgData = sectionCanvas.toDataURL("image/png");
+  //           if (position > 0) pdf.addPage();
+  //           pdf.addImage(
+  //             sectionImgData,
+  //             "PNG",
+  //             10,
+  //             10,
+  //             imgWidth,
+  //             (sectionCanvas.height * imgWidth) / canvas.width
+  //           );
+  //           position += sectionCanvas.height / (canvas.width / pdfWidth);
+  //         }
+  //       } else {
+  //         pdf.addImage(imgData, "PNG", 10, 10, imgWidth, imgHeight);
+  //       }
+  //       setShowToast(true);
+  //       setToastMessage("PDF generated successfully");
+  //       pdf.save(`Invoice-${order.order_number}.pdf`);
+  //       setIsPDFGenerating(false);
+  //       setPdfGeneratingRowId(null);
+  //       console.log("PDF generated successfully.");
+  //     } catch (error) {
+  //       setIsPDFGenerating(false);
+  //       setPdfGeneratingRowId(null);
+  //       console.error("Error generating PDF:", error);
+  //     }
+  //   },
+  //   []
+  // );
+
+  // const handleBulkPdfDownload = useCallback(
+  //   async (
+  //     orders,
+  //     shopdetails,
+  //     currentTemplate,
+  //     invoiceSettings,
+  //     GSTHSNCodes,
+  //     shopProfile
+  //   ) => {
+  //     if (!orders || orders.length === 0 || !currentTemplate) {
+  //       console.error(
+  //         "No orders or template available for bulk PDF generation."
+  //       );
+  //       return;
+  //     }
+
+  //     // console.log("Starting bulk PDF generation with:", {
+  //     //   orders,
+  //     //   shopdetails,
+  //     //   currentTemplate,
+  //     //   invoiceSettings,
+  //     //   GSTHSNCodes,
+  //     //   shopProfile,
+  //     // });
+
+  //     try {
+  //       const pdf = new jsPDF("p", "pt", "a4");
+
+  //       for (const order of orders) {
+  //         const invoiceContainer = document.createElement("div");
+  //         invoiceContainer.style.width = "794px";
+  //         invoiceContainer.style.height = "1123px";
+  //         invoiceContainer.style.position = "absolute";
+  //         invoiceContainer.style.top = "-9999px";
+  //         document.body.appendChild(invoiceContainer);
+
+  //         const renderInvoiceTemplate = () => {
+  //           switch (currentTemplate) {
+  //             case "1":
+  //               ReactDOM.render(
+  //                 <InvoiceTemplate1
+  //                   shopdetails={[shopdetails]}
+  //                   orders={[order]}
+  //                   invoiceSettings={invoiceSettings}
+  //                   GSTHSNCodes={GSTHSNCodes}
+  //                   shopProfile={shopProfile}
+  //                 />,
+  //                 invoiceContainer
+  //               );
+  //               break;
+  //             case "2":
+  //               ReactDOM.render(
+  //                 <InvoiceTemplate2
+  //                   shopdetails={[shopdetails]}
+  //                   orders={[order]}
+  //                   invoiceSettings={invoiceSettings}
+  //                   GSTHSNCodes={GSTHSNCodes}
+  //                   shopProfile={shopProfile}
+  //                 />,
+  //                 invoiceContainer
+  //               );
+  //               break;
+  //             case "3":
+  //               ReactDOM.render(
+  //                 <InvoiceTemplate3
+  //                   shopdetails={[shopdetails]}
+  //                   orders={[order]}
+  //                   invoiceSettings={invoiceSettings}
+  //                   GSTHSNCodes={GSTHSNCodes}
+  //                   shopProfile={shopProfile}
+  //                 />,
+  //                 invoiceContainer
+  //               );
+  //               break;
+  //             default:
+  //               console.error("Invalid template ID:", currentTemplate);
+  //           }
+  //         };
+
+  //         renderInvoiceTemplate();
+
+  //         // Wait for rendering to complete
+  //         await new Promise((resolve) => setTimeout(resolve, 2000));
+
+  //         const canvas = await html2canvas(invoiceContainer, {
+  //           scale: 2,
+  //           useCORS: true,
+  //           allowTaint: false,
+  //         });
+
+  //         const imgData = canvas.toDataURL("image/jpeg");
+  //         const pdfWidth = pdf.internal.pageSize.getWidth();
+  //         const imgWidth = pdfWidth - 20;
+  //         const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+  //         pdf.addImage(imgData, "PNG", 10, 10, imgWidth, imgHeight);
+
+  //         // Add a new page for the next order, except for the last one
+  //         if (orders.indexOf(order) !== orders.length - 1) {
+  //           pdf.addPage();
+  //         }
+
+  //         document.body.removeChild(invoiceContainer);
+  //       }
+
+  //       pdf.save(`Invoices-Bulk.pdf`);
+  //       console.log("Bulk PDF generated");
+  //     } catch (error) {
+  //       console.error("Error generating bulk PDF:", error);
+  //     }
+  //   },
+  //   []
+  // );
+
+  // const handlePrint = useCallback(
+  //   async (
+  //     order,
+  //     shopdetails,
+  //     currentTemplate,
+  //     invoiceSettings,
+  //     GSTHSNCodes,
+  //     shopProfile
+  //   ) => {
+  //     if (!order || !currentTemplate) {
+  //       setIsPDFPrinting(false);
+  //       console.error("Missing order or template data for printing.");
+  //       return;
+  //     }
+  //     try {
+  //       // Render the invoice template
+  //       const renderInvoiceTemplate = () => {
+  //         switch (currentTemplate) {
+  //           case "1":
+  //             return ReactDOMServer.renderToString(
+  //               <InvoiceTemplate1
+  //                 shopdetails={[shopdetails]}
+  //                 orders={[order]}
+  //                 invoiceSettings={invoiceSettings}
+  //                 GSTHSNCodes={GSTHSNCodes}
+  //                 shopProfile={shopProfile}
+  //               />
+  //             );
+  //           case "2":
+  //             return ReactDOMServer.renderToString(
+  //               <InvoiceTemplate2
+  //                 shopdetails={[shopdetails]}
+  //                 orders={[order]}
+  //                 invoiceSettings={invoiceSettings}
+  //                 GSTHSNCodes={GSTHSNCodes}
+  //                 shopProfile={shopProfile}
+  //               />
+  //             );
+  //           case "3":
+  //             return ReactDOMServer.renderToString(
+  //               <InvoiceTemplate3
+  //                 shopdetails={[shopdetails]}
+  //                 orders={[order]}
+  //                 invoiceSettings={invoiceSettings}
+  //                 GSTHSNCodes={GSTHSNCodes}
+  //                 shopProfile={shopProfile}
+  //               />
+  //             );
+  //           default:
+  //             console.error("Invalid template ID:", currentTemplate);
+  //             return "";
+  //         }
+  //       };
+  //       const invoiceContent = renderInvoiceTemplate();
+  //       // Open a new window for printing
+  //       const printWindow = window.open("", "_blank", "width=794,height=1123");
+  //       if (printWindow) {
+  //         const customStyles = `
+  //           <style>
+  //             @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap');
+  //              body, html {
+  //               margin: 0;
+  //               padding: 0;
+  //               font-family: ${
+  //                 invoiceSettings.branding.fontFamily || "Montserrat"
+  //               };
+  //             }
+  //              @page {
+  //               size: A4;
+  //               margin: 0px;
+  //             }
+  //              @media print {
+  //               body {
+  //                 -webkit-print-color-adjust: exact;
+  //                 overflow: hidden;
+  //               }
+  //               .page-break {
+  //                 page-break-before: always;
+  //               }
+  //             }
+  //              .invoice-container {
+  //               width: 794px;
+  //               margin: 0 auto;
+  //               padding: 20px;
+  //               background-color: #fff;
+  //               border: 1px solid #ccc;
+  //               border-radius: 8px;
+  //             }
+  //           </style>
+  //         `;
+  //         printWindow.document.open();
+  //         printWindow.document.write(`
+  //           <!DOCTYPE html>
+  //           <html lang="en">
+  //             <head>
+  //               <meta charset="UTF-8">
+  //               <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  //               <title>Print Invoice</title>
+  //               ${customStyles}
+  //             </head>
+  //             <body>
+  //               <div class="invoice-container">
+  //                 ${invoiceContent}
+  //               </div>
+  //             </body>
+  //           </html>
+  //         `);
+  //         printWindow.document.close();
+  //         // Trigger print once content is loaded
+  //         printWindow.onload = () => {
+  //           printWindow.print();
+  //           printWindow.close();
+  //         };
+  //       } else {
+  //         setIsPDFPrinting(false);
+  //         console.error("Failed to open a new window for printing.");
+  //       }
+  //     } catch (error) {
+  //       setIsPDFPrinting(false);
+  //       console.error("Error ensuring data readiness for print:", error);
+  //     }
+  //   },
+  //   []
+  // );
+
+  // const handleBulkPrint = useCallback(
+  //   async (
+  //     orders,
+  //     shopdetails,
+  //     currentTemplate,
+  //     invoiceSettings,
+  //     GSTHSNCodes,
+  //     shopProfile
+  //   ) => {
+  //     if (!orders || orders.length === 0 || !currentTemplate) {
+  //       console.error("No orders or template available for bulk printing.");
+  //       return;
+  //     }
+
+  //     // console.log("Starting bulk printing with:", {
+  //     //   orders,
+  //     //   shopdetails,
+  //     //   currentTemplate,
+  //     //   invoiceSettings,
+  //     //   GSTHSNCodes,
+  //     //   shopProfile,
+  //     // });
+
+  //     try {
+  //       const printWindow = window.open("", "_blank", "width=800,height=1123");
+  //       if (printWindow) {
+  //         const invoiceContent = orders
+  //           .slice(0, 10) // Limit to 10 orders for bulk print
+  //           .map((order) => {
+  //             const renderInvoiceTemplate = () => {
+  //               switch (currentTemplate) {
+  //                 case "1":
+  //                   return ReactDOMServer.renderToString(
+  //                     <InvoiceTemplate1
+  //                       shopdetails={[shopdetails]}
+  //                       orders={[order]}
+  //                       invoiceSettings={invoiceSettings}
+  //                       GSTHSNCodes={GSTHSNCodes}
+  //                       shopProfile={shopProfile}
+  //                     />
+  //                   );
+  //                 case "2":
+  //                   return ReactDOMServer.renderToString(
+  //                     <InvoiceTemplate2
+  //                       shopdetails={[shopdetails]}
+  //                       orders={[order]}
+  //                       invoiceSettings={invoiceSettings}
+  //                       GSTHSNCodes={GSTHSNCodes}
+  //                       shopProfile={shopProfile}
+  //                     />
+  //                   );
+  //                 case "3":
+  //                   return ReactDOMServer.renderToString(
+  //                     <InvoiceTemplate3
+  //                       shopdetails={[shopdetails]}
+  //                       orders={[order]}
+  //                       invoiceSettings={invoiceSettings}
+  //                       GSTHSNCodes={GSTHSNCodes}
+  //                       shopProfile={shopProfile}
+  //                     />
+  //                   );
+  //                 default:
+  //                   console.error("Invalid template ID:", currentTemplate);
+  //                   return "";
+  //               }
+  //             };
+  //             return `<div style="page-break-after: always;">${renderInvoiceTemplate()}</div>`;
+  //           })
+  //           .join("");
+
+  //         const tailwindStylesheet = `
+  //           <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" />
+  //         `;
+
+  //         const customStyles = `
+  //           <style>
+  //             @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap');
+  
+  //             body, html {
+  //               margin: 0;
+  //               padding: 0;
+  //               font-family: ${invoiceSettings.branding.fontFamily};
+  //             }
+  
+  //             @page {
+  //               size: A4;
+  //               margin: 0;
+  //             }
+  
+  //             @media print {
+  //               body {
+  //                 -webkit-print-color-adjust: exact;
+  //                 overflow: hidden;
+  //               }
+  //             }
+  
+  //             .invoice-container {
+  //               width: 794px;
+  //               margin: 0 auto;
+  //               padding: 0px;
+  //               background-color: #fff;
+  //               border: 1px solid #ccc;
+  //               border-radius: 8px;
+  //             }
+  
+  //             div {
+  //               page-break-inside: avoid;
+  //             }
+  //           </style>
+  //         `;
+
+  //         printWindow.document.open();
+  //         printWindow.document.write(`
+  //           <!DOCTYPE html>
+  //           <html lang="en">
+  //             <head>
+  //               <meta charset="UTF-8">
+  //               <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  //               <title>Print Invoices</title>
+  //               ${tailwindStylesheet}
+  //               ${customStyles}
+  //             </head>
+  //             <body>
+  //               ${invoiceContent}
+  //             </body>
+  //           </html>
+  //         `);
+  //         printWindow.document.close();
+
+  //         // Ensure the print triggers only after the content loads
+  //         printWindow.onload = () => {
+  //           printWindow.print();
+  //           printWindow.close();
+  //         };
+  //       } else {
+  //         console.error("Failed to open a new window for bulk printing.");
+  //       }
+  //     } catch (error) {
+  //       console.error("Error during bulk printing:", error);
+  //     }
+  //   },
+  //   []
+  // );
+
+
 
   const handlePdfDownload = useCallback(
-    async (order, shopdetails, currentTemplate, invoiceSettings, GSTHSNCodes, shopProfile) => {
+    async (order, shopdetails, currentTemplate, invoiceSettings, GSTHSNCodes, shopProfile, shopifyTax) => {
       if (!order || !currentTemplate) {
         setIsPDFGenerating(false);
         console.error("Order or template not available for PDF generation.");
         return;
       }
-       // Utility to preload images and resolve CORS issues
+ 
+ 
+      // Utility to preload images and resolve CORS issues
       const loadImageAsDataURL = async (url) => {
         try {
           const response = await fetch(url, { mode: "cors" });
@@ -957,7 +1690,9 @@ export function OrderTableEx({ value, shopdetails }) {
           return "";
         }
       };
-       // Preload images before rendering
+ 
+ 
+      // Preload images before rendering
       const preloadImages = async () => {
         if (shopProfile?.images?.logoURL) {
           shopProfile.images.logoURL = await loadImageAsDataURL(shopProfile.images.logoURL);
@@ -966,19 +1701,27 @@ export function OrderTableEx({ value, shopdetails }) {
           shopProfile.images.signatureURL = await loadImageAsDataURL(shopProfile.images.signatureURL);
         }
       };
-       try {
+ 
+ 
+      try {
         await preloadImages();
-         const pdf = new jsPDF("p", "pt", "a4");
+ 
+ 
+        const pdf = new jsPDF("p", "pt", "a4");
         const pdfWidth = pdf.internal.pageSize.getWidth();
         const pdfHeight = pdf.internal.pageSize.getHeight();
-         // Create invoice container
+ 
+ 
+        // Create invoice container
         const invoiceContainer = document.createElement("div");
         invoiceContainer.style.width = "794px"; // A4 width in pixels
         invoiceContainer.style.minHeight = "1123px"; // A4 height in pixels
         invoiceContainer.style.position = "absolute";
         invoiceContainer.style.top = "-9999px";
         document.body.appendChild(invoiceContainer);
-         // Render invoice template
+ 
+ 
+        // Render invoice template
         const renderInvoiceTemplate = () => {
           switch (currentTemplate) {
             case "1":
@@ -989,6 +1732,7 @@ export function OrderTableEx({ value, shopdetails }) {
                   invoiceSettings={invoiceSettings}
                   GSTHSNCodes={GSTHSNCodes}
                   shopProfile={shopProfile}
+                  isShopifyTax={shopifyTax}
                 />,
                 invoiceContainer
               );
@@ -1001,6 +1745,7 @@ export function OrderTableEx({ value, shopdetails }) {
                   invoiceSettings={invoiceSettings}
                   GSTHSNCodes={GSTHSNCodes}
                   shopProfile={shopProfile}
+                  isShopifyTax={shopifyTax}
                 />,
                 invoiceContainer
               );
@@ -1013,6 +1758,7 @@ export function OrderTableEx({ value, shopdetails }) {
                   invoiceSettings={invoiceSettings}
                   GSTHSNCodes={GSTHSNCodes}
                   shopProfile={shopProfile}
+                  isShopifyTax={shopifyTax}
                 />,
                 invoiceContainer
               );
@@ -1021,31 +1767,44 @@ export function OrderTableEx({ value, shopdetails }) {
               console.error("Invalid template ID:", currentTemplate);
           }
         };
-         renderInvoiceTemplate();
-         await new Promise((resolve) => setTimeout(resolve, 2000));
-         // Capture full invoice as a canvas
+ 
+ 
+        renderInvoiceTemplate();
+ 
+ 
+        await new Promise((resolve) => setTimeout(resolve, 2000));
+ 
+ 
+        // Capture full invoice as a canvas
         const canvas = await html2canvas(invoiceContainer, {
           scale: 2, // Improves quality
           useCORS: true,
           allowTaint: false,
           logging: true,
         });
-         document.body.removeChild(invoiceContainer);
-         const imgData = canvas.toDataURL("image/png");
+ 
+ 
+        document.body.removeChild(invoiceContainer);
+ 
+ 
+        const imgData = canvas.toDataURL("image/png");
         const imgWidth = pdfWidth - 20;
         const imgHeight = (canvas.height * imgWidth) / canvas.width;
-         let position = 0;
+ 
+ 
+        let position = 0;
         let pageHeight = pdfHeight - 40;
-         // **✅ New Logic: Check if content exceeds first page**
+ 
+ 
+        // **✅ New Logic: Check if content exceeds first page**
         if (imgHeight > pdfHeight) {
           while (position < imgHeight) {
             const sectionCanvas = document.createElement("canvas");
             sectionCanvas.width = canvas.width;
-            sectionCanvas.height = Math.min(
-              pageHeight * (canvas.width / pdfWidth),
-              canvas.height - position
-            );
-             const sectionCtx = sectionCanvas.getContext("2d");
+            sectionCanvas.height = Math.min(pageHeight * (canvas.width / pdfWidth), canvas.height - position);
+ 
+ 
+            const sectionCtx = sectionCanvas.getContext("2d");
             sectionCtx.drawImage(
               canvas,
               0,
@@ -1057,27 +1816,28 @@ export function OrderTableEx({ value, shopdetails }) {
               sectionCanvas.width,
               sectionCanvas.height
             );
-             const sectionImgData = sectionCanvas.toDataURL("image/png");
-             if (position > 0) pdf.addPage();
-            pdf.addImage(
-              sectionImgData,
-              "PNG",
-              10,
-              10,
-              imgWidth,
-              (sectionCanvas.height * imgWidth) / canvas.width
-            );
-             position += sectionCanvas.height / (canvas.width / pdfWidth);
+ 
+ 
+            const sectionImgData = sectionCanvas.toDataURL("image/png");
+ 
+ 
+            if (position > 0) pdf.addPage();
+            pdf.addImage(sectionImgData, "PNG", 10, 10, imgWidth, (sectionCanvas.height * imgWidth) / canvas.width);
+ 
+ 
+            position += sectionCanvas.height / (canvas.width / pdfWidth);
           }
         } else {
           pdf.addImage(imgData, "PNG", 10, 10, imgWidth, imgHeight);
         }
-         setShowToast(true);
+ 
+ 
+        setShowToast(true);
         setToastMessage("PDF generated successfully");
         pdf.save(`Invoice-${order.order_number}.pdf`);
         setIsPDFGenerating(false);
         setPdfGeneratingRowId(null);
-        console.log("PDF generated successfully.");
+        // console.log("PDF generated successfully.");
       } catch (error) {
         setIsPDFGenerating(false);
         setPdfGeneratingRowId(null);
@@ -1087,19 +1847,11 @@ export function OrderTableEx({ value, shopdetails }) {
     []
   );
  
+ 
   const handleBulkPdfDownload = useCallback(
-    async (
-      orders,
-      shopdetails,
-      currentTemplate,
-      invoiceSettings,
-      GSTHSNCodes,
-      shopProfile
-    ) => {
+    async (orders, shopdetails, currentTemplate, invoiceSettings, GSTHSNCodes, shopProfile, shopifyTax) => {
       if (!orders || orders.length === 0 || !currentTemplate) {
-        console.error(
-          "No orders or template available for bulk PDF generation."
-        );
+        console.error("No orders or template available for bulk PDF generation.");
         return;
       }
  
@@ -1137,6 +1889,7 @@ export function OrderTableEx({ value, shopdetails }) {
                     invoiceSettings={invoiceSettings}
                     GSTHSNCodes={GSTHSNCodes}
                     shopProfile={shopProfile}
+                    isShopifyTax={shopifyTax}
                   />,
                   invoiceContainer
                 );
@@ -1149,6 +1902,7 @@ export function OrderTableEx({ value, shopdetails }) {
                     invoiceSettings={invoiceSettings}
                     GSTHSNCodes={GSTHSNCodes}
                     shopProfile={shopProfile}
+                    isShopifyTax={shopifyTax}
                   />,
                   invoiceContainer
                 );
@@ -1161,6 +1915,7 @@ export function OrderTableEx({ value, shopdetails }) {
                     invoiceSettings={invoiceSettings}
                     GSTHSNCodes={GSTHSNCodes}
                     shopProfile={shopProfile}
+                    isShopifyTax={shopifyTax}
                   />,
                   invoiceContainer
                 );
@@ -1205,7 +1960,7 @@ export function OrderTableEx({ value, shopdetails }) {
  
  
         pdf.save(`Invoices-Bulk.pdf`);
-        console.log("Bulk PDF generated");
+        // console.log("Bulk PDF generated");
       } catch (error) {
         console.error("Error generating bulk PDF:", error);
       }
@@ -1213,14 +1968,17 @@ export function OrderTableEx({ value, shopdetails }) {
     []
   );
  
+ 
   const handlePrint = useCallback(
-    async (order, shopdetails, currentTemplate, invoiceSettings, GSTHSNCodes, shopProfile) => {
+    async (order, shopdetails, currentTemplate, invoiceSettings, GSTHSNCodes, shopProfile, shopifyTax) => {
       if (!order || !currentTemplate) {
         setIsPDFPrinting(false);
         console.error("Missing order or template data for printing.");
         return;
       }
-       try {
+ 
+ 
+      try {
         // Render the invoice template
         const renderInvoiceTemplate = () => {
           switch (currentTemplate) {
@@ -1232,6 +1990,7 @@ export function OrderTableEx({ value, shopdetails }) {
                   invoiceSettings={invoiceSettings}
                   GSTHSNCodes={GSTHSNCodes}
                   shopProfile={shopProfile}
+                  isShopifyTax={shopifyTax}
                 />
               );
             case "2":
@@ -1242,6 +2001,7 @@ export function OrderTableEx({ value, shopdetails }) {
                   invoiceSettings={invoiceSettings}
                   GSTHSNCodes={GSTHSNCodes}
                   shopProfile={shopProfile}
+                  isShopifyTax={shopifyTax}
                 />
               );
             case "3":
@@ -1252,6 +2012,7 @@ export function OrderTableEx({ value, shopdetails }) {
                   invoiceSettings={invoiceSettings}
                   GSTHSNCodes={GSTHSNCodes}
                   shopProfile={shopProfile}
+                  isShopifyTax={shopifyTax}
                 />
               );
             default:
@@ -1259,8 +2020,12 @@ export function OrderTableEx({ value, shopdetails }) {
               return "";
           }
         };
-         const invoiceContent = renderInvoiceTemplate();
-         // Open a new window for printing
+ 
+ 
+        const invoiceContent = renderInvoiceTemplate();
+ 
+ 
+        // Open a new window for printing
         const printWindow = window.open("", "_blank", "width=794,height=1123");
         if (printWindow) {
           const customStyles = `
@@ -1294,7 +2059,9 @@ export function OrderTableEx({ value, shopdetails }) {
               }
             </style>
           `;
-           printWindow.document.open();
+ 
+ 
+          printWindow.document.open();
           printWindow.document.write(`
             <!DOCTYPE html>
             <html lang="en">
@@ -1312,7 +2079,9 @@ export function OrderTableEx({ value, shopdetails }) {
             </html>
           `);
           printWindow.document.close();
-           // Trigger print once content is loaded
+ 
+ 
+          // Trigger print once content is loaded
           printWindow.onload = () => {
             printWindow.print();
             printWindow.close();
@@ -1327,22 +2096,17 @@ export function OrderTableEx({ value, shopdetails }) {
       }
     },
     []
-  ); 
-
+  );
+ 
+ 
   const handleBulkPrint = useCallback(
-    async (
-      orders,
-      shopdetails,
-      currentTemplate,
-      invoiceSettings,
-      GSTHSNCodes,
-      shopProfile
-    ) => {
+    async (orders, shopdetails, currentTemplate, invoiceSettings, GSTHSNCodes, shopProfile, shopifyTax) => {
       if (!orders || orders.length === 0 || !currentTemplate) {
         console.error("No orders or template available for bulk printing.");
         return;
       }
-
+ 
+ 
       // console.log("Starting bulk printing with:", {
       //   orders,
       //   shopdetails,
@@ -1351,7 +2115,8 @@ export function OrderTableEx({ value, shopdetails }) {
       //   GSTHSNCodes,
       //   shopProfile,
       // });
-
+ 
+ 
       try {
         const printWindow = window.open("", "_blank", "width=800,height=1123");
         if (printWindow) {
@@ -1368,6 +2133,7 @@ export function OrderTableEx({ value, shopdetails }) {
                         invoiceSettings={invoiceSettings}
                         GSTHSNCodes={GSTHSNCodes}
                         shopProfile={shopProfile}
+                        isShopifyTax={shopifyTax}
                       />
                     );
                   case "2":
@@ -1378,6 +2144,7 @@ export function OrderTableEx({ value, shopdetails }) {
                         invoiceSettings={invoiceSettings}
                         GSTHSNCodes={GSTHSNCodes}
                         shopProfile={shopProfile}
+                        isShopifyTax={shopifyTax}
                       />
                     );
                   case "3":
@@ -1388,6 +2155,7 @@ export function OrderTableEx({ value, shopdetails }) {
                         invoiceSettings={invoiceSettings}
                         GSTHSNCodes={GSTHSNCodes}
                         shopProfile={shopProfile}
+                        isShopifyTax={shopifyTax}
                       />
                     );
                   default:
@@ -1398,34 +2166,32 @@ export function OrderTableEx({ value, shopdetails }) {
               return `<div style="page-break-after: always;">${renderInvoiceTemplate()}</div>`;
             })
             .join("");
-
+ 
+ 
           const tailwindStylesheet = `
             <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" />
           `;
-
+ 
+ 
           const customStyles = `
             <style>
               @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap');
-  
-              body, html {
+               body, html {
                 margin: 0;
                 padding: 0;
                 font-family: ${invoiceSettings.branding.fontFamily};
               }
-  
-              @page {
+               @page {
                 size: A4;
                 margin: 0;
               }
-  
-              @media print {
+               @media print {
                 body {
                   -webkit-print-color-adjust: exact;
                   overflow: hidden;
                 }
               }
-  
-              .invoice-container {
+               .invoice-container {
                 width: 794px;
                 margin: 0 auto;
                 padding: 0px;
@@ -1433,13 +2199,13 @@ export function OrderTableEx({ value, shopdetails }) {
                 border: 1px solid #ccc;
                 border-radius: 8px;
               }
-  
-              div {
+               div {
                 page-break-inside: avoid;
               }
             </style>
           `;
-
+ 
+ 
           printWindow.document.open();
           printWindow.document.write(`
             <!DOCTYPE html>
@@ -1457,7 +2223,8 @@ export function OrderTableEx({ value, shopdetails }) {
             </html>
           `);
           printWindow.document.close();
-
+ 
+ 
           // Ensure the print triggers only after the content loads
           printWindow.onload = () => {
             printWindow.print();
@@ -1472,6 +2239,8 @@ export function OrderTableEx({ value, shopdetails }) {
     },
     []
   );
+ 
+ 
 
   //-------------------------------------------------------------------
 
@@ -1482,7 +2251,9 @@ export function OrderTableEx({ value, shopdetails }) {
   );
 
   const [selectedOrders, setSelectedOrders] = useState([]);
-  const allSelected = selectedOrders.length === paginatedOrders.length && paginatedOrders.length > 0;
+  const allSelected =
+    selectedOrders.length === paginatedOrders.length &&
+    paginatedOrders.length > 0;
 
   const rowMarkup = paginatedOrders.map(
     (
@@ -1501,25 +2272,31 @@ export function OrderTableEx({ value, shopdetails }) {
         //   }
         // }}
       >
-         <IndexTable.Cell>
-        <input
-          type="checkbox"
-          checked={selectedOrders.includes(id)}
-          onChange={() => handleOrderSelection(id)}
-          style={{ 
-            cursor: "pointer", 
-            width: "16px", 
-            height: "16px", 
-            accentColor: "#2463bc"  /* This changes the checkbox color */
-          }}
-        />
-      </IndexTable.Cell>
-      <IndexTable.Cell>{order_number}</IndexTable.Cell>
-      <IndexTable.Cell>{new Date(created_at).toLocaleString()}</IndexTable.Cell>
-      <IndexTable.Cell>{`${customer?.first_name || "Unknown"} ${customer?.last_name || ""}`}</IndexTable.Cell>
-      <IndexTable.Cell>{total_price}</IndexTable.Cell>
-      <IndexTable.Cell>{financial_status.charAt(0).toUpperCase() + financial_status.slice(1)}</IndexTable.Cell>
-  
+        <IndexTable.Cell>
+          <input
+            type="checkbox"
+            checked={selectedOrders.includes(id)}
+            onChange={() => handleOrderSelection(id)}
+            style={{
+              cursor: "pointer",
+              width: "16px",
+              height: "16px",
+              accentColor: "#2463bc" /* This changes the checkbox color */,
+            }}
+          />
+        </IndexTable.Cell>
+        <IndexTable.Cell>{order_number}</IndexTable.Cell>
+        <IndexTable.Cell>
+          {new Date(created_at).toLocaleString()}
+        </IndexTable.Cell>
+        <IndexTable.Cell>{`${customer?.first_name || "Unknown"} ${
+          customer?.last_name || ""
+        }`}</IndexTable.Cell>
+        <IndexTable.Cell>{total_price}</IndexTable.Cell>
+        <IndexTable.Cell>
+          {financial_status.charAt(0).toUpperCase() + financial_status.slice(1)}
+        </IndexTable.Cell>
+
         <IndexTable.Cell>
           <ButtonGroup
             style={{
@@ -1545,14 +2322,8 @@ export function OrderTableEx({ value, shopdetails }) {
                 transition: "all 0.3s ease",
                 backgroundColor: "white",
                 height: "30px", // Set consistent height
-                opacity:
-                selectedOrders.length > 1 
-                    ? "0.5"
-                    : "1",
-                pointerEvents:
-                selectedOrders.length > 1
-                    ? "none"
-                    : "auto",
+                opacity: selectedOrders.length > 1 ? "0.5" : "1",
+                pointerEvents: selectedOrders.length > 1 ? "none" : "auto",
               }}
               disabled={orders.length > 50 ? true : false}
               onClick={(e) => {
@@ -1578,8 +2349,8 @@ export function OrderTableEx({ value, shopdetails }) {
                         setPdfGeneratingRowId(null);
                         setShowToast(true);
                         setToastMessage("PDF generated");
-                        if(shopId) {  
-                        countInvoiceDownloads(shopId,1);
+                        if (shopId) {
+                          countInvoiceDownloads(shopId, 1);
                         }
                       })
                       .catch(() => {
@@ -1616,7 +2387,7 @@ export function OrderTableEx({ value, shopdetails }) {
     <Spinner accessibilityLabel="Printing" size="small" />
   ) : ( */}
             <button
-            // disabled={allSelected }
+              // disabled={allSelected }
               style={{
                 cursor: "pointer",
                 padding: "8px 12px",
@@ -1630,18 +2401,12 @@ export function OrderTableEx({ value, shopdetails }) {
                 transition: "all 0.3s ease",
                 backgroundColor: "white",
                 height: "30px",
-                opacity:
-                  selectedOrders.length > 1 
-                    ? "0.5"
-                    : "1",
-                pointerEvents:
-                selectedOrders.length > 1 
-                    ? "none"
-                    : "auto",
+                opacity: selectedOrders.length > 1 ? "0.5" : "1",
+                pointerEvents: selectedOrders.length > 1 ? "none" : "auto",
               }}
               onClick={(e) => {
                 e.stopPropagation();
-                console.log(selectedOrders,selectedOrders)
+                console.log(selectedOrders, selectedOrders);
                 if (orders.length > 50) {
                   setShowToast(true);
                   setToastMessage(
@@ -1663,9 +2428,9 @@ export function OrderTableEx({ value, shopdetails }) {
                         setPrintingRowId(null);
                         setShowToast(true);
                         setToastMessage("PDF printed");
-                        if(shopId) {  
-                          countInvoicePrint(shopId,1);
-                          }
+                        if (shopId) {
+                          countInvoicePrint(shopId, 1);
+                        }
                       })
                       .catch(() => {
                         setIsPDFPrinting(false);
@@ -1703,68 +2468,63 @@ export function OrderTableEx({ value, shopdetails }) {
               <Spinner accessibilityLabel="Sending invoice" size="small" />
             ) : (
               <>
-              <div
-                style={{
-                 
-                  gap: "4px",
-                  cursor: "pointer",
-                  padding: "8px",
-                  border: "1px solid black",
-                  borderRadius: "6px",
-                  boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)",
-                  color: "black",
-                  transition: "all 0.3s ease",
-                  backgroundColor: "white",
-                  height: "30px",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  opacity: selectedOrders.length > 1 ? "0.5" : "1",
-                  pointerEvents: selectedOrders.length > 1 ? "none" : "auto",
-                }}
-                onClick={() => {
-                  if (orders.length > 50) {
-                    setShowToast(true);
-                    setToastMessage(
-                      "You have exceed maximum invoice limit of 50 orders, please subscribe to premium plan to send more invoices"
-                    );
-                  } else {
-                    if (!isSending) {
-                      setSendingRowId(id);
-                      setIsSending(true);
-                      quickSendInvoice({
-                        orderDetails: paginatedOrders[index],
-                        shopDetails: shopdetails,
-                        invoiceSettings: InvoiceSetting2,
-                        customerEmail: paginatedOrders[index].customer.email,
-                        gstcodes: GSTHSNCodes,
-                        currentTemplate: currentTemplateId,
-                      })
-                        .then(() => {
-                          setIsSending(false);
-                          setSendingRowId(null);
-                          setShowToast(true);
-                          setToastMessage("Invoice sent");
-                          if (shopId) {
-                            countInvoiceSent(shopId, 1);
-                          }
+                <div
+                  style={{
+                    gap: "4px",
+                    cursor: "pointer",
+                    padding: "8px",
+                    border: "1px solid black",
+                    borderRadius: "6px",
+                    boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)",
+                    color: "black",
+                    transition: "all 0.3s ease",
+                    backgroundColor: "white",
+                    height: "30px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    opacity: selectedOrders.length > 1 ? "0.5" : "1",
+                    pointerEvents: selectedOrders.length > 1 ? "none" : "auto",
+                  }}
+                  onClick={() => {
+                    if (orders.length > 50) {
+                      setShowToast(true);
+                      setToastMessage(
+                        "You have exceed maximum invoice limit of 50 orders, please subscribe to premium plan to send more invoices"
+                      );
+                    } else {
+                      if (!isSending) {
+                        setSendingRowId(id);
+                        setIsSending(true);
+                        quickSendInvoice({
+                          orderDetails: paginatedOrders[index],
+                          shopDetails: shopdetails,
+                          invoiceSettings: InvoiceSetting2,
+                          customerEmail: paginatedOrders[index].customer.email,
+                          gstcodes: GSTHSNCodes,
+                          currentTemplate: currentTemplateId,
                         })
-                        .catch(() => {
-                          setIsSending(false);
-                          setSendingRowId(null);
-                        });
+                          .then(() => {
+                            setIsSending(false);
+                            setSendingRowId(null);
+                            setShowToast(true);
+                            setToastMessage("Invoice sent");
+                            if (shopId) {
+                              countInvoiceSent(shopId, 1);
+                            }
+                          })
+                          .catch(() => {
+                            setIsSending(false);
+                            setSendingRowId(null);
+                          });
+                      }
                     }
-                  }
-                }}
-              >
-                <span style={{ fontSize: "10px" }}>SEND</span>
-                <TbMailForward />
-              </div>
-            </>
-
-
-
-
+                  }}
+                >
+                  <span style={{ fontSize: "10px" }}>SEND</span>
+                  <TbMailForward />
+                </div>
+              </>
             )}
           </ButtonGroup>
         </IndexTable.Cell>
@@ -1775,26 +2535,37 @@ export function OrderTableEx({ value, shopdetails }) {
   return (
     <Frame>
       <Page title="All Orders" fullWidth>
-        {/* {showToast.active && (
-          <Toast
-            content={showToast.message}
-            onDismiss={() => setShowToast({ active: false, message: "" })}
-            error={showToast.error}
-          />
-        )} */}
         {loading ? (
           <SkeletonPage primaryAction>
             {/* <SkeletonDisplayText size="large" /> */}
-            <SkeletonBodyText lines={3} />
+            <SkeletonBodyText lines={25} />
           </SkeletonPage>
         ) : (
           <>
+            <Layout>
+              <Layout.Section>
+                <Banner title="Under maintenance" status="warning">
+                  <p>
+                    {" "}
+                    Due to ongoing maintenance, some features may be
+                    experiencing temporary issues. <strong>
+                      Logo upload
+                    </strong>, <strong>Signature upload</strong>, and{" "}
+                    <strong>Invoice send</strong> are currently not working. We
+                    appreciate your patience and assure you that everything will
+                    be resolved shortly. Thank you for bearing with us.{" "}
+                  </p>
+                </Banner>
+              </Layout.Section>
+            </Layout>
+
             <div
               style={{
                 display: "flex",
                 justifyContent: "space-between",
                 marginBottom: "10px",
                 gap: "10px",
+                marginTop: "30px",
               }}
             >
               <input
@@ -1811,7 +2582,7 @@ export function OrderTableEx({ value, shopdetails }) {
               />
 
               <Tooltip
-                active={!isSubscribed}
+               
                 content="Upgrade to premium plan."
               >
                 <div
@@ -1847,9 +2618,9 @@ export function OrderTableEx({ value, shopdetails }) {
                         if (!isPDFGeneratingBulk) {
                           handleBulkPdfDownload(
                             // paginatedOrders.slice(0, 10), // Get first 10 orders
-                              orders.filter((order) =>
-                                selectedOrders.includes(order.id)
-                        ),
+                            orders.filter((order) =>
+                              selectedOrders.includes(order.id)
+                            ),
                             shopdetails,
                             currentTemplateId,
                             InvoiceSetting2,
@@ -1860,8 +2631,11 @@ export function OrderTableEx({ value, shopdetails }) {
                               setIsPDFGeneratingBulk(false);
                               setShowToast(true);
                               setToastMessage("PDF generated");
-                              if(shopId) {
-                                countInvoiceDownloads(shopId,selectedOrders.length);
+                              if (shopId) {
+                                countInvoiceDownloads(
+                                  shopId,
+                                  selectedOrders.length
+                                );
                               }
                             })
                             .catch(() => {
@@ -1937,8 +2711,11 @@ export function OrderTableEx({ value, shopdetails }) {
                               setIsPDFPrintingBulk(false);
                               setShowToast(true);
                               setToastMessage("PDF printed");
-                              if(shopId) {
-                                countInvoicePrint(shopId,selectedOrders.length);
+                              if (shopId) {
+                                countInvoicePrint(
+                                  shopId,
+                                  selectedOrders.length
+                                );
                               }
                             })
                             .catch(() => {
@@ -1997,33 +2774,34 @@ export function OrderTableEx({ value, shopdetails }) {
                 ]}
               > */}
               <IndexTable
-          resourceName={{ singular: "order", plural: "orders" }}
-          itemCount={paginatedOrders.length}
-          selectable={false} // Disabling Shopify's default selection system
-          headings={[
-            {
-              title: (
-                <input
-                  type="checkbox"
-                  checked={allSelected}
-                  onChange={handleSelectAll}
-                  style={{ 
-                    cursor: "pointer", 
-                    width: "16px", 
-                    height: "16px", 
-                    accentColor: "#2463bc"  /* This changes the checkbox color */
-                  }}
-                />
-              ),
-            },
-            { title: "Order" },
-            { title: "Date" },
-            { title: "Customer" },
-            { title: "Total" },
-            { title: "Payment Status" },
-            { title: "Actions" },
-          ]}
-        >
+                resourceName={{ singular: "order", plural: "orders" }}
+                itemCount={paginatedOrders.length}
+                selectable={false} // Disabling Shopify's default selection system
+                headings={[
+                  {
+                    title: (
+                      <input
+                        type="checkbox"
+                        checked={allSelected}
+                        onChange={handleSelectAll}
+                        style={{
+                          cursor: "pointer",
+                          width: "16px",
+                          height: "16px",
+                          accentColor:
+                            "#2463bc" /* This changes the checkbox color */,
+                        }}
+                      />
+                    ),
+                  },
+                  { title: "Order" },
+                  { title: "Date" },
+                  { title: "Customer" },
+                  { title: "Total" },
+                  { title: "Payment Status" },
+                  { title: "Actions" },
+                ]}
+              >
                 {rowMarkup}
               </IndexTable>
               <div

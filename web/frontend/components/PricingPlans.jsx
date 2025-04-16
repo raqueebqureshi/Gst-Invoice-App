@@ -156,13 +156,7 @@ const maxOrders = typeof milestones[milestones.length - 1] === "number"
               <div style={{display:"flex", justifyContent:"space-between"}}>
 
               <h3 style={styles.planTitle}>{plan.title}</h3>
-              {/* {plan.planId === currentPlanId && (
-                <>
-                {console.log(plan.planId === currentPlanId)}
-              {console.log('plan.planId',plan.planId )}
-              {console.log('currentPlanId',currentPlanId )}
-                </>
-              )} */}
+              
               {(plan?.planId?.toString() || "") === (currentPlanId?.toString() || "") && (
                 <>             
                <span style={{display:"flex", alignItems:"center",

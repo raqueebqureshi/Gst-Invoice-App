@@ -3,11 +3,13 @@ import convertAmountToWords from "../components/ConvertAmount";
 import { useState, useEffect } from "react";
 import { hexToRgba } from "../components/hex";
 import SocialMediaIcons from "../components/GlobalSocialIcons";
+import ReusableFunctions from "../components/ReusableFunctions";
 
 
 
 
-export function InvoiceTemplate3({ shopdetails, orders, invoiceSettings, GSTHSNCodes,shopProfile }) {
+export function InvoiceTemplate3({ shopdetails, orders, invoiceSettings, GSTHSNCodes,shopProfile, isShopifyTax}) {
+ // console.log("isShopifyTax - ", isShopifyTax);
  // console.log("orders - InvoiceTemplate3", orders[0]);
  // console.log("store - details I3", shopdetails[0]);
  // console.log("store - profile I3", shopProfile);
@@ -55,31 +57,6 @@ export function InvoiceTemplate3({ shopdetails, orders, invoiceSettings, GSTHSNC
  }, []);
 
 
- // useEffect(() => {
- //   fetch(`/api/fetch-store-profile?shopId=${shopId}`, {
- //     method: "GET",
- //     headers: { "Content-Type": "application/json" },
- //   })
- //     .then((response) => response.json())
- //     .then((data) => {
- //       if (data && data.profile) {
- //         const profileData = data.profile;
- //         console.log("profileData", profileData);
- //         setShopProfile(profileData || {});
- //       }
- //     })
- //     .catch((error) => {
- //       console.error("Error fetching store profile:", error);
- //     });
- // }, [shopId]);
-
-
-
-
- // console.log("billing_address - InvoiceTemplate2", orders[0].billing_address);
- // console.log("orders - InvoiceTemplate2", orders);
-// console.log("orders - InvoiceTemplate2", JSON.stringify(orders));
- // console.log("store - details I", shopdetails[0]);
 
 
 
@@ -92,26 +69,29 @@ export function InvoiceTemplate3({ shopdetails, orders, invoiceSettings, GSTHSNC
      const matchedGSTItem = GSTHSNCodes.gstcodes
        ? GSTHSNCodes.gstcodes.find((gstItem) => Number(gstItem.productId) === item.product_id)
        : GSTHSNCodes.find((gstItem) => Number(gstItem.productId) === item.product_id);
-     // console.log("matchedGSTItem", matchedGSTItem);
+    
+     let taxPrice = 0;
 
 
-     // let taxPrice = 0;
-     // if (shopdetails[0].taxes_included === true) {
-     //   taxPrice = item?.tax_lines[0]?.price
-     //   ? parseFloat(item.tax_lines[0].price)
-     //   : 0;
-     // } else{
-     //    taxPrice = matchedGSTItem?.gst
-     //   ? (parseFloat(item.price) * parseFloat(matchedGSTItem.gst)) / 100
-     //   // : item?.tax_lines[0]?.price
-     //   //   ? parseFloat(item.tax_lines[0].price)
-     //     : 0;
-     // }
-     const taxPrice = matchedGSTItem?.gst
+     if(isShopifyTax){
+       taxPrice = item?.tax_lines[0]?.price
+       ? parseFloat(item.tax_lines[0].price)
+       : 0;
+
+
+     } else{
+         taxPrice = matchedGSTItem?.gst
      ? (parseFloat(item.price) * parseFloat(matchedGSTItem.gst)) / 100 * item.quantity
+     : 0;
+     }
+
+
+    
+     // const taxPrice = matchedGSTItem?.gst
+     // ? (parseFloat(item.price) * parseFloat(matchedGSTItem.gst)) / 100 * item.quantity
      // : item?.tax_lines[0]?.price
      //   ? parseFloat(item.tax_lines[0].price)
-     : 0;
+     // : 0;
      // const taxPrice = item?.tax_lines[0]?.price
      //   ? parseFloat(item.tax_lines[0].price)
      //   : matchedGSTItem?.gst
@@ -121,73 +101,75 @@ export function InvoiceTemplate3({ shopdetails, orders, invoiceSettings, GSTHSNC
      // console.log('acc + taxPrice:', acc + taxPrice);
      return acc + taxPrice;
      // return taxPrice;
-   }, 0)
-   ; // Convert to 2 decimal places
+   }, 0); // Convert to 2 decimal places
 
 
 
 
-   // Compute total tax across all line items
- const totalTaxAmountForSubtotal = orders[0].line_items
- ?.reduce((acc, item) => {
-   const matchedGSTItem = GSTHSNCodes.gstcodes
-     ? GSTHSNCodes.gstcodes.find((gstItem) => Number(gstItem.productId) === item.product_id)
-     : GSTHSNCodes.find((gstItem) => Number(gstItem.productId) === item.product_id);
-   // console.log("matchedGSTItem", matchedGSTItem);
+ //   // Compute total tax across all line items
+ // const totalTaxAmountForSubtotal = orders[0].line_items
+ // ?.reduce((acc, item) => {
+ //   const matchedGSTItem = GSTHSNCodes.gstcodes
+ //     ? GSTHSNCodes.gstcodes.find((gstItem) => Number(gstItem.productId) === item.product_id)
+ //     : GSTHSNCodes.find((gstItem) => Number(gstItem.productId) === item.product_id);
+ //   // console.log("matchedGSTItem", matchedGSTItem);
 
 
-   let taxPrice = 0;
-   if (shopdetails[0].taxes_included === true) {
-     taxPrice = item?.tax_lines[0]?.price
-     ? parseFloat(item.tax_lines[0].price)
-     : 0;
-   } else{
-      taxPrice = matchedGSTItem?.gst
-     ? (parseFloat(item.price) * parseFloat(matchedGSTItem.gst)) / 100
-     // : item?.tax_lines[0]?.price
-     //   ? parseFloat(item.tax_lines[0].price)
-       : 0;
-   }
-   // const taxPrice = matchedGSTItem?.gst
-   // ? (parseFloat(item.price) * parseFloat(matchedGSTItem.gst)) / 100
-   // : item?.tax_lines[0]?.price
-   //   ? parseFloat(item.tax_lines[0].price)
-   // : 0;
-   // const taxPrice = item?.tax_lines[0]?.price
-   //   ? parseFloat(item.tax_lines[0].price)
-   //   : matchedGSTItem?.gst
-   //   ? (parseFloat(item.price) * parseFloat(matchedGSTItem.gst)) / 100
-   //   : 0;
+ //   let taxPrice = 0;
+
+
+ //   if(isShopifyTax){
+ //       taxPrice = item?.tax_lines[0]?.price
+ //     ? parseFloat(item.tax_lines[0].price)
+ //     : 0;
+ //   }else{
+ //     taxPrice = matchedGSTItem?.gst
+ //       ? (parseFloat(item.price) * parseFloat(matchedGSTItem.gst)) / 100
+ //       :  0;
+ //   }
+
+
+ //   // if (shopdetails[0].taxes_included === true) {
+ //   //   taxPrice = item?.tax_lines[0]?.price
+ //   //   ? parseFloat(item.tax_lines[0].price)
+ //   //   : 0;
+ //   // } else{
+ //   //    taxPrice = matchedGSTItem?.gst
+ //   //   ? (parseFloat(item.price) * parseFloat(matchedGSTItem.gst)) / 100
+ //   //   // : item?.tax_lines[0]?.price
+ //   //   //   ? parseFloat(item.tax_lines[0].price)
+ //   //     : 0;
+ //   // }
+ //   // const taxPrice = matchedGSTItem?.gst
+ //   // ? (parseFloat(item.price) * parseFloat(matchedGSTItem.gst)) / 100
+ //   // : item?.tax_lines[0]?.price
+ //   //   ? parseFloat(item.tax_lines[0].price)
+ //   // : 0;
  
-   // console.log('acc + taxPrice:', acc + taxPrice);
-   return acc + taxPrice;
-   // return taxPrice;
- }, 0)
- ; // Convert to 2 decimal places
+ 
+ //   // console.log('acc + taxPrice:', acc + taxPrice);
+ //   return acc + taxPrice;
+ //   // return taxPrice;
+ // }, 0)
+ // ; // Convert to 2 decimal places
 
 
-  let totalPrice = orders[0].total_price !== null ? Number(orders[0].total_price )
+  let subTotal = Number(orders[0].subtotal_price !== null ? orders[0].subtotal_price : 0 ) || 0;
    // - orders[0].total_tax)
-    : 0;
-    let subTotal = totalPrice - totalTaxAmountForSubtotal;
-    let grandTotal =
+   
+   //  let subTotal = totalPrice - totalTaxAmountForSubtotal;
+ let grandTotal =
       subTotal +
       Number(totalTaxAmount) +
       (orders[0]?.shipping_lines[0]?.price
         ? Number(orders[0]?.shipping_lines[0]?.price)
-        : 0) -
-      (orders[0]?.discount_codes[0]?.amount
-        ? Number(orders[0]?.discount_codes[0]?.amount)
-        : 0);
+        : 0) ;
+     //    -
+     //  (orders[0]?.discount_codes[0]?.amount
+     //    ? Number(orders[0]?.discount_codes[0]?.amount)
+     //    : 0);
 
 
- // if (shopdetails[0].taxes_included === true) {
-  //   subTotal = totalPrice - totalTaxAmountForSubtotal;
- //   grandTotal = subTotal + Number(totalTaxAmount);
- // } else {
-  //   subTotal = totalPrice - totalTaxAmountForSubtotal;
- //   grandTotal = subTotal + Number(totalTaxAmount);
- // }
 
 
  useEffect(() => {
@@ -705,39 +687,59 @@ export function InvoiceTemplate3({ shopdetails, orders, invoiceSettings, GSTHSNC
            let lineAmount = 0;
 
 
-           if (shopdetails[0].taxes_included === true) {
-             // console.log("item", item);
-             taxPrice = item.price * (matchedGSTItem?.gst / 100) * item.quantity || 0;
-             price =
-               parseFloat(item.price) -
-                 // Number(taxPrice ? taxPrice : item?.tax_lines[0]?.price ? parseFloat(item.tax_lines[0].price) : 0) ||
-               0; // Convert to a number and default to 0 if NaN
-
-
-             // console.log("taxPrice", taxPrice);
-             lineAmount = (
-               item.quantity * price +
-               (Number(taxPrice ? taxPrice
-                 // : item?.tax_lines[0]?.price ? parseFloat(item.tax_lines[0].price)
-                 : 0) || 0)
-             )
-           
-               .toFixed(2); // Ensures final result is in 2 decimal format
-           } else {
-             taxPrice = item.price * (matchedGSTItem?.gst / 100) || 0;
-             price = parseFloat(item.price) || 0; // Convert to a number and default to 0 if NaN
-
-
-             // console.log("taxPrice", taxPrice);
-             lineAmount = (
-               item.quantity * price +
-               (Number(taxPrice ? taxPrice
-                 // : item?.tax_lines[0]?.price ? parseFloat(item.tax_lines[0].price)
-                 : 0) || 0)
-             )
+          
             
-               .toFixed(2); // Ensures final result is in 2 decimal format
-           }
+             if(isShopifyTax){
+               if (shopdetails[0].taxes_included === true) {
+                 // console.log("item", item);
+                 taxPrice = item?.tax_lines[0]?.price
+                 ? parseFloat(item.tax_lines[0].price) || 0
+                 : 0;
+                 price =
+                   parseFloat(item.price)
+                   - Number(taxPrice ? taxPrice / item.quantity : 0) ||
+                   0; // Convert to a number and default to 0 if NaN
+  
+                 console.log("taxPrice", taxPrice);
+                 console.log("price", price);
+                 console.log("parseFloat(item.price) - Number(taxPrice ? taxPrice : 0)", parseFloat(item.price) -
+                 Number(taxPrice ? taxPrice : 0));
+                 lineAmount = (
+                   price * item.quantity +
+                 Number(taxPrice ? taxPrice   : 0) || 0).toFixed(2); // Ensures final result is in 2 decimal format
+               }
+               else {
+                 taxPrice = item?.tax_lines[0]?.price
+                   ? parseFloat(item.tax_lines[0].price) || 0
+                   : 0;
+                 price = parseFloat(item.price) || 0; // Convert to a number and default to 0 if NaN
+                 lineAmount = (
+                     price * item.quantity +
+                   Number(taxPrice ? taxPrice : 0)
+                 )
+                  
+                   .toFixed(2); // Ensures final result is in 2 decimal format
+               }
+             }else{
+
+
+               taxPrice = item.price * (matchedGSTItem?.gst * item.quantity / 100) || 0;
+               price = parseFloat(item.price) || 0;
+               lineAmount = (
+                 price * item.quantity +
+               Number(taxPrice ? taxPrice : 0) || 0).toFixed(2);
+             }
+             // Convert to a number and default to 0 if NaN
+             // price = parseFloat(item.price) || 0;
+             // // console.log("taxPrice", taxPrice);
+             // lineAmount = (
+             //   item.quantity * price +
+             //   Number(taxPrice ? taxPrice
+             //     : 0)
+             // )
+            
+             //   .toFixed(2); // Ensures final result is in 2 decimal format
+          
 
 
              return (
@@ -803,7 +805,7 @@ export function InvoiceTemplate3({ shopdetails, orders, invoiceSettings, GSTHSNC
                      border: `1px solid ${hexToRgba(invoiceSettings.branding.primaryColor, 0.07) || "#e2e8f0"}`,
                    }}
                  >
-                   {matchedGSTItem?.gst || "-"}
+                   {isShopifyTax? ReusableFunctions.calculateTaxRate(item.price, taxPrice, item.quantity) : matchedGSTItem?.gst || "-"}%
                  </td>
                ) : (
                  <></>
@@ -1210,8 +1212,6 @@ export function InvoiceTemplate3({ shopdetails, orders, invoiceSettings, GSTHSNC
    </div>
  );
 }
-
-
 
 
 

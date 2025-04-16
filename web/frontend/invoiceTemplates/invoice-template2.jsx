@@ -3,9 +3,12 @@ import React from "react";
 import { useState, useEffect } from "react";
 import SocialMediaIcons from "../components/GlobalSocialIcons";
 import { hexToRgba } from "../components/hex";
+import ReusableFunctions from "../components/ReusableFunctions";
 
 
-export function InvoiceTemplate2({ shopdetails, orders, invoiceSettings, GSTHSNCodes, shopProfile }) {
+
+
+export function InvoiceTemplate2({ shopdetails, orders, invoiceSettings, GSTHSNCodes, shopProfile, isShopifyTax}) {
  // console.log("orders - InvoiceTemplate2", orders[0]);
  // console.log("store - details I2", shopdetails[0]);
  // console.log("invoiceSettings - InvoiceTemplate2", invoiceSettings);
@@ -53,76 +56,35 @@ export function InvoiceTemplate2({ shopdetails, orders, invoiceSettings, GSTHSNC
  }, []);
 
 
-  // // Compute total tax across all line items
- // const totalTaxAmount = orders[0].line_items
- //   ?.reduce((acc, item) => {
- //     const matchedGSTItem = GSTHSNCodes.gstcodes
- //       ? GSTHSNCodes.gstcodes.find((gstItem) => Number(gstItem.productId) === item.product_id)
- //       : GSTHSNCodes.find((gstItem) => Number(gstItem.productId) === item.product_id);
- //     console.log("matchedGSTItem", matchedGSTItem);
-
-
- //     const taxPrice = matchedGSTItem?.gst
- //     ? (parseFloat(item.price) * parseFloat(matchedGSTItem.gst)) / 100
- //     : item?.tax_lines[0]?.price
- //       ? parseFloat(item.tax_lines[0].price)
- //       : 0;
- //     // const taxPrice = item?.tax_lines[0]?.price
- //     //   ? parseFloat(item.tax_lines[0].price)
- //     //   : matchedGSTItem?.gst
- //     //   ? (parseFloat(item.price) * parseFloat(matchedGSTItem.gst)) / 100
- //     //   : 0;
-
-
- //     return acc + taxPrice;
- //   }, 0)
- //   ; // Convert to 2 decimal places
-
-
-  // let totalPrice = orders[0].total_price !== null ? Number(orders[0].total_price - orders[0].total_tax) : 0;
- // let subTotal = 0;
- // let grandTotal = 0;
-
-
- // if (shopdetails[0].taxes_included === true) {
-  //   subTotal = totalPrice - totalTaxAmount;
- //   grandTotal = subTotal + Number(totalTaxAmount);
- // } else {
-  //   subTotal = totalPrice;
- //   grandTotal = subTotal + Number(totalTaxAmount);
- // }
-
-
-
-
-
-
  // Compute total tax across all line items
  const totalTaxAmount = orders[0].line_items
    ?.reduce((acc, item) => {
      const matchedGSTItem = GSTHSNCodes.gstcodes
        ? GSTHSNCodes.gstcodes.find((gstItem) => Number(gstItem.productId) === item.product_id)
        : GSTHSNCodes.find((gstItem) => Number(gstItem.productId) === item.product_id);
-     // console.log("matchedGSTItem", matchedGSTItem);
+    
+     let taxPrice = 0;
 
 
-     // let taxPrice = 0;
-     // if (shopdetails[0].taxes_included === true) {
-     //   taxPrice = item?.tax_lines[0]?.price
-     //   ? parseFloat(item.tax_lines[0].price)
-     //   : 0;
-     // } else{
-     //    taxPrice = matchedGSTItem?.gst
-     //   ? (parseFloat(item.price) * parseFloat(matchedGSTItem.gst)) / 100
-     //   // : item?.tax_lines[0]?.price
-     //   //   ? parseFloat(item.tax_lines[0].price)
-     //     : 0;
-     // }
-     const taxPrice = matchedGSTItem?.gst
+     if(isShopifyTax){
+       taxPrice = item?.tax_lines[0]?.price
+       ? parseFloat(item.tax_lines[0].price)
+       : 0;
+
+
+     } else{
+         taxPrice = matchedGSTItem?.gst
      ? (parseFloat(item.price) * parseFloat(matchedGSTItem.gst)) / 100 * item.quantity
+     : 0;
+     }
+
+
+    
+     // const taxPrice = matchedGSTItem?.gst
+     // ? (parseFloat(item.price) * parseFloat(matchedGSTItem.gst)) / 100 * item.quantity
      // : item?.tax_lines[0]?.price
      //   ? parseFloat(item.tax_lines[0].price)
-     : 0;
+     // : 0;
      // const taxPrice = item?.tax_lines[0]?.price
      //   ? parseFloat(item.tax_lines[0].price)
      //   : matchedGSTItem?.gst
@@ -132,72 +94,29 @@ export function InvoiceTemplate2({ shopdetails, orders, invoiceSettings, GSTHSNC
      // console.log('acc + taxPrice:', acc + taxPrice);
      return acc + taxPrice;
      // return taxPrice;
-   }, 0)
-   ; // Convert to 2 decimal places
+   }, 0); // Convert to 2 decimal places
 
 
 
 
-   // Compute total tax across all line items
- const totalTaxAmountForSubtotal = orders[0].line_items
- ?.reduce((acc, item) => {
-   const matchedGSTItem = GSTHSNCodes.gstcodes
-     ? GSTHSNCodes.gstcodes.find((gstItem) => Number(gstItem.productId) === item.product_id)
-     : GSTHSNCodes.find((gstItem) => Number(gstItem.productId) === item.product_id);
-   // console.log("matchedGSTItem", matchedGSTItem);
 
 
-   let taxPrice = 0;
-   if (shopdetails[0].taxes_included === true) {
-     taxPrice = item?.tax_lines[0]?.price
-     ? parseFloat(item.tax_lines[0].price)
-     : 0;
-   } else{
-      taxPrice = matchedGSTItem?.gst
-     ? (parseFloat(item.price) * parseFloat(matchedGSTItem.gst)) / 100
-     // : item?.tax_lines[0]?.price
-     //   ? parseFloat(item.tax_lines[0].price)
-       : 0;
-   }
-   // const taxPrice = matchedGSTItem?.gst
-   // ? (parseFloat(item.price) * parseFloat(matchedGSTItem.gst)) / 100
-   // : item?.tax_lines[0]?.price
-   //   ? parseFloat(item.tax_lines[0].price)
-   // : 0;
-   // const taxPrice = item?.tax_lines[0]?.price
-   //   ? parseFloat(item.tax_lines[0].price)
-   //   : matchedGSTItem?.gst
-   //   ? (parseFloat(item.price) * parseFloat(matchedGSTItem.gst)) / 100
-   //   : 0;
- 
-   // console.log('acc + taxPrice:', acc + taxPrice);
-   return acc + taxPrice;
-   // return taxPrice;
- }, 0)
- ; // Convert to 2 decimal places
-
-
-  let totalPrice = orders[0].total_price !== null ? Number(orders[0].total_price )
+   let subTotal = Number(orders[0].subtotal_price !== null ? orders[0].subtotal_price : 0 ) || 0;
    // - orders[0].total_tax)
-    : 0;
    
-    let subTotal = totalPrice - totalTaxAmountForSubtotal;
-let grandTotal =
- subTotal +
- Number(totalTaxAmount) +
- (orders[0]?.shipping_lines[0]?.price
-   ? Number(orders[0]?.shipping_lines[0]?.price)
-   : 0) -
- (orders[0]?.discount_codes[0]?.amount
-   ? Number(orders[0]?.discount_codes[0]?.amount)
-   : 0);
- // if (shopdetails[0].taxes_included === true) {
-  //   subTotal = totalPrice - totalTaxAmountForSubtotal;
- //   grandTotal = subTotal + Number(totalTaxAmount);
- // } else {
-  //   subTotal = totalPrice - totalTaxAmountForSubtotal;
- //   grandTotal = subTotal + Number(totalTaxAmount);
- // }
+   //  let subTotal = totalPrice - totalTaxAmountForSubtotal;
+ let grandTotal =
+      subTotal +
+      Number(totalTaxAmount) +
+      (orders[0]?.shipping_lines[0]?.price
+        ? Number(orders[0]?.shipping_lines[0]?.price)
+        : 0) ;
+     //    -
+     //  (orders[0]?.discount_codes[0]?.amount
+     //    ? Number(orders[0]?.discount_codes[0]?.amount)
+     //    : 0);
+
+
 
 
 
@@ -269,7 +188,15 @@ let grandTotal =
      {invoiceSettings.supplier.showSupplier ? (
        <div style={{ marginTop: "20px", visibility: invoiceSettings.supplier.showSupplier ? "visible" : "hidden" }}>
          <h2 style={{ margin: 0, fontSize: "20px" }}>
-           {invoiceSettings.supplier.showHeading ? shopdetails[0]?.name !== null ? shopdetails[0]?.name : "Not Available" : <></>}
+           {invoiceSettings.supplier.showHeading ? (
+             shopdetails[0]?.name !== null ? (
+               shopdetails[0]?.name
+             ) : (
+               "Not Available"
+             )
+           ) : (
+             <></>
+           )}
          </h2>
          <p style={{ margin: "5px 0" }}>
            {invoiceSettings.supplier.showAddress ? (
@@ -322,7 +249,11 @@ let grandTotal =
            )}
          </p>
          <p style={{ margin: "0px 0" }}>
-           {invoiceSettings.supplier.showGSTIN ? <>GSTIN: {shopProfile?.storeProfile?.gstNumber || "Not Available"}</> : <></>}
+           {invoiceSettings.supplier.showGSTIN ? (
+             <>GSTIN: {shopProfile?.storeProfile?.gstNumber || "Not Available"}</>
+           ) : (
+             <></>
+           )}
          </p>
          {/* <p style={{ margin: '5px 0' }}>PAN NO: AAA123456</p> */}
        </div>
@@ -373,19 +304,16 @@ let grandTotal =
                ) : (
                  <></>
                )}{" "}
-               {invoiceSettings.billing.showCompany && (
-   
- orders[0]?.billing_address?.company &&
-  <span> ({orders[0].billing_address.company})</span>
-  
-
-
-)}
+               {invoiceSettings.billing.showCompany && orders[0]?.billing_address?.company && (
+                 <span> ({orders[0].billing_address.company})</span>
+               )}
              </p>
              {invoiceSettings.billing.showAddress1 ? (
                <p style={{ margin: "5px 0" }}>
                  ADDRESS:
-                 {orders[0]?.billing_address?.address1 !== null ? orders[0]?.billing_address?.address1 + ", " : "Not Available"}
+                 {orders[0]?.billing_address?.address1 !== null
+                   ? orders[0]?.billing_address?.address1 + ", "
+                   : "Not Available"}
                </p>
              ) : (
                <></>
@@ -432,7 +360,9 @@ let grandTotal =
                )}
              </p>
              {invoiceSettings.billing.showEmail ? (
-               <p style={{ margin: "5px 0" }}>Email ID: {orders[0]?.email !== null ? orders[0]?.email : "Not Available"}</p>
+               <p style={{ margin: "5px 0" }}>
+                 Email ID: {orders[0]?.email !== null ? orders[0]?.email : "Not Available"}
+               </p>
              ) : (
                <></>
              )}
@@ -486,19 +416,18 @@ let grandTotal =
                  ) : (
                    <></>
                  )}{" "}
-                 {invoiceSettings.shipping.showCompany && (
-   
-   orders[0]?.shipping_address?.company &&
-    <span> ({orders[0].shipping_address.company})</span>
-    
-  
- )}
+                 {invoiceSettings.shipping.showCompany && orders[0]?.shipping_address?.company && (
+                   <span> ({orders[0].shipping_address.company})</span>
+                 )}
                </p>
                <p style={{ margin: "5px 0" }}>
                  {invoiceSettings.shipping.showAddress1 ? (
                    <>
                      ADDRESS:{" "}
-                     {orders[0]?.shipping_address?.address1 !== null ? orders[0]?.shipping_address?.address1 : "Not Available"},
+                     {orders[0]?.shipping_address?.address1 !== null
+                       ? orders[0]?.shipping_address?.address1
+                       : "Not Available"}
+                     ,
                    </>
                  ) : (
                    <></>
@@ -544,13 +473,16 @@ let grandTotal =
                  )}
                </p>
                {invoiceSettings.shipping.showEmail ? (
-                 <p style={{ margin: "5px 0" }}>Email ID: {orders[0]?.email !== null ? orders[0]?.email : "Not Available"}</p>
+                 <p style={{ margin: "5px 0" }}>
+                   Email ID: {orders[0]?.email !== null ? orders[0]?.email : "Not Available"}
+                 </p>
                ) : (
                  <></>
                )}
                {invoiceSettings.shipping.showPhone ? (
                  <p style={{ margin: "5px 0" }}>
-                   PH: {orders[0]?.shipping_address?.phone !== null ? orders[0]?.shipping_address?.phone : "Not Available"}
+                   PH:{" "}
+                   {orders[0]?.shipping_address?.phone !== null ? orders[0]?.shipping_address?.phone : "Not Available"}
                  </p>
                ) : (
                  <></>
@@ -685,27 +617,23 @@ let grandTotal =
 
 
        <tbody style={{ textAlign: "center" }}>
-           {orders[0].line_items?.map((item, index) => {
-             // console.log('GSTHSNCodes-------',GSTHSNCodes[0].productId);
-             // console.log("item-------", item.product_id);
+         {orders[0].line_items?.map((item, index) => {
+           // console.log('GSTHSNCodes-------',GSTHSNCodes[0].productId);
+           // console.log("item-------", item.product_id);
 
 
-             // const matchedGSTItem = GSTHSNCodes.gstcodes
-             //   ? GSTHSNCodes.gstcodes.find((gstItem) => Number(gstItem.productId) === item.product_id)
-             //   : GSTHSNCodes.find((gstItem) => Number(gstItem.productId) === item.product_id);
+           // const matchedGSTItem = GSTHSNCodes.gstcodes
+           //   ? GSTHSNCodes.gstcodes.find((gstItem) => Number(gstItem.productId) === item.product_id)
+           //   : GSTHSNCodes.find((gstItem) => Number(gstItem.productId) === item.product_id);
 
 
-             // const price = parseFloat(item.price) || 0; // Convert to a number and default to 0 if NaN
-             // const lineAmount = item.quantity * price + (Number(item?.tax_lines[0]?.price) || 0) || 0;
+           // const price = parseFloat(item.price) || 0; // Convert to a number and default to 0 if NaN
+           // const lineAmount = item.quantity * price + (Number(item?.tax_lines[0]?.price) || 0) || 0;
 
 
-             const matchedGSTItem = GSTHSNCodes.gstcodes
-             ? GSTHSNCodes.gstcodes.find(
-                 (gstItem) => Number(gstItem.productId) === item.product_id
-               )
-             : GSTHSNCodes.find(
-                 (gstItem) => Number(gstItem.productId) === item.product_id
-               );
+           const matchedGSTItem = GSTHSNCodes.gstcodes
+             ? GSTHSNCodes.gstcodes.find((gstItem) => Number(gstItem.productId) === item.product_id)
+             : GSTHSNCodes.find((gstItem) => Number(gstItem.productId) === item.product_id);
            // console.log("matchedGSTItem", matchedGSTItem);
 
 
@@ -714,43 +642,52 @@ let grandTotal =
            let lineAmount = 0;
 
 
-           if (shopdetails[0].taxes_included === true) {
-             // console.log("item", item);
-             taxPrice = item.price * (matchedGSTItem?.gst / 100) * item.quantity || 0;
-             price =
-               parseFloat(item.price) -
-                 // Number(taxPrice ? taxPrice : item?.tax_lines[0]?.price ? parseFloat(item.tax_lines[0].price) : 0) ||
-               0; // Convert to a number and default to 0 if NaN
-
-
-             // console.log("taxPrice", taxPrice);
-             lineAmount = (
-               item.quantity * price +
-               (Number(taxPrice ? taxPrice
-                 // : item?.tax_lines[0]?.price ? parseFloat(item.tax_lines[0].price)
-                 : 0) || 0)
-             )
-           
-               .toFixed(2); // Ensures final result is in 2 decimal format
-           } else {
-             taxPrice = item.price * (matchedGSTItem?.gst / 100) || 0;
-             price = parseFloat(item.price) || 0; // Convert to a number and default to 0 if NaN
-
-
-             // console.log("taxPrice", taxPrice);
-             lineAmount = (
-               item.quantity * price +
-               (Number(taxPrice ? taxPrice
-                 // : item?.tax_lines[0]?.price ? parseFloat(item.tax_lines[0].price)
-                 : 0) || 0)
-             )
+          
             
-               .toFixed(2); // Ensures final result is in 2 decimal format
-           }
+             if(isShopifyTax){
+               if (shopdetails[0].taxes_included === true) {
+                 // console.log("item", item);
+                 taxPrice = item?.tax_lines[0]?.price
+                 ? parseFloat(item.tax_lines[0].price) || 0
+                 : 0;
+                 price =
+                   parseFloat(item.price)
+                   - Number(taxPrice ? taxPrice / item.quantity : 0) ||
+                   0; // Convert to a number and default to 0 if NaN
+  
+                 console.log("taxPrice", taxPrice);
+                 console.log("price", price);
+                 console.log("parseFloat(item.price) - Number(taxPrice ? taxPrice : 0)", parseFloat(item.price) -
+                 Number(taxPrice ? taxPrice : 0));
+                 lineAmount = (
+                   price * item.quantity +
+                 Number(taxPrice ? taxPrice   : 0) || 0).toFixed(2); // Ensures final result is in 2 decimal format
+               }
+               else {
+                 taxPrice = item?.tax_lines[0]?.price
+                   ? parseFloat(item.tax_lines[0].price) || 0
+                   : 0;
+                 price = parseFloat(item.price) || 0; // Convert to a number and default to 0 if NaN
+                 lineAmount = (
+                     price * item.quantity +
+                   Number(taxPrice ? taxPrice : 0)
+                 )
+                  
+                   .toFixed(2); // Ensures final result is in 2 decimal format
+               }
+             }else{
 
 
-             return (
-                 <tr key={item.id}>
+               taxPrice = item.price * (matchedGSTItem?.gst * item.quantity / 100) || 0;
+               price = parseFloat(item.price) || 0;
+               lineAmount = (
+                 price * item.quantity +
+               Number(taxPrice ? taxPrice : 0) || 0).toFixed(2);
+             }
+
+
+           return (
+             <tr key={item.id}>
                {invoiceSettings.lineItems.showVariantTitle ? (
                  <td
                    style={{
@@ -812,7 +749,7 @@ let grandTotal =
                      border: `1px solid ${hexToRgba(invoiceSettings.branding.primaryColor, 0.07) || "#e2e8f0"}`,
                    }}
                  >
-                   {matchedGSTItem?.gst || "-"}
+                    {isShopifyTax? ReusableFunctions.calculateTaxRate(item.price, taxPrice, item.quantity) : matchedGSTItem?.gst || "-"}%
                  </td>
                ) : (
                  <></>
@@ -828,9 +765,9 @@ let grandTotal =
                    ₹
                    {taxPrice
                      ? parseFloat(taxPrice).toFixed(2) // Converts to 2 decimal places
-                     // : item?.tax_lines[0]?.price
-                     // ? parseFloat(item.tax_lines[0].price).toFixed(2)
-                     : "0"}
+                     : // : item?.tax_lines[0]?.price
+                       // ? parseFloat(item.tax_lines[0].price).toFixed(2)
+                       "0"}
                    {/* ₹{item?.tax_lines[0]?.price
    ? parseFloat(item.tax_lines[0].price).toFixed(2)  // Converts to 2 decimal places
    : (taxPrice ? parseFloat(taxPrice).toFixed(2) : "0")} */}
@@ -852,9 +789,9 @@ let grandTotal =
                  <></>
                )}
              </tr>
-             );
-           })}
-         </tbody>
+           );
+         })}
+       </tbody>
      </table>
 
 
@@ -908,196 +845,154 @@ let grandTotal =
              </tr>
            </thead>
            <tbody>
-               {invoiceSettings.total.showSubtotal ? (
-                 <tr>
-                   <td
-                     style={{
-                       padding: "10px",
-                       fontWeight: "bold",
-                       backgroundColor: hexToRgba(invoiceSettings.branding.primaryColor, 0.07) || "#edf2f7",
-                       borderBottom: `1px solid ${
-                         hexToRgba(invoiceSettings.branding.primaryColor, 0.07) || "#e2e8f0"
-                       }`,
-                     }}
-                   >
-                     Subtotal
-                   </td>
-                   <td
-                     style={{
-                       padding: "10px",
-                       textAlign: "right",
-                       borderBottom: `1px solid ${
-                         hexToRgba(invoiceSettings.branding.primaryColor, 0.07) || "#e2e8f0"
-                       }`,
-                     }}
-                   >
-                    ₹{" "}
-                   {subTotal?
-                   subTotal.toFixed(2)
-                   // :orders[0].subtotal_price !== null
-                   //   ? Number(orders[0].subtotal_price).toFixed(2)
+             {invoiceSettings.total.showSubtotal ? (
+               <tr>
+                 <td
+                   style={{
+                     padding: "10px",
+                     fontWeight: "bold",
+                     backgroundColor: hexToRgba(invoiceSettings.branding.primaryColor, 0.07) || "#edf2f7",
+                     borderBottom: `1px solid ${hexToRgba(invoiceSettings.branding.primaryColor, 0.07) || "#e2e8f0"}`,
+                   }}
+                 >
+                   Subtotal
+                 </td>
+                 <td
+                   style={{
+                     padding: "10px",
+                     textAlign: "right",
+                     borderBottom: `1px solid ${hexToRgba(invoiceSettings.branding.primaryColor, 0.07) || "#e2e8f0"}`,
+                   }}
+                 >
+                   ₹{" "}
+                   {subTotal
+                     ? subTotal.toFixed(2)
+                     : // :orders[0].subtotal_price !== null
+                       //   ? Number(orders[0].subtotal_price).toFixed(2)
+                       "0"}
+                 </td>
+               </tr>
+             ) : null}
+             {invoiceSettings.total.showDiscount ? (
+               <tr>
+                 <td
+                   style={{
+                     padding: "10px",
+                     fontWeight: "bold",
+                     backgroundColor: hexToRgba(invoiceSettings.branding.primaryColor, 0.07) || "#edf2f7",
+                     borderBottom: `1px solid ${hexToRgba(invoiceSettings.branding.primaryColor, 0.07) || "#e2e8f0"}`,
+                   }}
+                 >
+                   Discount
+                 </td>
+                 <td
+                   style={{
+                     padding: "10px",
+                     textAlign: "right",
+                     borderBottom: `1px solid ${hexToRgba(invoiceSettings.branding.primaryColor, 0.07) || "#e2e8f0"}`,
+                   }}
+                 >
+                   ₹ (-{" "}
+                   {orders[0]?.discount_codes
+                     ? orders[0]?.discount_codes[0]?.amount
+                       ? Number(orders[0]?.discount_codes[0]?.amount).toFixed(2)
+                       : "0"
                      : "0"}
-                   </td>
-                 </tr>
-               ) : null}
-                {invoiceSettings.total.showDiscount ? (
-                               <tr>
-                                 <td
-                                   style={{
-                                     padding: "10px",
-                                     fontWeight: "bold",
-                                     backgroundColor:
-                                       hexToRgba(
-                                         invoiceSettings.branding.primaryColor,
-                                         0.07
-                                       ) || "#edf2f7",
-                                     borderBottom: `1px solid ${
-                                       hexToRgba(
-                                         invoiceSettings.branding.primaryColor,
-                                         0.07
-                                       ) || "#e2e8f0"
-                                     }`,
-                                   }}
-                                 >
-                                   Discount
-                                 </td>
-                                 <td
-                                   style={{
-                                     padding: "10px",
-                                     textAlign: "right",
-                                     borderBottom: `1px solid ${
-                                       hexToRgba(
-                                         invoiceSettings.branding.primaryColor,
-                                         0.07
-                                       ) || "#e2e8f0"
-                                     }`,
-                                   }}
-                                 >
-                                   ₹ (-{" "}
-                                   {orders[0]?.discount_codes  ?
-                                   orders[0]?.discount_codes[0]?.amount
-                                     ? Number(orders[0]?.discount_codes[0]?.amount).toFixed(2)
-                                     : "0" :"0"}
-                                   )
-                                 </td>
-                               </tr>
-                             ) : null}
-              
-                             {invoiceSettings.total.showTax ? (
-                               <tr>
-                                 <td
-                                   style={{
-                                     padding: "10px",
-                                     fontWeight: "bold",
-                                     backgroundColor:
-                                       hexToRgba(
-                                         invoiceSettings.branding.primaryColor,
-                                         0.07
-                                       ) || "#edf2f7",
-                                     borderBottom: `1px solid ${
-                                       hexToRgba(
-                                         invoiceSettings.branding.primaryColor,
-                                         0.07
-                                       ) || "#e2e8f0"
-                                     }`,
-                                   }}
-                                 >
-                                    Total Tax
-                                 </td>
-                                 <td
-                                   style={{
-                                     padding: "10px",
-                                     textAlign: "right",
-                                     borderBottom: `1px solid ${
-                                       hexToRgba(
-                                         invoiceSettings.branding.primaryColor,
-                                         0.07
-                                       ) || "#e2e8f0"
-                                     }`,
-                                   }}
-                                 >
-                                   ₹{" "}
-                                   {/* {orders[0].total_tax !== null
+                   )
+                 </td>
+               </tr>
+             ) : null}
+
+
+             {invoiceSettings.total.showTax ? (
+               <tr>
+                 <td
+                   style={{
+                     padding: "10px",
+                     fontWeight: "bold",
+                     backgroundColor: hexToRgba(invoiceSettings.branding.primaryColor, 0.07) || "#edf2f7",
+                     borderBottom: `1px solid ${hexToRgba(invoiceSettings.branding.primaryColor, 0.07) || "#e2e8f0"}`,
+                   }}
+                 >
+                   Total Tax
+                 </td>
+                 <td
+                   style={{
+                     padding: "10px",
+                     textAlign: "right",
+                     borderBottom: `1px solid ${hexToRgba(invoiceSettings.branding.primaryColor, 0.07) || "#e2e8f0"}`,
+                   }}
+                 >
+                   ₹{" "}
+                   {/* {orders[0].total_tax !== null
                                      ? Number(orders[0].total_tax).toFixed(2)
                                      : "0"} */}
-                                     {totalTaxAmount.toFixed(2)}
-                                 </td>
-                               </tr>
-                             ) : null}
-              
-                             {invoiceSettings.total.showShipping ? (
-                               <tr>
-                                 <td
-                                   style={{
-                                     padding: "10px",
-                                     fontWeight: "bold",
-                                     backgroundColor:
-                                       hexToRgba(
-                                         invoiceSettings.branding.primaryColor,
-                                         0.07
-                                       ) || "#edf2f7",
-                                     borderBottom: `1px solid ${
-                                       hexToRgba(
-                                         invoiceSettings.branding.primaryColor,
-                                         0.07
-                                       ) || "#e2e8f0"
-                                     }`,
-                                   }}
-                                 >
-                                   Shipping
-                                 </td>
-                                 <td
-                                   style={{
-                                     padding: "10px",
-                                     textAlign: "right",
-                                     borderBottom: `1px solid ${
-                                       hexToRgba(
-                                         invoiceSettings.branding.primaryColor,
-                                         0.07
-                                       ) || "#e2e8f0"
-                                     }`,
-                                   }}
-                                 >
-                                   ₹{" "}
-                                   {orders[0]?.shipping_lines ?
-                                   orders[0]?.shipping_lines[0]?.price
-                                     ? Number(orders[0]?.shipping_lines[0]?.price).toFixed(2)
-                                     : "0" :"0"}
-                                 </td>
-                               </tr>
-                             ) : null}
-               {invoiceSettings.total.showTotal ? (
-                 <tr>
-                   <td
-                     style={{
-                       padding: "10px",
-                       fontWeight: "bold",
-                       backgroundColor: invoiceSettings.branding.primaryColor || "#4a5568",
-                       color: "white",
-                       borderTop: `1px solid ${hexToRgba(invoiceSettings.branding.primaryColor, 0.07) || "#e2e8f0"}`,
-                     }}
-                   >
-                     TOTAL
-                   </td>
-                   <td
-                     style={{
-                       padding: "10px",
-                       textAlign: "right",
-                       fontWeight: "bold",
-                       backgroundColor: invoiceSettings.branding.primaryColor || "#4a5568",
-                       color: "white",
-                     }}
-                   >
-                     {/* ₹ {orders[0].total_price !== null ? Number(orders[0].total_price).toFixed(2) : "0.00"} */}
-                     ₹{" "}
-                   {grandTotal? grandTotal.toFixed(2)
-                   // :orders[0].total_price !== null
-                   //   ? Number(orders[0].total_price).toFixed(2)
+                   {totalTaxAmount.toFixed(2)}
+                 </td>
+               </tr>
+             ) : null}
+
+
+             {invoiceSettings.total.showShipping ? (
+               <tr>
+                 <td
+                   style={{
+                     padding: "10px",
+                     fontWeight: "bold",
+                     backgroundColor: hexToRgba(invoiceSettings.branding.primaryColor, 0.07) || "#edf2f7",
+                     borderBottom: `1px solid ${hexToRgba(invoiceSettings.branding.primaryColor, 0.07) || "#e2e8f0"}`,
+                   }}
+                 >
+                   Shipping
+                 </td>
+                 <td
+                   style={{
+                     padding: "10px",
+                     textAlign: "right",
+                     borderBottom: `1px solid ${hexToRgba(invoiceSettings.branding.primaryColor, 0.07) || "#e2e8f0"}`,
+                   }}
+                 >
+                   ₹{" "}
+                   {orders[0]?.shipping_lines
+                     ? orders[0]?.shipping_lines[0]?.price
+                       ? Number(orders[0]?.shipping_lines[0]?.price).toFixed(2)
+                       : "0"
                      : "0"}
-                   </td>
-                 </tr>
-               ) : null}
-             </tbody>
+                 </td>
+               </tr>
+             ) : null}
+             {invoiceSettings.total.showTotal ? (
+               <tr>
+                 <td
+                   style={{
+                     padding: "10px",
+                     fontWeight: "bold",
+                     backgroundColor: invoiceSettings.branding.primaryColor || "#4a5568",
+                     color: "white",
+                     borderTop: `1px solid ${hexToRgba(invoiceSettings.branding.primaryColor, 0.07) || "#e2e8f0"}`,
+                   }}
+                 >
+                   TOTAL
+                 </td>
+                 <td
+                   style={{
+                     padding: "10px",
+                     textAlign: "right",
+                     fontWeight: "bold",
+                     backgroundColor: invoiceSettings.branding.primaryColor || "#4a5568",
+                     color: "white",
+                   }}
+                 >
+                   {/* ₹ {orders[0].total_price !== null ? Number(orders[0].total_price).toFixed(2) : "0.00"} */}₹{" "}
+                   {grandTotal
+                     ? grandTotal.toFixed(2)
+                     : // :orders[0].total_price !== null
+                       //   ? Number(orders[0].total_price).toFixed(2)
+                       "0"}
+                 </td>
+               </tr>
+             ) : null}
+           </tbody>
          </table>
        </div>
      </div>
@@ -1190,13 +1085,11 @@ let grandTotal =
        {/* <SocialMediaIcons socialLink={shopProfile.socialLinks} invoiceSetting={invoiceSettings} /> */}
      </div>
      <div style={{ textAlign: "right" }}>
- <span>Powered by Indian GST Invoice</span>
-</div>
+       <span>Powered by Indian GST Invoice</span>
+     </div>
    </div>
  );
 }
-
-
 
 
 
