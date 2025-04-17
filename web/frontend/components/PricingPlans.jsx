@@ -124,30 +124,7 @@ const maxOrders = typeof milestones[milestones.length - 1] === "number"
           </span>
         </div>
 
-        {/* Progress Bar */}
-        {/* <div style={styles.progressContainer}> */}
-          {/* <div style={styles.progressBar}>
-            <div
-              style={{
-                ...styles.progressFill,
-                width: `${progressPercentage}%`,
-              }}
-            ></div>
-            <div
-              style={{
-                ...styles.progressIndicator,
-                left: `${progressPercentage}%`,
-              }}
-            >
-              {currentOrders} orders
-            </div>
-          </div> */}
-          {/* <div style={styles.progressLabels}> */}
-            {/* {milestones.map((milestone, index) => (
-              <span key={index}>{milestone}</span>
-            ))} */}
-          {/* </div>
-        </div> */}
+  
 
         {/* Plans Grid */}
         <div style={styles.plansGrid}>

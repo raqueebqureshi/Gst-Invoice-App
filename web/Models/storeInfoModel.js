@@ -58,7 +58,7 @@ const StoreProfileSchema = new mongoose.Schema({
    totalInvoicePrint: { type: Number, default: 0 }, // Total invoice prints
    totalInvoiceSent: { type: Number, default: 0 }, // Total invoices sent
  },
- isShopifyTax: { type: Boolean, default: true }, // Flag for Shopify tax
+ isAppTax: { type: Boolean, default: false }, // Flag for Shopify tax
 });
 
 

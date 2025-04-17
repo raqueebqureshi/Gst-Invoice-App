@@ -28,9 +28,6 @@ function CustomRouter({ pages }) {
    const requiredStoreFields = [
      "firstName",
      "lastName",
-     "brandColor",
-     "invoiceNumber",
-     "invoicePrefix",
      "brandName",
      "phone",
      "storeEmail",
@@ -42,35 +39,6 @@ function CustomRouter({ pages }) {
    for (const field of requiredStoreFields) {
      if (!profile.storeProfile[field]) return false
    }
-
-
-   // Check images
-   if (!profile.images || !profile.images.logoURL || !profile.images.signatureURL) return false
-
-
-   // Check addresses
-   if (!profile.addresses) return false
-   const requiredAddressFields = ["address", "apartment", "city", "postalCode", "country"]
-   for (const field of requiredAddressFields) {
-     if (!profile.addresses[field]) return false
-   }
-
-
-   // Check social links (optional, but if included should be complete)
-   if (profile.socialLinks) {
-     const socialFields = ["facebookURL", "xURL", "instagramURL", "pinterestURL", "youtubeURL"]
-     const hasSomeLinks = socialFields.some((field) => profile.socialLinks[field])
-
-
-     if (hasSomeLinks) {
-       // If they started filling social links, check if all are filled
-       for (const field of socialFields) {
-         if (!profile.socialLinks[field]) return false
-       }
-     }
-   }
-
-
    return true
  }
 

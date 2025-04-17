@@ -9,10 +9,10 @@ import ReusableFunctions from "../components/ReusableFunctions";
 
 
 export function InvoiceTemplate3({ shopdetails, orders, invoiceSettings, GSTHSNCodes,shopProfile, isShopifyTax}) {
- // console.log("isShopifyTax - ", isShopifyTax);
- // console.log("orders - InvoiceTemplate3", orders[0]);
- // console.log("store - details I3", shopdetails[0]);
- // console.log("store - profile I3", shopProfile);
+ console.log("isShopifyTax - ", isShopifyTax);
+ console.log("orders - InvoiceTemplate3", orders[0]);
+ console.log("store - details I3", shopdetails[0]);
+ console.log("store - profile I3", shopProfile);
  // console.log("invoiceSettings - InvoiceTemplate3", invoiceSettings);
  // console.log("GSTHSNCodes - InvoiceTemplate3", GSTHSNCodes);
 
@@ -73,7 +73,7 @@ export function InvoiceTemplate3({ shopdetails, orders, invoiceSettings, GSTHSNC
      let taxPrice = 0;
 
 
-     if(isShopifyTax){
+     if(!isShopifyTax){
        taxPrice = item?.tax_lines[0]?.price
        ? parseFloat(item.tax_lines[0].price)
        : 0;
@@ -689,7 +689,7 @@ export function InvoiceTemplate3({ shopdetails, orders, invoiceSettings, GSTHSNC
 
           
             
-             if(isShopifyTax){
+             if(!isShopifyTax){
                if (shopdetails[0].taxes_included === true) {
                  // console.log("item", item);
                  taxPrice = item?.tax_lines[0]?.price
@@ -805,7 +805,7 @@ export function InvoiceTemplate3({ shopdetails, orders, invoiceSettings, GSTHSNC
                      border: `1px solid ${hexToRgba(invoiceSettings.branding.primaryColor, 0.07) || "#e2e8f0"}`,
                    }}
                  >
-                   {isShopifyTax? ReusableFunctions.calculateTaxRate(item.price, taxPrice, item.quantity) : matchedGSTItem?.gst || "-"}%
+                   {!isShopifyTax? ReusableFunctions.calculateTaxRate(item.price, taxPrice, item.quantity) : matchedGSTItem?.gst || "-"}%
                  </td>
                ) : (
                  <></>
@@ -981,7 +981,7 @@ export function InvoiceTemplate3({ shopdetails, orders, invoiceSettings, GSTHSNC
                                      }`,
                                    }}
                                  >
-                                   ₹ (-{" "}
+                                   ₹ (
                                    {orders[0]?.discount_codes  ?
                                    orders[0]?.discount_codes[0]?.amount
                                      ? Number(orders[0]?.discount_codes[0]?.amount).toFixed(2)

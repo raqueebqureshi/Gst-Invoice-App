@@ -81,6 +81,10 @@ export function OrderTableEx({ value, shopdetails }) {
   const [shopId, setShopId] = useState(null);
   const [isSubscribed, setIsSubscribed] = useState(false);
   const itemsPerPage = 20;
+ const [isAppTaxApplied, setIsAppTaxApplied] = useState(false);
+
+
+
 
   // Toggle individual order selection
   const handleOrderSelection = (id) => {
@@ -428,7 +432,6 @@ export function OrderTableEx({ value, shopdetails }) {
   // useEffect(() => {
   //   fetchLastMonthOrders();
   // });
-
   useEffect(() => {
     if (shopId) {
       fetch(`/api/fetch-store-profile?shopId=${shopId}`, {
@@ -439,8 +442,9 @@ export function OrderTableEx({ value, shopdetails }) {
         .then((data) => {
           if (data && data.profile) {
             const profileData = data.profile;
-            // console.log("profileData", profileData);
+            console.log("profileData", profileData);
             setShopProfile(profileData || {});
+            setIsAppTaxApplied(profileData?.isAppTax || false);
           }
         })
         .catch((error) => {
@@ -448,6 +452,11 @@ export function OrderTableEx({ value, shopdetails }) {
         });
     }
   }, [shopId]);
+ 
+ 
+ 
+ 
+ 
 
   useEffect(() => {
     setTimeout(() => {

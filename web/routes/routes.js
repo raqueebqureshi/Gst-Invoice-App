@@ -44,6 +44,12 @@ import {
 
 import { handleBillingConfirmation } from '../controllers/Plans_billing.js'
 import { getLastMonthOrderCount, getOrders } from "../controllers/ordersController.js";
+import { changeTaxByApp } from "../controllers/taxController.js";
+
+
+
+
+
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
 
@@ -152,5 +158,9 @@ router.put("/api/update-total-invoice-downaload", updateTotalInvoiceDownload);
 // Update total invoice sent
 router.put("/api/update-total-invoice-print", updateTotalInvoicePrint);
 
+
+
+//taxation
+router.put("/api/update-tax-settings", changeTaxByApp);
 
 export default router;
