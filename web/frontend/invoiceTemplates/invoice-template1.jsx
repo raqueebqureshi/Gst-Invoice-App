@@ -10,9 +10,9 @@ import ReusableFunctions from "../components/ReusableFunctions";
 
 
 export function InvoiceTemplate1({ shopdetails, orders, invoiceSettings, GSTHSNCodes, shopProfile,isShopifyTax }) {
- console.log("shopdetails - InvoiceTemplate1", shopdetails);
- console.log("orders - InvoiceTemplate1", orders);
- console.log("invoiceSettings - InvoiceTemplate1", invoiceSettings);
+ // console.log("shopdetails - InvoiceTemplate1", shopdetails);
+ // console.log("orders - InvoiceTemplate1", orders);
+ // console.log("invoiceSettings - InvoiceTemplate1", invoiceSettings);
  // console.log("GSTHSNCodes - InvoiceTemplate1", GSTHSNCodes.gstcodes);
  // console.log('shopProfile',shopProfile);
 
@@ -59,71 +59,44 @@ export function InvoiceTemplate1({ shopdetails, orders, invoiceSettings, GSTHSNC
  }, []);
 
 
- // Compute total tax across all line items
- const totalTaxAmount = orders[0].line_items
-   ?.reduce((acc, item) => {
-     const matchedGSTItem = GSTHSNCodes.gstcodes
-       ? GSTHSNCodes.gstcodes.find((gstItem) => Number(gstItem.productId) === item.product_id)
-       : GSTHSNCodes.find((gstItem) => Number(gstItem.productId) === item.product_id);
-    
-     let taxPrice = 0;
+ // // Compute total tax across all line items
+ const totalTaxAmount = orders[0].line_items?.reduce((acc, item) => {
+   const matchedGSTItem = GSTHSNCodes.gstcodes
+     ? GSTHSNCodes.gstcodes.find((gstItem) => Number(gstItem.productId) === item.product_id)
+     : GSTHSNCodes.find((gstItem) => Number(gstItem.productId) === item.product_id);
 
 
-     if(!isShopifyTax){
-       taxPrice = item?.tax_lines[0]?.price
-       ? parseFloat(item.tax_lines[0].price)
-       : 0;
+   let taxPrice = 0;
 
 
-     } else{
-         taxPrice = matchedGSTItem?.gst
-     ? (parseFloat(item.price) * parseFloat(matchedGSTItem.gst)) / 100 * item.quantity
-     : 0;
-     }
-
-
-    
-     // const taxPrice = matchedGSTItem?.gst
-     // ? (parseFloat(item.price) * parseFloat(matchedGSTItem.gst)) / 100 * item.quantity
-     // : item?.tax_lines[0]?.price
-     //   ? parseFloat(item.tax_lines[0].price)
-     // : 0;
-     // const taxPrice = item?.tax_lines[0]?.price
-     //   ? parseFloat(item.tax_lines[0].price)
-     //   : matchedGSTItem?.gst
-     //   ? (parseFloat(item.price) * parseFloat(matchedGSTItem.gst)) / 100
+   if (!isShopifyTax.isAppTax) {
+     taxPrice = item?.tax_lines[0]?.price ? parseFloat(item.tax_lines[0].price) : 0;
+   } else {
+     const gst = matchedGSTItem?.gst ? parseFloat(matchedGSTItem.gst) : 0;
+     const inclusiveTotal = parseFloat(item.price) * item.quantity + parseFloat(item.tax_lines[0].price) || 0;
+     const baseTotal = inclusiveTotal / (1 + gst / 100);
+     taxPrice = taxPrice + inclusiveTotal - baseTotal;
+     // taxPrice = matchedGSTItem?.gst
+     //   ? ((parseFloat(item.price) * parseFloat(matchedGSTItem.gst)) / 100) * item.quantity
      //   : 0;
-   
-     // console.log('acc + taxPrice:', acc + taxPrice);
-     return acc + taxPrice;
-     // return taxPrice;
-   }, 0); // Convert to 2 decimal places
+   }
 
 
+   return acc + taxPrice;
+ }, 0); // Convert to 2 decimal places
 
 
+ let subTotal = 0;
+ let grandTotal = 0;
 
 
-   let subTotal = Number(orders[0].subtotal_price !== null ? orders[0].subtotal_price : 0 ) || 0;
-   // - orders[0].total_tax)
-   
-   //  let subTotal = totalPrice - totalTaxAmountForSubtotal;
- let grandTotal =
-      subTotal +
-      Number(totalTaxAmount) +
-      (orders[0]?.shipping_lines[0]?.price
-        ? Number(orders[0]?.shipping_lines[0]?.price)
-        : 0) ;
-     //    -
-     //  (orders[0]?.discount_codes[0]?.amount
-     //    ? Number(orders[0]?.discount_codes[0]?.amount)
-     //    : 0);
-
-
-
-
-
-
+ if (!isShopifyTax.isAppTax) {
+   subTotal = Number(orders[0].subtotal_price !== null ? orders[0].subtotal_price : 0) || 0;
+   grandTotal =
+     subTotal +
+     Number(totalTaxAmount) +
+     (orders[0]?.shipping_lines[0]?.price ? Number(orders[0]?.shipping_lines[0]?.price) : 0);
+ }
 
 
  useEffect(() => {
@@ -694,72 +667,73 @@ export function InvoiceTemplate1({ shopdetails, orders, invoiceSettings, GSTHSNC
        </thead>
        <tbody style={{ textAlign: "center" }}>
          {orders[0].line_items?.map((item, index) => {
-           // console.log('GSTHSNCodes-------',GSTHSNCodes[0].productId);
-           // console.log("item-------", item.product_id);
-
-
-           // const matchedGSTItem = GSTHSNCodes.gstcodes
-           //   ? GSTHSNCodes.gstcodes.find((gstItem) => Number(gstItem.productId) === item.product_id)
-           //   : GSTHSNCodes.find((gstItem) => Number(gstItem.productId) === item.product_id);
-
-
-           // const price = parseFloat(item.price) || 0; // Convert to a number and default to 0 if NaN
-           // const lineAmount = item.quantity * price + (Number(item?.tax_lines[0]?.price) || 0) || 0;
-
-
            const matchedGSTItem = GSTHSNCodes.gstcodes
-             ? GSTHSNCodes.gstcodes.find((gstItem) => Number(gstItem.productId) === item.product_id)
-             : GSTHSNCodes.find((gstItem) => Number(gstItem.productId) === item.product_id);
-           // console.log("matchedGSTItem", matchedGSTItem);
+           ? GSTHSNCodes.gstcodes.find((gstItem) => Number(gstItem.productId) === item.product_id)
+           : GSTHSNCodes.find((gstItem) => Number(gstItem.productId) === item.product_id);
 
 
-           let taxPrice = 0;
-           let price = 0;
-           let lineAmount = 0;
+         let taxPrice = 0;
+         let price = 0;
+         let lineAmount = 0;
 
 
-          
-            
-             if(!isShopifyTax){
-               if (shopdetails[0].taxes_included === true) {
-                 // console.log("item", item);
-                 taxPrice = item?.tax_lines[0]?.price
-                 ? parseFloat(item.tax_lines[0].price) || 0
-                 : 0;
-                 price =
-                   parseFloat(item.price)
-                   - Number(taxPrice ? taxPrice / item.quantity : 0) ||
-                   0; // Convert to a number and default to 0 if NaN
-  
-                 console.log("taxPrice", taxPrice);
-                 console.log("price", price);
-                 console.log("parseFloat(item.price) - Number(taxPrice ? taxPrice : 0)", parseFloat(item.price) -
-                 Number(taxPrice ? taxPrice : 0));
-                 lineAmount = (
-                   price * item.quantity +
-                 Number(taxPrice ? taxPrice   : 0) || 0).toFixed(2); // Ensures final result is in 2 decimal format
-               }
-               else {
-                 taxPrice = item?.tax_lines[0]?.price
-                   ? parseFloat(item.tax_lines[0].price) || 0
-                   : 0;
-                 price = parseFloat(item.price) || 0; // Convert to a number and default to 0 if NaN
-                 lineAmount = (
-                     price * item.quantity +
-                   Number(taxPrice ? taxPrice : 0)
-                 )
-                  
-                   .toFixed(2); // Ensures final result is in 2 decimal format
-               }
-             }else{
+         // console.log("GST Item:", matchedGSTItem);
+         // console.log("Item Price:", item.price);
+         // console.log("Item Quantity:", item.quantity);
+         // console.log("Using App Tax:", isShopifyTax.isAppTax);
+         // console.log("Taxes Included:", shopdetails[0].taxes_included);
 
 
-               taxPrice = item.price * (matchedGSTItem?.gst * item.quantity / 100) || 0;
-               price = parseFloat(item.price) || 0;
-               lineAmount = (
-                 price * item.quantity +
-               Number(taxPrice ? taxPrice : 0) || 0).toFixed(2);
-             }
+         if (!isShopifyTax.isAppTax) {
+           if (!shopdetails[0].taxes_included) {
+             taxPrice = item?.tax_lines?.[0]?.price ? parseFloat(item.tax_lines[0].price) || 0 : 0;
+             price = parseFloat(item.price);
+             lineAmount = (price * item.quantity + taxPrice).toFixed(2);
+
+
+             // console.log("➤ EXCLUSIVE Shopify Tax:");
+             // console.log("Tax Price:", taxPrice);
+             // console.log("Unit Price (Excl. Tax):", price);
+             // console.log("Line Amount:", lineAmount);
+           } else {
+             // 🧾 Shopify Tax - Inclusive
+             taxPrice = item?.tax_lines?.[0]?.price ? parseFloat(item.tax_lines[0].price) || 0 : 0;
+             price = parseFloat(item.price);
+             lineAmount = (price * item.quantity + taxPrice).toFixed(2);
+
+
+             // console.log("➤ INCLUSIVE Shopify Tax:");
+             // console.log("Tax Price:", taxPrice);
+             // console.log("Unit Price (Incl. Tax):", price);
+             // console.log("Line Amount:", lineAmount);
+           }
+         } else {
+           const gst = matchedGSTItem?.gst ? parseFloat(matchedGSTItem.gst) : 0;
+
+
+          //  console.log("App GST %:", gst);
+
+
+           const inclusiveTotal =
+             parseFloat(item.price) * item.quantity + parseFloat(item.tax_lines[0].price) || 0;
+           const baseTotal = inclusiveTotal / (1 + gst / 100);
+           taxPrice = inclusiveTotal - baseTotal;
+           price = baseTotal / item.quantity;
+           lineAmount = inclusiveTotal.toFixed(2);
+
+
+           subTotal = subTotal + Number(price) * item.quantity;
+
+
+           grandTotal = grandTotal + Number(lineAmount);
+
+
+           // console.log("➤ INCLUSIVE App Tax (Accurate):");
+           // console.log("Base Total:", baseTotal.toFixed(2));
+           // console.log("Base Unit Price:", price.toFixed(2));
+           // console.log("Tax Price:", taxPrice.toFixed(2));
+           // console.log("Line Amount:", lineAmount);
+         }
 
 
            return (

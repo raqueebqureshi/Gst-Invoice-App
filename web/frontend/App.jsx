@@ -107,9 +107,9 @@ function CustomRouter({ pages }) {
 
        // Set redirect flag
        setShouldRedirect(true)
-       console.log("Profile is complete, redirecting to orders page")
+      //  console.log("Profile is complete, redirecting to orders page")
      } else {
-       console.log("Profile is incomplete, staying on home page")
+      //  console.log("Profile is incomplete, staying on home page")
      }
 
 

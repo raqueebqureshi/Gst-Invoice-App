@@ -10,7 +10,8 @@ import {
   TextField,
   DropZone,
   Thumbnail,
-  Banner
+  Banner,
+  Checkbox
  } from "@shopify/polaris";
  import ToastNotification from "../components/ToastNotification";
  
@@ -62,6 +63,7 @@ import {
   });
   const [isSaving, setIsSaving] = useState(false);
   const [isEnabledByAppTax, setIsEnabledByAppTax] = useState(false);
+  const [isTaxIncluded, setIsTaxIncluded] = useState(false);
   const [addresses, setAddresses] = useState({
     address: "",
     apartment: "",
@@ -184,6 +186,8 @@ import {
       }
     }, 3000);
   }, [showToast]);
+ 
+ 
   useEffect(() => {
     fetch("/api/2024-10/shop.json", {
       method: "GET",
@@ -227,7 +231,8 @@ import {
           if (profileData.images.signatureURL !== "" && profileData.images.signatureURL !== null) {
             setSignatureUrl(profileData.images.signatureURL);
           }
-          setIsEnabledByAppTax(profileData.isAppTax || false);
+          setIsEnabledByAppTax(profileData.taxes.isAppTax || false);
+          setIsTaxIncluded(profileData.taxes.tax_includedOnProduct || false);
           // console.log("Shop Profile Data", profileData);
           // console.log("Logo URL:", logoFile);
         }
@@ -456,195 +461,68 @@ import {
   const toggleSection = (section) => setIsSectionOpen((prev) => ({ ...prev, [section]: !prev[section] }));
  
  
+  // const handleTaxIncludedChange = useCallback(
+  //   (newChecked) => setIsTaxIncluded(newChecked),
+  //   [],
+  // );
+ 
+ 
+  const handleTaxIncludedChange = () => {
+    setIsTaxIncluded((prev) => !prev);
+    if(isTaxIncluded){
+      updateCheckTaxIncluded(shopId, !isTaxIncluded);
+    }else{
+      updateCheckTaxIncluded(shopId, !isTaxIncluded);
+    }
+   
+  };
+ 
+ 
+  const updateCheckTaxIncluded = async (shopId, taxIncludedRequest) => {
+    try {
+      // console.log("shopId:", shopId);
+      // console.log("sendByAppEmail:", sendByAppEmail);
+      if (!shopId) {
+        console.error("Missing shopId.");
+        throw new Error("Invalid shopId.");
+      }
+     
+      const response = await fetch(`/api/update-tax-included?storeDomain=${storeDomain}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          shopId,
+          taxIncludedRequest
+        })
+      });
+      if (!response.ok) {
+        throw new Error(`Failed to fetch settings. Status: ${response.status}`);
+      }
+      const data = await response.json();
+      console.log("fetchToggleSetting:", data);
+      setIsTaxIncluded(data.updatedConfig.tax_includedOnProduct);
+     setShowToast(true);
+     if(data.updatedConfig.tax_includedOnProduct){
+      setToastMessage('Taxes will be included in product price.');
+     }else{
+      setToastMessage('Taxes will be excluded from product price.');
+     }
+   
+    } catch (error) {
+      console.error("Error while fetching settings:", error);
+    }
+  };
+ 
+ 
+ 
+ 
   return (
     <Page>
       <TitleBar title="Settings" />
-      {/* <AlphaCard>
-        <Tabs tabs={tabs} selected={selected} onSelect={handleTabChange}>
-          {selected === 0 && (
-            <div>
-              <TextField
-                label="First Name"
-                value={storeProfile.firstName}
-                onChange={(value) =>
-                  setStoreProfile({ ...storeProfile, firstName: value })
-                }
-              />
-              <TextField
-                label="Last Name"
-                value={storeProfile.lastName}
-                onChange={(value) =>
-                  setStoreProfile({ ...storeProfile, lastName: value })
-                }
-              />
-              <TextField
-                label="Brand Color"
-                value={storeProfile.brandColor}
-                onChange={(value) =>
-                  setStoreProfile({ ...storeProfile, brandColor: value })
-                }
-              />
-              <TextField
-                label="Invoice Number"
-                value={storeProfile.invoiceNumber}
-                type="number"
-                onChange={(value) =>
-                  setStoreProfile({
-                    ...storeProfile,
-                    invoiceNumber: Number(value),
-                  })
-                }
-              />
-              <TextField
-                label="Invoice Prefix"
-                value={storeProfile.invoicePrefix}
-                onChange={(value) =>
-                  setStoreProfile({ ...storeProfile, invoicePrefix: value })
-                }
-              />
-              <TextField
-                label="Brand Name"
-                value={storeProfile.brandName}
-                onChange={(value) =>
-                  setStoreProfile({ ...storeProfile, brandName: value })
-                }
-              />
-              <TextField
-                label="Phone"
-                value={storeProfile.phone}
-                onChange={(value) =>
-                  setStoreProfile({ ...storeProfile, phone: value })
-                }
-              />
-              <TextField
-                label="Store Email"
-                value={storeProfile.storeEmail}
-                onChange={(value) =>
-                  setStoreProfile({ ...storeProfile, storeEmail: value })
-                }
-              />
-              <TextField
-                label="Website URL"
-                value={storeProfile.websiteURL}
-                onChange={(value) =>
-                  setStoreProfile({ ...storeProfile, websiteURL: value })
-                }
-              />
-              <TextField
-                label="GST Number"
-                value={storeProfile.gstNumber}
-                onChange={(value) =>
-                  setStoreProfile({ ...storeProfile, gstNumber: value })
-                }
-              />
-            </div>
-          )}
-          {selected === 1 && (
-            <div>
-              <TextField
-                label="Logo URL"
-                value={images.logoURL}
-                onChange={(value) =>
-                  setImages({ ...images, logoURL: value })
-                }
-              />
-              <TextField
-                label="Signature URL"
-                value={images.signatureURL}
-                onChange={(value) =>
-                  setImages({ ...images, signatureURL: value })
-                }
-              />
-            </div>
-          )}
-          {selected === 2 && (
-            <div>
-              <TextField
-                label="Address"
-                value={addresses.address}
-                onChange={(value) =>
-                  setAddresses({ ...addresses, address: value })
-                }
-              />
-              <TextField
-                label="Apartment"
-                value={addresses.apartment}
-                onChange={(value) =>
-                  setAddresses({ ...addresses, apartment: value })
-                }
-              />
-              <TextField
-                label="City"
-                value={addresses.city}
-                onChange={(value) =>
-                  setAddresses({ ...addresses, city: value })
-                }
-              />
-              <TextField
-                label="Postal Code"
-                value={addresses.postalCode}
-                onChange={(value) =>
-                  setAddresses({ ...addresses, postalCode: value })
-                }
-              />
-              <TextField
-                label="Country"
-                value={addresses.country}
-                onChange={(value) =>
-                  setAddresses({ ...addresses, country: value })
-                }
-              />
-            </div>
-          )}
-          {selected === 3 && (
-            <div>
-              <TextField
-                label="Facebook URL"
-                value={socialLinks.facebookURL}
-                onChange={(value) =>
-                  setSocialLinks({ ...socialLinks, facebookURL: value })
-                }
-              />
-              <TextField
-                label="Twitter URL"
-                value={socialLinks.xURL}
-                onChange={(value) =>
-                  setSocialLinks({ ...socialLinks, xURL: value })
-                }
-              />
-              <TextField
-                label="Instagram URL"
-                value={socialLinks.instagramURL}
-                onChange={(value) =>
-                  setSocialLinks({ ...socialLinks, instagramURL: value })
-                }
-              />
-              <TextField
-                label="Pinterest URL"
-                value={socialLinks.pinterestURL}
-                onChange={(value) =>
-                  setSocialLinks({ ...socialLinks, pinterestURL: value })
-                }
-              />
-              <TextField
-                label="YouTube URL"
-                value={socialLinks.youtubeURL}
-                onChange={(value) =>
-                  setSocialLinks({ ...socialLinks, youtubeURL: value })
-                }
-              />
-            </div>
-          )}
-        </Tabs>
-        <div style={{ marginTop: "20px", textAlign: "right" }}>
-          <Button primary onClick={handleSave}>
-            Save
-          </Button>
-        </div>
-      </AlphaCard> */}
+    
  
  
-    <Layout>
+    {/* <Layout>
     <Layout.Section>
  <Banner title="Under maintenance" status="warning">
  
@@ -659,7 +537,7 @@ import {
                     appreciate your patience and assure you that everything will
                     be resolved shortly. Thank you for bearing with us.{" "}
                   </p>    </Banner></Layout.Section>
-    </Layout>
+    </Layout> */}
  
  
       <Tabs tabs={tabs} selected={selected} onSelect={handleTabChange} />
@@ -1001,7 +879,7 @@ import {
               <div style={styles.headerContainer}>
                 <div style={styles.titleSection}>
                   <TbReceiptTax style={{height: '20px', width:'20px'}}/>
-                  <h2 style={styles.titleText}>Indian GST Invoice Tax Rate</h2>
+                  <h2 style={styles.titleText}>App Tax Rates</h2>
                 </div>
                 <LegacyStack alignment="center" spacing="tight">
                   <Badge status={isEnabledByAppTax ? "success" : "critical"}>
@@ -1028,6 +906,23 @@ import {
                 </p>
               </div>
             </VerticalStack>
+ 
+ 
+            {/* <div  style={{ display: "flex",  alignItems: "start", marginTop: '20px' }}>
+            <Checkbox
+      // label="Include sales tax in product price and shipping rate"
+      checked={isTaxIncluded}
+      disabled={!isEnabledByAppTax}
+      onChange={handleTaxIncludedChange}
+    />
+    <div style={{ justifyContent: "space-between", alignItems: "start", marginTop: '3px' }}>
+    <p style={{ color: isEnabledByAppTax ? "black" : "gray"  }}>
+    Include sales tax in product price and shipping rate
+                </p>
+                <p style={{ color:  isEnabledByAppTax ? "gray" : "#d1d5db" }}>
+                Assumes a 18% tax rate, which is adjusted to local tax rates in markets</p>
+                </div>
+              </div> */}
           </AlphaCard>
         </div>
  
@@ -1142,10 +1037,6 @@ import {
   marginTop: "32px",
   textAlign: "right",
  };
- 
- 
- 
- 
  
  
  

@@ -412,7 +412,7 @@ export function OrderTableEx({ value, shopdetails }) {
       const data = await response.json();
 
       if (data.success) {
-        console.log("📦 Last month's order count:", data);
+        // console.log("📦 Last month's order count:", data);
         return data.lastMonthOrderCount;
       } else {
         throw new Error("Failed to fetch order count");
@@ -442,9 +442,9 @@ export function OrderTableEx({ value, shopdetails }) {
         .then((data) => {
           if (data && data.profile) {
             const profileData = data.profile;
-            console.log("profileData", profileData);
+            // console.log("profileData", profileData);
             setShopProfile(profileData || {});
-            setIsAppTaxApplied(profileData?.isAppTax || false);
+            setIsAppTaxApplied(profileData?.taxes || false);
           }
         })
         .catch((error) => {
@@ -523,65 +523,7 @@ export function OrderTableEx({ value, shopdetails }) {
   //   }
   // };
 
-  const sendInvoiceToCustomer = async (
-    orderDetails,
-    shopDetails,
-    invoiceSettings,
-    customerEmail,
-    gstcodes,
-    currentTemplateId,
-    shopifyTax
-  ) => {
-    try {
-      setIsSending(true);
-      // Fetch the generated PDF file as Blob
-      const pdfBlob = await generatePDFBlob(
-        orderDetails,
-        shopDetails,
-        invoiceSettings,
-        currentTemplateId,
-        gstcodes,
-        shopProfile,
-        shopifyTax
-      );
- 
- 
-      // Create a FormData object to include the Blob and additional data
-      const formData = new FormData();
-      formData.append("file", pdfBlob, `Invoice-${orderDetails.order_number}.pdf`);
-      formData.append("customerEmail", customerEmail);
-      formData.append("orderId", orderDetails.order_number);
-      formData.append("shopDetails", JSON.stringify(shopDetails));
- 
- 
-      // console.log("formData",formData);
-      // Send request to the backend API
-      const response = await fetch("/api/send-invoice", {
-        method: "POST",
-        body: formData,
-      });
- 
- 
-      if (!response.ok) {
-        // handleShowToast("Invoice sent successfully.");
-        const errorData = await response.json();
-        console.error("Error sending invoice:", errorData);
-        setShowToast(true);
-        setToastMessage("Internal Server Error 500");
-      } else {
-        const resp = await response.json();
-        console.log("Successfull sending invoice:", resp);
-        setShowToast(true);
-        setToastMessage("Sent invoice.");
-        // handleShowToast("", true);
-      }
-    } catch (error) {
-      //console.error("Error in sending invoice:", error);
-      setShowToast(true);
-      setToastMessage("An error occurred while sending the invoice.");
-      // handleShowToast("", true);
-    }
-  };
+  
  
  
  
@@ -856,13 +798,108 @@ export function OrderTableEx({ value, shopdetails }) {
   //   }
   // };
 
+  const quickSendInvoice = async ({
+    orderDetails,
+    shopDetails,
+    invoiceSettings,
+    customerEmail,
+    gstcodes,
+    currentTemplate,
+    shopProfile,
+    shopifyTax
+ 
+ 
+  }) => {
+    //console.log("hhhhhhhhhhhhhhhhhhhhh",orderDetails, shopDetails, invoiceSettings, customerEmail, gstcodes, currentTemplate);
+    try {
+      await sendInvoiceToCustomer(
+        orderDetails,
+        shopDetails,
+        invoiceSettings,
+        customerEmail,
+        gstcodes,
+        currentTemplate,
+        shopProfile,
+        shopifyTax
+      );
+    } catch (error) {
+      console.error("Error in Quick Send:", error);
+      setShowToast(true);
+      setToastMessage("An error occurred while sending the invoice.");
+      // handleShowToast("", true);
+    }
+  };
+   const sendInvoiceToCustomer = async (
+    orderDetails,
+    shopDetails,
+    invoiceSettings,
+    customerEmail,
+    gstcodes,
+    currentTemplateId,
+    shopProfile,
+    shopifyTax
+  ) => {
+    try {
+      setIsSending(true);
+      // Fetch the generated PDF file as Blob
+      const pdfBlob = await generatePDFBlob(
+        orderDetails,
+        shopDetails,
+        invoiceSettings,
+        currentTemplateId,
+        gstcodes,
+        shopProfile,
+        shopifyTax
+      );
+ 
+ 
+      // Create a FormData object to include the Blob and additional data
+      const formData = new FormData();
+      formData.append("file", pdfBlob, `Invoice-${orderDetails.order_number}.pdf`);
+      formData.append("customerEmail", customerEmail);
+      formData.append("orderId", orderDetails.order_number);
+      formData.append("shopDetails", JSON.stringify(shopDetails));
+ 
+ 
+      // console.log("formData",formData);
+      // Send request to the backend API
+      const response = await fetch("/api/send-invoice", {
+        method: "POST",
+        body: formData,
+      });
+ 
+ 
+      if (!response.ok) {
+        // handleShowToast("Invoice sent successfully.");
+        const errorData = await response.json();
+        console.error("Error sending invoice:", errorData);
+        setIsSending(false);
+        setShowToast(true);
+        setToastMessage("Internal Server Error 500");
+      } else {
+        const resp = await response.json();
+        console.log("Successfull sending invoice:", resp);
+        setIsSending(false);
+        setShowToast(true);
+        setToastMessage("Sent invoice.");
+        // handleShowToast("", true);
+      }
+    } catch (error) {
+      //console.error("Error in sending invoice:", error);
+      setIsSending(false);
+      setShowToast(true);
+      setToastMessage("An error occurred while sending the invoice.");
+      // handleShowToast("", true);
+    }
+  };
   const generatePDFBlob = async (
     orderDetails,
     shopDetails,
     invoiceSettings,
     currentTemplateId,
     gstcodes,
-    shopProfile, shopifyTax
+    shopProfile,
+    shopifyTax
   ) => {
     if (!orderDetails || !currentTemplateId) {
       console.error("Order details or template ID not available for PDF generation.");
@@ -1005,37 +1042,6 @@ export function OrderTableEx({ value, shopdetails }) {
   };
  
  
-  const quickSendInvoice = async ({
-    orderDetails,
-    shopDetails,
-    invoiceSettings,
-    customerEmail,
-    gstcodes,
-    currentTemplate,
-    shopProfile,
-    shopifyTax
- 
- 
-  }) => {
-    //console.log("hhhhhhhhhhhhhhhhhhhhh",orderDetails, shopDetails, invoiceSettings, customerEmail, gstcodes, currentTemplate);
-    try {
-      await sendInvoiceToCustomer(
-        orderDetails,
-        shopDetails,
-        invoiceSettings,
-        customerEmail,
-        gstcodes,
-        currentTemplate,
-        shopProfile,
-        shopifyTax
-      );
-    } catch (error) {
-      console.error("Error in Quick Send:", error);
-      setShowToast(true);
-      setToastMessage("An error occurred while sending the invoice.");
-      // handleShowToast("", true);
-    }
-  };
  
  
 
@@ -2307,235 +2313,248 @@ export function OrderTableEx({ value, shopdetails }) {
         </IndexTable.Cell>
 
         <IndexTable.Cell>
+         
           <ButtonGroup
-            style={{
-              display: "flex",
-              alignItems: "center", // Vertical alignment
-              gap: "0px", // Space between buttons
-            }}
-          >
-            {/* {pdfGeneratingRowId === id ? (
-    <Spinner accessibilityLabel="Generating PDF" size="small" />
-  ) : ( */}
-            <button
-              style={{
-                cursor: "pointer",
-                padding: "8px 12px", // Add consistent padding
-                border: "1px solid black",
-                borderRadius: "6px",
-                boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)",
-                color: "black",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                transition: "all 0.3s ease",
-                backgroundColor: "white",
-                height: "30px", // Set consistent height
-                opacity: selectedOrders.length > 1 ? "0.5" : "1",
-                pointerEvents: selectedOrders.length > 1 ? "none" : "auto",
-              }}
-              disabled={orders.length > 50 ? true : false}
-              onClick={(e) => {
-                e.stopPropagation();
-                if (orders.length > 50) {
-                  setShowToast(true);
-                  setToastMessage(
-                    "You have exceed maximum invoice limit of 50 orders, please subscribe to premium plan to generate more invoices"
-                  );
-                } else {
-                  if (!isPDFGenerating) {
-                    setIsPDFGenerating(true);
-                    handlePdfDownload(
-                      paginatedOrders[index],
-                      shopdetails,
-                      currentTemplateId,
-                      InvoiceSetting2,
-                      GSTHSNCodes,
-                      shopProfile
-                    )
-                      .then(() => {
-                        setIsPDFGenerating(false);
-                        setPdfGeneratingRowId(null);
-                        setShowToast(true);
-                        setToastMessage("PDF generated");
-                        if (shopId) {
-                          countInvoiceDownloads(shopId, 1);
-                        }
-                      })
-                      .catch(() => {
-                        setIsPDFGenerating(false);
-                        setPdfGeneratingRowId(null);
-                      });
-                    setPdfGeneratingRowId(id);
-                  }
-                }
-              }}
-              className="btn-actions"
-            >
-              {pdfGeneratingRowId === id ? (
-                <div style={{ padding: "0px 8.5px" }}>
-                  {" "}
-                  <Spinner accessibilityLabel="Printing" size="small" />
-                </div>
-              ) : (
-                <div
-                  style={{
-                    display: "flex",
-                    gap: "4px",
-                    alignItems: "center",
-                  }}
-                >
-                  <MdOutlineFileDownload />
-                  <span style={{ fontSize: "10px" }}>PDF</span>
-                </div>
-              )}
-            </button>
-            {/* )} */}
+           style={{
+             display: "flex",
+             alignItems: "center", // Vertical alignment
+             gap: "0px", // Space between buttons
+           }}
+         >
+           {/* {pdfGeneratingRowId === id ? (
+   <Spinner accessibilityLabel="Generating PDF" size="small" />
+ ) : ( */}
+           <button
+             style={{
+               cursor: "pointer",
+               padding: "8px 12px", // Add consistent padding
+               border: "1px solid black",
+               borderRadius: "6px",
+               boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)",
+               color: "black",
+               display: "flex",
+               alignItems: "center",
+               justifyContent: "center",
+               minWidth: "80px",
+               transition: "all 0.3s ease",
+               backgroundColor: "white",
+               height: "30px", // Set consistent height
+               opacity: selectedOrders.length > 1 ? "0.5" : "1",
+               pointerEvents: selectedOrders.length > 1 ? "none" : "auto",
+             }}
+             disabled={orders.length > 50 ? true : false}
+             onClick={(e) => {
+               e.stopPropagation();
+               if (orders.length > 50) {
+                 setShowToast(true);
+                 setToastMessage(
+                   "You have exceed maximum invoice limit of 50 orders, please subscribe to premium plan to generate more invoices"
+                 );
+               } else {
+                 if (!isPDFGenerating) {
+                   setIsPDFGenerating(true);
+                   handlePdfDownload(
+                     paginatedOrders[index],
+                     shopdetails,
+                     currentTemplateId,
+                     InvoiceSetting2,
+                     GSTHSNCodes,
+                     shopProfile,
+                     isAppTaxApplied
+                   )
+                     .then(() => {
+                       setIsPDFGenerating(false);
+                       setPdfGeneratingRowId(null);
+                       setShowToast(true);
+                       setToastMessage("PDF generated");
+                       if (shopId) {
+                         countInvoiceDownloads(shopId, 1);
+                       }
+                     })
+                     .catch(() => {
+                       setIsPDFGenerating(false);
+                       setPdfGeneratingRowId(null);
+                     });
+                   setPdfGeneratingRowId(id);
+                 }
+               }
+             }}
+             className="btn-actions"
+           >
+             {pdfGeneratingRowId === id ? (
+               <div style={{ padding: "0px 8.5px" }}>
+                 {" "}
+                 <Spinner accessibilityLabel="Printing" size="small" />
+               </div>
+             ) : (
+               <div
+                 style={{
+                   display: "flex",
+                   gap: "4px",
+                   alignItems: "center",
+                 }}
+               >
+                 <MdOutlineFileDownload />
+                 <span style={{ fontSize: "10px" }}>PDF</span>
+               </div>
+             )}
+           </button>
+           {/* )} */}
 
-            {/* {printingRowId === id ? (
-    <Spinner accessibilityLabel="Printing" size="small" />
-  ) : ( */}
-            <button
-              // disabled={allSelected }
-              style={{
-                cursor: "pointer",
-                padding: "8px 12px",
-                border: "1px solid black",
-                borderRadius: "6px",
-                boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)",
-                color: "black",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                transition: "all 0.3s ease",
-                backgroundColor: "white",
-                height: "30px",
-                opacity: selectedOrders.length > 1 ? "0.5" : "1",
-                pointerEvents: selectedOrders.length > 1 ? "none" : "auto",
-              }}
-              onClick={(e) => {
-                e.stopPropagation();
-                console.log(selectedOrders, selectedOrders);
-                if (orders.length > 50) {
-                  setShowToast(true);
-                  setToastMessage(
-                    "You have exceed maximum invoice limit of 50 orders, please subscribe to premium plan to print more invoices"
-                  );
-                } else {
-                  if (!isPDFPrinting) {
-                    setIsPDFPrinting(true);
-                    handlePrint(
-                      paginatedOrders[index],
-                      shopdetails,
-                      currentTemplateId,
-                      InvoiceSetting2,
-                      GSTHSNCodes,
-                      shopProfile
-                    )
-                      .then(() => {
-                        setIsPDFPrinting(false);
-                        setPrintingRowId(null);
-                        setShowToast(true);
-                        setToastMessage("PDF printed");
-                        if (shopId) {
-                          countInvoicePrint(shopId, 1);
-                        }
-                      })
-                      .catch(() => {
-                        setIsPDFPrinting(false);
-                        setPrintingRowId(null);
-                      });
-                    setPrintingRowId(id);
-                  }
-                }
-              }}
-              className="btn-actions"
-            >
-              {printingRowId === id ? (
-                <>
-                  <div style={{ padding: "0px 14px" }}>
-                    {" "}
-                    <Spinner accessibilityLabel="Printing" size="small" />
-                  </div>
-                </>
-              ) : (
-                <div
-                  style={{
-                    display: "flex",
-                    gap: "4px",
-                    alignItems: "center",
-                  }}
-                >
-                  <MdPrint />
-                  <span style={{ fontSize: "10px" }}>PRINT</span>
-                </div>
-              )}
-            </button>
-            {/* )} */}
 
-            {sendingRowId === id ? (
-              <Spinner accessibilityLabel="Sending invoice" size="small" />
-            ) : (
-              <>
-                <div
-                  style={{
-                    gap: "4px",
-                    cursor: "pointer",
-                    padding: "8px",
-                    border: "1px solid black",
-                    borderRadius: "6px",
-                    boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)",
-                    color: "black",
-                    transition: "all 0.3s ease",
-                    backgroundColor: "white",
-                    height: "30px",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    opacity: selectedOrders.length > 1 ? "0.5" : "1",
-                    pointerEvents: selectedOrders.length > 1 ? "none" : "auto",
-                  }}
-                  onClick={() => {
-                    if (orders.length > 50) {
-                      setShowToast(true);
-                      setToastMessage(
-                        "You have exceed maximum invoice limit of 50 orders, please subscribe to premium plan to send more invoices"
-                      );
-                    } else {
-                      if (!isSending) {
-                        setSendingRowId(id);
-                        setIsSending(true);
-                        quickSendInvoice({
-                          orderDetails: paginatedOrders[index],
-                          shopDetails: shopdetails,
-                          invoiceSettings: InvoiceSetting2,
-                          customerEmail: paginatedOrders[index].customer.email,
-                          gstcodes: GSTHSNCodes,
-                          currentTemplate: currentTemplateId,
-                        })
-                          .then(() => {
-                            setIsSending(false);
-                            setSendingRowId(null);
-                            setShowToast(true);
-                            setToastMessage("Invoice sent");
-                            if (shopId) {
-                              countInvoiceSent(shopId, 1);
-                            }
-                          })
-                          .catch(() => {
-                            setIsSending(false);
-                            setSendingRowId(null);
-                          });
-                      }
-                    }
-                  }}
-                >
-                  <span style={{ fontSize: "10px" }}>SEND</span>
-                  <TbMailForward />
-                </div>
-              </>
-            )}
-          </ButtonGroup>
+           {/* {printingRowId === id ? (
+   <Spinner accessibilityLabel="Printing" size="small" />
+ ) : ( */}
+           <button
+             // disabled={allSelected }
+             style={{
+               cursor: "pointer",
+               padding: "8px 12px",
+               border: "1px solid black",
+               borderRadius: "6px",
+               boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)",
+               color: "black",
+               display: "flex",
+               alignItems: "center",
+               justifyContent: "center",
+               minWidth: "80px",
+               transition: "all 0.3s ease",
+               backgroundColor: "white",
+               height: "30px",
+               opacity: selectedOrders.length > 1 ? "0.5" : "1",
+               pointerEvents: selectedOrders.length > 1 ? "none" : "auto",
+             }}
+             onClick={(e) => {
+               e.stopPropagation();
+               console.log(selectedOrders, selectedOrders);
+               if (orders.length > 50) {
+                 setShowToast(true);
+                 setToastMessage(
+                   "You have exceed maximum invoice limit of 50 orders, please subscribe to premium plan to print more invoices"
+                 );
+               } else {
+                 if (!isPDFPrinting) {
+                   setIsPDFPrinting(true);
+                   handlePrint(
+                     paginatedOrders[index],
+                     shopdetails,
+                     currentTemplateId,
+                     InvoiceSetting2,
+                     GSTHSNCodes,
+                     shopProfile,
+                     isAppTaxApplied
+                   )
+                     .then(() => {
+                       setIsPDFPrinting(false);
+                       setPrintingRowId(null);
+                       setShowToast(true);
+                       setToastMessage("PDF printed");
+                       if (shopId) {
+                         countInvoicePrint(shopId, 1);
+                       }
+                     })
+                     .catch(() => {
+                       setIsPDFPrinting(false);
+                       setPrintingRowId(null);
+                     });
+                   setPrintingRowId(id);
+                 }
+               }
+             }}
+             className="btn-actions"
+           >
+             {printingRowId === id ? (
+               <>
+                 <div style={{ padding: "0px 14px" }}>
+                   {" "}
+                   <Spinner accessibilityLabel="Printing" size="small" />
+                 </div>
+               </>
+             ) : (
+               <div
+                 style={{
+                   display: "flex",
+                   gap: "4px",
+                   alignItems: "center",
+                 }}
+               >
+                 <MdPrint />
+                 <span style={{ fontSize: "10px" }}>PRINT</span>
+               </div>
+             )}
+           </button>
+           {/* )} */}
+
+
+           {sendingRowId === id ? (
+             <Spinner accessibilityLabel="Sending invoice" size="small" />
+           ) : (
+             <>
+               <div
+                 style={{
+                  
+                   gap: "4px",
+                   cursor: "pointer",
+                   padding: "8px",
+                   border: "1px solid black",
+                   borderRadius: "6px",
+                   boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)",
+                   color: "black",
+                   transition: "all 0.3s ease",
+                   backgroundColor: "white",
+                   minWidth: "80px",
+                   height: "30px",
+                   display: "flex",
+                   alignItems: "center",
+                   justifyContent: "center",
+                   opacity: selectedOrders.length > 1 ? "0.5" : "1",
+                   pointerEvents: selectedOrders.length > 1 ? "none" : "auto",
+                 }}
+                 onClick={() => {
+                   if (orders.length > 50) {
+                     setShowToast(true);
+                     setToastMessage(
+                       "You have exceed maximum invoice limit of 50 orders, please subscribe to premium plan to send more invoices"
+                     );
+                   } else {
+                     if (!isSending) {
+                       setSendingRowId(id);
+                       setIsSending(true);
+                       quickSendInvoice({
+                         orderDetails: paginatedOrders[index],
+                         shopDetails: shopdetails,
+                         invoiceSettings: InvoiceSetting2,
+                         customerEmail: paginatedOrders[index].customer.email,
+                         gstcodes: GSTHSNCodes,
+                         currentTemplate: currentTemplateId,
+                         shopProfile: shopProfile,
+                         shopifyTax: isAppTaxApplied,
+                       })
+                         .then(() => {
+                           setIsSending(false);
+                           setSendingRowId(null);
+                           setShowToast(true);
+                           setToastMessage("Invoice sent");
+                           if (shopId) {
+                             countInvoiceSent(shopId, 1);
+                           }
+                         })
+                         .catch(() => {
+                           setIsSending(false);
+                           setSendingRowId(null);
+                         });
+                     }
+                   }
+                 }}
+               >
+                 <span style={{ fontSize: "10px" }}>SEND</span>
+                 <TbMailForward />
+               </div>
+             </>
+           )}
+         </ButtonGroup>
+
+
         </IndexTable.Cell>
       </IndexTable.Row>
     )
@@ -2551,7 +2570,7 @@ export function OrderTableEx({ value, shopdetails }) {
           </SkeletonPage>
         ) : (
           <>
-            <Layout>
+            {/* <Layout>
               <Layout.Section>
                 <Banner title="Under maintenance" status="warning">
                   <p>
@@ -2566,7 +2585,7 @@ export function OrderTableEx({ value, shopdetails }) {
                   </p>
                 </Banner>
               </Layout.Section>
-            </Layout>
+            </Layout> */}
 
             <div
               style={{

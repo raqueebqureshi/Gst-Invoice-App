@@ -44,7 +44,7 @@ import {
 
 import { handleBillingConfirmation } from '../controllers/Plans_billing.js'
 import { getLastMonthOrderCount, getOrders } from "../controllers/ordersController.js";
-import { changeTaxByApp } from "../controllers/taxController.js";
+import { changeTaxByApp , changeIsTaxIncluded } from "../controllers/taxController.js";
 
 
 
@@ -162,5 +162,8 @@ router.put("/api/update-total-invoice-print", updateTotalInvoicePrint);
 
 //taxation
 router.put("/api/update-tax-settings", changeTaxByApp);
+router.put("/api/update-tax-included", changeIsTaxIncluded);
+
+
 
 export default router;

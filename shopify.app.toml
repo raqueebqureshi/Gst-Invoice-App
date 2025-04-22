@@ -3,7 +3,7 @@
 client_id = "f91cb213006ab6fb5448b00b9a44c33c"
 name = "Indian GST Invoice"
 handle = "IndianGSTInvoice"
-application_url = "https://indian-gst-invoice-ddc.fly.dev"
+application_url = "https://indian-gst-invoice-ddc-snowy-hill-6969.fly.dev"
 embedded = true
 
 [build]
@@ -17,9 +17,7 @@ scopes = "read_all_orders,read_orders,write_orders,read_products,write_products"
 
 [auth]
 redirect_urls = [
-  "https://indian-gst-invoice-ddc.fly.dev/auth/callback",
-  "https://indian-gst-invoice-ddc.fly.dev/auth/shopify/callback",
-  "https://indian-gst-invoice-ddc.fly.dev/api/auth/callback"
+  "https://indian-gst-invoice-ddc-snowy-hill-6969.fly.dev/api/auth/callback"
 ]
 
 [webhooks]

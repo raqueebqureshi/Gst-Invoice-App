@@ -8,10 +8,10 @@ import invoice3 from "../assets/invoice3.png";
 import { useNavigate } from "react-router-dom";
 import ToastNotification from "../components/ToastNotification"; // Import the ToastNotification component
 
-import CustomizeTemplatePage from "./cutomizeTemplatePage";
+// import CustomizeTemplatePage from "./customizeTemplatePage";
 import UpgradeBanner from "../components/UpgradePlanBanner";
 
-export default function Orders() {
+export default function InvoiceTemplatePage() {
   const [storeDomain, setStoreDomain] = useState();
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate(); // Initialize useNavigate

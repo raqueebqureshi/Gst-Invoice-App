@@ -11,7 +11,7 @@ class ReusableFunctions {
     
        const tempTax = unitTax / unitQuantity;
        const taxRate = (tempTax / unitPrice) * 100;
-       console.log("Tax Rate: ", taxRate);
+      //  console.log("Tax Rate: ", taxRate);
        return parseFloat(taxRate.toFixed(2)); // Return percentage with 2 decimal places
      }
 }

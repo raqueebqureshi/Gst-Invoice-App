@@ -4,8 +4,8 @@ import React, {
   useCallback,
   use,
   useReducer,
-} from "react";
-import {
+ } from "react";
+ import {
   Button,
   Icon,
   AlphaCard,
@@ -16,29 +16,25 @@ import {
   Select,
   TextField,
   Spinner,
-} from "@shopify/polaris";
-import ToastNotification from "../components/ToastNotification";
-import { useLocation } from "react-router-dom";
-import { useNavigate } from "react-router-dom";
-
-import { RiAlignItemLeftLine } from "react-icons/ri";
-import { FaInbox } from "react-icons/fa";
-
-import { FaArrowLeft } from "react-icons/fa";
-
-import { FaMoneyBills } from "react-icons/fa6";
-import { HiOutlineReceiptTax } from "react-icons/hi";
-
-import { BiStore } from "react-icons/bi";
-import { LiaShippingFastSolid } from "react-icons/lia";
-
-import { CiImageOn, CiHome } from "react-icons/ci";
-
-import { InvoiceTemplate1 } from "../invoiceTemplates/invoice-template1";
-import { InvoiceTemplate2 } from "../invoiceTemplates/invoice-template2";
-import { InvoiceTemplate3 } from "../invoiceTemplates/invoice-template3";
-
-export default function CustomizeTemplate() {
+ } from "@shopify/polaris";
+ import ToastNotification from "../components/ToastNotification";
+ import { useLocation } from "react-router-dom";
+ import { useNavigate } from "react-router-dom";
+ import { RiAlignItemLeftLine } from "react-icons/ri";
+ import { FaInbox } from "react-icons/fa";
+ import { FaArrowLeft } from "react-icons/fa";
+ import { FaMoneyBills } from "react-icons/fa6";
+ import { HiOutlineReceiptTax } from "react-icons/hi";
+ import { BiStore } from "react-icons/bi";
+ import { LiaShippingFastSolid } from "react-icons/lia";
+ import { CiImageOn, CiHome } from "react-icons/ci";
+ import { InvoiceTemplate1 } from "../invoiceTemplates/invoice-template1";
+ import { InvoiceTemplate2 } from "../invoiceTemplates/invoice-template2";
+ import { InvoiceTemplate3 } from "../invoiceTemplates/invoice-template3";
+ import { set } from "mongoose";
+ 
+ 
+ export default function CustomizeTemplate() {
   const navigate = useNavigate(); // Initialize useNavigate
   const [selectedFont, setSelectedFont] = useState("Roboto, sans-serif");
   const [storeDomain, setStoreDomain] = useState(null);
@@ -49,7 +45,8 @@ export default function CustomizeTemplate() {
   const [shopDetails, setShopDetails] = useState([]);
   const { templateId } = state || {};
   const [CurrentTemplate, setCurrentTemplate] = useState();
-
+  const [showToast, setShowToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState("");
   const [showBrandingAndStyle, setShowBrandingAndStyle] = useState(false);
   const [showOverview, setShowOverview] = useState(false);
   const [showSupplier, setShowSupplier] = useState(false);
@@ -64,8 +61,11 @@ export default function CustomizeTemplate() {
   const [isSaving, setIsSaving] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
-  const [showToast, setShowToast] = useState(false);
-  const [toastMessage, setToastMessage] = useState("")
+  const [isAppTaxApplied, setIsAppTaxApplied] = useState(false);
+ 
+ 
+ 
+ 
   const [InvoiceSetting2, setInvoiceSetting2] = useState({
     branding: {
       showLogo: true,
@@ -170,7 +170,8 @@ export default function CustomizeTemplate() {
         "This is an electronically generated invoice, no signature is required",
     },
   });
-
+ 
+ 
   const demoOrder = [
     {
       id: 6159782150373,
@@ -337,8 +338,8 @@ export default function CustomizeTemplate() {
     },
   ];
   
-  
-
+ 
+ 
   const demoGST = [
     { productId: "123456789", productName: "bottle", gst: "12", hsn: "456789" },
     {
@@ -510,7 +511,8 @@ export default function CustomizeTemplate() {
       hsn: "878787",
     },
   ];
-
+ 
+ 
   const styles = {
     header: {
       display: "flex",
@@ -578,7 +580,8 @@ export default function CustomizeTemplate() {
       alignItems: "center",
       gap: "10px",
     },
-
+ 
+ 
     previewContainer: {
       // border: "1px solid #dcdcde",
       // borderRadius: "8px",
@@ -592,7 +595,8 @@ export default function CustomizeTemplate() {
       height: "fit-content", // Automatically adjust height based on child content
       // padding: "px", // Optional: Add padding to maintain spacing around content
     },
-
+ 
+ 
     button: {
       width: "120px",
       textAlign: "center",
@@ -646,7 +650,8 @@ export default function CustomizeTemplate() {
       minWidth: "240px", // Ensures dropdown has a default width
       padding: "10px 0", // Adds spacing within the dropdown for content
     },
-
+ 
+ 
     dropdownItem: {
       padding: "10px",
       cursor: "pointer",
@@ -690,10 +695,12 @@ export default function CustomizeTemplate() {
       margin: "20px 0 10px",
     },
   };
-
+ 
+ 
   const useForceUpdate = () => useReducer(() => ({}), {})[1];
   const forceUpdate = useForceUpdate();
-
+ 
+ 
   const updateInvoiceSetting2 = (section, key, value) => {
     setInvoiceSetting2((prevSettings) => ({
       ...prevSettings,
@@ -703,7 +710,8 @@ export default function CustomizeTemplate() {
       },
     }));
   };
-
+ 
+ 
   const updateSocialNetworkSetting = (key, value) => {
     setInvoiceSetting2((prevSettings) => ({
       ...prevSettings,
@@ -716,14 +724,10 @@ export default function CustomizeTemplate() {
       },
     }));
   };
-
-  // const handleSupplierCheckboxChange = (key) => {
-  //   setSupplierSettings((prev) => ({
-  //     ...prev,
-  //     [key]: !prev[key],
-  //   }));
-  // };
-
+ 
+ 
+ 
+ 
   // Fetch store details
   useEffect(() => {
     fetch("/api/2024-10/shop.json", {
@@ -746,37 +750,40 @@ export default function CustomizeTemplate() {
       })
       .catch((error) => console.log(error));
   }, []);
-
+ 
+ 
   useEffect(() => {
-    fetch(`/api/fetch-store-profile?shopId=${shopId}`, {
-      method: "GET",
-      headers: { "Content-Type": "application/json" },
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        if (data && data.profile) {
-          if (data && data.profile) {
-            const profileData = data.profile;
-            console.log("profileData", profileData);
-            setShopProfile(profileData || {});
-          }
-
-          //     const newCustomColor = data?.profile?.storeProfile?.brandColor || "#ff6600"; // Example custom color from API
-
-          //     console.log('newCustomColor', newCustomColor);
-          // // Update the Custom color directly
-          // const customOption = colorOptions.find((option) => option.value === "Custom");
-          // console.log('customOption', customOption);
-          // if (customOption) customOption.color = newCustomColor;
-
-          // forceUpdate(); // Force re-render after updating color
-        }
+    if(shopId){
+      fetch(`/api/fetch-store-profile?shopId=${shopId}`, {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
       })
-      .catch((error) => {
-        console.error("Error fetching store profile:", error);
-      });
+        .then((response) => response.json())
+        .then((data) => {
+          if (data && data.profile) {
+            if (data && data.profile) {
+              const profileData = data.profile;
+              // console.log("profileData", profileData);
+              setShopProfile(profileData || {});
+              setIsAppTaxApplied(profileData?.taxes || false);
+            }
+            // console.log("Shop Profile Data",data.profile );
+             //     const newCustomColor = data?.profile?.storeProfile?.brandColor || "#ff6600"; // Example custom color from API
+             //     console.log('newCustomColor', newCustomColor);
+            // // Update the Custom color directly
+            // const customOption = colorOptions.find((option) => option.value === "Custom");
+            // console.log('customOption', customOption);
+            // if (customOption) customOption.color = newCustomColor;
+             // forceUpdate(); // Force re-render after updating color
+          }
+        })
+        .catch((error) => {
+          console.error("Error fetching store profile:", error);
+        });
+    }
   }, [shopId]);
-
+ 
+ 
   useEffect(() => {
     if (storeDomain) {
       fetch(`/api/get-invoice-template?storeDomain=${storeDomain}`)
@@ -796,10 +803,12 @@ export default function CustomizeTemplate() {
     }
   }, [storeDomain]);
   // console.log("templateId", templateId);
-
+ 
+ 
   const fetchInvoiceSettings = async () => {
     // console.log("Sending request to fetch invoice settings");
-
+ 
+ 
     return fetch("/api/fetch-invoice-settings", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -818,18 +827,19 @@ export default function CustomizeTemplate() {
       .then((data) => {
         // setInvoiceSettings(data);
         const settings = data;
-        console.log("Received response:", settings);
+        // console.log("Received response:", settings);
         // console.log("Received response:", JSON.stringify(settings));
         if (settings) {
           setInvoiceSetting2((prevState) => ({
             ...prevState,
             ...settings,
           }));
-
-          console.log(
-            "settings.branding.fontFamily",
-            settings.branding.fontFamily
-          );
+ 
+ 
+          // console.log(
+          //   "settings.branding.fontFamily",
+          //   settings.branding.fontFamily
+          // );
           const matchedFont = fontOptions.find(
             (font) => font.fontFamily === settings.branding.fontFamily
           );
@@ -845,55 +855,33 @@ export default function CustomizeTemplate() {
         console.error("Error fetching invoice settings:", error.message);
       });
   };
-
+ 
+ 
   useEffect(() => {
     if (storeDomain && email) {
       fetchInvoiceSettings();
     }
   }, [storeDomain, email]);
-
-
-  //   try {
-  //     if (!storeDomain || !email) {
-  //       console.error("Missing storeDomain or email:", {
-  //         storeDomain,
-  //         email: email,
-  //       });
-  //       throw new Error("Invalid storeDomain or email.");
-  //     }
-
-  //     const url = `/api/products/gsthsn?storeDomain=${encodeURIComponent(
-  //       storeDomain
-  //     )}&email=${encodeURIComponent(email)}`;
-  //     console.log("Fetching GST HSN Values with URL:", url);
-
-  //     const response = await fetch(url);
-
-  //     if (!response.ok) {
-  //       throw new Error(
-  //         `Failed to fetch GST values. Status: ${response.status}`
-  //       );
-  //     }
-
-  //     const data = await response.json();
-  //     console.log("Fetched GST Values:", data.gstValues);
-
-  //     setGSTHSNCodes(data.gstValues);
-  //   } catch (error) {
-  //     console.error("Error fetching GST values:", error);
-  //   }
-  // };
+ 
+ 
   // Example usage:
   const handleShowToast = (message, isError) => {
     // console.log(`${isError ? "Error" : "Info"}: ${message}`);
   };
-
+ 
+ 
   useEffect(() => {
     // console.log("Invoice Settings", InvoiceSetting2);
   }, [InvoiceSetting2]);
-
+ 
+ 
   const updateInvoiceSettingAPI = async () => {
-
+    // console.log({
+    //   email: email,
+    //   storeDomain: storeDomain,
+    //   updatedSettings: invoiceSettings,
+    // });
+    // const updatedSettings = invoiceSettings;
     setIsSaving(true);
     return fetch("/api/update-invoice-settings", {
       method: "PUT",
@@ -933,7 +921,8 @@ export default function CustomizeTemplate() {
         setToastMessage("Error updating invoice settings");
       });
   };
-
+ 
+ 
   const renderInvoiceTemplate = (
     currentTemplate,
     shopdetails,
@@ -950,6 +939,7 @@ export default function CustomizeTemplate() {
             invoiceSettings={InvoiceSetting2}
             GSTHSNCodes={{ gstcodes }}
             shopProfile={shopProfile}
+            isShopifyTax={isAppTaxApplied}
           />
         );
       case 2:
@@ -960,6 +950,7 @@ export default function CustomizeTemplate() {
             invoiceSettings={InvoiceSetting2}
             GSTHSNCodes={{ gstcodes }}
             shopProfile={shopProfile}
+            isShopifyTax={isAppTaxApplied}
           />
         );
       case 3:
@@ -970,6 +961,7 @@ export default function CustomizeTemplate() {
             invoiceSettings={InvoiceSetting2}
             GSTHSNCodes={{ gstcodes }}
             shopProfile={shopProfile}
+            isShopifyTax={isAppTaxApplied}
           />
         );
       default:
@@ -977,7 +969,8 @@ export default function CustomizeTemplate() {
         return null; // Return null if no valid template is found
     }
   };
-
+ 
+ 
   const colorOptions = [
     { label: "Gray", value: "Gray", color: "#535151" },
     { label: "Black", value: "Black", color: "#000000" },
@@ -987,7 +980,8 @@ export default function CustomizeTemplate() {
     { label: "Navy Blue", value: "Navy Blue", color: "#001f3f" },
     // { label: "Custom", value: "Custom", color: "#0f0" },
   ];
-
+ 
+ 
   const menuItems = [
     {
       icon: <CiImageOn />,
@@ -999,7 +993,8 @@ export default function CustomizeTemplate() {
       label: "Overview",
       onClick: () => setShowOverview(true),
     },
-
+ 
+ 
     {
       icon: <BiStore />,
       label: "Supplier",
@@ -1032,7 +1027,8 @@ export default function CustomizeTemplate() {
     },
     { icon: <FaInbox />, label: "Other", onClick: () => setShowFooter(true) },
   ];
-
+ 
+ 
   const handleColorSelect = (value) => {
     updateInvoiceSetting2("branding", "primaryColor", value);
     // console.log(
@@ -1041,7 +1037,8 @@ export default function CustomizeTemplate() {
     // );
     // setPrimaryColor(value);
   };
-
+ 
+ 
   const fontOptions = [
     {
       label: "Roboto",
@@ -1053,7 +1050,8 @@ export default function CustomizeTemplate() {
       preview: "Almost before we knew it.",
       fontFamily: "Merriweather, serif", // Classic, formal serif font
     },
-
+ 
+ 
     {
       label: "Fira Code",
       preview: "Almost before we knew it.",
@@ -1065,13 +1063,15 @@ export default function CustomizeTemplate() {
       fontFamily: "Montserrat, sans-serif", // Clean and modern styling
     },
   ];
-
+ 
+ 
   const handleFontSelect = (font) => {
     setSelectedFont(font); // Set selected font label
     updateInvoiceSetting2("branding", "fontFamily", font.fontFamily); // Update font in branding
     setShowDropdown(false);
   };
-
+ 
+ 
   return (
     <div
       style={{
@@ -1103,7 +1103,8 @@ export default function CustomizeTemplate() {
           </div>
           <span>Customize template</span>
         </div>
-
+ 
+ 
         <div style={styles.buttonSection}>
           {/* <Popover
             active={popoverActive}
@@ -1150,7 +1151,8 @@ export default function CustomizeTemplate() {
                   >
                     <FaArrowLeft />
                   </div>
-
+ 
+ 
                   <span>Branding and Style</span>
                 </div>
                 {showDropdown && (
@@ -1229,7 +1231,8 @@ export default function CustomizeTemplate() {
                       } // Update state on change
                     />
                   </div>
-
+ 
+ 
                   {/* <p style={{ margin: "10px 0", fontWeight: "bold" }}>
                     Logo size
                   </p>
@@ -1240,7 +1243,8 @@ export default function CustomizeTemplate() {
                     onChange={(value) => setLogoSize(value)}
                   />
                   <p style={{ marginTop: "10px" }}>{logoSize}px</p> */}
-
+ 
+ 
                   <p style={{ margin: "10px 0", fontWeight: "bold" }}>
                     Primary color
                   </p>
@@ -1269,7 +1273,8 @@ export default function CustomizeTemplate() {
                     ))}
                   </div>
                   <p style={{ margin: "10px 0", fontWeight: "bold" }}>Header</p>
-
+ 
+ 
                   <hr />
                   <p style={{ margin: "10px 0" }}>Font Family</p>
                   <div style={styles.dropdownContainer}>
@@ -1280,7 +1285,8 @@ export default function CustomizeTemplate() {
                       {selectedFont.label}
                       <span>▼</span>
                     </div>
-
+ 
+ 
                     {/* <p style={{ marginTop: "20px" }}>Font size</p>
                     <RangeSlider
                       min={10}
@@ -1311,14 +1317,16 @@ export default function CustomizeTemplate() {
                   >
                     <FaArrowLeft />
                   </div>
-
+ 
+ 
                   <span>Overview</span>
                 </div>
                 <div>
                   <strong style={{ marginBottom: "10px" }}>
                     Document title
                   </strong>
-
+ 
+ 
                   <div
                     style={{
                       marginTop: "10px",
@@ -1777,7 +1785,8 @@ export default function CustomizeTemplate() {
                       Profile settings
                     </a>
                   </p>
-
+ 
+ 
                   <div>
                     <div
                       style={{
@@ -1837,7 +1846,8 @@ export default function CustomizeTemplate() {
                     placeholder="Eg. All prices will be calculated in INR"
                   /> */}
                   </div>
-
+ 
+ 
                   <p style={{ marginTop: "20px", fontWeight: "bold" }}>
                     Thank you note
                   </p>
@@ -1850,7 +1860,8 @@ export default function CustomizeTemplate() {
                     }
                     placeholder="Enter your thank you note"
                   />
-
+ 
+ 
                   <p style={{ marginTop: "20px", fontWeight: "bold" }}>
                     Customer note
                   </p>
@@ -1894,7 +1905,8 @@ export default function CustomizeTemplate() {
             )}
           </AlphaCard>
         </div>
-
+ 
+ 
         <div style={{ display: "flex", justifyContent: "center" }}>
           <AlphaCard style={styles.alphaCardPreview}>
             <div style={styles.sidebarTitle}>Preview</div>
@@ -1941,8 +1953,14 @@ export default function CustomizeTemplate() {
         <ToastNotification
           message={toastMessage}
           duration={3000} // Optional, can be customized
-   />
-)}
+        />
+      )}
     </div>
   );
-}
+ }
+ 
+ 
+ 
+ 
+ 
+ 

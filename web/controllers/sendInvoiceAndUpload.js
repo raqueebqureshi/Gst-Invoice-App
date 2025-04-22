@@ -3,8 +3,18 @@ import nodemailer from "nodemailer";
 import multer from "multer";
 import SMTPConfig from "../Models/SMTPConfig.js";
 // Configure AWS S3
+// const s3 = new S3Client({
+//   region: process.env.AWS_REGION,
+//   credentials: {
+//     accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+//     secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+//   },
+// });
+
 const s3 = new S3Client({
   region: process.env.AWS_REGION,
+  endpoint: process.env.AWS_ENDPOINT_URL_S3, // required when using custom deployment environments like Fly.io
+  forcePathStyle: true, // ensures compatibility
   credentials: {
     accessKeyId: process.env.AWS_ACCESS_KEY_ID,
     secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
