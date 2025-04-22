@@ -69,7 +69,7 @@ export function InvoiceTemplate3({ shopdetails, orders, invoiceSettings, GSTHSNC
      taxPrice = item?.tax_lines[0]?.price ? parseFloat(item.tax_lines[0].price) : 0;
    } else {
      const gst = matchedGSTItem?.gst ? parseFloat(matchedGSTItem.gst) : 0;
-     const inclusiveTotal = parseFloat(item.price) * item.quantity + parseFloat(item.tax_lines[0].price) || 0;
+     const inclusiveTotal = parseFloat(item.price || 0) * item.quantity + parseFloat(item.tax_lines[0].price || 0) || 0;
      const baseTotal = inclusiveTotal / (1 + gst / 100);
      taxPrice = taxPrice + inclusiveTotal - baseTotal;
      // taxPrice = matchedGSTItem?.gst
@@ -91,7 +91,7 @@ export function InvoiceTemplate3({ shopdetails, orders, invoiceSettings, GSTHSNC
    grandTotal =
      subTotal +
      Number(totalTaxAmount) +
-     (orders[0]?.shipping_lines[0]?.price ? Number(orders[0]?.shipping_lines[0]?.price) : 0);
+     (orders[0]?.shipping_lines[0]?.price ? Number(orders[0]?.shipping_lines[0]?.price || 0) : 0);
  }
 
 
@@ -600,8 +600,8 @@ export function InvoiceTemplate3({ shopdetails, orders, invoiceSettings, GSTHSNC
 
              if (!isShopifyTax.isAppTax) {
                if (!shopdetails[0].taxes_included) {
-                 taxPrice = item?.tax_lines?.[0]?.price ? parseFloat(item.tax_lines[0].price) || 0 : 0;
-                 price = parseFloat(item.price);
+                 taxPrice = item?.tax_lines?.[0]?.price ? parseFloat(item.tax_lines[0].price || 0) || 0 : 0;
+                 price = parseFloat(item.price || 0);
                  lineAmount = (price * item.quantity + taxPrice).toFixed(2);
 
 
@@ -611,8 +611,12 @@ export function InvoiceTemplate3({ shopdetails, orders, invoiceSettings, GSTHSNC
                  // console.log("Line Amount:", lineAmount);
                } else {
                  // 🧾 Shopify Tax - Inclusive
-                 taxPrice = item?.tax_lines?.[0]?.price ? parseFloat(item.tax_lines[0].price) || 0 : 0;
-                 price = parseFloat(item.price);
+             //     taxPrice = item?.tax_lines?.[0]?.rate ? parseFloat(item.tax_lines[0].rate) || 0 : 0;
+             // price = parseFloat(item.price);
+             // console.log('taxxx', (price * item.quantity * (taxPrice*100) /100))
+             // lineAmount = (price * item.quantity + (price * item.quantity * (taxPrice*100) /100)).toFixed(2);
+             taxPrice = item?.tax_lines?.[0]?.price ? parseFloat(item.tax_lines[0].price || 0) || 0 : 0;
+                 price = parseFloat(item.price || 0);
                  lineAmount = (price * item.quantity + taxPrice).toFixed(2);
 
 
@@ -625,21 +629,21 @@ export function InvoiceTemplate3({ shopdetails, orders, invoiceSettings, GSTHSNC
                const gst = matchedGSTItem?.gst ? parseFloat(matchedGSTItem.gst) : 0;
 
 
-              //  console.log("App GST %:", gst);
+               // console.log("App GST %:", gst);
 
 
                const inclusiveTotal =
-                 parseFloat(item.price) * item.quantity + parseFloat(item.tax_lines[0].price) || 0;
+                 parseFloat(item.price || 0) * item.quantity + parseFloat(item.tax_lines[0].price || 0) || 0;
                const baseTotal = inclusiveTotal / (1 + gst / 100);
                taxPrice = inclusiveTotal - baseTotal;
                price = baseTotal / item.quantity;
                lineAmount = inclusiveTotal.toFixed(2);
 
 
-               subTotal = subTotal + Number(price) * item.quantity;
+               subTotal = subTotal + Number(price) * item.quantity ;
 
 
-               grandTotal = grandTotal + Number(lineAmount);
+               grandTotal = grandTotal + Number(lineAmount) ;
 
 
                // console.log("➤ INCLUSIVE App Tax (Accurate):");
@@ -714,7 +718,7 @@ export function InvoiceTemplate3({ shopdetails, orders, invoiceSettings, GSTHSNC
                      }}
                    >
                      {!isShopifyTax.isAppTax
-                       ? ReusableFunctions.calculateTaxRate(item.price, taxPrice, item.quantity)
+                       ? ReusableFunctions.calculateTaxRate(item.price || 0, taxPrice, item.quantity)
                        : matchedGSTItem?.gst || "-"}
                      %
                    </td>
@@ -854,7 +858,7 @@ export function InvoiceTemplate3({ shopdetails, orders, invoiceSettings, GSTHSNC
                    >
                      ₹{" "}
                      {subTotal
-                       ? subTotal.toFixed(2)
+                       ? !isShopifyTax.isAppTax ? subTotal.toFixed(2) : subTotal.toFixed(2) - (orders[0]?.discount_codes[0]?.amount || 0)
                        : // :orders[0].subtotal_price !== null
                          //   ? Number(orders[0].subtotal_price).toFixed(2)
                          "0"}
@@ -955,7 +959,7 @@ export function InvoiceTemplate3({ shopdetails, orders, invoiceSettings, GSTHSNC
                      ₹{" "}
                      {orders[0]?.shipping_lines
                        ? orders[0]?.shipping_lines[0]?.price
-                         ? Number(orders[0]?.shipping_lines[0]?.price).toFixed(2)
+                         ? Number(orders[0]?.shipping_lines[0]?.price || 0).toFixed(2)
                          : "0"
                        : "0"}
                    </td>
@@ -985,7 +989,7 @@ export function InvoiceTemplate3({ shopdetails, orders, invoiceSettings, GSTHSNC
                    >
                      {/* ₹ {orders[0].total_price !== null ? Number(orders[0].total_price).toFixed(2) : "0.00"} */}₹{" "}
                      {grandTotal
-                       ? grandTotal.toFixed(2)
+                       ? !isShopifyTax.isAppTax ? grandTotal.toFixed(2) : Number(grandTotal - (orders[0]?.discount_codes[0]?.amount || 0)  + (orders[0]?.shipping_lines[0]?.price ? Number(orders[0]?.shipping_lines[0]?.price || 0) : 0) ).toFixed(2)
                        : // :orders[0].total_price !== null
                          //   ? Number(orders[0].total_price).toFixed(2)
                          "0"}
