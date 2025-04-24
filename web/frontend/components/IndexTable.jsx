@@ -1030,7 +1030,7 @@ export function OrderTableEx({ value, shopdetails }) {
       const imgHeight = (canvas.height * imgWidth) / canvas.width;
  
  
-      pdf.addImage(imgData, "PNG", 10, 10, imgWidth, imgHeight);
+      pdf.addImage(imgData, "JPG", 10, 10, imgWidth, imgHeight);
  
  
       // Return the PDF as a Blob
@@ -1802,7 +1802,7 @@ export function OrderTableEx({ value, shopdetails }) {
         document.body.removeChild(invoiceContainer);
  
  
-        const imgData = canvas.toDataURL("image/png");
+        const imgData = canvas.toDataURL("image/jpg");
         const imgWidth = pdfWidth - 20;
         const imgHeight = (canvas.height * imgWidth) / canvas.width;
  
@@ -1833,17 +1833,17 @@ export function OrderTableEx({ value, shopdetails }) {
             );
  
  
-            const sectionImgData = sectionCanvas.toDataURL("image/png");
+            const sectionImgData = sectionCanvas.toDataURL("image/jpg");
  
  
             if (position > 0) pdf.addPage();
-            pdf.addImage(sectionImgData, "PNG", 10, 10, imgWidth, (sectionCanvas.height * imgWidth) / canvas.width);
+            pdf.addImage(sectionImgData, "JPG", 10, 10, imgWidth, (sectionCanvas.height * imgWidth) / canvas.width);
  
  
             position += sectionCanvas.height / (canvas.width / pdfWidth);
           }
         } else {
-          pdf.addImage(imgData, "PNG", 10, 10, imgWidth, imgHeight);
+          pdf.addImage(imgData, "JPG", 10, 10, imgWidth, imgHeight);
         }
  
  
@@ -1961,7 +1961,7 @@ export function OrderTableEx({ value, shopdetails }) {
           const imgHeight = (canvas.height * imgWidth) / canvas.width;
  
  
-          pdf.addImage(imgData, "PNG", 10, 10, imgWidth, imgHeight);
+          pdf.addImage(imgData, "JPG", 10, 10, imgWidth, imgHeight);
  
  
           // Add a new page for the next order, except for the last one
