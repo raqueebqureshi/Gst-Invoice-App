@@ -686,8 +686,9 @@ export function InvoiceTemplate3({ shopdetails, orders, invoiceSettings, GSTHSNC
                       }}
                     >
                       {!isShopifyTax.isAppTax
-                        ? ReusableFunctions.calculateTaxRate(item?.price || 0, taxPrice, item.quantity)
-                        : matchedGSTItem?.gst || "-"}
+                        // ? ReusableFunctions.calculateTaxRate(item?.price || 0, taxPrice, item.quantity)
+                        ? Number(item?.tax_lines[0]?.rate * 100 || 0)
+                        : matchedGSTItem?.gst || "0"}
                       %
                     </td>
                   ) : (

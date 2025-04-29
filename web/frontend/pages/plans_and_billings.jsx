@@ -29,12 +29,18 @@ export default function Plans() {
           })
             .then((request) => request.json())
             .then((response) => {
-              // console.log("plan---!", response);
+              console.log("plan---!", response);
               // const tempID = response.data.planId.split('/').pop();
               // console.log("tempID" ,tempID);
               const fetchedPlanId = response.planId;
+              console.log('firstPlanId',fetchedPlanId);
+              console.log('firstPlanId', typeof fetchedPlanId);
               setplanId(fetchedPlanId);
-              localStorage.setItem("currentPlan", fetchedPlanId.toString()); // Store only the plan ID as string
+              localStorage.setItem("currentPlan", fetchedPlanId.toString()); // Store only the plan ID as 
+              
+              const tempCurrentPlan = localStorage.getItem("currentPlan");
+              console.log("tempCurrentPlan -- PB", tempCurrentPlan); 
+            
             })
             .catch((error) => console.log(error));
         }

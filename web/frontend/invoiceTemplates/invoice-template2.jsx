@@ -690,7 +690,10 @@ export function InvoiceTemplate2({ shopdetails, orders, invoiceSettings, GSTHSNC
                       border: `1px solid ${hexToRgba(invoiceSettings.branding.primaryColor, 0.07) || "#e2e8f0"}`,
                     }}
                   >
-                     {!isShopifyTax? ReusableFunctions.calculateTaxRate(item?.price || 0, taxPrice, item.quantity) : matchedGSTItem?.gst || "-"}%
+                     {!isShopifyTax
+                    //  ? ReusableFunctions.calculateTaxRate(item?.price || 0, taxPrice, item.quantity) 
+                    ? Number(item?.tax_lines[0]?.rate * 100 || 0)
+                     : matchedGSTItem?.gst || "0"}%
                   </td>
                 ) : (
                   <></>

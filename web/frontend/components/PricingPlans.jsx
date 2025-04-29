@@ -6,6 +6,19 @@ const [storeName, setStoreName] = useState(""); // State to hold the store name
 const currentOrders = 60; // Example: Change order count here
 const milestones = [0, 50, 1000, "Unlimited"]; // Define milestones
 
+
+useEffect(() => {
+
+  if(currentPlanId === undefined || currentPlanId === null){
+    console.log('currentPlanId', currentPlanId);
+    console.log('currentPlanId', typeof currentPlanId);
+    const tempCurrentPlan = localStorage.getItem("currentPlan");
+    console.log("tempCurrentPlan -- P P", tempCurrentPlan); 
+  
+  }
+}, [currentPlanId]); // Empty dependency array to run only once on mount
+
+
 const maxOrders = typeof milestones[milestones.length - 1] === "number" 
   ? milestones[milestones.length - 1] 
   : milestones[milestones.length - 2]; // Last numeric milestone
